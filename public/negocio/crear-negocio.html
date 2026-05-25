@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crear mi Negocio — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.form-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px;margin-bottom:16px}
+.form-card h3{font-size:.95rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}}
+.step-bar{display:flex;gap:8px;margin-bottom:28px;align-items:center}
+.step{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:600;color:var(--muted)}
+.step.active{color:var(--accent)}
+.step.done{color:var(--success)}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+.step.active .step-num{background:var(--accent);color:white}
+.step.done .step-num{background:var(--success);color:white}
+.step-line{flex:1;height:2px;background:var(--border);max-width:40px}
+</style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo" style="color:white">Nueva<span>Express</span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.8rem;margin-top:4px" id="sidebarUser"></div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📋 Pedidos</a></li>
+      <li><a href="crear-negocio.html" class="active">🏪 Crear Negocio</a></li>
+      <li><a href="#" onclick="APP.logout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header"><h1>Crear mi Negocio</h1><p>Configura tu perfil en el directorio de NuevaExpress</p></div>
+
+    <div class="step-bar">
+      <div class="step active" id="step1"><div class="step-num">1</div><span>Básico</span></div>
+      <div class="step-line"></div>
+      <div class="step" id="step2"><div class="step-num">2</div><span>Contacto</span></div>
+      <div class="step-line"></div>
+      <div class="step" id="step3"><div class="step-num">3</div><span>Ubicación</span></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="panel1">
+      <div class="form-card">
+        <h3>Información del negocio</h3>
+        <div class="form-group"><label>Nombre del negocio *</label><input type="text" id="f_name" placeholder="Ej: Restaurante El Sabor"></div>
+        <div class="form-group"><label>Categoría *</label><select id="f_category"><option value="">Selecciona...</option></select></div>
+        <div class="form-group"><label>Descripción</label><textarea id="f_description" rows="3" placeholder="Cuéntanos sobre tu negocio..."></textarea></div>
+        <div class="form-group"><label>¿Qué ofrecemos? <span style="font-weight:400;color:var(--muted)">(ej: ceviches, hamburguesas, servicio a domicilio)</span></label><textarea id="f_what_we_offer" rows="2" placeholder="Lista tus productos o servicios principales..."></textarea></div>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem">
+          <input type="checkbox" id="f_delivery" style="width:16px;height:16px"> Mi negocio ofrece delivery (tarifa Q15)
+        </label>
+      </div>
+      <button class="btn-primary" onclick="goStep(2)" style="padding:12px 32px">Siguiente →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="panel2" style="display:none">
+      <div class="form-card">
+        <h3>Información de contacto</h3>
+        <div class="two-col">
+          <div class="form-group"><label>Teléfono</label><input type="tel" id="f_phone" placeholder="+502 2222 2222"></div>
+          <div class="form-group"><label>WhatsApp <span style="font-weight:400;color:var(--muted)">(con código país)</span></label><input type="tel" id="f_whatsapp" placeholder="+50255551234"></div>
+        </div>
+        <div class="form-group"><label>Email del negocio</label><input type="email" id="f_email" placeholder="info@minegocio.com"></div>
+        <div class="form-group"><label>Sitio web</label><input type="url" id="f_website" placeholder="https://minegocio.com"></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-ghost" onclick="goStep(1)" style="padding:12px 24px">← Atrás</button>
+        <button class="btn-primary" onclick="goStep(3)" style="padding:12px 32px">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="panel3" style="display:none">
+      <div class="form-card">
+        <h3>Ubicación</h3>
+        <div class="form-group"><label>Dirección</label><input type="text" id="f_address" placeholder="5a Avenida 10-50, Zona 1"></div>
+        <div class="two-col">
+          <div class="form-group"><label>Ciudad</label><input type="text" id="f_city" placeholder="Guatemala" value="Guatemala"></div>
+          <div class="form-group"><label>Zona</label><input type="text" id="f_zone" placeholder="Zona 10"></div>
+        </div>
+        <div class="form-group">
+          <label>Link de Google Maps <span style="font-weight:400;color:var(--muted)">(opcional pero recomendado)</span></label>
+          <input type="url" id="f_maps" placeholder="https://maps.google.com/...">
+          <div style="font-size:.78rem;color:var(--muted);margin-top:4px">Abre Google Maps → busca tu negocio → compartir → copiar enlace</div>
+        </div>
+        <div class="two-col">
+          <div class="form-group"><label>Latitud <span style="font-weight:400;color:var(--muted)">(opcional)</span></label><input type="number" id="f_lat" placeholder="14.6349" step="any"></div>
+          <div class="form-group"><label>Longitud <span style="font-weight:400;color:var(--muted)">(opcional)</span></label><input type="number" id="f_lng" placeholder="-90.5069" step="any"></div>
+        </div>
+      </div>
+      <div id="errorMsg" style="color:var(--danger);font-size:.9rem;margin-bottom:12px;display:none"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-ghost" onclick="goStep(2)" style="padding:12px 24px">← Atrás</button>
+        <button class="btn-primary" onclick="create()" id="createBtn" style="padding:12px 32px">🎉 Crear negocio</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+APP.requireAuth(['negocio']);
+document.getElementById('sidebarUser').textContent = APP.user().name || '';
+
+async function init() {
+  // If already has business, redirect to profile
+  const me = await APP.fetch('/auth/me');
+  const res = await APP.get('/businesses?limit=50');
+  const all = res?.data?.businesses || [];
+  if (all.find(b => b.user_id == me?.data?.id)) {
+    window.location.href = 'perfil.html';
+    return;
+  }
+  const cats = await APP.get('/categories');
+  const sel = document.getElementById('f_category');
+  (cats.data||[]).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+}
+
+function goStep(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById(`panel${i}`).style.display = i===n ? 'block':'none';
+    const stepEl = document.getElementById(`step${i}`);
+    stepEl.className = 'step' + (i===n?' active': i<n?' done':'');
+  });
+  // Basic validation before advancing
+  if (n === 2 && !document.getElementById('f_name').value.trim()) {
+    document.getElementById('panel1').style.display = 'block';
+    document.getElementById('panel2').style.display = 'none';
+    APP.toast('El nombre del negocio es requerido', 'error');
+    return;
+  }
+}
+
+async function create() {
+  const name = document.getElementById('f_name').value.trim();
+  const cat  = document.getElementById('f_category').value;
+  const errEl = document.getElementById('errorMsg');
+  errEl.style.display = 'none';
+  if (!name) { errEl.textContent='El nombre es requerido'; errEl.style.display='block'; return; }
+  if (!cat)  { errEl.textContent='Selecciona una categoría'; errEl.style.display='block'; return; }
+
+  const btn = document.getElementById('createBtn');
+  btn.textContent = 'Creando...'; btn.disabled = true;
+
+  const payload = {
+    name, category_id: cat,
+    description:   document.getElementById('f_description').value,
+    what_we_offer: document.getElementById('f_what_we_offer').value,
+    accepts_delivery: document.getElementById('f_delivery').checked ? 1 : 0,
+    phone:    document.getElementById('f_phone').value,
+    whatsapp: document.getElementById('f_whatsapp').value,
+    email:    document.getElementById('f_email').value,
+    website:  document.getElementById('f_website').value,
+    address:  document.getElementById('f_address').value,
+    city:     document.getElementById('f_city').value,
+    zone:     document.getElementById('f_zone').value,
+    google_maps_url: document.getElementById('f_maps').value || null,
+    latitude:  document.getElementById('f_lat').value || null,
+    longitude: document.getElementById('f_lng').value || null,
+  };
+
+  const res = await APP.post('/businesses', payload);
+  if (res?.success) {
+    APP.toast('¡Negocio creado! Redirigiendo...');
+    setTimeout(() => window.location.href = 'perfil.html', 1200);
+  } else {
+    errEl.textContent = res?.message || 'Error al crear el negocio';
+    errEl.style.display = 'block';
+    btn.textContent = '🎉 Crear negocio'; btn.disabled = false;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

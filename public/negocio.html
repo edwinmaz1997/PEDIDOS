@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Negocio — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+<style>
+.biz-hero{background:var(--charcoal);min-height:260px;position:relative;overflow:hidden;display:flex;align-items:flex-end}
+.biz-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.4)}
+.biz-hero-content{position:relative;z-index:1;padding:28px 24px;max-width:1280px;width:100%;margin:0 auto;display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap}
+.biz-hero-logo{width:88px;height:88px;border-radius:14px;border:3px solid white;overflow:hidden;background:white;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2rem}
+.biz-hero-logo img{width:100%;height:100%;object-fit:cover}
+.biz-hero-info h1{color:white;font-size:clamp(1.4rem,3vw,2rem);margin-bottom:6px}
+.biz-hero-info .badges{display:flex;gap:8px;flex-wrap:wrap}
+.biz-hero-badge{background:rgba(255,255,255,.15);backdrop-filter:blur(4px);color:white;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:500}
+.content-grid{display:grid;grid-template-columns:1fr 340px;gap:24px;max-width:1280px;margin:32px auto;padding:0 24px}
+@media(max-width:768px){.content-grid{grid-template-columns:1fr;padding:0 16px}}
+.info-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px;margin-bottom:16px}
+.info-card h3{font-size:1rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.contact-btn{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:var(--radius-sm);font-weight:600;font-size:.9rem;text-decoration:none;transition:var(--transition);margin-bottom:10px}
+.contact-btn.phone{background:#e8f5e9;color:#1b5e20}.contact-btn.phone:hover{background:#1b5e20;color:white}
+.contact-btn.whatsapp{background:#e8f5e9;color:#075e54}.contact-btn.whatsapp:hover{background:#25d366;color:white}
+.contact-btn.maps{background:#e8f0fe;color:#1a56db}.contact-btn.maps:hover{background:#1a56db;color:white}
+.contact-btn.website{background:var(--off-white);color:var(--ink)}.contact-btn.website:hover{background:var(--charcoal);color:white}
+.photos-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+.photos-gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition)}
+.photos-gallery img:hover{transform:scale(1.02)}
+.hours-list{font-size:.9rem}
+.hours-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)}
+.hours-row:last-child{border-bottom:none}
+.hours-today{font-weight:700;color:var(--success)}
+.product-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.product-list-item:last-child{border-bottom:none}
+.sticky-order{position:sticky;top:80px}
+.photo-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:300;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.photo-lightbox img{max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="/" class="logo">Nueva<span>Express</span></a>
+    <div class="nav-right">
+      <a href="cliente/login.html" class="btn-ghost">Ingresar</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="biz-hero" id="bizHero">
+  <div class="biz-hero-bg" id="heroBg"></div>
+  <div class="biz-hero-content">
+    <div class="biz-hero-logo" id="bizLogo">🏪</div>
+    <div class="biz-hero-info">
+      <h1 id="bizName">Cargando...</h1>
+      <div class="badges" id="bizBadges"></div>
+    </div>
+  </div>
+</div>
+
+<div class="content-grid">
+  <!-- Left -->
+  <div>
+    <!-- Description -->
+    <div class="info-card" id="descCard" style="display:none">
+      <h3>📋 Sobre nosotros</h3>
+      <p id="bizDesc" style="color:var(--muted);line-height:1.7;font-size:.95rem"></p>
+    </div>
+
+    <!-- What we offer -->
+    <div class="info-card" id="offerCard" style="display:none">
+      <h3>✨ ¿Qué ofrecemos?</h3>
+      <p id="bizOffer" style="color:var(--muted);line-height:1.7;font-size:.95rem"></p>
+    </div>
+
+    <!-- Photos -->
+    <div class="info-card" id="photosCard" style="display:none">
+      <h3>📸 Fotos</h3>
+      <div class="photos-gallery" id="photoGallery"></div>
+    </div>
+
+    <!-- Products -->
+    <div class="info-card" id="productsCard" style="display:none">
+      <h3>📦 Productos / Servicios</h3>
+      <div id="productsList"></div>
+    </div>
+  </div>
+
+  <!-- Right sticky -->
+  <div class="sticky-order">
+    <!-- Contact -->
+    <div class="info-card" id="contactCard">
+      <h3>📞 Contacto</h3>
+      <div id="contactLinks"><div class="loading-state" style="padding:16px 0"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- Hours -->
+    <div class="info-card" id="hoursCard" style="display:none">
+      <h3>🕐 Horarios</h3>
+      <div class="hours-list" id="hoursList"></div>
+    </div>
+
+    <!-- Order CTA -->
+    <div class="info-card" id="orderCta">
+      <h3>🛒 Hacer un pedido</h3>
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px">Envía tu pedido directamente al negocio.</p>
+      <a id="orderLink" href="#" class="btn-primary" style="display:flex;justify-content:center;padding:14px">Pedir ahora</a>
+      <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:8px">Se cobra Q5 de tarifa de servicio</p>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="photo-lightbox" id="lightbox" style="display:none" onclick="closeLightbox()">
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<footer class="footer"><div class="container"><span class="logo">Nueva<span>Express</span></span><p>© 2024 NuevaExpress</p></div></footer>
+
+<script src="assets/js/app.js"></script>
+<script>
+// Get business by slug or id from URL
+// URLs: /negocio.html?slug=restaurante-prueba OR /negocio.html?id=5
+const params = new URLSearchParams(window.location.search);
+const slug   = params.get('slug');
+const bizId  = params.get('id');
+
+async function init() {
+  let url = '';
+  if (bizId)   url = `/api/businesses/${bizId}`;
+  else if (slug) {
+    // Search by slug
+    const res = await fetch(`/api/businesses/search?q=${encodeURIComponent(slug)}`);
+    const data = await res.json();
+    const found = (data.data||[]).find(b => b.slug === slug);
+    if (!found) { document.getElementById('bizName').textContent = 'Negocio no encontrado'; return; }
+    url = `/api/businesses/${found.id}`;
+  } else { document.getElementById('bizName').textContent = 'Parámetro inválido'; return; }
+
+  try {
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (!data.success) { document.getElementById('bizName').textContent = 'No encontrado'; return; }
+    render(data.data);
+  } catch(e) { console.error(e); }
+}
+
+function render(b) {
+  // Meta
+  document.title = b.name + ' — NuevaExpress';
+
+  // Hero
+  if (b.cover_photo) document.getElementById('heroBg').style.backgroundImage = `url('${APP.esc(b.cover_photo)}')`;
+  const logoEl = document.getElementById('bizLogo');
+  if (b.logo) logoEl.innerHTML = `<img src="${APP.esc(b.logo)}" alt="${APP.esc(b.name)}">`;
+  document.getElementById('bizName').textContent = b.name;
+
+  const badges = document.getElementById('bizBadges');
+  badges.innerHTML = `<span class="biz-hero-badge">${APP.esc(b.category_name)}</span>`;
+  if (b.is_verified) badges.innerHTML += `<span class="biz-hero-badge">⭐ Verificado</span>`;
+  if (b.accepts_delivery) badges.innerHTML += `<span class="biz-hero-badge">🛵 Delivery disponible</span>`;
+  if (b.rating > 0) badges.innerHTML += `<span class="biz-hero-badge">★ ${parseFloat(b.rating).toFixed(1)}</span>`;
+
+  // Description
+  if (b.description) { document.getElementById('bizDesc').textContent = b.description; document.getElementById('descCard').style.display = 'block'; }
+  if (b.what_we_offer) { document.getElementById('bizOffer').textContent = b.what_we_offer; document.getElementById('offerCard').style.display = 'block'; }
+
+  // Photos
+  const photos = b.photos || [];
+  if (photos.length) {
+    document.getElementById('photosCard').style.display = 'block';
+    document.getElementById('photoGallery').innerHTML = photos.map(p => `<img src="${APP.esc(p.photo_url)}" alt="" onclick="openLightbox('${APP.esc(p.photo_url)}')">`).join('');
+  }
+
+  // Products
+  const products = b.products || [];
+  if (products.length) {
+    document.getElementById('productsCard').style.display = 'block';
+    document.getElementById('productsList').innerHTML = products.map(p => `
+      <div class="product-list-item">
+        <div style="display:flex;gap:12px;align-items:center">
+          ${p.photo ? `<img src="${APP.esc(p.photo)}" style="width:44px;height:44px;border-radius:6px;object-fit:cover">` : ''}
+          <div>
+            <div style="font-weight:600;font-size:.9rem">${APP.esc(p.name)}</div>
+            ${p.description ? `<div style="font-size:.8rem;color:var(--muted)">${APP.esc(p.description)}</div>` : ''}
+          </div>
+        </div>
+        ${p.price ? `<span style="font-weight:700;color:var(--accent);white-space:nowrap">${APP.money(p.price)}</span>` : ''}
+      </div>`).join('');
+  }
+
+  // Contact
+  let contactHtml = '';
+  if (b.phone)    contactHtml += `<a class="contact-btn phone" href="tel:${APP.esc(b.phone)}">📞 ${APP.esc(b.phone)}</a>`;
+  if (b.whatsapp) contactHtml += `<a class="contact-btn whatsapp" href="https://wa.me/${b.whatsapp.replace(/\D/g,'')}" target="_blank">💬 WhatsApp</a>`;
+  const mapsUrl = b.latitude && b.longitude ? `https://www.google.com/maps?q=${b.latitude},${b.longitude}` : b.google_maps_url;
+  if (mapsUrl)    contactHtml += `<a class="contact-btn maps" href="${APP.esc(mapsUrl)}" target="_blank">🗺️ Ver en Google Maps</a>`;
+  if (b.website)  contactHtml += `<a class="contact-btn website" href="${APP.esc(b.website)}" target="_blank">🌐 Sitio web</a>`;
+  if (b.address)  contactHtml += `<div style="font-size:.85rem;color:var(--muted);margin-top:8px">📍 ${APP.esc(b.address)}${b.zone?', '+APP.esc(b.zone):''}</div>`;
+  if (!contactHtml) contactHtml = '<p style="color:var(--muted);font-size:.9rem">Sin datos de contacto</p>';
+  document.getElementById('contactLinks').innerHTML = contactHtml;
+
+  // Hours
+  const hours = typeof b.opening_hours === 'string' ? JSON.parse(b.opening_hours || '{}') : (b.opening_hours || {});
+  const dayKeys = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+  const dayLabels = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const todayIdx = [1,2,3,4,5,6,0][new Date().getDay()]; // 0=Mon
+  if (Object.keys(hours).length) {
+    document.getElementById('hoursCard').style.display = 'block';
+    document.getElementById('hoursList').innerHTML = dayKeys.map((k,i) => {
+      const h = hours[k];
+      if (!h) return '';
+      const isToday = i === todayIdx;
+      const label = h.closed ? '<span style="color:var(--danger)">Cerrado</span>' : `${h.open} — ${h.close}`;
+      return `<div class="hours-row ${isToday?'hours-today':''}"><span>${dayLabels[i]}${isToday?' (hoy)':''}</span><span>${label}</span></div>`;
+    }).join('');
+  }
+
+  // Order link
+  document.getElementById('orderLink').href = `/cliente/pedido.html?business=${b.id}`;
+}
+
+function openLightbox(url) { document.getElementById('lightboxImg').src = url; document.getElementById('lightbox').style.display = 'flex'; }
+function closeLightbox() { document.getElementById('lightbox').style.display = 'none'; }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeLightbox(); });
+
+init();
+</script>
+</body>
+</html>

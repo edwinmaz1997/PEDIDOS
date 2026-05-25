@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restablecer contraseña — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+<style>
+body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
+.auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px}
+.auth-card{background:white;border-radius:20px;padding:40px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+.pw-rules li{font-size:.8rem;color:var(--muted);margin-bottom:3px}
+.pw-rules li.ok{color:var(--success)}
+</style>
+</head>
+<body>
+<nav class="navbar"><div class="nav-inner"><a href="/" class="logo">Nueva<span>Express</span></a></div></nav>
+<div class="auth-wrap">
+  <div class="auth-card" id="mainCard">
+    <div style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:24px">Nueva<span style="color:var(--accent)">Express</span></div>
+    <div id="loadingState" style="text-align:center;padding:20px"><div class="spinner" style="margin:0 auto"></div></div>
+    <div id="formState" style="display:none">
+      <h2 style="margin-bottom:6px">Nueva contraseña</h2>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:24px">Elige una contraseña segura para tu cuenta.</p>
+      <div class="form-group">
+        <label>Nueva contraseña</label>
+        <input type="password" id="password" placeholder="Mínimo 8 caracteres" oninput="checkRules()">
+      </div>
+      <ul class="pw-rules" style="list-style:none;margin-bottom:14px">
+        <li id="rule-len">● Al menos 8 caracteres</li>
+        <li id="rule-upper">● Al menos una mayúscula</li>
+        <li id="rule-num">● Al menos un número</li>
+      </ul>
+      <div class="form-group">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="password2" placeholder="Repite la contraseña">
+      </div>
+      <div id="errorMsg" style="color:var(--danger);font-size:.85rem;margin-bottom:12px;display:none"></div>
+      <button class="btn-primary" style="width:100%;justify-content:center;padding:13px" onclick="doReset()" id="resetBtn">Restablecer contraseña</button>
+    </div>
+    <div id="errorState" style="display:none;text-align:center;padding:20px">
+      <div style="font-size:2rem;margin-bottom:12px">⚠️</div>
+      <h3>Enlace inválido o expirado</h3>
+      <p style="color:var(--muted);margin:10px 0 20px;font-size:.9rem">El enlace ya fue usado o expiró. Solicita uno nuevo.</p>
+      <a href="cliente/olvide-contrasena.html" class="btn-primary" style="display:inline-flex">Solicitar nuevo enlace</a>
+    </div>
+    <div id="successState" style="display:none;text-align:center;padding:20px">
+      <div style="font-size:2.5rem;margin-bottom:12px">✅</div>
+      <h3>¡Contraseña restablecida!</h3>
+      <p style="color:var(--muted);margin:10px 0 20px;font-size:.9rem">Ahora puedes iniciar sesión con tu nueva contraseña.</p>
+      <a href="cliente/login.html" class="btn-primary" style="display:inline-flex">Iniciar sesión</a>
+    </div>
+  </div>
+</div>
+<script>
+const token = new URLSearchParams(window.location.search).get('token');
+
+async function init() {
+  if (!token) { showState('error'); return; }
+  try {
+    const res  = await fetch('/api/auth/verify-reset-token', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token}) });
+    const data = await res.json();
+    if (data.success) showState('form');
+    else showState('error');
+  } catch(e) { showState('error'); }
+}
+
+function showState(s) {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('formState').style.display    = s==='form'    ? 'block':'none';
+  document.getElementById('errorState').style.display   = s==='error'   ? 'block':'none';
+  document.getElementById('successState').style.display = s==='success' ? 'block':'none';
+}
+
+function checkRules() {
+  const pw = document.getElementById('password').value;
+  const check = (id, ok) => { const el = document.getElementById(id); el.style.color = ok ? 'var(--success)' : 'var(--muted)'; };
+  check('rule-len',   pw.length >= 8);
+  check('rule-upper', /[A-Z]/.test(pw));
+  check('rule-num',   /[0-9]/.test(pw));
+}
+
+async function doReset() {
+  const password  = document.getElementById('password').value;
+  const password2 = document.getElementById('password2').value;
+  const errEl = document.getElementById('errorMsg');
+  const btn   = document.getElementById('resetBtn');
+  errEl.style.display = 'none';
+  if (password !== password2) { errEl.textContent='Las contraseñas no coinciden'; errEl.style.display='block'; return; }
+  btn.textContent='Guardando...'; btn.disabled=true;
+  try {
+    const res  = await fetch('/api/auth/reset-password', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token, password, confirm_password: password2}) });
+    const data = await res.json();
+    if (data.success) showState('success');
+    else { errEl.textContent = data.message||'Error'; errEl.style.display='block'; btn.textContent='Restablecer contraseña'; btn.disabled=false; }
+  } catch(e) { errEl.textContent='Error de conexión'; errEl.style.display='block'; btn.textContent='Restablecer contraseña'; btn.disabled=false; }
+}
+
+init();
+</script>
+</body>
+</html>

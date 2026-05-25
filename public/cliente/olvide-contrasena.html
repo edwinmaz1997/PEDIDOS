@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olvidé mi contraseña — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
+.auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px}
+.auth-card{background:white;border-radius:20px;padding:40px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+.auth-logo{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:24px}
+.auth-logo span{color:var(--accent)}
+.success-box{background:#d4edda;border:1px solid #c3e6cb;border-radius:var(--radius-sm);padding:16px;font-size:.9rem;color:#155724;display:none}
+</style>
+</head>
+<body>
+<nav class="navbar"><div class="nav-inner"><a href="/" class="logo">Nueva<span>Express</span></a></div></nav>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">Nueva<span>Express</span></div>
+    <h2 style="margin-bottom:6px">Olvidé mi contraseña</h2>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:24px">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
+    <div class="success-box" id="successBox">✅ Revisa tu correo. Si existe una cuenta con ese email, recibirás las instrucciones en unos minutos.</div>
+    <div id="formWrap">
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="email" placeholder="tucorreo@ejemplo.com" autocomplete="email">
+      </div>
+      <div id="errorMsg" style="color:var(--danger);font-size:.85rem;margin-bottom:12px;display:none"></div>
+      <button class="btn-primary" style="width:100%;justify-content:center;padding:13px" onclick="send()" id="sendBtn">Enviar enlace</button>
+    </div>
+    <p style="text-align:center;margin-top:20px;font-size:.9rem">
+      <a href="login.html" style="color:var(--accent);font-weight:600">← Volver al inicio de sesión</a>
+    </p>
+  </div>
+</div>
+<script>
+async function send() {
+  const email = document.getElementById('email').value.trim();
+  const btn   = document.getElementById('sendBtn');
+  const errEl = document.getElementById('errorMsg');
+  errEl.style.display = 'none';
+  if (!email) { errEl.textContent = 'Ingresa tu correo'; errEl.style.display = 'block'; return; }
+  btn.textContent = 'Enviando...'; btn.disabled = true;
+  try {
+    const res  = await fetch('/api/auth/forgot-password', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+    const data = await res.json();
+    document.getElementById('formWrap').style.display = 'none';
+    document.getElementById('successBox').style.display = 'block';
+  } catch(e) {
+    errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Enviar enlace'; btn.disabled = false;
+  }
+}
+document.addEventListener('keydown', e => { if(e.key==='Enter') send(); });
+</script>
+</body>
+</html>
