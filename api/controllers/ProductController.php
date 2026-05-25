@@ -3,7 +3,7 @@
 // Product Controller
 // ============================================================
 class ProductController {
-    private PDO $db;
+    private $db;
     public function __construct() { $this->db = Database::connect(); }
 
     public function index(): void {

@@ -3,7 +3,7 @@
 // Delivery Controller
 // ============================================================
 class DeliveryController {
-    private PDO $db;
+    private $db;
     public function __construct() { $this->db = Database::connect(); }
 
     // GET /api/deliveries — repartidor sees available + their own

@@ -3,7 +3,7 @@
 // Password Reset Controller
 // ============================================================
 class PasswordResetController {
-    private PDO $db;
+    private $db;
     public function __construct() { $this->db = Database::connect(); }
 
     // POST /api/auth/forgot-password

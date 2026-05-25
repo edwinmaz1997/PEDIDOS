@@ -3,7 +3,7 @@
 // Admin Controller
 // ============================================================
 class AdminController {
-    private PDO $db;
+    private $db;
     public function __construct() { $this->db = Database::connect(); }
 
     public function dashboard(): void {
@@ -44,7 +44,7 @@ class AdminController {
 // Notification Controller
 // ============================================================
 class NotificationController {
-    private PDO $db;
+    private $db;
     public function __construct() { $this->db = Database::connect(); }
 
     public function index(): void {

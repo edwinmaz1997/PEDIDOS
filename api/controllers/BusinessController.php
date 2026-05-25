@@ -5,7 +5,7 @@
 
 class BusinessController {
 
-    private PDO $db;
+    private $db;
 
     public function __construct() {
         $this->db = Database::connect();
@@ -216,25 +216,25 @@ class BusinessController {
     // --------------------------------------------------------
     // Private helpers
     // --------------------------------------------------------
-    private function getPhotos(int $businessId, int $limit = 20): array {
+    private function getPhotos($businessId, $limit = 20) {
         $stmt = $this->db->prepare("SELECT * FROM business_photos WHERE business_id = ? ORDER BY sort_order LIMIT ?");
         $stmt->execute([$businessId, $limit]);
         return $stmt->fetchAll();
     }
 
-    private function getProductsPreview(int $businessId, int $limit = 5): array {
+    private function getProductsPreview($businessId, $limit = 5) {
         $stmt = $this->db->prepare("SELECT id, name, price, photo FROM products_services WHERE business_id = ? AND is_available = 1 ORDER BY sort_order LIMIT ?");
         $stmt->execute([$businessId, $limit]);
         return $stmt->fetchAll();
     }
 
-    private function getAllProducts(int $businessId): array {
+    private function getAllProducts($businessId) {
         $stmt = $this->db->prepare("SELECT * FROM products_services WHERE business_id = ? AND is_available = 1 ORDER BY sort_order");
         $stmt->execute([$businessId]);
         return $stmt->fetchAll();
     }
 
-    private function generateSlug(string $name): string {
+    private function generateSlug($name) {
         $slug = strtolower(trim($name));
         $slug = iconv('UTF-8', 'ASCII//TRANSLIT', $slug);
         $slug = preg_replace('/[^a-z0-9-]/', '-', $slug);
@@ -253,7 +253,7 @@ class BusinessController {
         return $slug;
     }
 
-    private function findOwned(int $id, array $user): array {
+    private function findOwned($id, $user) {
         $stmt = $this->db->prepare("SELECT * FROM businesses WHERE id = ?");
         $stmt->execute([$id]);
         $biz = $stmt->fetch();
@@ -262,7 +262,7 @@ class BusinessController {
         return $biz;
     }
 
-    private function validate(array $body): array {
+    private function validate($body) {
         $errors = [];
         if (empty($body['name'])) $errors['name'] = 'El nombre es requerido';
         if (empty($body['category_id'])) $errors['category_id'] = 'La categoría es requerida';

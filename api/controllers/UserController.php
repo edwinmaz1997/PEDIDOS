@@ -3,7 +3,7 @@
 // User Profile Controller
 // ============================================================
 class UserController {
-    private PDO $db;
+    private $db;
     public function __construct() { $this->db = Database::connect(); }
 
     // GET /api/user/profile

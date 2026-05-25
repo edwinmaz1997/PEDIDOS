@@ -1,15 +1,11 @@
 <?php
 // ============================================================
-// Auth Middleware
+// Auth Middleware — compatible PHP 7.4+
 // ============================================================
 
 class AuthMiddleware {
 
-    // --------------------------------------------------------
-    // Validate session token from Authorization header
-    // Returns user array or calls Response::unauthorized
-    // --------------------------------------------------------
-    public static function authenticate(): array {
+    public static function authenticate() {
         $token = self::extractToken();
         if (!$token) Response::unauthorized('Token no proporcionado');
 
@@ -27,18 +23,15 @@ class AuthMiddleware {
         if (!$user) Response::unauthorized('Sesión inválida o expirada');
         if (!$user['is_active']) Response::forbidden('Cuenta desactivada');
 
-        // Slide session expiry on activity
         $db->prepare("UPDATE user_sessions SET expires_at = DATE_ADD(NOW(), INTERVAL ? SECOND) WHERE token = ?")
            ->execute([SESSION_LIFETIME, $token]);
 
         return $user;
     }
 
-    // --------------------------------------------------------
-    // Require specific role(s)
-    // --------------------------------------------------------
-    public static function requireRole(string|array $roles): array {
-        $user = self::authenticate();
+    // $roles can be string or array
+    public static function requireRole($roles) {
+        $user  = self::authenticate();
         $roles = (array) $roles;
         if (!in_array($user['role'], $roles)) {
             Response::forbidden('No tienes permiso para esta acción');
@@ -46,10 +39,7 @@ class AuthMiddleware {
         return $user;
     }
 
-    // --------------------------------------------------------
-    // Extract Bearer token from header
-    // --------------------------------------------------------
-    private static function extractToken(): ?string {
+    private static function extractToken() {
         $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
         if (preg_match('/^Bearer\s+(.+)$/i', $header, $matches)) {
             return trim($matches[1]);

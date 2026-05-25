@@ -118,7 +118,7 @@ UPDATE users SET role_id = 1 WHERE email = 'TU_EMAIL@ejemplo.com';
 
 ## Versión PHP requerida
 
-- **PHP 8.0+** recomendado (usa `match()` y `named arguments`)
+- **PHP 7.4+** compatible (probado en 7.4, recomendado 7.4 o superior)
 - **MySQL 5.7+** o **MariaDB 10.3+**
 - Extensiones PHP necesarias: `pdo`, `pdo_mysql`, `fileinfo`, `mbstring`
 
