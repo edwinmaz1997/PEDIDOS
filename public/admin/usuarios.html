@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Usuarios — Admin NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.filter-bar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.filter-bar input,.filter-bar select { padding:9px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:.9rem; outline:none; background:white; }
+.filter-bar input { flex:1; min-width:200px; }
+.filter-bar input:focus,.filter-bar select:focus { border-color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo" style="color:white">Nueva<span>Express</span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Administrador</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="negocios.html">🏪 Negocios</a></li>
+      <li><a href="usuarios.html" class="active">👥 Usuarios</a></li>
+      <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="#" onclick="APP.logout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div class="page-header" style="margin:0"><h1>Usuarios</h1><p>Gestión de cuentas del sistema</p></div>
+      <span class="badge badge-accepted" id="totalBadge"></span>
+    </div>
+
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="Buscar por nombre o email..." oninput="filterTable()">
+      <select id="roleFilter" onchange="filterTable()">
+        <option value="">Todos los roles</option>
+        <option value="admin">Admin</option>
+        <option value="negocio">Negocio</option>
+        <option value="cliente">Cliente</option>
+        <option value="repartidor">Repartidor</option>
+      </select>
+      <select id="statusFilter" onchange="filterTable()">
+        <option value="">Todos</option>
+        <option value="1">Activos</option>
+        <option value="0">Inactivos</option>
+      </select>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Rol</th><th>Último acceso</th><th>Estado</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="usersBody"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+APP.requireAuth(['admin']);
+let allUsers = [];
+
+const roleBadge = { admin:'badge-cancel', negocio:'badge-delivery', cliente:'badge-accepted', repartidor:'badge-active' };
+const roleLabel = { admin:'👑 Admin', negocio:'🏪 Negocio', cliente:'👤 Cliente', repartidor:'🛵 Repartidor' };
+
+async function init() {
+  const res = await APP.get('/admin/users');
+  allUsers = res?.data || [];
+  document.getElementById('totalBadge').textContent = allUsers.length + ' usuarios';
+  renderTable(allUsers);
+}
+
+function filterTable() {
+  const q      = document.getElementById('searchInput').value.toLowerCase();
+  const role   = document.getElementById('roleFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  const filtered = allUsers.filter(u => {
+    const mQ = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+    const mR = !role || u.role === role;
+    const mS = status === '' || u.is_active == status;
+    return mQ && mR && mS;
+  });
+  renderTable(filtered);
+}
+
+function renderTable(list) {
+  const body = document.getElementById('usersBody');
+  if (!list.length) { body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Sin resultados</td></tr>'; return; }
+  body.innerHTML = list.map(u => `
+    <tr>
+      <td style="color:var(--muted);font-size:.8rem">#${u.id}</td>
+      <td><strong>${APP.esc(u.name)}</strong></td>
+      <td style="font-size:.85rem">${APP.esc(u.email)}</td>
+      <td style="font-size:.85rem">${u.phone ? `<a href="tel:${APP.esc(u.phone)}" style="color:var(--accent)">${APP.esc(u.phone)}</a>` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td><span class="badge ${roleBadge[u.role]||''}">${roleLabel[u.role]||u.role}</span></td>
+      <td style="font-size:.8rem;color:var(--muted)">${u.last_login ? APP.date(u.last_login) : 'Nunca'}</td>
+      <td><span class="badge ${u.is_active?'badge-done':'badge-cancel'}">${u.is_active?'Activo':'Inactivo'}</span></td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button onclick="toggleStatus(${u.id}, ${u.is_active})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem" title="${u.is_active?'Desactivar':'Activar'}">
+            ${u.is_active ? '⏸' : '▶'}
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function toggleStatus(id, current) {
+  // Direct DB action — needs endpoint extension; for now use businesses workaround
+  APP.toast('Función disponible vía base de datos directa', 'info');
+}
+
+init();
+</script>
+</body>
+</html>

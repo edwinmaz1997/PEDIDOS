@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuevo Negocio — Admin NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.form-card { background:white;border-radius:var(--radius);border:1px solid var(--border);padding:28px;margin-bottom:20px; }
+.form-card h3 { font-size:1rem;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border); }
+.two-col { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
+@media(max-width:600px){.two-col{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo" style="color:white">Nueva<span>Express</span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Administrador</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="negocios.html" class="active">🏪 Negocios</a></li>
+      <li><a href="usuarios.html">👥 Usuarios</a></li>
+      <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="#" onclick="APP.logout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <a href="negocios.html" style="color:var(--muted);text-decoration:none;font-size:.9rem">← Negocios</a>
+      <span style="color:var(--border)">/</span>
+      <h1 style="font-size:1.4rem">Agregar Negocio</h1>
+    </div>
+
+    <div class="form-card">
+      <h3>Información básica</h3>
+      <div class="two-col">
+        <div class="form-group"><label>Nombre del negocio *</label><input type="text" id="f_name" placeholder="Restaurante El Sabor"></div>
+        <div class="form-group"><label>Categoría *</label><select id="f_category"></select></div>
+      </div>
+      <div class="form-group"><label>Descripción</label><textarea id="f_description" rows="2" placeholder="Breve descripción..."></textarea></div>
+      <div class="form-group"><label>¿Qué ofrecemos?</label><textarea id="f_what_we_offer" rows="2" placeholder="Ceviches, mariscos, comida típica..."></textarea></div>
+    </div>
+
+    <div class="form-card">
+      <h3>Contacto</h3>
+      <div class="two-col">
+        <div class="form-group"><label>Teléfono</label><input type="tel" id="f_phone" placeholder="+502 2222 2222"></div>
+        <div class="form-group"><label>WhatsApp</label><input type="tel" id="f_whatsapp" placeholder="+50255551234"></div>
+      </div>
+      <div class="two-col">
+        <div class="form-group"><label>Email</label><input type="email" id="f_email" placeholder="negocio@ejemplo.com"></div>
+        <div class="form-group"><label>Sitio web</label><input type="url" id="f_website" placeholder="https://..."></div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3>Ubicación</h3>
+      <div class="form-group"><label>Dirección</label><input type="text" id="f_address" placeholder="5a Avenida 10-50, Zona 1"></div>
+      <div class="two-col">
+        <div class="form-group"><label>Ciudad</label><input type="text" id="f_city" placeholder="Guatemala"></div>
+        <div class="form-group"><label>Zona</label><input type="text" id="f_zone" placeholder="Zona 10"></div>
+      </div>
+      <div class="two-col">
+        <div class="form-group"><label>Latitud</label><input type="number" id="f_latitude" placeholder="14.6349" step="any"></div>
+        <div class="form-group"><label>Longitud</label><input type="number" id="f_longitude" placeholder="-90.5069" step="any"></div>
+      </div>
+      <div class="form-group"><label>Link Google Maps</label><input type="url" id="f_maps" placeholder="https://maps.google.com/..."></div>
+    </div>
+
+    <div class="form-card">
+      <h3>Configuración</h3>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.95rem;margin-bottom:8px">
+        <input type="checkbox" id="f_delivery" style="width:16px;height:16px"> Acepta delivery (Q15.00 tarifa)
+      </label>
+      <p style="font-size:.8rem;color:var(--muted)">La tarifa de servicio es fija en Q5.00 por pedido.</p>
+    </div>
+
+    <div class="form-card">
+      <h3>Cuenta del propietario</h3>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">El propietario recibirá estas credenciales para acceder a su panel.</p>
+      <div class="two-col">
+        <div class="form-group"><label>Nombre *</label><input type="text" id="owner_name" placeholder="Juan García"></div>
+        <div class="form-group"><label>Teléfono</label><input type="tel" id="owner_phone" placeholder="+502 5555 1234"></div>
+      </div>
+      <div class="form-group"><label>Email *</label><input type="email" id="owner_email" placeholder="juan@negocio.com"></div>
+      <div class="two-col">
+        <div class="form-group"><label>Contraseña *</label><input type="password" id="owner_password" placeholder="Mínimo 8 caracteres"></div>
+        <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="owner_password2" placeholder="Repetir contraseña"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;align-items:center">
+      <button class="btn-primary" onclick="createBusiness()" id="submitBtn" style="padding:13px 32px">Crear negocio</button>
+      <a href="negocios.html" class="btn-ghost" style="padding:13px 20px">Cancelar</a>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+APP.requireAuth(['admin']);
+
+async function init() {
+  const cats = await APP.get('/categories');
+  const sel = document.getElementById('f_category');
+  (cats.data||[]).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+}
+
+async function createBusiness() {
+  const ownerPass  = document.getElementById('owner_password').value;
+  const ownerPass2 = document.getElementById('owner_password2').value;
+  if (ownerPass !== ownerPass2) { APP.toast('Las contraseñas no coinciden', 'error'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Creando...'; btn.disabled = true;
+
+  try {
+    // Step 1: Register owner account
+    const userRes = await fetch('/api/auth/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('owner_name').value,
+        phone: document.getElementById('owner_phone').value,
+        email: document.getElementById('owner_email').value,
+        password: ownerPass,
+        role: 'negocio'
+      })
+    }).then(r => r.json());
+
+    if (!userRes.success) { APP.toast(userRes.message || 'Error al crear usuario', 'error'); return; }
+
+    // Step 2: Create business with admin token
+    const bizRes = await APP.post('/businesses', {
+      category_id: document.getElementById('f_category').value,
+      name: document.getElementById('f_name').value,
+      description: document.getElementById('f_description').value,
+      what_we_offer: document.getElementById('f_what_we_offer').value,
+      phone: document.getElementById('f_phone').value,
+      whatsapp: document.getElementById('f_whatsapp').value,
+      email: document.getElementById('f_email').value,
+      website: document.getElementById('f_website').value,
+      address: document.getElementById('f_address').value,
+      city: document.getElementById('f_city').value,
+      zone: document.getElementById('f_zone').value,
+      latitude: document.getElementById('f_latitude').value || null,
+      longitude: document.getElementById('f_longitude').value || null,
+      google_maps_url: document.getElementById('f_maps').value || null,
+      accepts_delivery: document.getElementById('f_delivery').checked ? 1 : 0,
+    });
+
+    if (bizRes?.success) {
+      APP.toast('¡Negocio creado exitosamente!');
+      setTimeout(() => window.location.href = 'negocios.html', 1200);
+    } else {
+      APP.toast(bizRes?.message || 'Error al crear negocio', 'error');
+    }
+  } catch(e) {
+    APP.toast('Error de conexión', 'error');
+  } finally {
+    btn.textContent = 'Crear negocio'; btn.disabled = false;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

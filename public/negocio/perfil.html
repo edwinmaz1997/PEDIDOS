@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Perfil de Negocio — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.tabs { display:flex; gap:4px; background:var(--off-white); border-radius:var(--radius-sm); padding:4px; margin-bottom:28px; width:fit-content; }
+.tab { padding:8px 20px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:500; transition:var(--transition); }
+.tab.active { background:white; box-shadow:var(--shadow-sm); font-weight:600; }
+.panel { display:none; } .panel.active { display:block; }
+.photo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; margin-bottom:16px; }
+.photo-item { position:relative; border-radius:var(--radius-sm); overflow:hidden; aspect-ratio:1; background:var(--off-white); }
+.photo-item img { width:100%; height:100%; object-fit:cover; }
+.photo-delete { position:absolute; top:6px; right:6px; background:rgba(0,0,0,.6); color:white; border:none; border-radius:50%; width:26px; height:26px; cursor:pointer; font-size:.8rem; display:flex; align-items:center; justify-content:center; }
+.photo-add { border:2px dashed var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; gap:6px; color:var(--muted); font-size:.85rem; transition:var(--transition); aspect-ratio:1; border-radius:var(--radius-sm); }
+.photo-add:hover { border-color:var(--accent); color:var(--accent); }
+.map-preview { background:var(--off-white); border-radius:var(--radius-sm); padding:14px; margin-top:8px; font-size:.85rem; color:var(--muted); border:1px solid var(--border); }
+.hours-grid { display:grid; gap:10px; }
+.hours-row { display:grid; grid-template-columns:100px 1fr; align-items:center; gap:12px; }
+.hours-day { font-size:.9rem; font-weight:600; }
+.hours-inputs { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.hours-inputs input[type=time] { padding:6px 10px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; }
+.cover-wrap { position:relative; height:180px; background:var(--off-white); border-radius:var(--radius); overflow:hidden; margin-bottom:16px; border:1px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.cover-wrap img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
+.cover-overlay { position:absolute; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:.9rem; opacity:0; transition:var(--transition); }
+.cover-wrap:hover .cover-overlay { opacity:1; }
+.logo-wrap { width:80px; height:80px; border-radius:12px; overflow:hidden; background:var(--off-white); border:1px solid var(--border); cursor:pointer; position:relative; flex-shrink:0; }
+.logo-wrap img { width:100%; height:100%; object-fit:cover; }
+.logo-overlay { position:absolute; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; color:white; font-size:.7rem; font-weight:600; opacity:0; transition:var(--transition); }
+.logo-wrap:hover .logo-overlay { opacity:1; }
+.top-biz { display:flex; gap:16px; align-items:flex-start; margin-bottom:20px; }
+</style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo" style="color:white">Nueva<span>Express</span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.8rem;margin-top:4px" id="sidebarUser"></div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📋 Pedidos</a></li>
+      <li><a href="perfil.html" class="active">🏪 Mi Perfil</a></li>
+      <li><a href="productos.html">📦 Productos</a></li>
+      <li><a href="#" onclick="APP.logout()">🚪 Cerrar Sesión</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Mi Perfil de Negocio</h1>
+      <p>Información visible en el directorio público</p>
+    </div>
+
+    <div id="loadingState" class="loading-state"><div class="spinner"></div></div>
+    <div id="profileContent" style="display:none">
+
+      <!-- Cover + Logo -->
+      <div class="cover-wrap" id="coverWrap" onclick="document.getElementById('coverInput').click()">
+        <img id="coverImg" src="" alt="" style="display:none">
+        <div style="text-align:center;color:var(--muted);z-index:1">
+          <div style="font-size:2rem">🖼️</div>
+          <div style="font-size:.85rem;margin-top:4px">Foto de portada</div>
+        </div>
+        <div class="cover-overlay">📷 Cambiar portada</div>
+        <input type="file" id="coverInput" accept="image/*" style="display:none" onchange="uploadCover(this)">
+      </div>
+
+      <div class="top-biz">
+        <div class="logo-wrap" onclick="document.getElementById('logoInput').click()">
+          <img id="logoImg" src="" alt="" style="display:none">
+          <div id="logoPlaceholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.8rem">🏪</div>
+          <div class="logo-overlay">Logo</div>
+          <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="uploadLogo(this)">
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem" id="bizNameDisplay">Mi Negocio</div>
+          <div style="color:var(--muted);font-size:.85rem" id="bizSlugDisplay"></div>
+          <div style="margin-top:6px"><span class="badge" id="bizStatusBadge"></span></div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('info',this)">📝 Información</button>
+        <button class="tab" onclick="switchTab('contacto',this)">📞 Contacto</button>
+        <button class="tab" onclick="switchTab('ubicacion',this)">📍 Ubicación</button>
+        <button class="tab" onclick="switchTab('horarios',this)">🕐 Horarios</button>
+        <button class="tab" onclick="switchTab('fotos',this)">📸 Fotos</button>
+      </div>
+
+      <!-- Tab: Información -->
+      <div class="panel active" id="tab-info">
+        <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px">
+          <div class="form-group">
+            <label>Nombre del negocio *</label>
+            <input type="text" id="f_name" placeholder="Restaurante El Sabor">
+          </div>
+          <div class="form-group">
+            <label>Categoría *</label>
+            <select id="f_category"></select>
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea id="f_description" rows="3" placeholder="Breve descripción de tu negocio..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>¿Qué ofrecemos? <span style="color:var(--muted);font-weight:400">(aparece en el directorio)</span></label>
+            <textarea id="f_what_we_offer" rows="3" placeholder="Ceviches, mariscos frescos, comida típica guatemalteca..."></textarea>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem">
+              <input type="checkbox" id="f_accepts_delivery" style="width:16px;height:16px"> Acepta delivery
+            </label>
+          </div>
+          <div style="margin-top:20px">
+            <button class="btn-primary" onclick="saveInfo()">Guardar información</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Contacto -->
+      <div class="panel" id="tab-contacto">
+        <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="tel" id="f_phone" placeholder="+502 2222 2222">
+            </div>
+            <div class="form-group">
+              <label>WhatsApp <span style="color:var(--muted);font-weight:400">(con código país)</span></label>
+              <input type="tel" id="f_whatsapp" placeholder="+50255551234">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" id="f_email" placeholder="negocio@ejemplo.com">
+          </div>
+          <div class="form-group">
+            <label>Sitio web</label>
+            <input type="url" id="f_website" placeholder="https://minegocio.com">
+          </div>
+          <div style="background:var(--off-white);border-radius:var(--radius-sm);padding:14px;font-size:.85rem;margin-bottom:16px">
+            💡 El teléfono y WhatsApp aparecerán como botones de llamada directa en tu perfil público.
+          </div>
+          <button class="btn-primary" onclick="saveContacto()">Guardar contacto</button>
+        </div>
+      </div>
+
+      <!-- Tab: Ubicación -->
+      <div class="panel" id="tab-ubicacion">
+        <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px">
+          <div class="form-group">
+            <label>Dirección</label>
+            <input type="text" id="f_address" placeholder="5a Avenida 10-50, Zona 1">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+              <label>Ciudad</label>
+              <input type="text" id="f_city" placeholder="Guatemala">
+            </div>
+            <div class="form-group">
+              <label>Zona</label>
+              <input type="text" id="f_zone" placeholder="Zona 10">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+              <label>Latitud <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
+              <input type="number" id="f_latitude" placeholder="14.6349" step="any">
+            </div>
+            <div class="form-group">
+              <label>Longitud <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
+              <input type="number" id="f_longitude" placeholder="-90.5069" step="any">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Link de Google Maps</label>
+            <input type="url" id="f_google_maps_url" placeholder="https://maps.google.com/...">
+            <div style="font-size:.8rem;color:var(--muted);margin-top:4px">Abre Google Maps → comparte → copia el enlace corto</div>
+          </div>
+          <div class="map-preview" id="mapPreview" style="display:none">
+            <strong>Vista previa:</strong><br>
+            <a id="mapLink" href="#" target="_blank" style="color:var(--accent)">Ver en Google Maps →</a>
+          </div>
+          <div style="background:var(--off-white);border-radius:var(--radius-sm);padding:14px;font-size:.85rem;margin-bottom:16px">
+            💡 Puedes obtener las coordenadas exactas en <a href="https://maps.google.com" target="_blank" style="color:var(--accent)">Google Maps</a>: clic derecho en tu negocio → "¿Qué hay aquí?"
+          </div>
+          <button class="btn-primary" onclick="saveUbicacion()">Guardar ubicación</button>
+        </div>
+      </div>
+
+      <!-- Tab: Horarios -->
+      <div class="panel" id="tab-horarios">
+        <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px">
+          <div class="hours-grid" id="hoursGrid"></div>
+          <div style="margin-top:20px">
+            <button class="btn-primary" onclick="saveHorarios()">Guardar horarios</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Fotos -->
+      <div class="panel" id="tab-fotos">
+        <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px">
+          <p style="color:var(--muted);font-size:.9rem;margin-bottom:16px">Agrega hasta 10 fotos de tu negocio. Se mostrarán en tu perfil público.</p>
+          <div class="photo-grid" id="photoGrid"></div>
+          <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="uploadPhotos(this)">
+        </div>
+      </div>
+
+    </div><!-- /profileContent -->
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+APP.requireAuth(['negocio']);
+document.getElementById('sidebarUser').textContent = APP.user().name || '';
+
+let biz = null;
+const days = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const dayKeys = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+
+async function init() {
+  // Load categories
+  const cats = await APP.get('/categories');
+  const sel = document.getElementById('f_category');
+  (cats.data||[]).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  // Load business
+  const res = await APP.get('/businesses?limit=1');
+  // Get own business via admin endpoint or search
+  const me = await APP.fetch('/auth/me');
+  if (!me?.success) return;
+  // Try fetching businesses for this user
+  const bizRes = await APP.fetch('/businesses?limit=50');
+  const all = bizRes?.data?.businesses || [];
+  biz = all.find(b => b.user_id == me.data.id) || all[0];
+  if (!biz) {
+    document.getElementById('loadingState').innerHTML = `
+      <div style="text-align:center;padding:40px">
+        <div style="font-size:2.5rem;margin-bottom:16px">🏪</div>
+        <h3>Aún no tienes un negocio registrado</h3>
+        <p style="color:var(--muted);margin:10px 0 20px">Crea tu negocio para aparecer en el directorio</p>
+        <button class="btn-primary" onclick="showCreateForm()">+ Crear mi negocio</button>
+      </div>`;
+    return;
+  }
+  fillForm();
+  buildHoursGrid();
+  loadPhotos();
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('profileContent').style.display = 'block';
+}
+
+function fillForm() {
+  const e = id => document.getElementById(id);
+  e('bizNameDisplay').textContent = biz.name;
+  e('bizSlugDisplay').textContent = 'nuevaexpress.com/#' + biz.slug;
+  e('bizStatusBadge').textContent = biz.is_active ? '✅ Activo' : '⏸ Inactivo';
+  e('bizStatusBadge').className = 'badge ' + (biz.is_active ? 'badge-done' : 'badge-cancel');
+  e('f_name').value = biz.name || '';
+  e('f_category').value = biz.category_id || '';
+  e('f_description').value = biz.description || '';
+  e('f_what_we_offer').value = biz.what_we_offer || '';
+  e('f_accepts_delivery').checked = !!biz.accepts_delivery;
+  e('f_phone').value = biz.phone || '';
+  e('f_whatsapp').value = biz.whatsapp || '';
+  e('f_email').value = biz.email || '';
+  e('f_website').value = biz.website || '';
+  e('f_address').value = biz.address || '';
+  e('f_city').value = biz.city || '';
+  e('f_zone').value = biz.zone || '';
+  e('f_latitude').value = biz.latitude || '';
+  e('f_longitude').value = biz.longitude || '';
+  e('f_google_maps_url').value = biz.google_maps_url || '';
+  if (biz.cover_photo) { e('coverImg').src = biz.cover_photo; e('coverImg').style.display = 'block'; }
+  if (biz.logo) { e('logoImg').src = biz.logo; e('logoImg').style.display = 'block'; e('logoPlaceholder').style.display = 'none'; }
+  updateMapPreview();
+}
+
+function buildHoursGrid() {
+  const hours = typeof biz.opening_hours === 'string' ? JSON.parse(biz.opening_hours||'{}') : (biz.opening_hours||{});
+  const grid = document.getElementById('hoursGrid');
+  grid.innerHTML = dayKeys.map((k,i) => {
+    const h = hours[k] || { open: '08:00', close: '18:00', closed: false };
+    return `
+      <div class="hours-row">
+        <div class="hours-day">${days[i]}</div>
+        <div class="hours-inputs">
+          <input type="checkbox" id="closed_${k}" ${h.closed?'checked':''} onchange="toggleDay('${k}')" style="width:14px;height:14px">
+          <label for="closed_${k}" style="font-size:.8rem;color:var(--muted)">Cerrado</label>
+          <input type="time" id="open_${k}" value="${h.open||'08:00'}" ${h.closed?'disabled':''}>
+          <span>—</span>
+          <input type="time" id="close_${k}" value="${h.close||'18:00'}" ${h.closed?'disabled':''}>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleDay(k) {
+  const closed = document.getElementById(`closed_${k}`).checked;
+  document.getElementById(`open_${k}`).disabled = closed;
+  document.getElementById(`close_${k}`).disabled = closed;
+}
+
+function updateMapPreview() {
+  const lat = document.getElementById('f_latitude').value;
+  const lng = document.getElementById('f_longitude').value;
+  const url = document.getElementById('f_google_maps_url').value;
+  const preview = document.getElementById('mapPreview');
+  const link = document.getElementById('mapLink');
+  if (lat && lng) {
+    link.href = `https://www.google.com/maps?q=${lat},${lng}`;
+    preview.style.display = 'block';
+  } else if (url) {
+    link.href = url;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  ['f_latitude','f_longitude','f_google_maps_url'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updateMapPreview);
+  });
+});
+
+async function saveInfo() {
+  const data = {
+    name: document.getElementById('f_name').value,
+    category_id: document.getElementById('f_category').value,
+    description: document.getElementById('f_description').value,
+    what_we_offer: document.getElementById('f_what_we_offer').value,
+    accepts_delivery: document.getElementById('f_accepts_delivery').checked ? 1 : 0,
+  };
+  const res = await APP.put(`/businesses/${biz.id}`, data);
+  if (res?.success) { APP.toast('Información guardada'); biz = {...biz, ...data}; document.getElementById('bizNameDisplay').textContent = data.name; }
+  else APP.toast(res?.message || 'Error', 'error');
+}
+
+async function saveContacto() {
+  const data = {
+    phone: document.getElementById('f_phone').value,
+    whatsapp: document.getElementById('f_whatsapp').value,
+    email: document.getElementById('f_email').value,
+    website: document.getElementById('f_website').value,
+  };
+  const res = await APP.put(`/businesses/${biz.id}`, data);
+  if (res?.success) APP.toast('Contacto guardado');
+  else APP.toast(res?.message || 'Error', 'error');
+}
+
+async function saveUbicacion() {
+  const data = {
+    address: document.getElementById('f_address').value,
+    city: document.getElementById('f_city').value,
+    zone: document.getElementById('f_zone').value,
+    latitude: document.getElementById('f_latitude').value || null,
+    longitude: document.getElementById('f_longitude').value || null,
+    google_maps_url: document.getElementById('f_google_maps_url').value || null,
+  };
+  const res = await APP.put(`/businesses/${biz.id}`, data);
+  if (res?.success) APP.toast('Ubicación guardada');
+  else APP.toast(res?.message || 'Error', 'error');
+}
+
+async function saveHorarios() {
+  const hours = {};
+  dayKeys.forEach(k => {
+    hours[k] = {
+      closed: document.getElementById(`closed_${k}`).checked,
+      open: document.getElementById(`open_${k}`).value,
+      close: document.getElementById(`close_${k}`).value,
+    };
+  });
+  const res = await APP.put(`/businesses/${biz.id}`, { opening_hours: hours });
+  if (res?.success) APP.toast('Horarios guardados');
+  else APP.toast(res?.message || 'Error', 'error');
+}
+
+async function uploadCover(input) {
+  if (!input.files[0]) return;
+  APP.toast('Subiendo portada...', 'info');
+  const res = await APP.upload(input.files[0], 'covers');
+  if (res?.success) {
+    const url = res.data.url;
+    await APP.put(`/businesses/${biz.id}`, { cover_photo: url });
+    document.getElementById('coverImg').src = url;
+    document.getElementById('coverImg').style.display = 'block';
+    APP.toast('Portada actualizada');
+  } else APP.toast('Error al subir imagen', 'error');
+}
+
+async function uploadLogo(input) {
+  if (!input.files[0]) return;
+  APP.toast('Subiendo logo...', 'info');
+  const res = await APP.upload(input.files[0], 'logos');
+  if (res?.success) {
+    const url = res.data.url;
+    await APP.put(`/businesses/${biz.id}`, { logo: url });
+    document.getElementById('logoImg').src = url;
+    document.getElementById('logoImg').style.display = 'block';
+    document.getElementById('logoPlaceholder').style.display = 'none';
+    APP.toast('Logo actualizado');
+  } else APP.toast('Error al subir logo', 'error');
+}
+
+async function loadPhotos() {
+  const grid = document.getElementById('photoGrid');
+  const photos = biz.photos || [];
+  const addBtn = `<div class="photo-add" onclick="document.getElementById('photoInput').click()"><span style="font-size:1.5rem">+</span><span>Agregar foto</span></div>`;
+  grid.innerHTML = photos.map(p => `
+    <div class="photo-item">
+      <img src="${APP.esc(p.photo_url)}" alt="">
+      <button class="photo-delete" onclick="deletePhoto(${p.id}, this)" title="Eliminar">✕</button>
+    </div>
+  `).join('') + (photos.length < 10 ? addBtn : '');
+}
+
+async function uploadPhotos(input) {
+  const files = Array.from(input.files).slice(0, 10 - (biz.photos?.length || 0));
+  for (const file of files) {
+    APP.toast('Subiendo foto...', 'info');
+    const res = await APP.upload(file, 'businesses');
+    if (res?.success) {
+      await APP.fetch(`/businesses/${biz.id}/photos`, { method:'POST', body: JSON.stringify({ url: res.data.url }) });
+    }
+  }
+  // Reload
+  const bizRes = await APP.get(`/businesses/${biz.id}`);
+  if (bizRes?.success) { biz = bizRes.data; loadPhotos(); APP.toast('Fotos guardadas'); }
+}
+
+async function deletePhoto(photoId, btn) {
+  if (!confirm('¿Eliminar esta foto?')) return;
+  const res = await APP.delete(`/businesses/${biz.id}/photos/${photoId}`);
+  if (res?.success) { btn.closest('.photo-item').remove(); APP.toast('Foto eliminada'); }
+  else APP.toast('Error', 'error');
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+init();
+</script>
+</body>
+</html>

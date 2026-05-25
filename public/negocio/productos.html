@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Productos — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.products-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
+.prod-row { display:grid; grid-template-columns:60px 1fr auto auto 100px; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border); }
+.prod-row:last-child { border-bottom:none; }
+.prod-row:hover { background:var(--off-white); }
+.prod-thumb { width:56px; height:56px; border-radius:8px; object-fit:cover; background:var(--off-white); display:flex; align-items:center; justify-content:center; font-size:1.3rem; overflow:hidden; }
+.prod-thumb img { width:100%; height:100%; object-fit:cover; }
+.prod-name { font-weight:600; font-size:.95rem; }
+.prod-desc { font-size:.8rem; color:var(--muted); margin-top:2px; }
+.prod-price { font-weight:700; color:var(--accent); white-space:nowrap; }
+.prod-actions { display:flex; gap:8px; }
+.icon-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:6px 10px; cursor:pointer; font-size:.85rem; transition:var(--transition); }
+.icon-btn:hover { background:var(--off-white); }
+.icon-btn.danger:hover { background:#fdf0f0; border-color:var(--danger); color:var(--danger); }
+.modal-form { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:flex-end; justify-content:center; }
+@media(min-width:640px){ .modal-form { align-items:center; } }
+.modal-form-box { background:white; border-radius:20px 20px 0 0; padding:28px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; }
+@media(min-width:640px){ .modal-form-box { border-radius:20px; } }
+.toggle-available { display:flex; align-items:center; gap:10px; }
+.switch { position:relative; width:44px; height:24px; }
+.switch input { opacity:0; width:0; height:0; }
+.slider { position:absolute; inset:0; background:var(--border); border-radius:24px; cursor:pointer; transition:.3s; }
+.slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
+input:checked + .slider { background:var(--success); }
+input:checked + .slider:before { transform:translateX(20px); }
+.header-actions { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+</style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo" style="color:white">Nueva<span>Express</span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.8rem;margin-top:4px" id="sidebarUser"></div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📋 Pedidos</a></li>
+      <li><a href="perfil.html">🏪 Mi Perfil</a></li>
+      <li><a href="productos.html" class="active">📦 Productos</a></li>
+      <li><a href="#" onclick="APP.logout()">🚪 Cerrar Sesión</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="header-actions">
+      <div class="page-header" style="margin:0">
+        <h1>Productos / Servicios</h1>
+        <p>Aparecen en tu perfil y sirven para búsquedas y pedidos</p>
+      </div>
+      <button class="btn-primary" onclick="openModal()">+ Agregar producto</button>
+    </div>
+
+    <div id="productsContainer"><div class="loading-state"><div class="spinner"></div></div></div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-form" id="productModal" style="display:none">
+  <div class="modal-form-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 id="modalTitle">Nuevo Producto</h3>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nombre *</label>
+      <input type="text" id="p_name" placeholder="Ceviche mixto">
+    </div>
+    <div class="form-group">
+      <label>Descripción</label>
+      <textarea id="p_description" rows="2" placeholder="Descripción breve del producto o servicio"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Precio (Q) <span style="color:var(--muted);font-weight:400">— déjalo vacío si varía</span></label>
+      <input type="number" id="p_price" placeholder="45.00" step="0.50" min="0">
+    </div>
+    <div class="form-group">
+      <label>Foto del producto</label>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="width:72px;height:72px;border-radius:10px;overflow:hidden;background:var(--off-white);border:1px solid var(--border);flex-shrink:0">
+          <img id="p_photoPreview" src="" style="width:100%;height:100%;object-fit:cover;display:none">
+          <div id="p_photoPlaceholder" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem">📦</div>
+        </div>
+        <div>
+          <input type="file" id="p_photoInput" accept="image/*" style="display:none" onchange="previewProductPhoto(this)">
+          <button class="btn-ghost" style="padding:7px 14px;font-size:.85rem" onclick="document.getElementById('p_photoInput').click()">📷 Subir foto</button>
+        </div>
+      </div>
+    </div>
+    <div class="toggle-available" style="margin-bottom:20px">
+      <label class="switch"><input type="checkbox" id="p_available" checked><span class="slider"></span></label>
+      <span style="font-size:.9rem">Disponible para pedidos</span>
+    </div>
+    <input type="hidden" id="p_id">
+    <div style="display:flex;gap:10px">
+      <button class="btn-primary" style="flex:1;justify-content:center;padding:13px" onclick="saveProduct()">Guardar</button>
+      <button class="btn-ghost" onclick="closeModal()" style="padding:13px 20px">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+APP.requireAuth(['negocio']);
+document.getElementById('sidebarUser').textContent = APP.user().name || '';
+
+let bizId = null;
+let products = [];
+let photoFileToUpload = null;
+
+async function init() {
+  // Get biz id
+  const me = await APP.fetch('/auth/me');
+  const bizRes = await APP.get('/businesses?limit=50');
+  const all = bizRes?.data?.businesses || [];
+  const biz = all.find(b => b.user_id == me.data.id) || all[0];
+  if (!biz) { document.getElementById('productsContainer').innerHTML = '<div class="empty-state"><p>Primero crea tu negocio en <a href="perfil.html" style="color:var(--accent)">Mi Perfil</a>.</p></div>'; return; }
+  bizId = biz.id;
+  loadProducts();
+}
+
+async function loadProducts() {
+  const container = document.getElementById('productsContainer');
+  const res = await APP.get(`/products?business_id=${bizId}`);
+  products = res?.data || [];
+  if (!products.length) {
+    container.innerHTML = `<div class="empty-state"><p>No tienes productos registrados.</p><button class="btn-primary" style="margin-top:16px" onclick="openModal()">+ Agregar el primero</button></div>`;
+    return;
+  }
+  container.innerHTML = `
+    <div class="products-table-wrap">
+      ${products.map(renderProductRow).join('')}
+    </div>`;
+}
+
+function renderProductRow(p) {
+  return `
+    <div class="prod-row" id="prod-row-${p.id}">
+      <div class="prod-thumb">
+        ${p.photo ? `<img src="${APP.esc(p.photo)}" alt="">` : '📦'}
+      </div>
+      <div>
+        <div class="prod-name">${APP.esc(p.name)}</div>
+        ${p.description ? `<div class="prod-desc">${APP.esc(p.description)}</div>` : ''}
+      </div>
+      <div class="prod-price">${p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
+      <div>
+        <label class="switch" title="${p.is_available?'Disponible':'No disponible'}">
+          <input type="checkbox" ${p.is_available?'checked':''} onchange="toggleAvailable(${p.id}, this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="prod-actions">
+        <button class="icon-btn" onclick="openModal(${p.id})" title="Editar">✏️</button>
+        <button class="icon-btn danger" onclick="deleteProduct(${p.id})" title="Eliminar">🗑️</button>
+      </div>
+    </div>`;
+}
+
+async function toggleAvailable(id, available) {
+  const res = await APP.put(`/products/${id}`, { is_available: available ? 1 : 0 });
+  if (!res?.success) APP.toast('Error al actualizar', 'error');
+  else APP.toast(available ? 'Producto activado' : 'Producto desactivado');
+}
+
+function openModal(productId = null) {
+  photoFileToUpload = null;
+  const p = productId ? products.find(x => x.id === productId) : null;
+  document.getElementById('modalTitle').textContent = p ? 'Editar Producto' : 'Nuevo Producto';
+  document.getElementById('p_id').value = productId || '';
+  document.getElementById('p_name').value = p?.name || '';
+  document.getElementById('p_description').value = p?.description || '';
+  document.getElementById('p_price').value = p?.price || '';
+  document.getElementById('p_available').checked = p ? !!p.is_available : true;
+  const preview = document.getElementById('p_photoPreview');
+  const placeholder = document.getElementById('p_photoPlaceholder');
+  if (p?.photo) { preview.src = p.photo; preview.style.display = 'block'; placeholder.style.display = 'none'; }
+  else { preview.style.display = 'none'; placeholder.style.display = 'flex'; }
+  document.getElementById('productModal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('productModal').style.display = 'none'; }
+
+function previewProductPhoto(input) {
+  if (!input.files[0]) return;
+  photoFileToUpload = input.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('p_photoPreview').src = e.target.result;
+    document.getElementById('p_photoPreview').style.display = 'block';
+    document.getElementById('p_photoPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+async function saveProduct() {
+  const id   = document.getElementById('p_id').value;
+  const name = document.getElementById('p_name').value.trim();
+  if (!name) { APP.toast('El nombre es requerido', 'error'); return; }
+
+  let photoUrl = null;
+  if (photoFileToUpload) {
+    APP.toast('Subiendo foto...', 'info');
+    const upRes = await APP.upload(photoFileToUpload, 'products');
+    if (upRes?.success) photoUrl = upRes.data.url;
+  }
+
+  const payload = {
+    business_id: bizId,
+    name,
+    description: document.getElementById('p_description').value,
+    price: document.getElementById('p_price').value || null,
+    is_available: document.getElementById('p_available').checked ? 1 : 0,
+  };
+  if (photoUrl) payload.photo = photoUrl;
+
+  let res;
+  if (id) res = await APP.put(`/products/${id}`, payload);
+  else res = await APP.post('/products', payload);
+
+  if (res?.success) {
+    APP.toast(id ? 'Producto actualizado' : 'Producto agregado');
+    closeModal();
+    loadProducts();
+  } else {
+    APP.toast(res?.message || 'Error', 'error');
+  }
+}
+
+async function deleteProduct(id) {
+  if (!confirm('¿Eliminar este producto?')) return;
+  const res = await APP.delete(`/products/${id}`);
+  if (res?.success) { APP.toast('Producto eliminado'); loadProducts(); }
+  else APP.toast('Error', 'error');
+}
+
+document.getElementById('productModal').addEventListener('click', e => {
+  if (e.target.id === 'productModal') closeModal();
+});
+
+init();
+</script>
+</body>
+</html>
