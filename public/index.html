@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos GT — Directorio de Negocios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="/" class="logo">Pedidos<span>GT</span></a>
+    <div class="nav-right">
+      <a href="cliente/login.html" class="btn-ghost">Ingresar</a>
+      <a href="cliente/register.html" class="btn-primary">Registrarse</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Encuentra negocios<br><span class="accent">cerca de ti</span></h1>
+    <p>Restaurantes, farmacias, supermercados y más — haz tu pedido en segundos.</p>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Busca restaurantes, ceviches, farmacias..." autocomplete="off">
+      <button onclick="doSearch()" class="btn-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="hero-bg"></div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="categories-section">
+  <div class="container">
+    <h2 class="section-title">Categorías</h2>
+    <div class="categories-track" id="categoriesTrack"></div>
+  </div>
+</section>
+
+<!-- BUSINESSES CAROUSEL BY CATEGORY -->
+<div id="businessSections"></div>
+
+<!-- SEARCH RESULTS -->
+<section class="search-results hidden" id="searchResults">
+  <div class="container">
+    <h2 class="section-title" id="searchTitle">Resultados</h2>
+    <div class="businesses-grid" id="resultsGrid"></div>
+  </div>
+</section>
+
+<!-- MODAL: Business Detail -->
+<div class="modal-overlay hidden" id="businessModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <span class="logo">Pedidos<span>GT</span></span>
+    <p>© 2024 PedidosGT. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<script>
+const API = '/api';
+
+// ─── State ───────────────────────────────────────────────
+let categories = [];
+let activeCategory = null;
+
+// ─── Init ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadCategories();
+  await loadAllSections();
+});
+
+// ─── Load Categories ──────────────────────────────────────
+async function loadCategories() {
+  try {
+    const res = await fetch(`${API}/categories`);
+    const data = await res.json();
+    categories = data.data || [];
+    renderCategories();
+  } catch(e) { console.error(e); }
+}
+
+function renderCategories() {
+  const icons = { utensils:'🍴', pills:'💊', 'shopping-cart':'🛒', wrench:'🔧', shirt:'👕', laptop:'💻', heart:'💅', store:'🏪' };
+  const track = document.getElementById('categoriesTrack');
+  track.innerHTML = `
+    <button class="cat-chip active" onclick="filterCategory(null, this)">Todos</button>
+    ${categories.map(c => `
+      <button class="cat-chip" onclick="filterCategory(${c.id}, this)" style="--cat-color:${c.color}">
+        <span>${icons[c.icon] || '🏪'}</span> ${escHtml(c.name)}
+      </button>
+    `).join('')}
+  `;
+}
+
+// ─── Filter by category ───────────────────────────────────
+async function filterCategory(id, btn) {
+  document.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCategory = id;
+  document.getElementById('searchResults').classList.add('hidden');
+  document.getElementById('businessSections').classList.remove('hidden');
+  if (id) {
+    const sec = document.getElementById(`cat-section-${id}`);
+    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// ─── Load All Sections (carousel per category) ────────────
+async function loadAllSections() {
+  const container = document.getElementById('businessSections');
+  container.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  try {
+    const res = await fetch(`${API}/businesses?limit=50`);
+    const data = await res.json();
+    const businesses = data.data?.businesses || [];
+
+    // Group by category
+    const grouped = {};
+    businesses.forEach(b => {
+      const key = b.category_id;
+      if (!grouped[key]) grouped[key] = { name: b.category_name, icon: b.category_icon, color: b.category_color, items: [] };
+      grouped[key].items.push(b);
+    });
+
+    if (Object.keys(grouped).length === 0) {
+      container.innerHTML = '<div class="empty-state"><p>No hay negocios registrados aún.</p></div>';
+      return;
+    }
+
+    container.innerHTML = Object.entries(grouped).map(([catId, group]) => `
+      <section class="biz-section" id="cat-section-${catId}">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">${escHtml(group.name)}</h2>
+            <span class="see-all" onclick="filterCategory(${catId}, document.querySelector('[onclick*=\\'filterCategory(${catId}\\']'))">Ver todos →</span>
+          </div>
+          <div class="carousel-wrapper">
+            <button class="carousel-btn prev" onclick="slideCarousel('${catId}', -1)">‹</button>
+            <div class="carousel-track" id="carousel-${catId}">
+              ${group.items.map(b => renderCard(b)).join('')}
+            </div>
+            <button class="carousel-btn next" onclick="slideCarousel('${catId}', 1)">›</button>
+          </div>
+        </div>
+      </section>
+    `).join('');
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><p>Error cargando negocios.</p></div>';
+    console.error(e);
+  }
+}
+
+// ─── Carousel ─────────────────────────────────────────────
+function slideCarousel(catId, dir) {
+  const track = document.getElementById(`carousel-${catId}`);
+  const cardW = track.querySelector('.biz-card')?.offsetWidth + 24 || 320;
+  track.scrollBy({ left: dir * cardW * 2, behavior: 'smooth' });
+}
+
+// ─── Render Card ──────────────────────────────────────────
+function renderCard(b) {
+  const photo = b.photos?.[0]?.photo_url || b.cover_photo || 'assets/img/placeholder.svg';
+  const products = (b.products_preview || []).slice(0,3).map(p => `<span class="tag">${escHtml(p.name)}</span>`).join('');
+  return `
+    <article class="biz-card" onclick="openBusiness(${b.id})">
+      <div class="card-photo" style="background-image:url('${escHtml(photo)}')">
+        <span class="card-badge" style="background:${escHtml(b.category_color || '#888')}">${escHtml(b.category_name || '')}</span>
+        ${b.accepts_delivery ? '<span class="card-delivery">🛵 Delivery</span>' : ''}
+      </div>
+      <div class="card-body">
+        <h3>${escHtml(b.name)}</h3>
+        <p class="card-desc">${escHtml((b.description || '').slice(0,80))}${b.description?.length > 80 ? '...' : ''}</p>
+        <div class="card-tags">${products}</div>
+        <div class="card-footer">
+          ${b.rating > 0 ? `<span class="rating">★ ${parseFloat(b.rating).toFixed(1)}</span>` : ''}
+          ${b.zone ? `<span class="zone">📍 ${escHtml(b.zone)}</span>` : ''}
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+// ─── Search ───────────────────────────────────────────────
+let searchTimeout;
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => { if (e.target.value.trim()) doSearch(); else showAll(); }, 400);
+});
+
+async function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return showAll();
+  try {
+    const res = await fetch(`${API}/businesses/search?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    const results = data.data || [];
+    document.getElementById('businessSections').classList.add('hidden');
+    const sr = document.getElementById('searchResults');
+    sr.classList.remove('hidden');
+    document.getElementById('searchTitle').textContent = `${results.length} resultado${results.length !== 1 ? 's' : ''} para "${q}"`;
+    document.getElementById('resultsGrid').innerHTML = results.length
+      ? results.map(b => renderCard(b)).join('')
+      : '<div class="empty-state"><p>Sin resultados. Intenta con otro término.</p></div>';
+  } catch(e) { console.error(e); }
+}
+
+function showAll() {
+  document.getElementById('searchResults').classList.add('hidden');
+  document.getElementById('businessSections').classList.remove('hidden');
+}
+
+// ─── Business Modal ───────────────────────────────────────
+async function openBusiness(id) {
+  const modal = document.getElementById('businessModal');
+  const content = document.getElementById('modalContent');
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  content.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+
+  try {
+    const res = await fetch(`${API}/businesses/${id}`);
+    const data = await res.json();
+    const b = data.data;
+    const photos = b.photos || [];
+    const products = b.products || [];
+
+    content.innerHTML = `
+      <div class="modal-photos">
+        ${photos.length ? `<div class="photos-scroll">${photos.map(p => `<img src="${escHtml(p.photo_url)}" alt="">`).join('')}</div>` : `<div class="modal-cover" style="background:linear-gradient(135deg,#1a1a2e,#16213e)"><span class="modal-logo-text">${escHtml(b.name)}</span></div>`}
+      </div>
+      <div class="modal-info">
+        <div class="modal-header">
+          <div>
+            <span class="modal-cat-badge">${escHtml(b.category_name)}</span>
+            <h2>${escHtml(b.name)}</h2>
+          </div>
+          <div class="modal-actions-top">
+            ${b.phone ? `<a href="tel:${escHtml(b.phone)}" class="btn-action call">📞 Llamar</a>` : ''}
+            ${b.whatsapp ? `<a href="https://wa.me/${escHtml(b.whatsapp.replace(/\D/g,''))}" target="_blank" class="btn-action whatsapp">💬 WhatsApp</a>` : ''}
+          </div>
+        </div>
+        ${b.description ? `<p class="modal-desc">${escHtml(b.description)}</p>` : ''}
+        ${b.what_we_offer ? `<div class="modal-section"><h4>¿Qué ofrecemos?</h4><p>${escHtml(b.what_we_offer)}</p></div>` : ''}
+        <div class="modal-meta">
+          ${b.address ? `<div class="meta-item">📍 <span>${escHtml(b.address)}${b.zone ? ', ' + escHtml(b.zone) : ''}</span></div>` : ''}
+          ${b.phone ? `<div class="meta-item">📞 <a href="tel:${escHtml(b.phone)}">${escHtml(b.phone)}</a></div>` : ''}
+          ${b.email ? `<div class="meta-item">✉️ <a href="mailto:${escHtml(b.email)}">${escHtml(b.email)}</a></div>` : ''}
+          ${b.accepts_delivery ? `<div class="meta-item">🛵 <span>Delivery disponible — Q${b.delivery_fee} + Q${b.service_fee} servicio</span></div>` : ''}
+        </div>
+        ${b.latitude && b.longitude ? `
+          <a href="https://www.google.com/maps?q=${b.latitude},${b.longitude}" target="_blank" class="btn-maps">
+            🗺️ Ver en Google Maps
+          </a>` : b.google_maps_url ? `<a href="${escHtml(b.google_maps_url)}" target="_blank" class="btn-maps">🗺️ Ver en Google Maps</a>` : ''}
+        ${products.length ? `
+          <div class="modal-section">
+            <h4>Productos / Servicios</h4>
+            <div class="products-grid">
+              ${products.map(p => `
+                <div class="product-card">
+                  ${p.photo ? `<img src="${escHtml(p.photo)}" alt="">` : ''}
+                  <div class="product-info">
+                    <span class="product-name">${escHtml(p.name)}</span>
+                    ${p.price ? `<span class="product-price">Q${parseFloat(p.price).toFixed(2)}</span>` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+        <a href="cliente/pedido.html?business=${b.id}" class="btn-order">
+          🛒 Hacer un Pedido
+        </a>
+      </div>
+    `;
+  } catch(e) {
+    content.innerHTML = '<div class="empty-state"><p>Error cargando negocio.</p></div>';
+  }
+}
+
+function closeModal() {
+  document.getElementById('businessModal').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+document.getElementById('businessModal').addEventListener('click', (e) => {
+  if (e.target.id === 'businessModal') closeModal();
+});
+
+// ─── Utils ────────────────────────────────────────────────
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+</script>
+</body>
+</html>

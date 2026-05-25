@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Repartidor — PedidosGT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.delivery-card { background:white;border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:16px; }
+.delivery-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px; }
+.delivery-route { display:flex;flex-direction:column;gap:8px;margin:12px 0; }
+.route-point { display:flex;align-items:flex-start;gap:10px;font-size:.9rem; }
+.route-icon { font-size:1.1rem;flex-shrink:0; }
+.route-label { font-weight:600;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em; }
+.route-address { color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo" style="color:white">Pedidos<span>GT</span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px" id="sidebarUser">Repartidor</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html" class="active">🛵 Entregas</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header"><h1>Mis Entregas</h1><p>Entregas disponibles y asignadas a ti</p></div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Disponibles</div><div class="stat-value" id="sAvailable" style="color:var(--accent)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Mis activas</div><div class="stat-value" id="sActive">—</div></div>
+      <div class="stat-card"><div class="stat-label">Completadas hoy</div><div class="stat-value" id="sDone" style="color:var(--success)">—</div></div>
+    </div>
+
+    <div id="deliveriesContainer"><div class="loading-state"><div class="spinner"></div></div></div>
+  </main>
+</div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('pedidos_token');
+const user  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
+if (!token || user.role !== 'repartidor') window.location.href = '/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name || 'Repartidor';
+
+const statusLabels = { disponible:'Disponible', asignado:'Asignado', recogido:'Recogido', entregado:'Entregado' };
+const statusBadge  = { disponible:'badge-pending', asignado:'badge-delivery', recogido:'badge-active', entregado:'badge-done' };
+
+async function loadDeliveries() {
+  const container = document.getElementById('deliveriesContainer');
+  try {
+    const res = await fetch(`${API}/deliveries`, { headers: { Authorization:`Bearer ${token}` } });
+    const data = await res.json();
+    const deliveries = data.data || [];
+    const available = deliveries.filter(d => d.status === 'disponible').length;
+    const active    = deliveries.filter(d => d.repartidor_id == user.id && ['asignado','recogido'].includes(d.status)).length;
+    const done      = deliveries.filter(d => d.repartidor_id == user.id && d.status === 'entregado').length;
+    document.getElementById('sAvailable').textContent = available;
+    document.getElementById('sActive').textContent = active;
+    document.getElementById('sDone').textContent = done;
+
+    if (!deliveries.length) { container.innerHTML = '<div class="empty-state"><p>No hay entregas disponibles ahora.</p></div>'; return; }
+    container.innerHTML = deliveries.map(d => renderDelivery(d)).join('');
+  } catch(e) { container.innerHTML = '<div class="empty-state"><p>Error cargando entregas.</p></div>'; }
+}
+
+function renderDelivery(d) {
+  const isOwn = d.repartidor_id == user.id;
+  const canClaim = d.status === 'disponible';
+  const canPickup = isOwn && d.status === 'asignado';
+  const canDeliver = isOwn && d.status === 'recogido';
+
+  return `
+    <div class="delivery-card">
+      <div class="delivery-header">
+        <div>
+          <strong>${esc(d.order_number)}</strong>
+          <div style="font-size:.85rem;color:var(--muted)">👤 ${esc(d.client_name)} · ${esc(d.client_phone||'')}</div>
+          <div style="font-size:.85rem;font-weight:700;color:var(--accent);margin-top:4px">Q${parseFloat(d.total||0).toFixed(2)}</div>
+        </div>
+        <span class="badge ${statusBadge[d.status]||''}">${statusLabels[d.status]||d.status}</span>
+      </div>
+      <div class="delivery-route">
+        <div class="route-point">
+          <span class="route-icon">🏪</span>
+          <div><div class="route-label">Recoger en</div><div class="route-address">${esc(d.business_name)} — ${esc(d.pickup_address||'Ver dirección del negocio')}</div></div>
+        </div>
+        <div class="route-point">
+          <span class="route-icon">📍</span>
+          <div><div class="route-label">Entregar en</div><div class="route-address">${esc(d.delivery_address||'Sin dirección')}</div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        ${canClaim  ? `<button class="btn-primary" onclick="claimDelivery(${d.id})" style="padding:9px 18px">🛵 Tomar entrega</button>` : ''}
+        ${canPickup ? `<button class="btn-primary" onclick="updateStatus(${d.id},'recogido')" style="padding:9px 18px">📦 Marcar recogido</button>` : ''}
+        ${canDeliver? `<button class="btn-primary" onclick="updateStatus(${d.id},'entregado')" style="padding:9px 18px">✔ Marcar entregado</button>` : ''}
+        ${d.delivery_address ? `<a href="https://www.google.com/maps/search/${encodeURIComponent(d.delivery_address)}" target="_blank" class="btn-ghost" style="padding:9px 18px">🗺️ Ver mapa</a>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+async function claimDelivery(id) {
+  try {
+    const res = await fetch(`${API}/deliveries/${id}/assign`, { method:'PUT', headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'}, body:'{}' });
+    const data = await res.json();
+    if (data.success) loadDeliveries(); else alert(data.message);
+  } catch(e) { alert('Error'); }
+}
+
+async function updateStatus(id, status) {
+  try {
+    const res = await fetch(`${API}/deliveries/${id}`, { method:'PUT', headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'}, body: JSON.stringify({status}) });
+    const data = await res.json();
+    if (data.success) loadDeliveries(); else alert(data.message);
+  } catch(e) { alert('Error'); }
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
+loadDeliveries();
+setInterval(loadDeliveries, 15000);
+</script>
+</body>
+</html>

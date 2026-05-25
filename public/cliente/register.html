@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro — PedidosGT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+body { background: var(--bg); display: flex; flex-direction: column; min-height: 100vh; }
+.auth-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px; }
+.auth-card { background: white; border-radius: 20px; padding: 40px; width: 100%; max-width: 460px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
+.auth-logo { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 24px; }
+.auth-logo span { color: var(--accent); }
+.error-msg { background: #fdf0f0; border: 1px solid #f5c2c2; color: var(--danger); padding: 10px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 16px; display: none; }
+.role-toggle { display: flex; gap: 8px; margin-bottom: 24px; }
+.role-btn { flex: 1; padding: 9px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: white; cursor: pointer; font-family: 'DM Sans',sans-serif; font-size: .8rem; font-weight: 500; transition: var(--transition); }
+.role-btn.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pw-rules { font-size: .78rem; color: var(--muted); margin-top: 6px; }
+</style>
+</head>
+<body>
+<nav class="navbar"><div class="nav-inner"><a href="/" class="logo">Pedidos<span>GT</span></a></div></nav>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">Pedidos<span>GT</span></div>
+    <h2 style="margin-bottom:4px">Crear cuenta</h2>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px">Únete gratis a PedidosGT</p>
+
+    <div class="role-toggle">
+      <button class="role-btn active" onclick="setRole('cliente', this)">👤 Cliente</button>
+      <button class="role-btn" onclick="setRole('negocio', this)">🏪 Negocio</button>
+      <button class="role-btn" onclick="setRole('repartidor', this)">🛵 Repartidor</button>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="two-col">
+      <div class="form-group"><label>Nombre completo</label><input type="text" id="name" placeholder="Tu nombre"></div>
+      <div class="form-group"><label>Teléfono</label><input type="tel" id="phone" placeholder="+502 5555 5555"></div>
+    </div>
+    <div class="form-group"><label>Correo electrónico</label><input type="email" id="email" placeholder="tucorreo@ejemplo.com"></div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" id="password" placeholder="Mínimo 8 caracteres">
+      <div class="pw-rules">Debe contener al menos 8 caracteres, una mayúscula y un número.</div>
+    </div>
+    <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="password2" placeholder="Repite la contraseña"></div>
+
+    <button class="btn-primary" style="width:100%;justify-content:center;padding:14px" onclick="doRegister()" id="regBtn">
+      Crear cuenta
+    </button>
+    <p style="text-align:center;margin-top:20px;font-size:.9rem;color:var(--muted)">
+      ¿Ya tienes cuenta? <a href="login.html" style="color:var(--accent);font-weight:600">Inicia sesión</a>
+    </p>
+  </div>
+</div>
+
+<script>
+const API = '/api';
+let selectedRole = 'cliente';
+function setRole(r, btn) { selectedRole = r; document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+
+async function doRegister() {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const password2 = document.getElementById('password2').value;
+  const btn = document.getElementById('regBtn');
+
+  if (!name || !email || !password) { showError('Completa todos los campos obligatorios'); return; }
+  if (password !== password2) { showError('Las contraseñas no coinciden'); return; }
+  if (password.length < 8) { showError('La contraseña debe tener al menos 8 caracteres'); return; }
+
+  btn.textContent = 'Creando cuenta...'; btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/auth/register`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, email, password, role: selectedRole })
+    });
+    const data = await res.json();
+    if (!data.success) { showError(data.message || 'Error al crear cuenta'); return; }
+    localStorage.setItem('pedidos_token', data.data.token);
+    localStorage.setItem('pedidos_user', JSON.stringify(data.data.user));
+    const role = data.data.user.role;
+    if (role === 'negocio') window.location.href = '/negocio/index.html';
+    else if (role === 'repartidor') window.location.href = '/repartidor/index.html';
+    else window.location.href = '/cliente/index.html';
+  } catch(e) { showError('Error de conexión. Intenta de nuevo.'); }
+  finally { btn.textContent = 'Crear cuenta'; btn.disabled = false; }
+}
+function showError(msg) { const el = document.getElementById('errorMsg'); el.textContent = msg; el.style.display = 'block'; }
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+</script>
+</body>
+</html>

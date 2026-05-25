@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hacer Pedido — PedidosGT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.order-layout { display:grid; grid-template-columns:1fr 360px; gap:24px; max-width:1100px; margin:0 auto; padding:32px 24px; }
+@media(max-width:768px){ .order-layout{grid-template-columns:1fr;} }
+.order-section { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:24px; margin-bottom:16px; }
+.order-section h3 { font-size:1.1rem; margin-bottom:16px; }
+.product-pick { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+.product-pick:last-child { border-bottom:none; }
+.prod-name { font-weight:500; }
+.prod-price { color:var(--accent); font-weight:700; font-size:.95rem; }
+.qty-ctrl { display:flex; align-items:center; gap:10px; }
+.qty-btn { width:30px; height:30px; border-radius:50%; border:1.5px solid var(--border); background:white; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+.qty-btn:hover { background:var(--charcoal); color:white; border-color:var(--charcoal); }
+.qty-num { font-weight:700; min-width:20px; text-align:center; }
+.cart-summary { position:sticky; top:80px; }
+.cart-item { display:flex; justify-content:space-between; font-size:.9rem; margin-bottom:8px; }
+.cart-divider { border:none; border-top:1px solid var(--border); margin:12px 0; }
+.cart-total { display:flex; justify-content:space-between; font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; }
+.delivery-toggle { display:flex; gap:8px; margin-bottom:16px; }
+.delivery-btn { flex:1; padding:10px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:white; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:500; transition:var(--transition); text-align:center; }
+.delivery-btn.active { background:var(--charcoal); color:white; border-color:var(--charcoal); }
+.fee-row { display:flex; justify-content:space-between; font-size:.85rem; color:var(--muted); margin-bottom:6px; }
+.custom-item { display:flex; gap:8px; margin-bottom:8px; }
+.custom-item input { flex:1; }
+.success-screen { text-align:center; padding:48px 24px; }
+.success-icon { font-size:3rem; margin-bottom:16px; }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="/" class="logo">Pedidos<span>GT</span></a>
+    <a href="index.html" class="btn-ghost">Mis Pedidos</a>
+  </div>
+</nav>
+
+<div id="mainContent">
+  <div class="order-layout">
+    <!-- Left -->
+    <div>
+      <div class="order-section" id="bizInfo">
+        <div class="loading-state"><div class="spinner"></div></div>
+      </div>
+
+      <!-- Products -->
+      <div class="order-section" id="productsSection" style="display:none">
+        <h3>Selecciona productos</h3>
+        <div id="productsList"></div>
+        <hr style="margin:16px 0;border:none;border-top:1px solid var(--border)">
+        <h4 style="margin-bottom:10px;font-size:.95rem">O escribe tu pedido personalizado</h4>
+        <div id="customItems">
+          <div class="custom-item">
+            <input type="text" class="custom-input" placeholder="Ej: 2 ceviches mixtos, extra limón..." style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;width:100%">
+          </div>
+        </div>
+        <button class="btn-ghost" style="font-size:.85rem;padding:7px 14px;margin-top:8px" onclick="addCustomRow()">+ Agregar línea</button>
+      </div>
+
+      <!-- Notes -->
+      <div class="order-section">
+        <h3>Indicaciones especiales</h3>
+        <div class="form-group" style="margin:0">
+          <textarea id="notes" rows="3" placeholder="Sin picante, extra salsa, instrucciones de entrega..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Cart -->
+    <div class="cart-summary">
+      <div class="order-section">
+        <h3>Tu pedido</h3>
+        <div class="delivery-toggle">
+          <button class="delivery-btn active" onclick="setDelivery('pickup',this)">🏃 Recoger</button>
+          <button class="delivery-btn" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
+        </div>
+        <div id="deliveryAddressWrap" style="display:none;margin-bottom:12px">
+          <input type="text" id="deliveryAddress" placeholder="Dirección de entrega" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif">
+        </div>
+        <div id="cartItems"><p style="color:var(--muted);font-size:.9rem">Agrega productos a tu pedido</p></div>
+        <hr class="cart-divider">
+        <div id="feesBreakdown"></div>
+        <hr class="cart-divider">
+        <div class="cart-total"><span>Total</span><span id="cartTotal">Q0.00</span></div>
+        <button class="btn-primary" style="width:100%;justify-content:center;padding:14px;margin-top:16px" id="submitBtn" onclick="submitOrder()" disabled>
+          Enviar Pedido
+        </button>
+        <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:8px">
+          Se cobra Q5 de servicio por pedido
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('pedidos_token');
+if (!token) window.location.href = '/cliente/login.html';
+
+const params     = new URLSearchParams(window.location.search);
+const businessId = parseInt(params.get('business')) || 0;
+if (!businessId) window.location.href = '/index.html';
+
+let business    = null;
+let cart        = {}; // product_id -> { name, price, qty }
+let customItems = [];
+let deliveryType = 'pickup';
+
+const SERVICE_FEE = 5;
+
+// ── Load Business ──────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch(`${API}/businesses/${businessId}`);
+    const data = await res.json();
+    if (!data.success) { window.location.href = '/'; return; }
+    business = data.data;
+    renderBizInfo();
+    renderProducts();
+  } catch(e) { console.error(e); }
+}
+
+function renderBizInfo() {
+  const el = document.getElementById('bizInfo');
+  el.innerHTML = `
+    <div style="display:flex;gap:16px;align-items:flex-start">
+      ${business.logo ? `<img src="${esc(business.logo)}" style="width:64px;height:64px;border-radius:var(--radius-sm);object-fit:cover">` : `<div style="width:64px;height:64px;border-radius:var(--radius-sm);background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1.8rem">🏪</div>`}
+      <div>
+        <h2 style="font-size:1.3rem">${esc(business.name)}</h2>
+        <p style="color:var(--muted);font-size:.85rem">${esc(business.category_name || '')}</p>
+        ${business.address ? `<p style="color:var(--muted);font-size:.85rem">📍 ${esc(business.address)}</p>` : ''}
+        ${business.phone ? `<a href="tel:${esc(business.phone)}" style="color:var(--accent);font-size:.85rem">📞 ${esc(business.phone)}</a>` : ''}
+      </div>
+    </div>
+  `;
+  // Enable/disable delivery button
+  if (!business.accepts_delivery) {
+    document.getElementById('deliveryBtn').disabled = true;
+    document.getElementById('deliveryBtn').title = 'Este negocio no ofrece delivery';
+    document.getElementById('deliveryBtn').style.opacity = '.4';
+  }
+}
+
+function renderProducts() {
+  const section = document.getElementById('productsSection');
+  const list    = document.getElementById('productsList');
+  const products = business.products || [];
+  section.style.display = 'block';
+  if (!products.length) { list.innerHTML = '<p style="color:var(--muted);font-size:.9rem">Este negocio no tiene productos listados. Usa el campo personalizado.</p>'; return; }
+  list.innerHTML = products.map(p => `
+    <div class="product-pick" id="pp-${p.id}">
+      <div>
+        <div class="prod-name">${esc(p.name)}</div>
+        ${p.description ? `<div style="font-size:.8rem;color:var(--muted)">${esc(p.description)}</div>` : ''}
+        ${p.price ? `<div class="prod-price">Q${parseFloat(p.price).toFixed(2)}</div>` : ''}
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button>
+        <span class="qty-num" id="qty-${p.id}">0</span>
+        <button class="qty-btn" onclick="changeQty(${p.id},1,'${esc(p.name)}',${p.price||0})">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function changeQty(id, delta, name, price) {
+  if (!cart[id]) cart[id] = { name: name || '', price: parseFloat(price)||0, qty: 0 };
+  cart[id].qty = Math.max(0, cart[id].qty + delta);
+  if (cart[id].qty === 0) delete cart[id];
+  document.getElementById(`qty-${id}`).textContent = cart[id]?.qty || 0;
+  updateCart();
+}
+
+function addCustomRow() {
+  const wrap = document.getElementById('customItems');
+  const div  = document.createElement('div');
+  div.className = 'custom-item';
+  div.innerHTML = `<input type="text" class="custom-input" placeholder="Descripción del producto..." style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;width:100%"><button onclick="this.parentElement.remove();updateCart()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem">×</button>`;
+  wrap.appendChild(div);
+}
+
+function setDelivery(type, btn) {
+  deliveryType = type;
+  document.querySelectorAll('.delivery-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('deliveryAddressWrap').style.display = type === 'delivery' ? 'block' : 'none';
+  updateCart();
+}
+
+function updateCart() {
+  const cartEl = document.getElementById('cartItems');
+  const feeEl  = document.getElementById('feesBreakdown');
+  const totalEl = document.getElementById('cartTotal');
+  const submitBtn = document.getElementById('submitBtn');
+
+  let subtotal = 0;
+  let lines = [];
+
+  Object.entries(cart).forEach(([id, item]) => {
+    if (item.qty > 0) {
+      const lineTotal = item.price * item.qty;
+      subtotal += lineTotal;
+      lines.push(`<div class="cart-item"><span>${esc(item.name)} ×${item.qty}</span><span>${item.price ? 'Q'+lineTotal.toFixed(2) : ''}</span></div>`);
+    }
+  });
+
+  // Custom items
+  document.querySelectorAll('.custom-input').forEach(inp => {
+    if (inp.value.trim()) lines.push(`<div class="cart-item"><span>${esc(inp.value.trim())}</span><span></span></div>`);
+  });
+
+  if (!lines.length) { cartEl.innerHTML = '<p style="color:var(--muted);font-size:.9rem">Agrega productos a tu pedido</p>'; }
+  else { cartEl.innerHTML = lines.join(''); }
+
+  const deliveryFee = deliveryType === 'delivery' && business?.accepts_delivery ? parseFloat(business.delivery_fee || 15) : 0;
+  const total = subtotal + SERVICE_FEE + deliveryFee;
+
+  feeEl.innerHTML = `
+    ${subtotal > 0 ? `<div class="fee-row"><span>Subtotal</span><span>Q${subtotal.toFixed(2)}</span></div>` : ''}
+    <div class="fee-row"><span>Tarifa de servicio</span><span>Q${SERVICE_FEE.toFixed(2)}</span></div>
+    ${deliveryFee > 0 ? `<div class="fee-row"><span>Delivery</span><span>Q${deliveryFee.toFixed(2)}</span></div>` : ''}
+  `;
+  totalEl.textContent = `Q${total.toFixed(2)}`;
+  submitBtn.disabled = lines.length === 0;
+}
+
+async function submitOrder() {
+  const notes = document.getElementById('notes').value.trim();
+  const deliveryAddress = document.getElementById('deliveryAddress').value.trim();
+  if (deliveryType === 'delivery' && !deliveryAddress) { alert('Ingresa tu dirección de entrega'); return; }
+
+  const items = [];
+  Object.entries(cart).forEach(([id, item]) => {
+    if (item.qty > 0) items.push({ product_id: parseInt(id), name: item.name, quantity: item.qty });
+  });
+  document.querySelectorAll('.custom-input').forEach((inp, i) => {
+    if (inp.value.trim()) items.push({ name: inp.value.trim(), quantity: 1 });
+  });
+  if (!items.length) { alert('Agrega al menos un producto'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Enviando...'; btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ business_id: businessId, delivery_type: deliveryType, delivery_address: deliveryAddress, notes, items })
+    });
+    const data = await res.json();
+    if (!data.success) { alert(data.message || 'Error al enviar pedido'); return; }
+
+    document.getElementById('mainContent').innerHTML = `
+      <div class="success-screen">
+        <div class="success-icon">✅</div>
+        <h2 style="margin-bottom:8px">¡Pedido enviado!</h2>
+        <p style="color:var(--muted);margin-bottom:8px">Tu pedido <strong>${data.data.order_number}</strong> fue enviado al negocio.</p>
+        <p style="color:var(--muted);margin-bottom:24px">Total: <strong>Q${parseFloat(data.data.total).toFixed(2)}</strong></p>
+        <a href="index.html" class="btn-primary" style="display:inline-flex">Ver mis pedidos</a>
+      </div>
+    `;
+  } catch(e) { alert('Error de conexión'); btn.textContent = 'Enviar Pedido'; btn.disabled = false; }
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+init();
+document.getElementById('customItems').addEventListener('input', updateCart);
+</script>
+</body>
+</html>

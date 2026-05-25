@@ -1,0 +1,19 @@
+# Config con credenciales — NUNCA subir
+api/config/config.php
+.env
+
+# Uploads generados por el sistema
+public/uploads/
+
+# Logs
+*.log
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

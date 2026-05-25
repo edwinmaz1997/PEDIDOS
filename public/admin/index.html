@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — PedidosGT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo" style="color:white">Pedidos<span>GT</span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Administrador</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html" class="active">📊 Dashboard</a></li>
+      <li><a href="negocios.html">🏪 Negocios</a></li>
+      <li><a href="usuarios.html">👥 Usuarios</a></li>
+      <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header"><h1>Dashboard</h1><p>Resumen general del sistema</p></div>
+
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-label">Negocios activos</div><div class="stat-value" id="sBiz">—</div></div>
+      <div class="stat-card"><div class="stat-label">Usuarios</div><div class="stat-value" id="sUsers">—</div></div>
+      <div class="stat-card"><div class="stat-label">Pedidos hoy</div><div class="stat-value" id="sToday">—</div></div>
+      <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value" id="sPending" style="color:var(--warning)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Ingresos hoy (Q)</div><div class="stat-value" id="sRevenue" style="color:var(--success)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Deliveries disp.</div><div class="stat-value" id="sDeliveries">—</div></div>
+    </div>
+
+    <h3 style="margin-bottom:16px;font-size:1.1rem">Pedidos recientes</h3>
+    <div style="overflow-x:auto">
+      <table class="data-table" id="recentTable">
+        <thead><tr><th>#</th><th>Cliente</th><th>Negocio</th><th>Total</th><th>Tipo</th><th>Estado</th><th>Fecha</th></tr></thead>
+        <tbody id="recentBody"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('pedidos_token');
+const user  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
+if (!token || user.role !== 'admin') window.location.href = '/cliente/login.html';
+
+const statusBadge = { pendiente:'badge-pending', aceptado:'badge-accepted', en_preparacion:'badge-delivery', listo:'badge-active', en_camino:'badge-delivery', entregado:'badge-done', cancelado:'badge-cancel' };
+const statusLabels= { pendiente:'Pendiente', aceptado:'Aceptado', en_preparacion:'En prep.', listo:'Listo', en_camino:'En camino', entregado:'Entregado', cancelado:'Cancelado' };
+
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${API}/admin/dashboard`, { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    if (!data.success) return;
+    const s = data.data.stats;
+    document.getElementById('sBiz').textContent = s.total_businesses;
+    document.getElementById('sUsers').textContent = s.total_users;
+    document.getElementById('sToday').textContent = s.orders_today;
+    document.getElementById('sPending').textContent = s.pending_orders;
+    document.getElementById('sRevenue').textContent = 'Q' + parseFloat(s.revenue_today||0).toFixed(2);
+    document.getElementById('sDeliveries').textContent = s.available_deliveries;
+
+    const rows = (data.data.recent_orders || []).map(o => `
+      <tr>
+        <td>${esc(o.order_number)}</td>
+        <td>${esc(o.client_name)}</td>
+        <td>${esc(o.business_name)}</td>
+        <td>Q${parseFloat(o.total).toFixed(2)}</td>
+        <td>${o.delivery_type==='delivery'?'🛵 Delivery':'🏃 Recoger'}</td>
+        <td><span class="badge ${statusBadge[o.status]||''}">${statusLabels[o.status]||o.status}</span></td>
+        <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</td>
+      </tr>
+    `).join('');
+    document.getElementById('recentBody').innerHTML = rows || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Sin pedidos</td></tr>';
+  } catch(e) { console.error(e); }
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
+loadDashboard();
+setInterval(loadDashboard, 30000);
+</script>
+</body>
+</html>

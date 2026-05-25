@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Negocio — PedidosGT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.order-card { background:white;border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:16px; }
+.order-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px; }
+.order-client { font-size:.85rem;color:var(--muted);margin-top:4px; }
+.order-items-list { margin:10px 0; }
+.order-item-line { font-size:.9rem;padding:4px 0;border-bottom:1px solid var(--border); display:flex; justify-content:space-between; }
+.order-item-line:last-child{border-bottom:none;}
+.respond-form { background:var(--off-white);border-radius:var(--radius-sm);padding:16px;margin-top:12px; }
+.respond-form h4 { margin-bottom:10px;font-size:.95rem; }
+.respond-row { display:flex;gap:10px;flex-wrap:wrap; }
+.tab-nav { display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap; }
+.tab-btn { padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:.85rem;font-family:'DM Sans',sans-serif;transition:var(--transition); }
+.tab-btn.active { background:var(--charcoal);color:white;border-color:var(--charcoal); }
+.bell-badge { display:inline-block;background:var(--accent);color:white;border-radius:10px;font-size:.7rem;padding:1px 6px;margin-left:4px; }
+</style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo" style="color:white">Pedidos<span>GT</span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.8rem;margin-top:4px" id="sidebarUser">Mi Negocio</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html" class="active">📋 Pedidos</a></li>
+      <li><a href="perfil.html">🏪 Mi Perfil</a></li>
+      <li><a href="productos.html">📦 Productos</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Panel del Negocio</h1>
+      <p id="bizNameHeader">Gestiona tus pedidos entrantes</p>
+    </div>
+
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-label">Pedidos hoy</div><div class="stat-value" id="statToday">—</div></div>
+      <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value" id="statPending" style="color:var(--warning)">—</div></div>
+      <div class="stat-card"><div class="stat-label">En preparación</div><div class="stat-value" id="statPrep" style="color:var(--accent)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Entregados hoy</div><div class="stat-value" id="statDone" style="color:var(--success)">—</div></div>
+    </div>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="loadOrders('pendiente',this)">⏳ Pendientes <span class="bell-badge" id="pendingCount"></span></button>
+      <button class="tab-btn" onclick="loadOrders('aceptado',this)">✅ Aceptados</button>
+      <button class="tab-btn" onclick="loadOrders('en_preparacion',this)">👨‍🍳 En prep.</button>
+      <button class="tab-btn" onclick="loadOrders('listo',this)">📦 Listos</button>
+      <button class="tab-btn" onclick="loadOrders('',this)">Todos</button>
+    </div>
+
+    <div id="ordersContainer"><div class="loading-state"><div class="spinner"></div></div></div>
+  </main>
+</div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('pedidos_token');
+const user  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
+if (!token || user.role !== 'negocio') window.location.href = '/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name || 'Mi Negocio';
+
+const statusLabels = { pendiente:'⏳ Pendiente', aceptado:'✅ Aceptado', en_preparacion:'👨‍🍳 En preparación', listo:'📦 Listo', en_camino:'🛵 En camino', entregado:'✔ Entregado', cancelado:'✕ Cancelado' };
+const statusBadge  = { pendiente:'badge-pending', aceptado:'badge-accepted', en_preparacion:'badge-delivery', listo:'badge-active', en_camino:'badge-delivery', entregado:'badge-done', cancelado:'badge-cancel' };
+const nextStatus   = { aceptado:'en_preparacion', en_preparacion:'listo', listo:'entregado' };
+const nextLabel    = { aceptado:'Iniciar preparación', en_preparacion:'Marcar listo', listo:'Marcar entregado' };
+
+async function loadOrders(status, tabBtn) {
+  if (tabBtn) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); tabBtn.classList.add('active'); }
+  const container = document.getElementById('ordersContainer');
+  container.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  try {
+    const qs = status ? `?status=${status}` : '';
+    const res = await fetch(`${API}/orders${qs}`, { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    const orders = data.data?.orders || [];
+    if (!orders.length) { container.innerHTML = '<div class="empty-state"><p>No hay pedidos en esta categoría.</p></div>'; return; }
+    container.innerHTML = orders.map(renderOrder).join('');
+    updateStats(orders);
+  } catch(e) { container.innerHTML = '<div class="empty-state"><p>Error cargando pedidos.</p></div>'; }
+}
+
+function renderOrder(o) {
+  const items = (o.items || []).map(i => `<div class="order-item-line"><span>${esc(i.product_name)} ×${i.quantity}</span>${i.notes?`<span style="color:var(--muted);font-size:.8rem">${esc(i.notes)}</span>`:''}</div>`).join('');
+  const canRespond = o.status === 'pendiente';
+  const canAdvance = nextStatus[o.status];
+  return `
+    <div class="order-card" id="order-${o.id}">
+      <div class="order-header">
+        <div>
+          <strong>${esc(o.order_number)}</strong>
+          <div class="order-client">👤 ${esc(o.client_name)} ${o.client_phone?`· <a href="tel:${esc(o.client_phone)}">${esc(o.client_phone)}</a>`:''}</div>
+          <div style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</div>
+          ${o.delivery_type==='delivery'?`<div style="font-size:.8rem;color:var(--accent)">🛵 Delivery: ${esc(o.delivery_address||'')}</div>`:'<div style="font-size:.8rem;color:var(--muted)">🏃 Recoger en negocio</div>'}
+        </div>
+        <span class="badge ${statusBadge[o.status]||'badge-pending'}">${statusLabels[o.status]||o.status}</span>
+      </div>
+      ${items?`<div class="order-items-list">${items}</div>`:''}
+      ${o.notes?`<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);font-size:.85rem;margin-top:8px">📝 ${esc(o.notes)}</div>`:''}
+      <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+        <span>Total</span><span style="color:var(--accent)">Q${parseFloat(o.total).toFixed(2)}</span>
+      </div>
+      ${canRespond ? `
+        <div class="respond-form">
+          <h4>Responder pedido</h4>
+          <div class="form-group" style="margin-bottom:10px">
+            <textarea id="resp-${o.id}" rows="2" placeholder="Mensaje al cliente (opcional)..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem"></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:10px">
+            <input type="number" id="time-${o.id}" placeholder="Tiempo estimado (min)" min="1" max="180" style="width:160px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif">
+          </div>
+          <div class="respond-row">
+            <button class="btn-primary" onclick="respond(${o.id},'aceptar')" style="padding:9px 18px">✅ Aceptar</button>
+            <button class="btn-ghost" onclick="respond(${o.id},'rechazar')" style="padding:9px 18px;color:var(--danger);border-color:var(--danger)">✕ Rechazar</button>
+          </div>
+        </div>
+      ` : ''}
+      ${canAdvance ? `<div style="margin-top:12px"><button class="btn-primary" onclick="advanceStatus(${o.id},'${nextStatus[o.status]}')" style="padding:9px 18px">${nextLabel[o.status]}</button></div>` : ''}
+    </div>
+  `;
+}
+
+async function respond(orderId, action) {
+  const response = document.getElementById(`resp-${orderId}`)?.value || '';
+  const estTime  = parseInt(document.getElementById(`time-${orderId}`)?.value) || null;
+  try {
+    const res = await fetch(`${API}/orders/${orderId}/respond`, {
+      method: 'PUT', headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+      body: JSON.stringify({ action, response, estimated_time: estTime })
+    });
+    const data = await res.json();
+    if (data.success) loadOrders('pendiente', null);
+    else alert(data.message);
+  } catch(e) { alert('Error de conexión'); }
+}
+
+async function advanceStatus(orderId, status) {
+  try {
+    const res = await fetch(`${API}/orders/${orderId}/status`, {
+      method:'PUT', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+      body: JSON.stringify({ status })
+    });
+    const data = await res.json();
+    if (data.success) loadOrders('', null);
+    else alert(data.message);
+  } catch(e) { alert('Error de conexión'); }
+}
+
+function updateStats(orders) {
+  const today = new Date().toDateString();
+  document.getElementById('statToday').textContent = orders.filter(o => new Date(o.created_at).toDateString()===today).length;
+  document.getElementById('statPending').textContent = orders.filter(o=>o.status==='pendiente').length;
+  document.getElementById('statPrep').textContent = orders.filter(o=>o.status==='en_preparacion').length;
+  document.getElementById('statDone').textContent = orders.filter(o=>o.status==='entregado'&&new Date(o.created_at).toDateString()===today).length;
+  const pending = orders.filter(o=>o.status==='pendiente').length;
+  document.getElementById('pendingCount').textContent = pending || '';
+  document.getElementById('pendingCount').style.display = pending ? '' : 'none';
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
+
+loadOrders('pendiente', null);
+setInterval(() => loadOrders('pendiente', null), 20000);
+</script>
+</body>
+</html>

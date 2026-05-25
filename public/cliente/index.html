@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Pedidos — PedidosGT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.order-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:20px; margin-bottom:16px; }
+.order-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+.order-num { font-family:'Syne',sans-serif; font-weight:700; font-size:1.05rem; }
+.order-biz { color:var(--muted); font-size:.9rem; }
+.order-items { margin:12px 0; border-top:1px solid var(--border); padding-top:12px; }
+.order-item-row { display:flex; justify-content:space-between; font-size:.9rem; margin-bottom:4px; }
+.order-total-row { display:flex; justify-content:space-between; font-weight:700; border-top:1px solid var(--border); padding-top:8px; margin-top:8px; }
+.order-response { background:var(--off-white); border-radius:var(--radius-sm); padding:12px; margin-top:12px; font-size:.9rem; }
+.order-response strong { display:block; margin-bottom:4px; }
+.order-actions { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.status-timeline { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+.status-dot { font-size:.75rem; padding:3px 10px; border-radius:20px; background:var(--off-white); color:var(--muted); }
+.status-dot.done { background:#d4edda; color:#155724; }
+.filter-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+.filter-tab { padding:7px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; cursor:pointer; font-size:.85rem; font-family:'DM Sans',sans-serif; transition:var(--transition); }
+.filter-tab.active { background:var(--charcoal); color:white; border-color:var(--charcoal); }
+</style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo" style="color:white">Pedidos<span>GT</span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.8rem;margin-top:4px" id="sidebarUser">Cliente</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html" class="active">📋 Mis Pedidos</a></li>
+      <li><a href="/index.html">🏪 Directorio</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Mis Pedidos</h1>
+      <p>Historial y estado de tus pedidos</p>
+    </div>
+
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="loadOrders('', this)">Todos</button>
+      <button class="filter-tab" onclick="loadOrders('pendiente', this)">⏳ Pendientes</button>
+      <button class="filter-tab" onclick="loadOrders('aceptado', this)">✅ Aceptados</button>
+      <button class="filter-tab" onclick="loadOrders('en_preparacion', this)">👨‍🍳 En preparación</button>
+      <button class="filter-tab" onclick="loadOrders('entregado', this)">✔ Entregados</button>
+      <button class="filter-tab" onclick="loadOrders('cancelado', this)">✕ Cancelados</button>
+    </div>
+
+    <div id="ordersContainer"><div class="loading-state"><div class="spinner"></div></div></div>
+
+    <a href="/index.html" class="btn-primary" style="display:inline-flex;margin-top:16px">
+      🛒 Hacer un nuevo pedido
+    </a>
+  </main>
+</div>
+
+<script>
+const API = '/api';
+const token = localStorage.getItem('pedidos_token');
+const user  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
+if (!token) window.location.href = '/cliente/login.html';
+if (user.role && user.role !== 'cliente') window.location.href = `/${user.role}/index.html`;
+
+document.getElementById('sidebarUser').textContent = user.name || 'Cliente';
+
+const statusLabels = {
+  pendiente:'⏳ Pendiente', aceptado:'✅ Aceptado', en_preparacion:'👨‍🍳 En preparación',
+  listo:'📦 Listo', en_camino:'🛵 En camino', entregado:'✔ Entregado', cancelado:'✕ Cancelado'
+};
+const statusBadge = {
+  pendiente:'badge-pending', aceptado:'badge-accepted', en_preparacion:'badge-delivery',
+  listo:'badge-active', en_camino:'badge-delivery', entregado:'badge-done', cancelado:'badge-cancel'
+};
+
+async function loadOrders(status = '', tabBtn = null) {
+  if (tabBtn) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tabBtn.classList.add('active');
+  }
+  const container = document.getElementById('ordersContainer');
+  container.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  try {
+    const qs = status ? `?status=${status}` : '';
+    const res = await fetch(`${API}/orders${qs}`, { headers: { Authorization: `Bearer ${token}` } });
+    const data = await res.json();
+    const orders = data.data?.orders || [];
+    if (!orders.length) { container.innerHTML = '<div class="empty-state"><p>No tienes pedidos aún.</p></div>'; return; }
+    container.innerHTML = orders.map(renderOrder).join('');
+  } catch(e) { container.innerHTML = '<div class="empty-state"><p>Error cargando pedidos.</p></div>'; }
+}
+
+function renderOrder(o) {
+  const items = (o.items || []).map(i => `<div class="order-item-row"><span>${esc(i.product_name)} x${i.quantity}</span>${i.unit_price ? `<span>Q${(i.unit_price*i.quantity).toFixed(2)}</span>` : ''}</div>`).join('');
+  return `
+    <div class="order-card">
+      <div class="order-top">
+        <div>
+          <div class="order-num">${esc(o.order_number)}</div>
+          <div class="order-biz">🏪 ${esc(o.business_name || '')}</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:2px">${new Date(o.created_at).toLocaleString('es-GT')}</div>
+        </div>
+        <span class="badge ${statusBadge[o.status] || 'badge-pending'}">${statusLabels[o.status] || o.status}</span>
+      </div>
+      ${items ? `<div class="order-items">${items}<div class="order-total-row"><span>Total</span><span>Q${parseFloat(o.total).toFixed(2)}</span></div></div>` : ''}
+      ${o.notes ? `<div style="font-size:.85rem;color:var(--muted);margin-top:8px">📝 ${esc(o.notes)}</div>` : ''}
+      ${o.business_response ? `<div class="order-response"><strong>Respuesta del negocio:</strong>${esc(o.business_response)}${o.estimated_time ? ` — ⏱ ~${o.estimated_time} min` : ''}</div>` : ''}
+      <div class="order-actions">
+        ${o.status === 'entregado' ? `<button class="btn-ghost" style="font-size:.85rem;padding:7px 14px" onclick="window.location.href='/index.html'">🔁 Pedir de nuevo</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
+
+loadOrders();
+// Poll every 30s for status updates
+setInterval(() => loadOrders(document.querySelector('.filter-tab.active')?.dataset?.status || ''), 30000);
+</script>
+</body>
+</html>
