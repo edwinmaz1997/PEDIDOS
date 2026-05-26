@@ -215,8 +215,11 @@ class BusinessController {
     public function destroy(int $id): void {
         $user = AuthMiddleware::requireRole(['admin', 'negocio']);
         $this->findOwned($id, $user);
-        $this->db->prepare("UPDATE businesses SET is_active = 0 WHERE id = ?")->execute([$id]);
-        Response::success(null, 'Negocio eliminado');
+        // Hard delete — remove photos, products, then business
+        $this->db->prepare("DELETE FROM business_photos WHERE business_id = ?")->execute([$id]);
+        $this->db->prepare("DELETE FROM products_services WHERE business_id = ?")->execute([$id]);
+        $this->db->prepare("DELETE FROM businesses WHERE id = ?")->execute([$id]);
+        Response::success(null, 'Negocio eliminado correctamente');
     }
 
     // --------------------------------------------------------

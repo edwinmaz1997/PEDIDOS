@@ -153,16 +153,23 @@ try {
             }
             $ctrl     = new AdminController();
             $userCtrl = new UserController();
-            if ($action === 'users' && $id && $subAction === 'toggle') {
-                $userCtrl->adminToggle($id);
+            // /api/admin/users/{id} — subAction holds the id when action is a word
+            $adminUserId = null;
+            if ($action === 'users' && isset($parts[2]) && is_numeric($parts[2])) {
+                $adminUserId = (int)$parts[2];
+            }
+            $adminUserAction = isset($parts[3]) ? $parts[3] : null;
+
+            if ($action === 'users' && $adminUserId && $adminUserAction === 'toggle') {
+                $userCtrl->adminToggle($adminUserId);
                 break;
             }
-            if ($action === 'users' && $id && $method === 'PUT') {
-                $userCtrl->adminUpdate($id, $body);
+            if ($action === 'users' && $adminUserId && $method === 'PUT') {
+                $userCtrl->adminUpdate($adminUserId, $body);
                 break;
             }
-            if ($action === 'users' && $id && $method === 'DELETE') {
-                $userCtrl->adminDelete($id);
+            if ($action === 'users' && $adminUserId && $method === 'DELETE') {
+                $userCtrl->adminDelete($adminUserId);
                 break;
             }
             switch ($action) {
