@@ -1,11 +1,11 @@
 // ============================================================
-// PedidosGT — Shared Utilities
+// NuevaExpress — Shared Utilities
 // ============================================================
 
 const APP = {
   API: '/api',
-  token: () => localStorage.getItem('pedidos_token'),
-  user: () => JSON.parse(localStorage.getItem('pedidos_user') || '{}'),
+  token: () => localStorage.getItem('nuevaexpress_token'),
+  user: () => JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}'),
 
   // Auth headers
   authHeaders: () => ({

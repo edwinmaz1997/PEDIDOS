@@ -1,5 +1,5 @@
 /* ============================================================
-   PedidosGT — Main Stylesheet
+   NuevaExpress — Main Stylesheet
    Font: Syne (headings) + DM Sans (body)
    Theme: Clean white, charcoal, coral accent
    ============================================================ */
@@ -358,4 +358,97 @@ img { max-width: 100%; display: block; }
   .hero { padding: 52px 16px 60px; }
   .biz-card { flex: 0 0 240px; }
   .categories-section { padding: 20px 0; }
+}
+
+/* ============================================================
+   RESPONSIVE IMPROVEMENTS
+   ============================================================ */
+
+/* Mobile navbar */
+@media (max-width: 768px) {
+  .nav-inner { padding: 0 16px; }
+  .nav-right .btn-ghost { display: none; }
+  .hero { padding: 40px 16px 50px; }
+  .hero h1 { font-size: 1.8rem; }
+  .hero p { font-size: .95rem; }
+  .search-bar { padding: 5px 5px 5px 16px; }
+  .search-bar input { font-size: .9rem; }
+}
+
+/* Mobile categories */
+@media (max-width: 480px) {
+  .cat-chip { padding: 8px 14px; font-size: .82rem; }
+  .section-title { font-size: 1.2rem; }
+  .biz-card { flex: 0 0 220px; }
+  .card-photo { height: 150px; }
+}
+
+/* Dashboard sidebar mobile */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed; left: -240px; top: 0; height: 100vh;
+    transition: left .3s ease; z-index: 200;
+    width: 240px;
+  }
+  .sidebar.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,.3); }
+  .main-content { margin-left: 0 !important; padding: 16px; }
+  .mobile-menu-btn {
+    display: flex !important;
+    position: fixed; top: 16px; left: 16px; z-index: 300;
+    background: var(--charcoal); color: white; border: none;
+    border-radius: 8px; width: 40px; height: 40px;
+    align-items: center; justify-content: center;
+    font-size: 1.2rem; cursor: pointer; box-shadow: var(--shadow);
+  }
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.5); z-index: 199;
+  }
+  .sidebar-overlay.open { display: block; }
+  .page-header { margin-top: 48px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .data-table { font-size: .8rem; }
+  .data-table th, .data-table td { padding: 8px 10px; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr !important; }
+  .modal-box { border-radius: 16px 16px 0 0; }
+  .modal-info { padding: 16px; }
+  .modal-header { flex-direction: column; align-items: flex-start; }
+  .modal-actions-top { width: 100%; }
+  .btn-action { flex: 1; text-align: center; justify-content: center; }
+  .order-layout { padding: 0 12px; }
+  .content-grid { padding: 0 12px; }
+}
+
+/* Dashboard tables on mobile */
+@media (max-width: 640px) {
+  .data-table thead { display: none; }
+  .data-table tr { display: block; border-bottom: 2px solid var(--border); padding: 8px 0; }
+  .data-table td { display: flex; justify-content: space-between; border: none; padding: 4px 12px; }
+  .data-table td:before { content: attr(data-label); font-weight: 600; color: var(--muted); font-size: .75rem; }
+}
+
+/* Forms responsive */
+@media (max-width: 600px) {
+  .form-card { padding: 16px; }
+  .auth-card { padding: 24px 20px; }
+  .auth-wrap { padding: 20px 12px; }
+}
+
+/* Order page responsive */
+@media (max-width: 768px) {
+  .order-layout { grid-template-columns: 1fr !important; }
+  .cart-summary { position: static; }
+}
+
+/* Business profile page */
+@media (max-width: 768px) {
+  .biz-hero-content { padding: 16px; }
+  .biz-hero-logo { width: 64px; height: 64px; }
+  .biz-hero-info h1 { font-size: 1.3rem; }
+  .content-grid { grid-template-columns: 1fr !important; }
+  .sticky-order { position: static; }
 }

@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — PedidosGT</title>
+<title>Admin — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 </head>
 <body>
+<button class="mobile-menu-btn" style="display:none" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="dashboard-layout">
   <aside class="sidebar">
     <div class="sidebar-logo">
@@ -48,15 +50,15 @@
 
 <script>
 const API = '/api';
-var adminUser = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
-if (!localStorage.getItem('pedidos_token') || adminUser.role !== 'admin') window.location.href = '/cliente/login.html';
+var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'admin') window.location.href = '/cliente/login.html';
 
 const statusBadge = { pendiente:'badge-pending', aceptado:'badge-accepted', en_preparacion:'badge-delivery', listo:'badge-active', en_camino:'badge-delivery', entregado:'badge-done', cancelado:'badge-cancel' };
 const statusLabels= { pendiente:'Pendiente', aceptado:'Aceptado', en_preparacion:'En prep.', listo:'Listo', en_camino:'En camino', entregado:'Entregado', cancelado:'Cancelado' };
 
 async function loadDashboard() {
   try {
-    const res = await fetch(`${API}/admin/dashboard`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('pedidos_token') } });
+    const res = await fetch(`${API}/admin/dashboard`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
     const data = await res.json();
     if (!data.success) return;
     const s = data.data.stats;

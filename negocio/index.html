@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Negocio — PedidosGT</title>
+<title>Panel Negocio — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
@@ -24,6 +24,8 @@
 </style>
 </head>
 <body>
+<button class="mobile-menu-btn" style="display:none" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="dashboard-layout">
   <aside class="sidebar">
     <div class="sidebar-logo">
@@ -65,9 +67,9 @@
 
 <script>
 const API = '/api';
-const user  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
-var adminUser = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
-if (!localStorage.getItem('pedidos_token') || adminUser.role !== 'negocio') window.location.href = '/cliente/login.html';
+const user  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'negocio') window.location.href = '/cliente/login.html';
 document.getElementById('sidebarUser').textContent = user.name || 'Mi Negocio';
 
 const statusLabels = { pendiente:'⏳ Pendiente', aceptado:'✅ Aceptado', en_preparacion:'👨‍🍳 En preparación', listo:'📦 Listo', en_camino:'🛵 En camino', entregado:'✔ Entregado', cancelado:'✕ Cancelado' };
@@ -81,7 +83,7 @@ async function loadOrders(status, tabBtn) {
   container.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
   try {
     const qs = status ? `?status=${status}` : '';
-    const res = await fetch(`${API}/orders${qs}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('pedidos_token') } });
+    const res = await fetch(`${API}/orders${qs}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
     const data = await res.json();
     const orders = data.data?.orders || [];
     if (!orders.length) { container.innerHTML = '<div class="empty-state"><p>No hay pedidos en esta categoría.</p></div>'; return; }
@@ -135,7 +137,7 @@ async function respond(orderId, action) {
   const estTime  = parseInt(document.getElementById(`time-${orderId}`)?.value) || null;
   try {
     const res = await fetch(`${API}/orders/${orderId}/respond`, {
-      method: 'PUT', headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + localStorage.getItem('pedidos_token') },
+      method: 'PUT', headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
       body: JSON.stringify({ action, response, estimated_time: estTime })
     });
     const data = await res.json();
@@ -147,7 +149,7 @@ async function respond(orderId, action) {
 async function advanceStatus(orderId, status) {
   try {
     const res = await fetch(`${API}/orders/${orderId}/status`, {
-      method:'PUT', headers:{'Content-Type':'application/json', Authorization: 'Bearer ' + localStorage.getItem('pedidos_token')},
+      method:'PUT', headers:{'Content-Type':'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token')},
       body: JSON.stringify({ status })
     });
     const data = await res.json();

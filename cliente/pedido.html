@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hacer Pedido — PedidosGT</title>
+<title>Hacer Pedido — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
@@ -102,7 +102,7 @@
 
 <script>
 const API = '/api';
-if (!localStorage.getItem('pedidos_token')) window.location.href = '/cliente/login.html';
+if (!localStorage.getItem('nuevaexpress_token')) window.location.href = '/cliente/login.html';
 
 const params     = new URLSearchParams(window.location.search);
 const businessId = parseInt(params.get('business')) || 0;
@@ -251,7 +251,7 @@ async function submitOrder() {
   try {
     const res = await fetch(`${API}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('pedidos_token') },
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
       body: JSON.stringify({ business_id: businessId, delivery_type: deliveryType, delivery_address: deliveryAddress, notes, items })
     });
     const data = await res.json();

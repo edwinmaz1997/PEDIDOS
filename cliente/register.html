@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro — PedidosGT</title>
+<title>Registro — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
@@ -28,7 +28,7 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
   <div class="auth-card">
     <div class="auth-logo">Pedidos<span>GT</span></div>
     <h2 style="margin-bottom:4px">Crear cuenta</h2>
-    <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px">Únete gratis a PedidosGT</p>
+    <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px">Únete gratis a NuevaExpress</p>
 
     <div class="role-toggle">
       <button class="role-btn active" onclick="setRole('cliente', this)">👤 Cliente</button>
@@ -84,8 +84,8 @@ async function doRegister() {
     });
     const data = await res.json();
     if (!data.success) { showError(data.message || 'Error al crear cuenta'); return; }
-    localStorage.setItem('pedidos_token', data.data.token);
-    localStorage.setItem('pedidos_user', JSON.stringify(data.data.user));
+    localStorage.setItem('nuevaexpress_token', data.data.token);
+    localStorage.setItem('nuevaexpress_user', JSON.stringify(data.data.user));
     const role = data.data.user.role;
     if (role === 'negocio') window.location.href = '/negocio/index.html';
     else if (role === 'repartidor') window.location.href = '/repartidor/index.html';

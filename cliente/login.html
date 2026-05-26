@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Iniciar Sesión — PedidosGT</title>
+<title>Iniciar Sesión — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
@@ -40,7 +40,7 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
 <div class="auth-wrap">
   <div class="auth-card">
     <div class="auth-logo">Pedidos<span>GT</span></div>
-    <div class="auth-subtitle">Tu marketplace local</div>
+    <div class="auth-subtitle">Tu directorio de negocios local</div>
     <h2>Bienvenido de vuelta</h2>
     <p class="auth-subtitle" style="margin-bottom:20px">Ingresa a tu cuenta para continuar</p>
 
@@ -109,8 +109,8 @@ async function doLogin() {
     if (!data.success) { showError(data.message || 'Credenciales incorrectas'); return; }
 
     // Store token
-    localStorage.setItem('pedidos_token', data.data.token);
-    localStorage.setItem('pedidos_user', JSON.stringify(data.data.user));
+    localStorage.setItem('nuevaexpress_token', data.data.token);
+    localStorage.setItem('nuevaexpress_user', JSON.stringify(data.data.user));
 
     // Redirect by role
     const role = data.data.user.role;

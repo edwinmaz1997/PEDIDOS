@@ -17,6 +17,8 @@
 </style>
 </head>
 <body>
+<button class="mobile-menu-btn" style="display:none" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="dashboard-layout">
   <aside class="sidebar">
     <div class="sidebar-logo">
@@ -89,8 +91,8 @@
 
 <script src="../assets/js/app.js"></script>
 <script>
-var adminUser  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
-if (!localStorage.getItem('pedidos_token') || adminUser.role !== 'cliente') { window.location.href = '/cliente/login.html'; }
+var adminUser  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'cliente') { window.location.href = '/cliente/login.html'; }
 const user = APP.user();
 document.getElementById('sidebarUser').textContent = user.name || '';
 
@@ -134,7 +136,7 @@ async function saveProfile() {
     // Update stored user
     const stored = APP.user();
     stored.name = document.getElementById('f_name').value.trim();
-    localStorage.setItem('pedidos_user', JSON.stringify(stored));
+    localStorage.setItem('nuevaexpress_user', JSON.stringify(stored));
     document.getElementById('profileName').textContent = stored.name;
     document.getElementById('avatarEl').textContent    = (stored.name||'?')[0].toUpperCase();
     document.getElementById('sidebarUser').textContent = stored.name;

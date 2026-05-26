@@ -36,6 +36,8 @@ input:checked + .slider:before { transform:translateX(20px); }
 </style>
 </head>
 <body>
+<button class="mobile-menu-btn" style="display:none" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="dashboard-layout">
   <aside class="sidebar">
     <div class="sidebar-logo">
@@ -109,8 +111,8 @@ input:checked + .slider:before { transform:translateX(20px); }
 
 <script src="../assets/js/app.js"></script>
 <script>
-var adminUser  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
-if (!localStorage.getItem('pedidos_token') || adminUser.role !== 'negocio') { window.location.href = '/cliente/login.html'; }
+var adminUser  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'negocio') { window.location.href = '/cliente/login.html'; }
 document.getElementById('sidebarUser').textContent = APP.user().name || '';
 
 let bizId = null;
