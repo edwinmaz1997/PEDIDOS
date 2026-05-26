@@ -1,3 +1,27 @@
+
+// ── Navbar auth state (runs on every page load) ──────────────
+(function updateNavbar() {
+  var token = localStorage.getItem('nuevaexpress_token');
+  var user  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+  if (!token || !user.name) return;
+
+  var role  = user.role || 'cliente';
+  var panel = {
+    admin:      '/admin/index.html',
+    negocio:    '/negocio/index.html',
+    repartidor: '/repartidor/index.html',
+    cliente:    '/cliente/index.html'
+  }[role] || '/cliente/index.html';
+
+  // Try by id first, then by class
+  var nav = document.getElementById('navRight') || document.querySelector('.nav-right');
+  if (nav) {
+    nav.innerHTML =
+      '<a href="' + panel + '" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">👤 ' + user.name.split(' ')[0] + '</a>' +
+      '<a href="' + panel + '" class="btn-primary" style="padding:7px 14px;font-size:.82rem">Mi panel</a>';
+  }
+})();
+
 // ============================================================
 // NuevaExpress PWA — Install prompt + Push notifications
 // ============================================================
