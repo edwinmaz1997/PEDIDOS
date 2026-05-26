@@ -8,10 +8,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.form-card { background:white;border-radius:var(--radius);border:1px solid var(--border);padding:28px;margin-bottom:20px; }
-.form-card h3 { font-size:1rem;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border); }
-.two-col { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
-@media(max-width:600px){.two-col{grid-template-columns:1fr;}}
+.form-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:28px;margin-bottom:20px}
+.form-card h3{font-size:1rem;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -37,6 +37,7 @@
       <h1 style="font-size:1.4rem">Agregar Negocio</h1>
     </div>
 
+    <!-- Información del negocio -->
     <div class="form-card">
       <h3>Información básica</h3>
       <div class="two-col">
@@ -45,8 +46,12 @@
       </div>
       <div class="form-group"><label>Descripción</label><textarea id="f_description" rows="2" placeholder="Breve descripción..."></textarea></div>
       <div class="form-group"><label>¿Qué ofrecemos?</label><textarea id="f_what_we_offer" rows="2" placeholder="Ceviches, mariscos, comida típica..."></textarea></div>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem">
+        <input type="checkbox" id="f_delivery" style="width:16px;height:16px"> Acepta delivery (Q15.00 tarifa)
+      </label>
     </div>
 
+    <!-- Contacto -->
     <div class="form-card">
       <h3>Contacto</h3>
       <div class="two-col">
@@ -59,6 +64,7 @@
       </div>
     </div>
 
+    <!-- Ubicación -->
     <div class="form-card">
       <h3>Ubicación</h3>
       <div class="form-group"><label>Dirección</label><input type="text" id="f_address" placeholder="5a Avenida 10-50, Zona 1"></div>
@@ -73,17 +79,10 @@
       <div class="form-group"><label>Link Google Maps</label><input type="url" id="f_maps" placeholder="https://maps.google.com/..."></div>
     </div>
 
-    <div class="form-card">
-      <h3>Configuración</h3>
-      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.95rem;margin-bottom:8px">
-        <input type="checkbox" id="f_delivery" style="width:16px;height:16px"> Acepta delivery (Q15.00 tarifa)
-      </label>
-      <p style="font-size:.8rem;color:var(--muted)">La tarifa de servicio es fija en Q5.00 por pedido.</p>
-    </div>
-
+    <!-- Cuenta del propietario -->
     <div class="form-card">
       <h3>Cuenta del propietario</h3>
-      <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">El propietario recibirá estas credenciales para acceder a su panel.</p>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">Se creará una cuenta con rol "negocio" para que el propietario acceda a su panel.</p>
       <div class="two-col">
         <div class="form-group"><label>Nombre *</label><input type="text" id="owner_name" placeholder="Juan García"></div>
         <div class="form-group"><label>Teléfono</label><input type="tel" id="owner_phone" placeholder="+502 5555 1234"></div>
@@ -94,6 +93,8 @@
         <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="owner_password2" placeholder="Repetir contraseña"></div>
       </div>
     </div>
+
+    <div id="errorMsg" style="color:var(--danger);font-size:.9rem;margin-bottom:16px;display:none;background:#fdf0f0;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid #f5c2c2"></div>
 
     <div style="display:flex;gap:12px;align-items:center">
       <button class="btn-primary" onclick="createBusiness()" id="submitBtn" style="padding:13px 32px">Crear negocio</button>
@@ -106,69 +107,120 @@
 <script>
 APP.requireAuth(['admin']);
 
+// Save admin token before anything else
+var adminToken = APP.token();
+
 async function init() {
   const cats = await APP.get('/categories');
-  const sel = document.getElementById('f_category');
-  (cats.data||[]).forEach(c => {
-    const opt = document.createElement('option');
+  const sel  = document.getElementById('f_category');
+  (cats.data || []).forEach(function(c) {
+    var opt = document.createElement('option');
     opt.value = c.id; opt.textContent = c.name;
     sel.appendChild(opt);
   });
 }
 
 async function createBusiness() {
-  const ownerPass  = document.getElementById('owner_password').value;
-  const ownerPass2 = document.getElementById('owner_password2').value;
-  if (ownerPass !== ownerPass2) { APP.toast('Las contraseñas no coinciden', 'error'); return; }
+  var ownerPass  = document.getElementById('owner_password').value;
+  var ownerPass2 = document.getElementById('owner_password2').value;
+  var errEl = document.getElementById('errorMsg');
+  errEl.style.display = 'none';
 
-  const btn = document.getElementById('submitBtn');
+  if (!document.getElementById('f_name').value.trim()) { showError('El nombre del negocio es requerido'); return; }
+  if (!document.getElementById('f_category').value)    { showError('Selecciona una categoría'); return; }
+  if (!document.getElementById('owner_name').value.trim()) { showError('El nombre del propietario es requerido'); return; }
+  if (!document.getElementById('owner_email').value.trim()) { showError('El email del propietario es requerido'); return; }
+  if (!ownerPass) { showError('La contraseña es requerida'); return; }
+  if (ownerPass !== ownerPass2) { showError('Las contraseñas no coinciden'); return; }
+  if (ownerPass.length < 8) { showError('La contraseña debe tener al menos 8 caracteres'); return; }
+
+  var btn = document.getElementById('submitBtn');
   btn.textContent = 'Creando...'; btn.disabled = true;
 
   try {
-    // Step 1: Register owner account
-    const userRes = await fetch('/api/auth/register', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+    // Step 1: Register owner using a direct fetch (not APP.fetch which uses admin token)
+    var userRes = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: document.getElementById('owner_name').value,
-        phone: document.getElementById('owner_phone').value,
-        email: document.getElementById('owner_email').value,
+        name:     document.getElementById('owner_name').value.trim(),
+        phone:    document.getElementById('owner_phone').value.trim(),
+        email:    document.getElementById('owner_email').value.trim(),
         password: ownerPass,
-        role: 'negocio'
+        role:     'negocio'
       })
-    }).then(r => r.json());
+    });
+    var userData = await userRes.json();
 
-    if (!userRes.success) { APP.toast(userRes.message || 'Error al crear usuario', 'error'); return; }
+    if (!userData.success) {
+      showError('Error al crear usuario: ' + (userData.message || 'Error desconocido'));
+      btn.textContent = 'Crear negocio'; btn.disabled = false;
+      return;
+    }
 
-    // Step 2: Create business with admin token
-    const bizRes = await APP.post('/businesses', {
-      category_id: document.getElementById('f_category').value,
-      name: document.getElementById('f_name').value,
-      description: document.getElementById('f_description').value,
-      what_we_offer: document.getElementById('f_what_we_offer').value,
-      phone: document.getElementById('f_phone').value,
-      whatsapp: document.getElementById('f_whatsapp').value,
-      email: document.getElementById('f_email').value,
-      website: document.getElementById('f_website').value,
-      address: document.getElementById('f_address').value,
-      city: document.getElementById('f_city').value,
-      zone: document.getElementById('f_zone').value,
-      latitude: document.getElementById('f_latitude').value || null,
-      longitude: document.getElementById('f_longitude').value || null,
-      google_maps_url: document.getElementById('f_maps').value || null,
+    // Step 2: Create business using ADMIN token (not the new user's token)
+    var bizPayload = {
+      category_id:      document.getElementById('f_category').value,
+      name:             document.getElementById('f_name').value.trim(),
+      description:      document.getElementById('f_description').value,
+      what_we_offer:    document.getElementById('f_what_we_offer').value,
+      phone:            document.getElementById('f_phone').value,
+      whatsapp:         document.getElementById('f_whatsapp').value,
+      email:            document.getElementById('f_email').value,
+      website:          document.getElementById('f_website').value,
+      address:          document.getElementById('f_address').value,
+      city:             document.getElementById('f_city').value,
+      zone:             document.getElementById('f_zone').value,
+      latitude:         document.getElementById('f_latitude').value  || null,
+      longitude:        document.getElementById('f_longitude').value || null,
+      google_maps_url:  document.getElementById('f_maps').value      || null,
       accepts_delivery: document.getElementById('f_delivery').checked ? 1 : 0,
+    };
+
+    var bizRes = await fetch('/api/businesses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + adminToken   // <-- siempre el token admin
+      },
+      body: JSON.stringify(bizPayload)
+    });
+    var bizData = await bizRes.json();
+
+    if (!bizData.success) {
+      showError('Usuario creado pero error al crear negocio: ' + (bizData.message || 'Error'));
+      btn.textContent = 'Crear negocio'; btn.disabled = false;
+      return;
+    }
+
+    // Step 3: Assign the new business to the new user
+    // Update business owner via admin — reassign user_id to the new owner
+    var newUserId = userData.data.user.id;
+    var bizId     = bizData.data.id;
+
+    await fetch('/api/admin/assign-business', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + adminToken
+      },
+      body: JSON.stringify({ business_id: bizId, user_id: newUserId })
     });
 
-    if (bizRes?.success) {
-      APP.toast('¡Negocio creado exitosamente!');
-      setTimeout(() => window.location.href = 'negocios.html', 1200);
-    } else {
-      APP.toast(bizRes?.message || 'Error al crear negocio', 'error');
-    }
+    APP.toast('¡Negocio creado exitosamente!');
+    setTimeout(function() { window.location.href = 'negocios.html'; }, 1200);
+
   } catch(e) {
-    APP.toast('Error de conexión', 'error');
-  } finally {
+    showError('Error de conexión: ' + e.message);
     btn.textContent = 'Crear negocio'; btn.disabled = false;
   }
+}
+
+function showError(msg) {
+  var el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 }
 
 init();

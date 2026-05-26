@@ -38,6 +38,15 @@ class AdminController {
         $orders = $this->db->query("SELECT o.*, b.name as business_name, u.name as client_name FROM orders o JOIN businesses b ON o.business_id=b.id JOIN users u ON o.client_id=u.id ORDER BY o.created_at DESC LIMIT 100")->fetchAll();
         Response::success($orders);
     }
+
+    public function assignBusiness($bizId, $userId) {
+        AuthMiddleware::requireRole('admin');
+        if (!$bizId || !$userId) Response::error('Datos requeridos', 400);
+        $this->db->prepare("UPDATE businesses SET user_id = ? WHERE id = ?")
+                 ->execute([$userId, $bizId]);
+        Response::success(null, 'Negocio asignado al propietario');
+    }
+
 }
 
 // ============================================================

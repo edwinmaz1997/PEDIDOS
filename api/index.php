@@ -146,6 +146,11 @@ try {
 
         // ── ADMIN ────────────────────────────────────────────
         case 'admin':
+            // /admin/assign-business
+            if ($action === 'assign-business' && $method === 'POST') {
+                $ctrl->assignBusiness($body['business_id'] ?? 0, $body['user_id'] ?? 0);
+                break;
+            }
             $ctrl     = new AdminController();
             $userCtrl = new UserController();
             if ($action === 'users' && $id && $subAction === 'toggle') {
