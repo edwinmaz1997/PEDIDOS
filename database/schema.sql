@@ -194,7 +194,7 @@ CREATE TABLE IF NOT EXISTS order_items (
     unit_price DECIMAL(10,2),
     notes TEXT,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products_services(id) ON SET NULL
+    FOREIGN KEY (product_id) REFERENCES products_services(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
@@ -208,7 +208,7 @@ CREATE TABLE IF NOT EXISTS order_status_log (
     changed_by INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (changed_by) REFERENCES users(id) ON SET NULL
+    FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS deliveries (
     delivered_at TIMESTAMP NULL,
     notes TEXT,
     FOREIGN KEY (order_id) REFERENCES orders(id),
-    FOREIGN KEY (repartidor_id) REFERENCES users(id) ON SET NULL,
+    FOREIGN KEY (repartidor_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_repartidor (repartidor_id),
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
