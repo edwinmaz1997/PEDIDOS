@@ -86,8 +86,8 @@ let categories = [];
 let activeCategory = null;
 
 // ─── Init ─────────────────────────────────────────────────
-// Update navbar based on auth state — runs after DOM ready
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Update navbar based on auth state
   var token = localStorage.getItem('nuevaexpress_token');
   var user  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
   var navRight = document.getElementById('navRight');
@@ -98,9 +98,6 @@ document.addEventListener('DOMContentLoaded', function() {
       '<a href="' + panel + '" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">👤 ' + user.name.split(' ')[0] + '</a>' +
       '<a href="' + panel + '" class="btn-primary" style="padding:7px 14px;font-size:.82rem">Mi panel</a>';
   }
-});
-
-document.addEventListener('DOMContentLoaded', async () => {
   await loadCategories();
   await loadAllSections();
 });
