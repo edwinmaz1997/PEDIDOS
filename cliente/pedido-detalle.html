@@ -243,35 +243,73 @@ function renderResponse() {
 }
 
 async function loadMessages() {
-  var res = await fetch('/api/orders/' + orderId + '/messages', {
+  if (isLoadingMsg) return;
+  isLoadingMsg = true;
+  var after = lastMsgId > 0 ? '?after='+lastMsgId : '';
+  try {
+  var res = await fetch('/api/orders/' + orderId + '/messages' + after, {
     headers: { 'Authorization': 'Bearer ' + getToken() }
   }).then(function(r){ return r.json(); });
   if (!res.success) return;
 
   // Update total if changed
-  if (res.data.order && res.data.order.total !== order.total) {
+  if (res.data.order && parseFloat(res.data.order.total) !== parseFloat(order.total)) {
     order = res.data.order;
     renderItems();
   }
 
-  renderMessages(res.data.messages || []);
+  // Append or render messages
+  var msgs = res.data.messages || [];
+  if (lastMsgId === 0) {
+    allMessages = msgs;
+    renderMessages(allMessages);
+    if (msgs.length) lastMsgId = Math.max.apply(null, msgs.map(function(m){ return parseInt(m.id); }));
+  } else if (msgs.length) {
+    var maxId = Math.max.apply(null, msgs.map(function(m){ return parseInt(m.id); }));
+    if (maxId > lastMsgId) {
+      lastMsgId = maxId;
+      allMessages = allMessages.concat(msgs);
+      appendMessages(msgs);
+    }
+  }
+}
+
+var lastMsgId = 0;
+var isLoadingMsg = false;
+var allMessages = [];
+
+function buildMsgHtml(m) {
+  var mine   = m.sender_id == user.id;
+  var system = m.sender_role === 'system' || m.message.startsWith('💰');
+  var cls    = system ? 'system' : (mine ? 'mine' : 'theirs');
+  return '<div class="chat-msg '+cls+'" id="msg-'+m.id+'">' +
+    (!mine && !system ? '<div class="chat-sender">'+esc(m.sender_name)+'</div>' : '') +
+    '<div class="chat-bubble">'+esc(m.message).replace(/
+/g,'<br>')+'</div>' +
+    '<div class="chat-time">'+formatTime(m.created_at)+'</div>' +
+  '</div>';
 }
 
 function renderMessages(messages) {
   var container = document.getElementById('chatMessages');
-  var wasAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
+  if (!messages.length) {
+    container.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.85rem;padding:20px">Sin mensajes aún. ¡Inicia la conversación!</div>';
+    return;
+  }
+  container.innerHTML = messages.map(buildMsgHtml).join('');
+  container.scrollTop = container.scrollHeight;
+}
 
-  container.innerHTML = messages.length ? messages.map(function(m) {
-    var mine   = m.sender_id == user.id;
-    var system = m.sender_role === 'system' || m.message.startsWith('💰');
-    var cls    = system ? 'system' : (mine ? 'mine' : 'theirs');
-    return '<div class="chat-msg ' + cls + '">' +
-      (!mine && !system ? '<div class="chat-sender">' + esc(m.sender_name) + '</div>' : '') +
-      '<div class="chat-bubble">' + esc(m.message) + '</div>' +
-      '<div class="chat-time">' + formatTime(m.created_at) + '</div>' +
-    '</div>';
-  }).join('') : '<div style="text-align:center;color:var(--muted);font-size:.85rem;padding:20px">Sin mensajes aún. ¡Inicia la conversación!</div>';
-
+function appendMessages(messages) {
+  var container = document.getElementById('chatMessages');
+  var wasAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 60;
+  var empty = container.querySelector('div[style*="Sin mensajes"]');
+  if (empty) empty.remove();
+  messages.forEach(function(m) {
+    if (!document.getElementById('msg-'+m.id)) {
+      container.insertAdjacentHTML('beforeend', buildMsgHtml(m));
+    }
+  });
   if (wasAtBottom) container.scrollTop = container.scrollHeight;
 }
 

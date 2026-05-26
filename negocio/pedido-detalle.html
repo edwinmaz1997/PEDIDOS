@@ -334,9 +334,10 @@ async function advanceStatus(status) {
 
 var lastMsgId = 0;
 var isLoadingMsg = false;
+var allMessages = [];
 
 async function loadMessages() {
-  if (isLoadingMsg) return; // prevent overlapping requests
+  if (isLoadingMsg) return;
   isLoadingMsg = true;
   try {
     var url = '/api/orders/'+orderId+'/messages' + (lastMsgId > 0 ? '?after='+lastMsgId : '');
@@ -346,21 +347,27 @@ async function loadMessages() {
     if (!res.success) return;
 
     var messages = res.data.messages || [];
-    
-    // Check if we have new messages
-    if (messages.length > 0) {
-      var maxId = Math.max.apply(null, messages.map(function(m){ return m.id; }));
+
+    if (lastMsgId === 0) {
+      // First load — render all
+      allMessages = messages;
+      renderMessages(allMessages);
+      if (messages.length > 0) {
+        lastMsgId = Math.max.apply(null, messages.map(function(m){ return parseInt(m.id); }));
+      }
+    } else if (messages.length > 0) {
+      // Append only new messages
+      var maxId = Math.max.apply(null, messages.map(function(m){ return parseInt(m.id); }));
       if (maxId > lastMsgId) {
         lastMsgId = maxId;
-        renderMessages(messages);
+        allMessages = allMessages.concat(messages);
+        appendMessages(messages);
         // Update total if changed
-        if (res.data.order && res.data.order.total !== order.total) {
+        if (res.data.order && parseFloat(res.data.order.total) !== parseFloat(order.total)) {
           order = Object.assign(order, res.data.order);
-          renderItems();
+          if (typeof renderItems === 'function') renderItems();
         }
       }
-    } else if (lastMsgId === 0) {
-      renderMessages([]);
     }
   } catch(e) {
   } finally {

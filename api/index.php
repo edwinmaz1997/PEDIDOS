@@ -35,7 +35,14 @@ Security::setSecurityHeaders();
 
 $ip       = Security::getClientIp();
 $endpoint = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-if (!Security::checkRateLimit($ip, $endpoint)) {
+
+// Skip rate limiting for chat polling endpoints
+$skipRateLimit = (
+    strpos($endpoint, '/messages') !== false ||
+    strpos($endpoint, '/notifications') !== false
+);
+
+if (!$skipRateLimit && !Security::checkRateLimit($ip, $endpoint)) {
     Response::error('Demasiadas solicitudes. Intenta de nuevo en un momento.', 429);
 }
 
