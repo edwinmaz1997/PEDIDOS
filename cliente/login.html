@@ -112,12 +112,18 @@ async function doLogin() {
     localStorage.setItem('nuevaexpress_token', data.data.token);
     localStorage.setItem('nuevaexpress_user', JSON.stringify(data.data.user));
 
-    // Redirect by role
+    // Verify it was saved
+    const saved = localStorage.getItem('nuevaexpress_token');
+    if (!saved) { showError('Error al guardar sesión. Intenta de nuevo.'); return; }
+
+    // Redirect by role after short delay to ensure storage is written
     const role = data.data.user.role;
-    if (role === 'admin')       window.location.href = '/admin/index.html';
-    else if (role === 'negocio') window.location.href = '/negocio/index.html';
-    else if (role === 'repartidor') window.location.href = '/repartidor/index.html';
-    else                         window.location.href = '/cliente/index.html';
+    setTimeout(function() {
+      if (role === 'admin')            window.location.href = '/admin/index.html';
+      else if (role === 'negocio')     window.location.href = '/negocio/index.html';
+      else if (role === 'repartidor')  window.location.href = '/repartidor/index.html';
+      else                             window.location.href = '/cliente/index.html';
+    }, 100);
 
   } catch(e) {
     showError('Error de conexión. Intenta de nuevo.');
