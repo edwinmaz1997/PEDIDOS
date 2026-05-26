@@ -444,3 +444,13 @@ img { max-width: 100%; display: block; }
   .logo-text { display: none; }
   .nav-right .btn-ghost { display: none; }
 }
+
+/* ── Navbar fix v2 ───────────────────────────────────────── */
+.logo-text { font-size: 1.1rem; white-space: nowrap; max-width: none !important; overflow: visible !important; text-overflow: unset !important; }
+
+@media (max-width: 480px) {
+  .logo-text { font-size: .95rem; }
+  .logo img { height: 30px; }
+  .nav-right .btn-ghost { display: none !important; }
+  .nav-right .btn-primary { padding: 7px 14px; font-size: .82rem; }
+}
