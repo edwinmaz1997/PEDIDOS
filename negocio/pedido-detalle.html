@@ -337,6 +337,18 @@ var isLoadingMsg = false;
 var allMessages = [];
 
 // ── Chat ──────────────────────────────────────────────────────
+
+function buildMsg(m) {
+  var mine = m.sender_id == user.id;
+  var sys  = m.message.charAt(0) === '💰' || m.message.charAt(0) === '•';
+  var cls  = sys ? 'system' : (mine ? 'mine' : 'theirs');
+  return '<div class="chat-msg '+cls+'" id="cm-'+m.id+'">'+
+    (!mine&&!sys?'<div class="chat-sender">'+esc(m.sender_name)+'</div>':'')+
+    '<div class="chat-bubble">'+esc(m.message).replace(/\n/g,'<br>')+'</div>'+
+    '<div class="chat-time">'+formatTime(m.created_at)+'</div>'+
+  '</div>';
+}
+
 async function loadMessages() {
   try {
     // Always fetch all messages — simple and reliable
