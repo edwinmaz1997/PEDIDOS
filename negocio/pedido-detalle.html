@@ -396,11 +396,16 @@ async function sendMessage() {
   var msg   = input.value.trim();
   if (!msg) return;
   input.value = '';
-  await fetch('/api/orders/'+orderId+'/messages', {
-    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
-    body: JSON.stringify({message: msg})
-  });
-  loadMessages();
+  try {
+    var res = await fetch('/api/orders/'+orderId+'/messages', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+      body: JSON.stringify({message: msg})
+    }).then(function(r){ return r.json(); });
+    if (res.success) {
+      lastMsgId = parseInt(res.data.id) - 1;
+      await loadMessages();
+    }
+  } catch(e) { console.log(e); }
 }
 
 function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }

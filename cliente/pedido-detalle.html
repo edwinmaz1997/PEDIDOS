@@ -257,9 +257,10 @@ async function sendMessage() {
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
       body: JSON.stringify({message:msg})
     }).then(function(r){ return r.json(); });
-    // Reset lastMsgId to force full reload and pick up the new message
     if (res.success) {
-      lastMsgId = 0;
+      // Set lastMsgId to one before new message so loadMessages picks it up
+      var newId = parseInt(res.data.id);
+      lastMsgId = newId - 1;
       await loadMessages();
     }
   } catch(e) { console.log(e); }
