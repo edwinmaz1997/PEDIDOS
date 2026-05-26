@@ -1,11 +1,9 @@
 Options -Indexes
 RewriteEngine On
 
-# Rutar TODO /api/* al backend PHP — incluye subrutas profundas
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^api/.*$ api/index.php [QSA,L]
 
-# SPA fallback para paneles
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(cliente|negocio|admin|repartidor)/(.*)$ /$1/$2 [L]

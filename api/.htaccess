@@ -1,13 +1,3 @@
 Options -Indexes
 RewriteEngine On
-
-# Pasar TODAS las peticiones a index.php independientemente de la profundidad
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [QSA,L]
-
-# Bloquear acceso directo a archivos PHP excepto index.php
-<FilesMatch "^(?!index\.php$).*\.php$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
