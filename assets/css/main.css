@@ -479,3 +479,21 @@ img { max-width: 100%; display: block; }
   .categories-section { padding: 28px 0; }
   .categories-track { justify-content: flex-start; flex-wrap: nowrap; }
 }
+
+/* ── Mobile menu button fix ──────────────────────────────── */
+.mobile-menu-btn {
+  display: none;
+  position: fixed; top: 14px; left: 14px; z-index: 300;
+  background: var(--blue); color: white; border: none;
+  border-radius: 8px; width: 42px; height: 42px;
+  align-items: center; justify-content: center;
+  font-size: 1.3rem; cursor: pointer;
+  box-shadow: 0 2px 12px rgba(74,144,217,.4);
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn { display: flex !important; }
+  .sidebar { left: -260px; transition: left .25s ease; }
+  .sidebar.open { left: 0; }
+  .main-content { margin-left: 0 !important; padding: 70px 16px 24px; }
+}

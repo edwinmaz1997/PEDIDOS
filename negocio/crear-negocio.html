@@ -23,7 +23,7 @@
 </style>
 </head>
 <body>
-<button class="mobile-menu-btn" style="display:none" onclick="toggleSidebar()">☰</button>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="dashboard-layout">
   <aside class="sidebar">
@@ -189,5 +189,15 @@ async function create() {
 
 init();
 </script>
+
+<script>
+function toggleSidebar() {
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  if (sidebar) sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('open');
+}
+</script>
+
 </body>
 </html>
