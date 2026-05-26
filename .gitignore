@@ -17,3 +17,7 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# htaccess managed manually on server
+.htaccess
+api/.htaccess
