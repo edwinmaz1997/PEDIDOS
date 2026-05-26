@@ -132,6 +132,25 @@ setInterval(() => loadOrders(document.querySelector('.filter-tab.active')?.datas
 </script>
 
 <script>
+  // Recover token from URL hash if localStorage is empty
+  (function() {
+    var hash = window.location.hash;
+    if (hash && hash.indexOf('tk=') !== -1) {
+      var parts = hash.substring(1).split('&');
+      var tk = '', us = '';
+      parts.forEach(function(p) {
+        if (p.indexOf('tk=') === 0) tk = p.substring(3);
+        if (p.indexOf('us=') === 0) us = decodeURIComponent(p.substring(3));
+      });
+      if (tk) {
+        localStorage.setItem('nuevaexpress_token', tk);
+        if (us) localStorage.setItem('nuevaexpress_user', us);
+        // Clean URL
+        history.replaceState(null, '', window.location.pathname);
+      }
+    }
+  })();
+
 function toggleSidebar() {
   var sidebar = document.querySelector('.sidebar');
   var overlay = document.getElementById('sidebarOverlay');

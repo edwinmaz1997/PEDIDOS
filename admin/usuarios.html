@@ -69,6 +69,25 @@
 
 <script src="../assets/js/app.js"></script>
 <script>
+  // Recover token from URL hash if localStorage is empty
+  (function() {
+    var hash = window.location.hash;
+    if (hash && hash.indexOf('tk=') !== -1) {
+      var parts = hash.substring(1).split('&');
+      var tk = '', us = '';
+      parts.forEach(function(p) {
+        if (p.indexOf('tk=') === 0) tk = p.substring(3);
+        if (p.indexOf('us=') === 0) us = decodeURIComponent(p.substring(3));
+      });
+      if (tk) {
+        localStorage.setItem('nuevaexpress_token', tk);
+        if (us) localStorage.setItem('nuevaexpress_user', us);
+        // Clean URL
+        history.replaceState(null, '', window.location.pathname);
+      }
+    }
+  })();
+
 var adminUser  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
 if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'admin') { window.location.href = '/cliente/login.html'; }
 let allUsers = [];
