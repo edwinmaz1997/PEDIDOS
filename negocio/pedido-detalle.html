@@ -344,7 +344,7 @@ async function loadMessages() {
     var res = await fetch(url, {
       headers:{'Authorization':'Bearer '+getToken()}
     }).then(function(r){ return r.json(); });
-    if (!res.success) return;
+    if (!res.success) { isLoadingMsg = false; return; }
 
     var messages = res.data.messages || [];
 

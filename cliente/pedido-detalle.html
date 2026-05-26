@@ -245,32 +245,35 @@ function renderResponse() {
 async function loadMessages() {
   if (isLoadingMsg) return;
   isLoadingMsg = true;
-  var after = lastMsgId > 0 ? '?after='+lastMsgId : '';
   try {
-  var res = await fetch('/api/orders/' + orderId + '/messages' + after, {
-    headers: { 'Authorization': 'Bearer ' + getToken() }
-  }).then(function(r){ return r.json(); });
-  if (!res.success) return;
+    var after = lastMsgId > 0 ? '?after='+lastMsgId : '';
+    var res = await fetch('/api/orders/' + orderId + '/messages' + after, {
+      headers: { 'Authorization': 'Bearer ' + getToken() }
+    }).then(function(r){ return r.json(); });
+    if (!res.success) { isLoadingMsg = false; return; }
 
-  // Update total if changed
-  if (res.data.order && parseFloat(res.data.order.total) !== parseFloat(order.total)) {
-    order = res.data.order;
-    renderItems();
-  }
-
-  // Append or render messages
-  var msgs = res.data.messages || [];
-  if (lastMsgId === 0) {
-    allMessages = msgs;
-    renderMessages(allMessages);
-    if (msgs.length) lastMsgId = Math.max.apply(null, msgs.map(function(m){ return parseInt(m.id); }));
-  } else if (msgs.length) {
-    var maxId = Math.max.apply(null, msgs.map(function(m){ return parseInt(m.id); }));
-    if (maxId > lastMsgId) {
-      lastMsgId = maxId;
-      allMessages = allMessages.concat(msgs);
-      appendMessages(msgs);
+    if (res.data.order && parseFloat(res.data.order.total) !== parseFloat(order.total)) {
+      order = res.data.order;
+      renderItems();
     }
+
+    var msgs = res.data.messages || [];
+    if (lastMsgId === 0) {
+      allMessages = msgs;
+      renderMessages(allMessages);
+      if (msgs.length) lastMsgId = Math.max.apply(null, msgs.map(function(m){ return parseInt(m.id); }));
+    } else if (msgs.length) {
+      var maxId = Math.max.apply(null, msgs.map(function(m){ return parseInt(m.id); }));
+      if (maxId > lastMsgId) {
+        lastMsgId = maxId;
+        allMessages = allMessages.concat(msgs);
+        appendMessages(msgs);
+      }
+    }
+  } catch(e) {
+    console.log('Chat error:', e);
+  } finally {
+    isLoadingMsg = false;
   }
 }
 
