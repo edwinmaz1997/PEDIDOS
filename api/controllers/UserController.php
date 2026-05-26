@@ -69,4 +69,50 @@ class UserController {
         if (!$newStatus) $this->db->prepare("DELETE FROM user_sessions WHERE user_id = ?")->execute([$id]);
         Response::success(['is_active' => $newStatus], $newStatus ? 'Usuario activado' : 'Usuario desactivado');
     }
+
+    // PUT /api/admin/users/{id}
+    public function adminUpdate($id, $body) {
+        AuthMiddleware::requireRole('admin');
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        if (!$stmt->fetch()) Response::notFound('Usuario no encontrado');
+
+        $sets = []; $params = [];
+
+        if (!empty($body['name']))    { $sets[] = 'name = ?';     $params[] = Security::sanitize($body['name']); }
+        if (isset($body['phone']))    { $sets[] = 'phone = ?';    $params[] = Security::sanitize($body['phone']); }
+        if (isset($body['role_id']))  { $sets[] = 'role_id = ?';  $params[] = (int)$body['role_id']; }
+        if (isset($body['is_active'])){ $sets[] = 'is_active = ?'; $params[] = (int)$body['is_active']; }
+        if (!empty($body['password'])) {
+            $sets[]   = 'password_hash = ?';
+            $params[] = Security::hashPassword($body['password']);
+        }
+
+        if (!$sets) Response::error('Sin datos para actualizar', 400);
+        $params[] = $id;
+        $this->db->prepare("UPDATE users SET " . implode(', ', $sets) . " WHERE id = ?")->execute($params);
+
+        // If deactivated, kill sessions
+        if (isset($body['is_active']) && !$body['is_active']) {
+            $this->db->prepare("DELETE FROM user_sessions WHERE user_id = ?")->execute([$id]);
+        }
+
+        Response::success(null, 'Usuario actualizado');
+    }
+
+    // DELETE /api/admin/users/{id}
+    public function adminDelete($id) {
+        AuthMiddleware::requireRole('admin');
+        $me = AuthMiddleware::authenticate();
+        if ($me['id'] == $id) Response::error('No puedes eliminar tu propia cuenta', 400);
+
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        if (!$stmt->fetch()) Response::notFound('Usuario no encontrado');
+
+        $this->db->prepare("DELETE FROM user_sessions WHERE user_id = ?")->execute([$id]);
+        $this->db->prepare("DELETE FROM users WHERE id = ?")->execute([$id]);
+        Response::success(null, 'Usuario eliminado');
+    }
+
 }

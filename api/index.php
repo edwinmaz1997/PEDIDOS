@@ -157,6 +157,14 @@ try {
                 $userCtrl->adminToggle($id);
                 break;
             }
+            if ($action === 'users' && $id && $method === 'PUT') {
+                $userCtrl->adminUpdate($id, $body);
+                break;
+            }
+            if ($action === 'users' && $id && $method === 'DELETE') {
+                $userCtrl->adminDelete($id);
+                break;
+            }
             switch ($action) {
                 case 'dashboard':  $ctrl->dashboard();  break;
                 case 'users':      $ctrl->users();       break;

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editar Usuario — Admin NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.form-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:28px;margin-bottom:20px}
+.form-card h3{font-size:1rem;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}}
+.avatar{width:72px;height:72px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:white;font-family:'Syne',sans-serif;font-weight:700}
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Administrador</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="negocios.html">🏪 Negocios</a></li>
+      <li><a href="usuarios.html" class="active">👥 Usuarios</a></li>
+      <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <a href="usuarios.html" style="color:var(--muted);text-decoration:none;font-size:.9rem">← Usuarios</a>
+      <span style="color:var(--border)">/</span>
+      <h1 style="font-size:1.4rem" id="pageTitle">Editar Usuario</h1>
+    </div>
+
+    <div id="loadingState" class="loading-state"><div class="spinner"></div></div>
+    <div id="formContent" style="display:none">
+
+      <div style="display:flex;gap:16px;align-items:center;background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px;margin-bottom:20px">
+        <div class="avatar" id="avatarEl">?</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem" id="headerName">—</div>
+          <div style="color:var(--muted);font-size:.85rem" id="headerEmail">—</div>
+          <div style="margin-top:6px"><span class="badge" id="headerBadge"></span></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3>Información personal</h3>
+        <div class="two-col">
+          <div class="form-group"><label>Nombre completo *</label><input type="text" id="f_name" placeholder="Nombre"></div>
+          <div class="form-group"><label>Teléfono</label><input type="tel" id="f_phone" placeholder="+502 5555 5555"></div>
+        </div>
+        <div class="form-group"><label>Correo electrónico</label><input type="email" id="f_email" disabled style="background:var(--off-white);color:var(--muted);cursor:not-allowed"><div style="font-size:.78rem;color:var(--muted);margin-top:4px">El email no se puede cambiar.</div></div>
+        <div class="form-group">
+          <label>Rol</label>
+          <select id="f_role">
+            <option value="1">👑 Administrador</option>
+            <option value="2">🏪 Negocio</option>
+            <option value="3">👤 Cliente</option>
+            <option value="4">🛵 Repartidor</option>
+          </select>
+        </div>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem">
+          <input type="checkbox" id="f_active" style="width:16px;height:16px"> Cuenta activa
+        </label>
+      </div>
+
+      <div class="form-card">
+        <h3>🔒 Cambiar contraseña <span style="font-weight:400;color:var(--muted);font-size:.85rem">(dejar vacío para no cambiar)</span></h3>
+        <div class="two-col">
+          <div class="form-group"><label>Nueva contraseña</label><input type="password" id="f_password" placeholder="Mínimo 8 caracteres"></div>
+          <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="f_password2" placeholder="Repetir"></div>
+        </div>
+      </div>
+
+      <div id="errorMsg" style="color:var(--danger);font-size:.9rem;margin-bottom:16px;display:none;background:#fdf0f0;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid #f5c2c2"></div>
+
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <button class="btn-primary" onclick="saveChanges()" id="saveBtn" style="padding:13px 32px">💾 Guardar cambios</button>
+        <a href="usuarios.html" class="btn-ghost" style="padding:13px 20px">Cancelar</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+  (function() {
+    var hash = window.location.hash;
+    if (hash && hash.indexOf('tk=') !== -1) {
+      var parts = hash.substring(1).split('&');
+      var tk = '', us = '';
+      parts.forEach(function(p) {
+        if (p.indexOf('tk=') === 0) tk = p.substring(3);
+        if (p.indexOf('us=') === 0) us = decodeURIComponent(p.substring(3));
+      });
+      if (tk) {
+        localStorage.setItem('nuevaexpress_token', tk);
+        if (us) localStorage.setItem('nuevaexpress_user', us);
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    }
+  })();
+
+var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'admin') {
+  window.location.href = '/cliente/login.html';
+}
+
+function getToken() { return localStorage.getItem('nuevaexpress_token'); }
+
+var userId = new URLSearchParams(window.location.search).get('id');
+if (!userId) window.location.href = 'usuarios.html';
+
+var roleBadge = { admin:'badge-cancel', negocio:'badge-delivery', cliente:'badge-accepted', repartidor:'badge-active' };
+var roleLabel = { admin:'👑 Admin', negocio:'🏪 Negocio', cliente:'👤 Cliente', repartidor:'🛵 Repartidor' };
+var roleIdMap  = { admin:1, negocio:2, cliente:3, repartidor:4 };
+
+async function init() {
+  var res = await fetch('/api/admin/users', {
+    headers: { 'Authorization': 'Bearer ' + getToken() }
+  }).then(function(r){ return r.json(); });
+
+  if (!res.success) { alert('Error cargando usuarios'); return; }
+  var user = (res.data || []).find(function(u) { return u.id == userId; });
+  if (!user) { alert('Usuario no encontrado'); window.location.href = 'usuarios.html'; return; }
+
+  document.getElementById('pageTitle').textContent  = 'Editar: ' + user.name;
+  document.getElementById('avatarEl').textContent   = (user.name||'?')[0].toUpperCase();
+  document.getElementById('headerName').textContent  = user.name;
+  document.getElementById('headerEmail').textContent = user.email;
+  var badge = document.getElementById('headerBadge');
+  badge.textContent  = roleLabel[user.role] || user.role;
+  badge.className    = 'badge ' + (roleBadge[user.role] || '');
+
+  document.getElementById('f_name').value    = user.name || '';
+  document.getElementById('f_phone').value   = user.phone || '';
+  document.getElementById('f_email').value   = user.email || '';
+  document.getElementById('f_role').value    = roleIdMap[user.role] || 3;
+  document.getElementById('f_active').checked = !!user.is_active;
+
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('formContent').style.display  = 'block';
+}
+
+async function saveChanges() {
+  var btn = document.getElementById('saveBtn');
+  var name     = document.getElementById('f_name').value.trim();
+  var phone    = document.getElementById('f_phone').value.trim();
+  var role_id  = document.getElementById('f_role').value;
+  var is_active = document.getElementById('f_active').checked ? 1 : 0;
+  var password  = document.getElementById('f_password').value;
+  var password2 = document.getElementById('f_password2').value;
+
+  if (!name) { showError('El nombre es requerido'); return; }
+  if (password && password.length < 8) { showError('La contraseña debe tener al menos 8 caracteres'); return; }
+  if (password && password !== password2) { showError('Las contraseñas no coinciden'); return; }
+
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+
+  var payload = { name: name, phone: phone, role_id: parseInt(role_id), is_active: is_active };
+  if (password) payload.password = password;
+
+  var res = await fetch('/api/admin/users/' + userId, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+    body: JSON.stringify(payload)
+  }).then(function(r){ return r.json(); });
+
+  if (res.success) {
+    APP.toast('¡Usuario actualizado!');
+    setTimeout(function() { window.location.href = 'usuarios.html'; }, 1000);
+  } else {
+    showError(res.message || 'Error al guardar');
+    btn.textContent = '💾 Guardar cambios'; btn.disabled = false;
+  }
+}
+
+function showError(msg) {
+  var el = document.getElementById('errorMsg');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
+function toggleSidebar() {
+  var s = document.querySelector('.sidebar');
+  var o = document.getElementById('sidebarOverlay');
+  if(s) s.classList.toggle('open');
+  if(o) o.classList.toggle('open');
+}
+
+init();
+</script>
+</body>
+</html>

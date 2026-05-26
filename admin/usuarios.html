@@ -129,18 +129,39 @@ function renderTable(list) {
       <td><span class="badge ${u.is_active?'badge-done':'badge-cancel'}">${u.is_active?'Activo':'Inactivo'}</span></td>
       <td>
         <div style="display:flex;gap:6px">
+          <button onclick="editUser(${u.id})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem" title="Editar">✏️</button>
           <button onclick="toggleStatus(${u.id}, ${u.is_active})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem" title="${u.is_active?'Desactivar':'Activar'}">
             ${u.is_active ? '⏸' : '▶'}
           </button>
+          <button onclick="deleteUser(${u.id}, '${u.name.replace(/'/g,'')}')" style="background:none;border:1px solid #f5c2c2;color:var(--danger);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem" title="Eliminar">🗑️</button>
         </div>
       </td>
     </tr>
   `).join('');
 }
 
+function editUser(id) {
+  window.location.href = 'editar-usuario.html?id=' + id;
+}
+
 async function toggleStatus(id, current) {
-  // Direct DB action — needs endpoint extension; for now use businesses workaround
-  APP.toast('Función disponible vía base de datos directa', 'info');
+  var res = await fetch('/api/admin/users/' + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
+    body: JSON.stringify({ is_active: current ? 0 : 1 })
+  }).then(function(r){ return r.json(); });
+  if (res.success) { APP.toast(current ? 'Usuario desactivado' : 'Usuario activado'); init(); }
+  else APP.toast(res.message || 'Error', 'error');
+}
+
+async function deleteUser(id, name) {
+  if (!confirm('¿Eliminar al usuario "' + name + '"? Esta acción no se puede deshacer.')) return;
+  var res = await fetch('/api/admin/users/' + id, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nuevaexpress_token') }
+  }).then(function(r){ return r.json(); });
+  if (res.success) { APP.toast('Usuario eliminado'); init(); }
+  else APP.toast(res.message || 'Error', 'error');
 }
 
 init();
