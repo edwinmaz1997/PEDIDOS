@@ -428,3 +428,19 @@ img { max-width: 100%; display: block; }
   .cart-summary { position: static; }
   .content-grid { grid-template-columns: 1fr !important; padding: 0 12px; }
 }
+
+/* ── Navbar logo + buttons fix ───────────────────────────── */
+.logo img { height: 34px; border-radius: 7px; flex-shrink: 0; }
+.logo-text { font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+
+@media (max-width: 480px) {
+  .logo-text { max-width: 90px; font-size: .95rem; }
+  .nav-right .btn-primary { padding: 6px 12px; font-size: .78rem; }
+  .nav-right .btn-ghost { padding: 6px 10px; font-size: .78rem; }
+  .logo img { height: 30px; }
+}
+
+@media (max-width: 360px) {
+  .logo-text { display: none; }
+  .nav-right .btn-ghost { display: none; }
+}
