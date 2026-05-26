@@ -454,3 +454,28 @@ img { max-width: 100%; display: block; }
   .nav-right .btn-ghost { display: none !important; }
   .nav-right .btn-primary { padding: 7px 14px; font-size: .82rem; }
 }
+
+/* ── Categories section spacing fix ─────────────────────── */
+.categories-section {
+  padding: 40px 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+}
+
+.categories-section h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.categories-track {
+  justify-content: center;
+  flex-wrap: wrap;
+  overflow-x: auto;
+  gap: 12px;
+  padding: 4px 24px 8px;
+}
+
+@media (max-width: 768px) {
+  .categories-section { padding: 28px 0; }
+  .categories-track { justify-content: flex-start; flex-wrap: nowrap; }
+}
