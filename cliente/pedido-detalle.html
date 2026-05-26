@@ -2,36 +2,31 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#4A90D9">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="NuevaExpress">
-<link rel="apple-touch-icon" href="/assets/img/logo.jpg">
 <link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Detalle de Pedido — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
 <style>
-.order-detail-grid { display:grid; grid-template-columns:1fr 360px; gap:20px; }
-@media(max-width:768px){ .order-detail-grid { grid-template-columns:1fr; } }
-.detail-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:20px; margin-bottom:16px; }
-.detail-card h3 { font-size:1rem; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); }
-.status-timeline { display:flex; flex-direction:column; gap:0; }
-.timeline-item { display:flex; gap:14px; padding-bottom:16px; position:relative; }
-.timeline-item:last-child { padding-bottom:0; }
-.timeline-dot { width:12px; height:12px; border-radius:50%; background:var(--border); flex-shrink:0; margin-top:4px; position:relative; z-index:1; }
-.timeline-dot.done { background:var(--green); }
-.timeline-dot.current { background:var(--blue); box-shadow:0 0 0 3px rgba(74,144,217,.2); }
-.timeline-line { position:absolute; left:5px; top:16px; bottom:0; width:2px; background:var(--border); }
-.timeline-line.done { background:var(--green); }
-.item-row { display:flex; justify-content:space-between; font-size:.9rem; padding:6px 0; border-bottom:1px solid var(--border); }
-.item-row:last-child { border-bottom:none; }
-.fee-row { display:flex; justify-content:space-between; font-size:.85rem; color:var(--muted); margin-bottom:6px; }
-.total-final { display:flex; justify-content:space-between; font-weight:700; font-size:1.1rem; border-top:1px solid var(--border); padding-top:10px; margin-top:6px; }
+.order-detail-grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+@media(max-width:768px){.order-detail-grid{grid-template-columns:1fr}}
+.detail-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:16px}
+.detail-card h3{font-size:1rem;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.status-timeline{display:flex;flex-direction:column;gap:0}
+.timeline-item{display:flex;gap:14px;padding-bottom:16px;position:relative}
+.timeline-item:last-child{padding-bottom:0}
+.timeline-dot{width:12px;height:12px;border-radius:50%;background:var(--border);flex-shrink:0;margin-top:4px;position:relative;z-index:1}
+.timeline-dot.done{background:var(--green)}
+.timeline-dot.current{background:var(--blue);box-shadow:0 0 0 3px rgba(74,144,217,.2)}
+.timeline-line{position:absolute;left:5px;top:16px;bottom:0;width:2px;background:var(--border)}
+.timeline-line.done{background:var(--green)}
+.item-row{display:flex;justify-content:space-between;font-size:.9rem;padding:8px 0;border-bottom:1px solid var(--border)}
+.item-row:last-child{border-bottom:none}
+.fee-row{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:6px}
+.total-final{display:flex;justify-content:space-between;font-weight:700;font-size:1.1rem;border-top:1px solid var(--border);padding-top:10px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -48,27 +43,20 @@
       <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
     </ul>
   </aside>
-
   <main class="main-content">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
       <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:.9rem">← Mis Pedidos</a>
       <span style="color:var(--border)">/</span>
       <h1 style="font-size:1.4rem" id="pageTitle">Pedido</h1>
     </div>
-
     <div id="loadingState" class="loading-state"><div class="spinner"></div></div>
     <div id="content" style="display:none">
       <div class="order-detail-grid">
-
-        <!-- Left -->
         <div>
-          <!-- Status -->
           <div class="detail-card">
             <h3>Estado del pedido</h3>
             <div class="status-timeline" id="statusTimeline"></div>
           </div>
-
-          <!-- Items -->
           <div class="detail-card">
             <h3>Productos</h3>
             <div id="itemsList"></div>
@@ -79,29 +67,22 @@
               <div class="total-final"><span>Total</span><span id="totalVal" style="color:var(--blue)">—</span></div>
             </div>
           </div>
-
-          <!-- Business response -->
           <div class="detail-card" id="responseCard" style="display:none">
             <h3>Respuesta del negocio</h3>
             <p id="bizResponse" style="color:var(--muted);font-size:.9rem;line-height:1.7"></p>
             <div id="estimatedTime" style="margin-top:8px;font-size:.85rem;color:var(--blue)"></div>
           </div>
         </div>
-
-        <!-- Right -->
         <div>
-          <!-- Business info -->
           <div class="detail-card">
             <h3>Negocio</h3>
             <div id="bizInfo"></div>
           </div>
-
-          <!-- Chat -->
           <div class="detail-card">
             <h3>💬 Chat con el negocio</h3>
             <div class="chat-wrap">
               <div class="chat-messages" id="chatMessages">
-                <div class="loading-state" style="padding:20px"><div class="spinner"></div></div>
+                <div style="text-align:center;padding:20px"><div class="spinner" style="margin:0 auto"></div></div>
               </div>
               <div class="chat-input-wrap">
                 <textarea class="chat-input" id="chatInput" placeholder="Escribe un mensaje..." rows="1" onkeydown="handleKey(event)"></textarea>
@@ -114,69 +95,56 @@
     </div>
   </main>
 </div>
-
 <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <script src="../assets/js/app.js"></script>
+<script src="/assets/js/pwa.js"></script>
 <script>
-(function() {
-  var hash = window.location.hash;
-  if (hash && hash.indexOf('tk=') !== -1) {
-    var parts = hash.substring(1).split('&');
-    var tk = '', us = '';
-    parts.forEach(function(p) {
-      if (p.indexOf('tk=') === 0) tk = p.substring(3);
-      if (p.indexOf('us=') === 0) us = decodeURIComponent(p.substring(3));
-    });
-    if (tk) {
-      localStorage.setItem('nuevaexpress_token', tk);
-      if (us) localStorage.setItem('nuevaexpress_user', us);
-      history.replaceState(null, '', window.location.pathname + window.location.search);
-    }
-  }
-})();
+(function(){var h=window.location.hash;if(h&&h.indexOf('tk=')!==-1){var p=h.substring(1).split('&'),tk='',us='';p.forEach(function(x){if(x.indexOf('tk=')===0)tk=x.substring(3);if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname+window.location.search);}}})();
 
-var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+var user = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
 if (!localStorage.getItem('nuevaexpress_token')) window.location.href = '/cliente/login.html';
 document.getElementById('sidebarUser').textContent = user.name || '';
 
-function getToken() { return localStorage.getItem('nuevaexpress_token'); }
+function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
 
 var orderId = new URLSearchParams(window.location.search).get('id');
 if (!orderId) window.location.href = 'index.html';
 
 var order = null;
 var pollInterval = null;
+var lastMsgId = 0;
 
 var statusSteps = [
-  { key:'pendiente',      label:'Pedido enviado',       icon:'📤' },
-  { key:'aceptado',       label:'Aceptado por el negocio', icon:'✅' },
-  { key:'en_preparacion', label:'En preparación',       icon:'👨‍🍳' },
-  { key:'listo',          label:'Listo para recoger',   icon:'📦' },
-  { key:'en_camino',      label:'En camino',            icon:'🛵' },
-  { key:'entregado',      label:'Entregado',            icon:'✔' },
+  {key:'pendiente',label:'Pedido enviado',icon:'📤'},
+  {key:'aceptado',label:'Aceptado por el negocio',icon:'✅'},
+  {key:'en_preparacion',label:'En preparación',icon:'👨‍🍳'},
+  {key:'listo',label:'Listo para recoger',icon:'📦'},
+  {key:'en_camino',label:'En camino',icon:'🛵'},
+  {key:'entregado',label:'Entregado',icon:'✔'},
 ];
 
 async function init() {
-  var res = await fetch('/api/orders/' + orderId, {
-    headers: { 'Authorization': 'Bearer ' + getToken() }
-  }).then(function(r){ return r.json(); });
-
-  if (!res.success) { window.location.href = 'index.html'; return; }
-  order = res.data;
-
-  document.getElementById('pageTitle').textContent = order.order_number;
-  renderStatus();
-  renderItems();
-  renderBizInfo();
-  if (order.business_response) renderResponse();
-
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('content').style.display = 'block';
-
-  loadMessages();
-  pollInterval = setInterval(loadMessages, 2000);
+  try {
+    var res = await fetch('/api/orders/' + orderId, {
+      headers: { 'Authorization': 'Bearer ' + getToken() }
+    }).then(function(r){ return r.json(); });
+    if (!res.success) { window.location.href = 'index.html'; return; }
+    order = res.data;
+    document.getElementById('pageTitle').textContent = order.order_number;
+    renderStatus();
+    renderItems();
+    renderBizInfo();
+    if (order.business_response) renderResponse();
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+    loadMessages();
+    pollInterval = setInterval(loadMessages, 3000);
+  } catch(e) {
+    console.error('init error:', e);
+    document.getElementById('loadingState').innerHTML = '<p style="color:var(--danger)">Error cargando pedido.</p>';
+  }
 }
 
 function renderStatus() {
@@ -186,187 +154,137 @@ function renderStatus() {
     return;
   }
   document.getElementById('statusTimeline').innerHTML = statusSteps.map(function(s, i) {
-    var done    = i < currentIdx;
-    var current = i === currentIdx;
-    var cls     = done ? 'done' : (current ? 'current' : '');
+    var done = i < currentIdx, current = i === currentIdx;
     return '<div class="timeline-item">' +
-      (i < statusSteps.length-1 ? '<div class="timeline-line ' + (done?'done':'') + '"></div>' : '') +
-      '<div class="timeline-dot ' + cls + '"></div>' +
-      '<div>' +
-        '<div style="font-weight:600;font-size:.9rem;color:' + (current?'var(--blue)':(done?'var(--ink)':'var(--muted)')) + '">' + s.icon + ' ' + s.label + '</div>' +
-      '</div>' +
+      (i < statusSteps.length-1 ? '<div class="timeline-line '+(done?'done':'')+'"></div>' : '') +
+      '<div class="timeline-dot '+(done?'done':current?'current':'')+'"></div>' +
+      '<div style="font-weight:600;font-size:.9rem;color:'+(current?'var(--blue)':done?'var(--ink)':'var(--muted)')+'">'+s.icon+' '+s.label+'</div>' +
     '</div>';
   }).join('');
 }
 
 function renderItems() {
   var items = order.items || [];
-  var itemsHtml = items.map(function(i) {
-    var lineTotal = i.unit_price ? parseFloat(i.unit_price) * i.quantity : null;
-    return '<div class="item-row">' +
-      '<div>' +
-        '<div style="font-weight:500">' + esc(i.product_name) + ' <span style="color:var(--muted)">×' + i.quantity + '</span></div>' +
-        (i.unit_price ? '<div style="font-size:.78rem;color:var(--muted)">Q' + parseFloat(i.unit_price).toFixed(2) + ' c/u</div>' : '<div style="font-size:.78rem;color:var(--muted)">Precio pendiente</div>') +
-      '</div>' +
-      (lineTotal ? '<span style="font-weight:700;color:var(--blue)">Q' + lineTotal.toFixed(2) + '</span>' : '<span style="color:var(--muted);font-size:.82rem">—</span>') +
-    '</div>';
+  document.getElementById('itemsList').innerHTML = items.map(function(i) {
+    var lt = i.unit_price ? parseFloat(i.unit_price)*i.quantity : null;
+    return '<div class="item-row"><div><div style="font-weight:500">'+esc(i.product_name)+' <span style="color:var(--muted)">×'+i.quantity+'</span></div>'+(i.unit_price?'<div style="font-size:.78rem;color:var(--muted)">Q'+parseFloat(i.unit_price).toFixed(2)+' c/u</div>':'<div style="font-size:.78rem;color:var(--muted)">Precio pendiente</div>')+'</div>'+(lt?'<span style="font-weight:700;color:var(--blue)">Q'+lt.toFixed(2)+'</span>':'<span style="color:var(--muted)">—</span>')+'</div>';
   }).join('') || '<p style="color:var(--muted);font-size:.9rem">Sin productos listados</p>';
-
-  if (order.notes) itemsHtml += '<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);margin-top:8px;font-size:.85rem;color:var(--muted)">📝 ' + esc(order.notes) + '</div>';
-  document.getElementById('itemsList').innerHTML = itemsHtml;
-
-  document.getElementById('subtotalVal').textContent   = 'Q' + parseFloat(order.subtotal||0).toFixed(2);
-  document.getElementById('serviceFeeVal').textContent = 'Q' + parseFloat(order.service_fee||0).toFixed(2);
-  document.getElementById('totalVal').textContent      = 'Q' + parseFloat(order.total||0).toFixed(2);
-
-  if (parseFloat(order.delivery_fee) > 0) {
-    document.getElementById('deliveryFeeRow').style.display = 'flex';
-    document.getElementById('deliveryFeeVal').textContent = 'Q' + parseFloat(order.delivery_fee).toFixed(2);
+  if (order.notes) document.getElementById('itemsList').innerHTML += '<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);margin-top:8px;font-size:.85rem;color:var(--muted)">📝 '+esc(order.notes)+'</div>';
+  document.getElementById('subtotalVal').textContent = 'Q'+parseFloat(order.subtotal||0).toFixed(2);
+  document.getElementById('serviceFeeVal').textContent = 'Q'+parseFloat(order.service_fee||0).toFixed(2);
+  document.getElementById('totalVal').textContent = 'Q'+parseFloat(order.total||0).toFixed(2);
+  if (parseFloat(order.delivery_fee)>0) {
+    document.getElementById('deliveryFeeRow').style.display='flex';
+    document.getElementById('deliveryFeeVal').textContent='Q'+parseFloat(order.delivery_fee).toFixed(2);
   }
 }
 
 function renderBizInfo() {
   document.getElementById('bizInfo').innerHTML =
-    '<div style="font-weight:600;margin-bottom:4px">' + esc(order.business_name||'') + '</div>' +
-    (order.delivery_type === 'delivery' ?
-      '<div style="font-size:.85rem;color:var(--muted)">🛵 Delivery a: ' + esc(order.delivery_address||'') + '</div>' :
-      '<div style="font-size:.85rem;color:var(--muted)">🏃 Recoger en negocio</div>') +
-    '<div style="font-size:.8rem;color:var(--muted);margin-top:4px">' + new Date(order.created_at).toLocaleString('es-GT') + '</div>';
+    '<div style="font-weight:600;margin-bottom:4px">'+esc(order.business_name||'')+'</div>'+
+    (order.delivery_type==='delivery'?'<div style="font-size:.85rem;color:var(--muted)">🛵 Delivery a: '+esc(order.delivery_address||'')+'</div>':'<div style="font-size:.85rem;color:var(--muted)">🏃 Recoger en negocio</div>')+
+    '<div style="font-size:.8rem;color:var(--muted);margin-top:4px">'+formatDate(order.created_at)+'</div>';
 }
 
 function renderResponse() {
-  document.getElementById('responseCard').style.display = 'block';
-  document.getElementById('bizResponse').textContent = order.business_response;
-  if (order.estimated_time) {
-    document.getElementById('estimatedTime').textContent = '⏱ Tiempo estimado: ' + order.estimated_time + ' minutos';
-  }
+  document.getElementById('responseCard').style.display='block';
+  document.getElementById('bizResponse').textContent=order.business_response;
+  if (order.estimated_time) document.getElementById('estimatedTime').textContent='⏱ Tiempo estimado: '+order.estimated_time+' min';
 }
 
+// ── Chat ──────────────────────────────────────────────────────
 async function loadMessages() {
-  if (isLoadingMsg) return;
-  isLoadingMsg = true;
   try {
-    var after = lastMsgId > 0 ? '?after='+lastMsgId : '';
-    var res = await fetch('/api/orders/' + orderId + '/messages' + after, {
-      headers: { 'Authorization': 'Bearer ' + getToken() }
-    }).then(function(r){ return r.json(); });
-    if (!res.success) { isLoadingMsg = false; return; }
+    var url = '/api/orders/'+orderId+'/messages'+(lastMsgId>0?'?after='+lastMsgId:'');
+    var res = await fetch(url, { headers:{'Authorization':'Bearer '+getToken()} }).then(function(r){ return r.json(); });
+    if (!res.success) return;
 
+    // Update total if changed
     if (res.data.order && parseFloat(res.data.order.total) !== parseFloat(order.total)) {
-      order = res.data.order;
-      renderItems();
+      order = res.data.order; renderItems();
     }
 
     var msgs = res.data.messages || [];
+    if (!msgs.length && lastMsgId === 0) {
+      document.getElementById('chatMessages').innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.85rem;padding:20px">Sin mensajes aún. ¡Escribe algo!</div>';
+      return;
+    }
+    if (!msgs.length) return;
+
+    var maxId = Math.max.apply(null, msgs.map(function(m){ return parseInt(m.id); }));
+    if (maxId <= lastMsgId) return;
+
     if (lastMsgId === 0) {
-      allMessages = msgs;
-      renderMessages(allMessages);
-      if (msgs.length) lastMsgId = Math.max.apply(null, msgs.map(function(m){ return parseInt(m.id); }));
-    } else if (msgs.length) {
-      var maxId = Math.max.apply(null, msgs.map(function(m){ return parseInt(m.id); }));
-      if (maxId > lastMsgId) {
-        lastMsgId = maxId;
-        allMessages = allMessages.concat(msgs);
-        appendMessages(msgs);
-      }
+      // First load
+      document.getElementById('chatMessages').innerHTML = msgs.map(buildMsg).join('');
+    } else {
+      // Append new ones
+      var container = document.getElementById('chatMessages');
+      var atBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 60;
+      msgs.forEach(function(m) {
+        if (!document.getElementById('cm-'+m.id)) container.insertAdjacentHTML('beforeend', buildMsg(m));
+      });
+      if (atBottom) container.scrollTop = container.scrollHeight;
     }
-  } catch(e) {
-    console.log('Chat error:', e);
-  } finally {
-    isLoadingMsg = false;
-  }
+    lastMsgId = maxId;
+    // Always scroll on first load
+    if (lastMsgId === maxId && msgs.length) {
+      var c = document.getElementById('chatMessages');
+      c.scrollTop = c.scrollHeight;
+    }
+  } catch(e) { console.log('chat err',e); }
 }
 
-var lastMsgId = 0;
-var isLoadingMsg = false;
-var allMessages = [];
-
-function buildMsgHtml(m) {
-  var mine   = m.sender_id == user.id;
-  var system = m.sender_role === 'system' || m.message.startsWith('💰');
-  var cls    = system ? 'system' : (mine ? 'mine' : 'theirs');
-  return '<div class="chat-msg '+cls+'" id="msg-'+m.id+'">' +
-    (!mine && !system ? '<div class="chat-sender">'+esc(m.sender_name)+'</div>' : '') +
-    '<div class="chat-bubble">'+esc(m.message).replace(/
-/g,'<br>')+'</div>' +
-    '<div class="chat-time">'+formatTime(m.created_at)+'</div>' +
+function buildMsg(m) {
+  var mine = m.sender_id == user.id;
+  var sys  = m.message.charAt(0) === '💰' || m.message.charAt(0) === '•';
+  var cls  = sys ? 'system' : (mine ? 'mine' : 'theirs');
+  return '<div class="chat-msg '+cls+'" id="cm-'+m.id+'">'+
+    (!mine&&!sys?'<div class="chat-sender">'+esc(m.sender_name)+'</div>':'')+
+    '<div class="chat-bubble">'+esc(m.message).replace(/\n/g,'<br>')+'</div>'+
+    '<div class="chat-time">'+formatDate(m.created_at)+'</div>'+
   '</div>';
-}
-
-function renderMessages(messages) {
-  var container = document.getElementById('chatMessages');
-  if (!messages.length) {
-    container.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.85rem;padding:20px">Sin mensajes aún. ¡Inicia la conversación!</div>';
-    return;
-  }
-  container.innerHTML = messages.map(buildMsgHtml).join('');
-  container.scrollTop = container.scrollHeight;
-}
-
-function appendMessages(messages) {
-  var container = document.getElementById('chatMessages');
-  var wasAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 60;
-  var empty = container.querySelector('div[style*="Sin mensajes"]');
-  if (empty) empty.remove();
-  messages.forEach(function(m) {
-    if (!document.getElementById('msg-'+m.id)) {
-      container.insertAdjacentHTML('beforeend', buildMsgHtml(m));
-    }
-  });
-  if (wasAtBottom) container.scrollTop = container.scrollHeight;
 }
 
 async function sendMessage() {
   var input = document.getElementById('chatInput');
-  var msg   = input.value.trim();
+  var msg = input.value.trim();
   if (!msg) return;
-
   input.value = '';
-  input.style.height = 'auto';
-
-  await fetch('/api/orders/' + orderId + '/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
-    body: JSON.stringify({ message: msg })
-  });
-
-  loadMessages();
+  try {
+    await fetch('/api/orders/'+orderId+'/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+      body: JSON.stringify({message:msg})
+    });
+    // Force reload messages immediately after sending
+    lastMsgId = Math.max(0, lastMsgId - 1);
+    await loadMessages();
+  } catch(e) { console.log(e); }
 }
 
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
+function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }
 
-function formatTime(str) {
-  var parts = str.replace('T',' ').split(/[- :]/);
-  var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]), parseInt(parts[3])||0, parseInt(parts[4])||0);
-  var h = d.getHours(), m = d.getMinutes();
-  var ampm = h >= 12 ? 'p. m.' : 'a. m.';
-  h = h % 12 || 12;
-  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()+
-    ' '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+ampm;
+function formatDate(str) {
+  if (!str) return '';
+  var p = str.replace('T',' ').split(/[- :]/);
+  var d = new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]),parseInt(p[3])||0,parseInt(p[4])||0);
+  var h=d.getHours(),mi=d.getMinutes(),ap=h>=12?'p.m.':'a.m.';
+  h=h%12||12;
+  return String(d.getDate()).padStart(2,'0')+'/'+(d.getMonth()+1)+'/'+d.getFullYear()+' '+String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0')+' '+ap;
 }
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function doLogout(){localStorage.clear();window.location.href='/cliente/login.html';}
+function toggleSidebar(){var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open');}
 
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
-function toggleSidebar() {
-  var s = document.querySelector('.sidebar'); var o = document.getElementById('sidebarOverlay');
-  if(s) s.classList.toggle('open'); if(o) o.classList.toggle('open');
-}
+// Pause/resume on visibility
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){clearInterval(pollInterval);}
+  else{loadMessages();pollInterval=setInterval(loadMessages,3000);}
+});
+window.addEventListener('beforeunload',function(){clearInterval(pollInterval);});
 
 init();
-window.addEventListener('beforeunload', function(){ clearInterval(pollInterval); });
-
-// Pause polling when tab is hidden, resume when visible (saves resources)
-document.addEventListener('visibilitychange', function() {
-  if (document.hidden) {
-    clearInterval(pollInterval);
-  } else {
-    loadMessages();
-    pollInterval = setInterval(loadMessages, 2000);
-  }
-});
 </script>
-<script src="/assets/js/pwa.js"></script>
 </body>
 </html>
