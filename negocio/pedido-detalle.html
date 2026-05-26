@@ -167,7 +167,7 @@ async function init() {
   document.getElementById('content').style.display = 'block';
 
   loadMessages();
-  pollInterval = setInterval(loadMessages, 8000);
+  pollInterval = setInterval(loadMessages, 2000);
 }
 
 function renderActions() {
@@ -332,12 +332,40 @@ async function advanceStatus(status) {
   else APP.toast(res.message||'Error','error');
 }
 
+var lastMsgId = 0;
+var isLoadingMsg = false;
+
 async function loadMessages() {
-  var res = await fetch('/api/orders/'+orderId+'/messages', {
-    headers:{'Authorization':'Bearer '+getToken()}
-  }).then(function(r){ return r.json(); });
-  if (!res.success) return;
-  renderMessages(res.data.messages||[]);
+  if (isLoadingMsg) return; // prevent overlapping requests
+  isLoadingMsg = true;
+  try {
+    var url = '/api/orders/'+orderId+'/messages' + (lastMsgId > 0 ? '?after='+lastMsgId : '');
+    var res = await fetch(url, {
+      headers:{'Authorization':'Bearer '+getToken()}
+    }).then(function(r){ return r.json(); });
+    if (!res.success) return;
+
+    var messages = res.data.messages || [];
+    
+    // Check if we have new messages
+    if (messages.length > 0) {
+      var maxId = Math.max.apply(null, messages.map(function(m){ return m.id; }));
+      if (maxId > lastMsgId) {
+        lastMsgId = maxId;
+        renderMessages(messages);
+        // Update total if changed
+        if (res.data.order && res.data.order.total !== order.total) {
+          order = Object.assign(order, res.data.order);
+          renderItems();
+        }
+      }
+    } else if (lastMsgId === 0) {
+      renderMessages([]);
+    }
+  } catch(e) {
+  } finally {
+    isLoadingMsg = false;
+  }
 }
 
 function renderMessages(messages) {
@@ -377,6 +405,16 @@ function toggleSidebar() { var s=document.querySelector('.sidebar');var o=docume
 
 init();
 window.addEventListener('beforeunload', function(){ clearInterval(pollInterval); });
+
+// Pause polling when tab is hidden, resume when visible (saves resources)
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) {
+    clearInterval(pollInterval);
+  } else {
+    loadMessages();
+    pollInterval = setInterval(loadMessages, 2000);
+  }
+});
 </script>
 <script src="/assets/js/pwa.js"></script>
 </body>

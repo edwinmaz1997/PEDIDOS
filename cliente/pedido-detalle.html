@@ -176,7 +176,7 @@ async function init() {
   document.getElementById('content').style.display = 'block';
 
   loadMessages();
-  pollInterval = setInterval(loadMessages, 8000);
+  pollInterval = setInterval(loadMessages, 2000);
 }
 
 function renderStatus() {
@@ -315,6 +315,16 @@ function toggleSidebar() {
 
 init();
 window.addEventListener('beforeunload', function(){ clearInterval(pollInterval); });
+
+// Pause polling when tab is hidden, resume when visible (saves resources)
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) {
+    clearInterval(pollInterval);
+  } else {
+    loadMessages();
+    pollInterval = setInterval(loadMessages, 2000);
+  }
+});
 </script>
 <script src="/assets/js/pwa.js"></script>
 </body>

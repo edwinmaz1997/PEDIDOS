@@ -6,26 +6,46 @@ class OrderMessageController {
     private $db;
     public function __construct() { $this->db = Database::connect(); }
 
-    // GET /api/orders/{id}/messages
+    // GET /api/orders/{id}/messages[?after={id}]
     public function index($orderId) {
         $user  = AuthMiddleware::authenticate();
         $order = $this->getOrder($orderId, $user);
+        $after = isset($_GET['after']) ? (int)$_GET['after'] : 0;
 
         // Mark messages as read
         $this->db->prepare("UPDATE order_messages SET is_read = 1 WHERE order_id = ? AND sender_id != ?")
                  ->execute([$orderId, $user['id']]);
 
-        $stmt = $this->db->prepare("
-            SELECT m.*, u.name as sender_name
-            FROM order_messages m
-            JOIN users u ON m.sender_id = u.id
-            WHERE m.order_id = ?
-            ORDER BY m.created_at ASC
-        ");
-        $stmt->execute([$orderId]);
-        $messages = $stmt->fetchAll();
+        if ($after > 0) {
+            // Only fetch new messages since last known id
+            $stmt = $this->db->prepare("
+                SELECT m.*, u.name as sender_name
+                FROM order_messages m
+                JOIN users u ON m.sender_id = u.id
+                WHERE m.order_id = ? AND m.id > ?
+                ORDER BY m.created_at ASC
+            ");
+            $stmt->execute([$orderId, $after]);
+            $messages = $stmt->fetchAll();
 
-        // Unread count for this user
+            // Only return data if there are new messages
+            if (empty($messages)) {
+                Response::success(['messages' => [], 'order' => null, 'unread_count' => 0]);
+                return;
+            }
+        } else {
+            // Full load on first request
+            $stmt = $this->db->prepare("
+                SELECT m.*, u.name as sender_name
+                FROM order_messages m
+                JOIN users u ON m.sender_id = u.id
+                WHERE m.order_id = ?
+                ORDER BY m.created_at ASC
+            ");
+            $stmt->execute([$orderId]);
+            $messages = $stmt->fetchAll();
+        }
+
         $unread = $this->db->prepare("SELECT COUNT(*) FROM order_messages WHERE order_id = ? AND sender_id != ? AND is_read = 0");
         $unread->execute([$orderId, $user['id']]);
 
