@@ -252,14 +252,16 @@ async function sendMessage() {
   if (!msg) return;
   input.value = '';
   try {
-    await fetch('/api/orders/'+orderId+'/messages', {
+    var res = await fetch('/api/orders/'+orderId+'/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
       body: JSON.stringify({message:msg})
-    });
-    // Force reload messages immediately after sending
-    lastMsgId = Math.max(0, lastMsgId - 1);
-    await loadMessages();
+    }).then(function(r){ return r.json(); });
+    // Reset lastMsgId to force full reload and pick up the new message
+    if (res.success) {
+      lastMsgId = 0;
+      await loadMessages();
+    }
   } catch(e) { console.log(e); }
 }
 
