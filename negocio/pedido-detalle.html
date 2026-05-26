@@ -309,7 +309,7 @@ function renderClientInfo() {
     (order.delivery_type==='delivery' ?
       '<div style="font-size:.85rem;color:var(--muted);margin-top:6px">🛵 Delivery: '+esc(order.delivery_address||'')+'</div>' :
       '<div style="font-size:.85rem;color:var(--muted);margin-top:6px">🏃 Recoger en negocio</div>') +
-    '<div style="font-size:.8rem;color:var(--muted);margin-top:4px">'+new Date(order.created_at).toLocaleString('es-GT')+'</div>';
+    '<div style="font-size:.8rem;color:var(--muted);margin-top:4px">'+new Date(order.created_at).toLocaleString('es-GT', {timeZone:'America/Guatemala'})+'</div>';
 }
 
 async function respond(action) {
@@ -370,7 +370,7 @@ async function sendMessage() {
 
 function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }
 function getBadge(s) { return {pendiente:'badge-pending',aceptado:'badge-accepted',en_preparacion:'badge-delivery',listo:'badge-active',en_camino:'badge-delivery',entregado:'badge-done',cancelado:'badge-cancel'}[s]||''; }
-function formatTime(str) { var d=new Date(str); return d.toLocaleTimeString('es-GT',{hour:'2-digit',minute:'2-digit'})+' · '+d.toLocaleDateString('es-GT'); }
+function formatTime(str) { var d=new Date(str); return d.toLocaleString('es-GT',{timeZone:'America/Guatemala',hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit',year:'numeric'}); }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function doLogout() { localStorage.clear(); window.location.href='/cliente/login.html'; }
 function toggleSidebar() { var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }

@@ -81,6 +81,7 @@ const APP = {
   date(str) {
     if (!str) return '';
     return new Date(str).toLocaleString('es-GT', {
+      timeZone: 'America/Guatemala',
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });

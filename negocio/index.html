@@ -111,7 +111,7 @@ function renderOrder(o) {
         <div>
           <strong>${esc(o.order_number)}</strong>
           <div class="order-client">👤 ${esc(o.client_name)} ${o.client_phone?`· <a href="tel:${esc(o.client_phone)}">${esc(o.client_phone)}</a>`:''}</div>
-          <div style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</div>
+          <div style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT', {timeZone:'America/Guatemala'})}</div>
           ${o.delivery_type==='delivery'?`<div style="font-size:.8rem;color:var(--accent)">🛵 Delivery: ${esc(o.delivery_address||'')}</div>`:'<div style="font-size:.8rem;color:var(--muted)">🏃 Recoger en negocio</div>'}
         </div>
         <span class="badge ${statusBadge[o.status]||'badge-pending'}">${statusLabels[o.status]||o.status}</span>

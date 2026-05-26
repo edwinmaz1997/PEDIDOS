@@ -92,7 +92,7 @@ async function loadDashboard() {
         <td>Q${parseFloat(o.total).toFixed(2)}</td>
         <td>${o.delivery_type==='delivery'?'🛵 Delivery':'🏃 Recoger'}</td>
         <td><span class="badge ${statusBadge[o.status]||''}">${statusLabels[o.status]||o.status}</span></td>
-        <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</td>
+        <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT', {timeZone:'America/Guatemala'})}</td>
       </tr>
     `).join('');
     document.getElementById('recentBody').innerHTML = rows || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Sin pedidos</td></tr>';

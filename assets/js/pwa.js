@@ -126,23 +126,38 @@ async function checkNewNotifications() {
     if (!data.success) return;
 
     var notifs = data.data.notifications || [];
+
+    // Initialize lastNotifId on first run to avoid showing old notifications
+    if (lastNotifId === 0 && notifs.length > 0) {
+      lastNotifId = notifs[0].id; // most recent
+      localStorage.setItem('last_notif_id', lastNotifId);
+      return;
+    }
+
     var unread = notifs.filter(function(n) {
-      return !n.is_read && n.id > lastNotifId;
+      return parseInt(n.id) > lastNotifId;
     });
 
     if (unread.length > 0 && 'Notification' in window && Notification.permission === 'granted') {
       unread.forEach(function(n) {
-        new Notification(n.title, {
-          body: n.message,
-          icon: '/assets/img/logo.jpg',
-          badge: '/assets/img/logo.jpg',
-          tag: 'notif-' + n.id
+        var notif = new Notification(n.title, {
+          body:    n.message,
+          icon:    '/assets/img/icon-192.png',
+          badge:   '/assets/img/icon-192.png',
+          tag:     'notif-' + n.id,
+          vibrate: [200, 100, 200],
+          requireInteraction: false
         });
-        lastNotifId = Math.max(lastNotifId, n.id);
+        // Click opens app
+        notif.onclick = function() {
+          window.focus();
+          notif.close();
+        };
+        lastNotifId = Math.max(lastNotifId, parseInt(n.id));
       });
       localStorage.setItem('last_notif_id', lastNotifId);
     }
-  } catch(e) {}
+  } catch(e) { console.log('Notif error:', e); }
 }
 
 // Start polling if logged in

@@ -231,7 +231,7 @@ function renderBizInfo() {
     (order.delivery_type === 'delivery' ?
       '<div style="font-size:.85rem;color:var(--muted)">🛵 Delivery a: ' + esc(order.delivery_address||'') + '</div>' :
       '<div style="font-size:.85rem;color:var(--muted)">🏃 Recoger en negocio</div>') +
-    '<div style="font-size:.8rem;color:var(--muted);margin-top:4px">' + new Date(order.created_at).toLocaleString('es-GT') + '</div>';
+    '<div style="font-size:.8rem;color:var(--muted);margin-top:4px">' + new Date(order.created_at).toLocaleString('es-GT', {timeZone:'America/Guatemala'}) + '</div>';
 }
 
 function renderResponse() {
@@ -297,8 +297,16 @@ function handleKey(e) {
 }
 
 function formatTime(str) {
+  // Parse UTC time from server and convert to Guatemala (UTC-6)
   var d = new Date(str);
-  return d.toLocaleTimeString('es-GT', { hour:'2-digit', minute:'2-digit' }) + ' · ' + d.toLocaleDateString('es-GT');
+  return d.toLocaleString('es-GT', {
+    timeZone: 'America/Guatemala',
+    hour: '2-digit',
+    minute: '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
 }
 
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }

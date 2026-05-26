@@ -117,7 +117,7 @@ function renderOrder(o) {
         <div>
           <div class="order-num">${esc(o.order_number)}</div>
           <div class="order-biz">🏪 ${esc(o.business_name || '')}</div>
-          <div style="font-size:.8rem;color:var(--muted);margin-top:2px">${new Date(o.created_at).toLocaleString('es-GT')}</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:2px">${new Date(o.created_at).toLocaleString('es-GT', {timeZone:'America/Guatemala'})}</div>
         </div>
         <span class="badge ${statusBadge[o.status] || 'badge-pending'}">${statusLabels[o.status] || o.status}</span>
       </div>
