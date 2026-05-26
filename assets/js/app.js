@@ -21,8 +21,8 @@ const APP = {
     });
     const data = await res.json();
     if (res.status === 401) {
-      localStorage.clear();
-      window.location.href = '/cliente/login.html';
+      // No borrar localStorage ni redirigir automaticamente
+      // Solo retornar null para que cada pagina maneje el error
       return null;
     }
     return data;

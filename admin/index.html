@@ -48,8 +48,6 @@
 
 <script>
 const API = '/api';
-const token = localStorage.getItem('pedidos_token');
-const user  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
 if (!token || user.role !== 'admin') window.location.href = '/cliente/login.html';
 
 const statusBadge = { pendiente:'badge-pending', aceptado:'badge-accepted', en_preparacion:'badge-delivery', listo:'badge-active', en_camino:'badge-delivery', entregado:'badge-done', cancelado:'badge-cancel' };
@@ -57,7 +55,7 @@ const statusLabels= { pendiente:'Pendiente', aceptado:'Aceptado', en_preparacion
 
 async function loadDashboard() {
   try {
-    const res = await fetch(`${API}/admin/dashboard`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API}/admin/dashboard`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('pedidos_token') } });
     const data = await res.json();
     if (!data.success) return;
     const s = data.data.stats;
