@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Negocio — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,7 +119,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<footer class="footer"><div class="container"><span class="logo">Nueva<span>Express</span></span><p>© 2024 NuevaExpress</p></div></footer>
+<footer class="footer"><div class="container"><span class="logo">Nueva<span>Express</span></span><p>© <span id="yr"></span> NuevaExpress</p></div></footer>
 
 <script src="assets/js/app.js"></script>
 <script>
@@ -229,5 +230,6 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') closeLightbox()
 
 init();
 </script>
+<script>var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();</script>
 </body>
 </html>

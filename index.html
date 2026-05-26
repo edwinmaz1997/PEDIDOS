@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NuevaExpress — Directorio de Negocios</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,7 +67,7 @@
 <footer class="footer">
   <div class="container">
     <div class="logo" style="justify-content:center"><img src="assets/img/logo.jpg" alt="NuevaExpress" style="height:36px;border-radius:8px"><span class="logo-text">Nueva<span>Express</span></span></div>
-    <p>© 2024 NuevaExpress. Todos los derechos reservados.</p>
+    <p>© <span id="yr"></span> NuevaExpress. Todos los derechos reservados.</p>
   </div>
 </footer>
 
@@ -307,5 +308,6 @@ function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 </script>
+<script>var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();</script>
 </body>
 </html>

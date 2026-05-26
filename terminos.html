@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Términos y Condiciones — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -89,6 +90,7 @@
   <p>Para cualquier consulta sobre estos términos, escríbenos a: <a href="mailto:info@nuevaexpress.com" style="color:var(--accent)">info@nuevaexpress.com</a></p>
 </div>
 
-<footer class="footer"><div class="container"><span class="logo">Nueva<span>Express</span></span><p>© 2024 NuevaExpress · Guatemala</p></div></footer>
+<footer class="footer"><div class="container"><span class="logo">Nueva<span>Express</span></span><p>© <span id="yr"></span> NuevaExpress · Guatemala</p></div></footer>
+<script>var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();</script>
 </body>
 </html>
