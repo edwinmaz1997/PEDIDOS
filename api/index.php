@@ -221,6 +221,10 @@ try {
             if ($action === 'categories' && $catId && $method === 'PUT')    { $catCtrl->update($catId, $body); break; }
             if ($action === 'categories' && $catId && $method === 'DELETE') { $catCtrl->destroy($catId); break; }
 
+            // DELETE /api/admin/orders/{id}
+            $adminOrderId = isset($parts[2]) && is_numeric($parts[2]) ? (int)$parts[2] : null;
+            if ($action === 'orders' && $adminOrderId && $method === 'DELETE') { $ctrl->deleteOrder($adminOrderId); break; }
+
             switch ($action) {
                 case 'dashboard':  $ctrl->dashboard();  break;
                 case 'users':      $ctrl->users();       break;

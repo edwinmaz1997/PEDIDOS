@@ -39,6 +39,20 @@ class AdminController {
         Response::success($orders);
     }
 
+    public function deleteOrder($id): void {
+        AuthMiddleware::requireRole('admin');
+        $stmt = $this->db->prepare("SELECT id FROM orders WHERE id = ?");
+        $stmt->execute([$id]);
+        if (!$stmt->fetch()) Response::notFound('Pedido no encontrado');
+        // Delete all related records
+        $this->db->prepare("DELETE FROM order_messages WHERE order_id = ?")->execute([$id]);
+        $this->db->prepare("DELETE FROM order_status_log WHERE order_id = ?")->execute([$id]);
+        $this->db->prepare("DELETE FROM order_items WHERE order_id = ?")->execute([$id]);
+        $this->db->prepare("DELETE FROM deliveries WHERE order_id = ?")->execute([$id]);
+        $this->db->prepare("DELETE FROM orders WHERE id = ?")->execute([$id]);
+        Response::success(null, 'Pedido eliminado correctamente');
+    }
+
     public function assignBusiness($bizId, $userId) {
         AuthMiddleware::requireRole('admin');
         if (!$bizId || !$userId) Response::error('Datos requeridos', 400);
