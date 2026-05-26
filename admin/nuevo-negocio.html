@@ -37,7 +37,6 @@
       <h1 style="font-size:1.4rem">Agregar Negocio</h1>
     </div>
 
-    <!-- Información del negocio -->
     <div class="form-card">
       <h3>Información básica</h3>
       <div class="two-col">
@@ -51,9 +50,8 @@
       </label>
     </div>
 
-    <!-- Contacto -->
     <div class="form-card">
-      <h3>Contacto</h3>
+      <h3>Contacto del negocio</h3>
       <div class="two-col">
         <div class="form-group"><label>Teléfono</label><input type="tel" id="f_phone" placeholder="+502 2222 2222"></div>
         <div class="form-group"><label>WhatsApp</label><input type="tel" id="f_whatsapp" placeholder="+50255551234"></div>
@@ -64,7 +62,6 @@
       </div>
     </div>
 
-    <!-- Ubicación -->
     <div class="form-card">
       <h3>Ubicación</h3>
       <div class="form-group"><label>Dirección</label><input type="text" id="f_address" placeholder="5a Avenida 10-50, Zona 1"></div>
@@ -79,10 +76,9 @@
       <div class="form-group"><label>Link Google Maps</label><input type="url" id="f_maps" placeholder="https://maps.google.com/..."></div>
     </div>
 
-    <!-- Cuenta del propietario -->
     <div class="form-card">
       <h3>Cuenta del propietario</h3>
-      <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">Se creará una cuenta con rol "negocio" para que el propietario acceda a su panel.</p>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">Se creará una cuenta con rol "negocio" para acceder al panel.</p>
       <div class="two-col">
         <div class="form-group"><label>Nombre *</label><input type="text" id="owner_name" placeholder="Juan García"></div>
         <div class="form-group"><label>Teléfono</label><input type="tel" id="owner_phone" placeholder="+502 5555 1234"></div>
@@ -90,7 +86,7 @@
       <div class="form-group"><label>Email *</label><input type="email" id="owner_email" placeholder="juan@negocio.com"></div>
       <div class="two-col">
         <div class="form-group"><label>Contraseña *</label><input type="password" id="owner_password" placeholder="Mínimo 8 caracteres"></div>
-        <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="owner_password2" placeholder="Repetir contraseña"></div>
+        <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="owner_password2" placeholder="Repetir"></div>
       </div>
     </div>
 
@@ -107,45 +103,50 @@
 <script>
 APP.requireAuth(['admin']);
 
-// Save admin token before anything else
-var adminToken = APP.token();
+var adminToken = APP.token(); // guardamos el token admin antes de cualquier cosa
 
 async function init() {
-  const cats = await APP.get('/categories');
-  const sel  = document.getElementById('f_category');
+  var cats = await APP.get('/categories');
+  var sel  = document.getElementById('f_category');
   (cats.data || []).forEach(function(c) {
     var opt = document.createElement('option');
-    opt.value = c.id; opt.textContent = c.name;
+    opt.value = c.id;
+    opt.textContent = c.name;
     sel.appendChild(opt);
   });
 }
 
 async function createBusiness() {
-  var ownerPass  = document.getElementById('owner_password').value;
-  var ownerPass2 = document.getElementById('owner_password2').value;
   var errEl = document.getElementById('errorMsg');
   errEl.style.display = 'none';
 
-  if (!document.getElementById('f_name').value.trim()) { showError('El nombre del negocio es requerido'); return; }
-  if (!document.getElementById('f_category').value)    { showError('Selecciona una categoría'); return; }
-  if (!document.getElementById('owner_name').value.trim()) { showError('El nombre del propietario es requerido'); return; }
-  if (!document.getElementById('owner_email').value.trim()) { showError('El email del propietario es requerido'); return; }
-  if (!ownerPass) { showError('La contraseña es requerida'); return; }
-  if (ownerPass !== ownerPass2) { showError('Las contraseñas no coinciden'); return; }
+  var name       = document.getElementById('f_name').value.trim();
+  var cat        = document.getElementById('f_category').value;
+  var ownerName  = document.getElementById('owner_name').value.trim();
+  var ownerEmail = document.getElementById('owner_email').value.trim();
+  var ownerPass  = document.getElementById('owner_password').value;
+  var ownerPass2 = document.getElementById('owner_password2').value;
+
+  if (!name)       { showError('El nombre del negocio es requerido'); return; }
+  if (!cat)        { showError('Selecciona una categoría'); return; }
+  if (!ownerName)  { showError('El nombre del propietario es requerido'); return; }
+  if (!ownerEmail) { showError('El email del propietario es requerido'); return; }
+  if (!ownerPass)  { showError('La contraseña es requerida'); return; }
   if (ownerPass.length < 8) { showError('La contraseña debe tener al menos 8 caracteres'); return; }
+  if (ownerPass !== ownerPass2) { showError('Las contraseñas no coinciden'); return; }
 
   var btn = document.getElementById('submitBtn');
-  btn.textContent = 'Creando...'; btn.disabled = true;
+  btn.textContent = 'Creando usuario...'; btn.disabled = true;
 
   try {
-    // Step 1: Register owner using a direct fetch (not APP.fetch which uses admin token)
+    // Paso 1: Registrar al propietario
     var userRes = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name:     document.getElementById('owner_name').value.trim(),
+        name:     ownerName,
         phone:    document.getElementById('owner_phone').value.trim(),
-        email:    document.getElementById('owner_email').value.trim(),
+        email:    ownerEmail,
         password: ownerPass,
         role:     'negocio'
       })
@@ -158,54 +159,42 @@ async function createBusiness() {
       return;
     }
 
-    // Step 2: Create business using ADMIN token (not the new user's token)
-    var bizPayload = {
-      category_id:      document.getElementById('f_category').value,
-      name:             document.getElementById('f_name').value.trim(),
-      description:      document.getElementById('f_description').value,
-      what_we_offer:    document.getElementById('f_what_we_offer').value,
-      phone:            document.getElementById('f_phone').value,
-      whatsapp:         document.getElementById('f_whatsapp').value,
-      email:            document.getElementById('f_email').value,
-      website:          document.getElementById('f_website').value,
-      address:          document.getElementById('f_address').value,
-      city:             document.getElementById('f_city').value,
-      zone:             document.getElementById('f_zone').value,
-      latitude:         document.getElementById('f_latitude').value  || null,
-      longitude:        document.getElementById('f_longitude').value || null,
-      google_maps_url:  document.getElementById('f_maps').value      || null,
-      accepts_delivery: document.getElementById('f_delivery').checked ? 1 : 0,
-    };
-
-    var bizRes = await fetch('/api/businesses', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + adminToken   // <-- siempre el token admin
-      },
-      body: JSON.stringify(bizPayload)
-    });
-    var bizData = await bizRes.json();
-
-    if (!bizData.success) {
-      showError('Usuario creado pero error al crear negocio: ' + (bizData.message || 'Error'));
-      btn.textContent = 'Crear negocio'; btn.disabled = false;
-      return;
-    }
-
-    // Step 3: Assign the new business to the new user
-    // Update business owner via admin — reassign user_id to the new owner
     var newUserId = userData.data.user.id;
-    var bizId     = bizData.data.id;
+    btn.textContent = 'Creando negocio...';
 
-    await fetch('/api/admin/assign-business', {
+    // Paso 2: Crear negocio con TOKEN DEL ADMIN y asignar al nuevo usuario
+    var bizRes = await fetch('/api/businesses', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + adminToken
       },
-      body: JSON.stringify({ business_id: bizId, user_id: newUserId })
+      body: JSON.stringify({
+        owner_user_id:   newUserId,
+        category_id:     cat,
+        name:            name,
+        description:     document.getElementById('f_description').value,
+        what_we_offer:   document.getElementById('f_what_we_offer').value,
+        phone:           document.getElementById('f_phone').value,
+        whatsapp:        document.getElementById('f_whatsapp').value,
+        email:           document.getElementById('f_email').value,
+        website:         document.getElementById('f_website').value,
+        address:         document.getElementById('f_address').value,
+        city:            document.getElementById('f_city').value,
+        zone:            document.getElementById('f_zone').value,
+        latitude:        document.getElementById('f_latitude').value  || null,
+        longitude:       document.getElementById('f_longitude').value || null,
+        google_maps_url: document.getElementById('f_maps').value      || null,
+        accepts_delivery: document.getElementById('f_delivery').checked ? 1 : 0
+      })
     });
+    var bizData = await bizRes.json();
+
+    if (!bizData.success) {
+      showError('Usuario creado pero error en negocio: ' + (bizData.message || 'Error'));
+      btn.textContent = 'Crear negocio'; btn.disabled = false;
+      return;
+    }
 
     APP.toast('¡Negocio creado exitosamente!');
     setTimeout(function() { window.location.href = 'negocios.html'; }, 1200);
@@ -220,7 +209,7 @@ function showError(msg) {
   var el = document.getElementById('errorMsg');
   el.textContent = msg;
   el.style.display = 'block';
-  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  el.scrollIntoView({ behavior: 'smooth' });
 }
 
 init();

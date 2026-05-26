@@ -145,6 +145,12 @@ class BusinessController {
 
         $slug = $this->generateSlug($body['name']);
 
+        // Admin can specify owner_user_id to assign business to another user
+        $ownerId = $user['id'];
+        if ($user['role'] === 'admin' && !empty($body['owner_user_id'])) {
+            $ownerId = (int)$body['owner_user_id'];
+        }
+
         $stmt = $this->db->prepare("
             INSERT INTO businesses
                 (user_id, category_id, name, slug, description, what_we_offer,
@@ -154,7 +160,7 @@ class BusinessController {
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         ");
         $stmt->execute([
-            $user['id'],
+            $ownerId,
             (int)$body['category_id'],
             $body['name'],
             $slug,
