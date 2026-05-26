@@ -102,10 +102,8 @@
 <script src="../assets/js/app.js"></script>
 <script>
 // Verificacion manual sin redireccion automatica
-var adminToken = localStorage.getItem('pedidos_token');
-var adminUser  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
-
-if (!adminToken || adminUser.role !== 'admin') {
+var adminUser = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
+if (!localStorage.getItem('pedidos_token') || adminUser.role !== 'admin') {
   window.location.href = '/cliente/login.html';
 }
 
@@ -171,7 +169,7 @@ async function createBusiness() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + adminToken
+        'Authorization': 'Bearer ' + localStorage.getItem('pedidos_token')
       },
       body: JSON.stringify({
         owner_user_id:   newUserId,
