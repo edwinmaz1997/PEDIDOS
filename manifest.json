@@ -3,35 +3,50 @@
   "short_name": "NuevaExpress",
   "description": "Tu directorio de negocios local en Guatemala",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#1a1a2e",
   "theme_color": "#4A90D9",
-  "orientation": "portrait",
-  "lang": "es",
+  "orientation": "portrait-primary",
+  "lang": "es-GT",
   "icons": [
     {
-      "src": "/assets/img/logo.jpg",
+      "src": "/assets/img/icon-192.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "/assets/img/logo.jpg",
+      "src": "/assets/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/img/icon-512.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "any maskable"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
       "name": "Mis Pedidos",
+      "short_name": "Pedidos",
       "url": "/cliente/index.html",
-      "description": "Ver mis pedidos"
+      "icons": [{ "src": "/assets/img/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Directorio",
+      "short_name": "Directorio",
       "url": "/",
-      "description": "Explorar negocios"
+      "icons": [{ "src": "/assets/img/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
