@@ -48,7 +48,8 @@
 
 <script>
 const API = '/api';
-if (!token || user.role !== 'admin') window.location.href = '/cliente/login.html';
+var adminUser = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
+if (!localStorage.getItem('pedidos_token') || adminUser.role !== 'admin') window.location.href = '/cliente/login.html';
 
 const statusBadge = { pendiente:'badge-pending', aceptado:'badge-accepted', en_preparacion:'badge-delivery', listo:'badge-active', en_camino:'badge-delivery', entregado:'badge-done', cancelado:'badge-cancel' };
 const statusLabels= { pendiente:'Pendiente', aceptado:'Aceptado', en_preparacion:'En prep.', listo:'Listo', en_camino:'En camino', entregado:'Entregado', cancelado:'Cancelado' };

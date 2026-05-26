@@ -46,7 +46,8 @@
 <script>
 const API = '/api';
 const user  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
-if (!token || user.role !== 'repartidor') window.location.href = '/cliente/login.html';
+var adminUser = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
+if (!localStorage.getItem('pedidos_token') || adminUser.role !== 'repartidor') window.location.href = '/cliente/login.html';
 document.getElementById('sidebarUser').textContent = user.name || 'Repartidor';
 
 const statusLabels = { disponible:'Disponible', asignado:'Asignado', recogido:'Recogido', entregado:'Entregado' };

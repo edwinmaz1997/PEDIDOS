@@ -68,7 +68,7 @@
 <script>
 const API = '/api';
 const user  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
-if (!token) window.location.href = '/cliente/login.html';
+if (!localStorage.getItem('pedidos_token')) window.location.href = '/cliente/login.html';
 if (user.role && user.role !== 'cliente') window.location.href = `/${user.role}/index.html`;
 
 document.getElementById('sidebarUser').textContent = user.name || 'Cliente';
