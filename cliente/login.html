@@ -108,21 +108,19 @@ async function doLogin() {
     const data = await res.json();
     if (!data.success) { showError(data.message || 'Credenciales incorrectas'); return; }
 
-    // Store token
+    // Store token in localStorage
     localStorage.setItem('nuevaexpress_token', data.data.token);
     localStorage.setItem('nuevaexpress_user', JSON.stringify(data.data.user));
 
-    // Pass token via URL hash as backup
-    const role = data.data.user.role;
-    const token = data.data.token;
-    const userStr = encodeURIComponent(JSON.stringify(data.data.user));
+    // Redirect with token in hash (backup in case localStorage doesn't persist)
+    var role = data.data.user.role;
+    var token = data.data.token;
+    var userStr = encodeURIComponent(JSON.stringify(data.data.user));
 
-    setTimeout(function() {
-      if (role === 'admin')            window.location.href = '/admin/index.html#tk=' + token + '&us=' + userStr;
-      else if (role === 'negocio')     window.location.href = '/negocio/index.html#tk=' + token + '&us=' + userStr;
-      else if (role === 'repartidor')  window.location.href = '/repartidor/index.html#tk=' + token + '&us=' + userStr;
-      else                             window.location.href = '/cliente/index.html#tk=' + token + '&us=' + userStr;
-    }, 200);
+    if (role === 'admin')           window.location.href = '/admin/index.html#tk=' + token + '&us=' + userStr;
+    else if (role === 'negocio')    window.location.href = '/negocio/index.html#tk=' + token + '&us=' + userStr;
+    else if (role === 'repartidor') window.location.href = '/repartidor/index.html#tk=' + token + '&us=' + userStr;
+    else                            window.location.href = '/cliente/index.html#tk=' + token + '&us=' + userStr;
 
   } catch(e) {
     showError('Error de conexión. Intenta de nuevo.');
