@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editar Negocio — Admin NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.form-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:28px;margin-bottom:20px}
+.form-card h3{font-size:1rem;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-bottom:12px}
+.photo-thumb{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1;background:var(--off-white);border:1px solid var(--border)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-del{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:.7rem;display:flex;align-items:center;justify-content:center}
+.logo-wrap{width:80px;height:80px;border-radius:12px;overflow:hidden;border:1px solid var(--border);cursor:pointer;position:relative;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:2rem}
+.logo-wrap img{width:100%;height:100%;object-fit:cover}
+.cover-wrap{height:160px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);cursor:pointer;position:relative;background:var(--off-white);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.cover-wrap img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.cover-overlay,.logo-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;color:white;font-size:.8rem;font-weight:600;opacity:0;transition:var(--transition)}
+.cover-wrap:hover .cover-overlay,.logo-wrap:hover .logo-overlay{opacity:1}
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Administrador</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="negocios.html" class="active">🏪 Negocios</a></li>
+      <li><a href="usuarios.html">👥 Usuarios</a></li>
+      <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <a href="negocios.html" style="color:var(--muted);text-decoration:none;font-size:.9rem">← Negocios</a>
+      <span style="color:var(--border)">/</span>
+      <h1 style="font-size:1.4rem" id="pageTitle">Editar Negocio</h1>
+    </div>
+
+    <div id="loadingState" class="loading-state"><div class="spinner"></div></div>
+    <div id="formContent" style="display:none">
+
+      <!-- Portada y logo -->
+      <div class="form-card">
+        <h3>📸 Imágenes</h3>
+        <div class="cover-wrap" id="coverWrap" onclick="document.getElementById('coverInput').click()">
+          <img id="coverImg" src="" alt="" style="display:none">
+          <div style="text-align:center;z-index:1;color:var(--muted)"><div style="font-size:2rem">🖼️</div><div style="font-size:.8rem;margin-top:4px">Foto de portada</div></div>
+          <div class="cover-overlay">📷 Cambiar portada</div>
+          <input type="file" id="coverInput" accept="image/*" style="display:none" onchange="uploadCover(this)">
+        </div>
+        <div style="display:flex;gap:16px;align-items:center;margin-bottom:20px">
+          <div class="logo-wrap" id="logoWrap" onclick="document.getElementById('logoInput').click()">
+            <img id="logoImg" src="" alt="" style="display:none">
+            <span id="logoPlaceholder">🏪</span>
+            <div class="logo-overlay">Logo</div>
+            <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="uploadLogo(this)">
+          </div>
+          <div>
+            <button class="btn-ghost" style="padding:8px 16px;font-size:.85rem" onclick="document.getElementById('logoInput').click()">📷 Cambiar logo</button>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:4px">JPG, PNG o WebP · Máx 5MB</div>
+          </div>
+        </div>
+
+        <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:8px">Fotos del negocio <span style="font-weight:400;color:var(--muted)">(hasta 10 fotos)</span></label>
+        <div class="photo-grid" id="photoGrid"></div>
+        <input type="file" id="photosInput" accept="image/*" multiple style="display:none" onchange="uploadPhotos(this)">
+        <button class="btn-ghost" style="padding:8px 16px;font-size:.85rem" onclick="document.getElementById('photosInput').click()">+ Agregar fotos</button>
+      </div>
+
+      <!-- Información básica -->
+      <div class="form-card">
+        <h3>Información básica</h3>
+        <div class="two-col">
+          <div class="form-group"><label>Nombre *</label><input type="text" id="f_name" placeholder="Nombre del negocio"></div>
+          <div class="form-group"><label>Categoría *</label><select id="f_category"></select></div>
+        </div>
+        <div class="form-group"><label>Descripción</label><textarea id="f_description" rows="3"></textarea></div>
+        <div class="form-group"><label>¿Qué ofrecemos?</label><textarea id="f_what_we_offer" rows="2"></textarea></div>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem">
+          <input type="checkbox" id="f_delivery" style="width:16px;height:16px"> Acepta delivery (Q15.00)
+        </label>
+      </div>
+
+      <!-- Contacto -->
+      <div class="form-card">
+        <h3>Contacto</h3>
+        <div class="two-col">
+          <div class="form-group"><label>Teléfono</label><input type="tel" id="f_phone"></div>
+          <div class="form-group"><label>WhatsApp</label><input type="tel" id="f_whatsapp"></div>
+        </div>
+        <div class="two-col">
+          <div class="form-group"><label>Email</label><input type="email" id="f_email"></div>
+          <div class="form-group"><label>Sitio web</label><input type="url" id="f_website"></div>
+        </div>
+      </div>
+
+      <!-- Ubicación -->
+      <div class="form-card">
+        <h3>Ubicación</h3>
+        <div class="form-group"><label>Dirección</label><input type="text" id="f_address"></div>
+        <div class="two-col">
+          <div class="form-group"><label>Ciudad</label><input type="text" id="f_city"></div>
+          <div class="form-group"><label>Zona</label><input type="text" id="f_zone"></div>
+        </div>
+        <div class="two-col">
+          <div class="form-group"><label>Latitud</label><input type="number" id="f_latitude" step="any"></div>
+          <div class="form-group"><label>Longitud</label><input type="number" id="f_longitude" step="any"></div>
+        </div>
+        <div class="form-group"><label>Link Google Maps</label><input type="url" id="f_maps"></div>
+      </div>
+
+      <!-- Estado -->
+      <div class="form-card">
+        <h3>Estado del negocio</h3>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem">
+          <input type="checkbox" id="f_active" style="width:16px;height:16px"> Negocio activo (visible en el directorio)
+        </label>
+      </div>
+
+      <div id="errorMsg" style="color:var(--danger);font-size:.9rem;margin-bottom:16px;display:none;background:#fdf0f0;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid #f5c2c2"></div>
+
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <button class="btn-primary" onclick="saveChanges()" id="saveBtn" style="padding:13px 32px">💾 Guardar cambios</button>
+        <a href="negocios.html" class="btn-ghost" style="padding:13px 20px">Cancelar</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+  (function() {
+    var hash = window.location.hash;
+    if (hash && hash.indexOf('tk=') !== -1) {
+      var parts = hash.substring(1).split('&');
+      var tk = '', us = '';
+      parts.forEach(function(p) {
+        if (p.indexOf('tk=') === 0) tk = p.substring(3);
+        if (p.indexOf('us=') === 0) us = decodeURIComponent(p.substring(3));
+      });
+      if (tk) {
+        localStorage.setItem('nuevaexpress_token', tk);
+        if (us) localStorage.setItem('nuevaexpress_user', us);
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    }
+  })();
+
+var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'admin') {
+  window.location.href = '/cliente/login.html';
+}
+
+function getToken() { return localStorage.getItem('nuevaexpress_token'); }
+
+var bizId = new URLSearchParams(window.location.search).get('id');
+var biz   = null;
+
+if (!bizId) window.location.href = 'negocios.html';
+
+async function init() {
+  // Load categories
+  var cats = await fetch('/api/categories').then(function(r){ return r.json(); });
+  var sel  = document.getElementById('f_category');
+  (cats.data || []).forEach(function(c) {
+    var opt = document.createElement('option');
+    opt.value = c.id; opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+
+  // Load business
+  var res = await fetch('/api/businesses/' + bizId, {
+    headers: { 'Authorization': 'Bearer ' + getToken() }
+  }).then(function(r){ return r.json(); });
+
+  if (!res.success) { alert('Negocio no encontrado'); window.location.href = 'negocios.html'; return; }
+  biz = res.data;
+
+  document.getElementById('pageTitle').textContent = 'Editar: ' + biz.name;
+  fillForm();
+  renderPhotos();
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('formContent').style.display  = 'block';
+}
+
+function fillForm() {
+  var f = function(id) { return document.getElementById(id); };
+  f('f_name').value        = biz.name || '';
+  f('f_category').value    = biz.category_id || '';
+  f('f_description').value = biz.description || '';
+  f('f_what_we_offer').value = biz.what_we_offer || '';
+  f('f_phone').value       = biz.phone || '';
+  f('f_whatsapp').value    = biz.whatsapp || '';
+  f('f_email').value       = biz.email || '';
+  f('f_website').value     = biz.website || '';
+  f('f_address').value     = biz.address || '';
+  f('f_city').value        = biz.city || '';
+  f('f_zone').value        = biz.zone || '';
+  f('f_latitude').value    = biz.latitude || '';
+  f('f_longitude').value   = biz.longitude || '';
+  f('f_maps').value        = biz.google_maps_url || '';
+  f('f_delivery').checked  = !!biz.accepts_delivery;
+  f('f_active').checked    = !!biz.is_active;
+
+  if (biz.cover_photo) {
+    var ci = f('coverImg');
+    ci.src = biz.cover_photo; ci.style.display = 'block';
+  }
+  if (biz.logo) {
+    var li = f('logoImg');
+    li.src = biz.logo; li.style.display = 'block';
+    f('logoPlaceholder').style.display = 'none';
+  }
+}
+
+function renderPhotos() {
+  var grid   = document.getElementById('photoGrid');
+  var photos = biz.photos || [];
+  grid.innerHTML = photos.map(function(p) {
+    return '<div class="photo-thumb"><img src="' + esc(p.photo_url) + '" alt=""><button class="photo-del" onclick="deletePhoto(' + p.id + ', this.parentElement)">✕</button></div>';
+  }).join('');
+}
+
+async function deletePhoto(photoId, el) {
+  if (!confirm('¿Eliminar esta foto?')) return;
+  var res = await fetch('/api/businesses/' + bizId + '/photos/' + photoId, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + getToken() }
+  }).then(function(r){ return r.json(); });
+  if (res.success) { el.remove(); APP.toast('Foto eliminada'); }
+  else APP.toast('Error al eliminar', 'error');
+}
+
+async function uploadLogo(input) {
+  if (!input.files[0]) return;
+  APP.toast('Subiendo logo...', 'info');
+  var url = await uploadFile(input.files[0], 'logos');
+  if (url) {
+    await fetch('/api/businesses/' + bizId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({ logo: url })
+    });
+    document.getElementById('logoImg').src = url;
+    document.getElementById('logoImg').style.display = 'block';
+    document.getElementById('logoPlaceholder').style.display = 'none';
+    APP.toast('Logo actualizado');
+  }
+}
+
+async function uploadCover(input) {
+  if (!input.files[0]) return;
+  APP.toast('Subiendo portada...', 'info');
+  var url = await uploadFile(input.files[0], 'covers');
+  if (url) {
+    await fetch('/api/businesses/' + bizId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({ cover_photo: url })
+    });
+    var ci = document.getElementById('coverImg');
+    ci.src = url; ci.style.display = 'block';
+    APP.toast('Portada actualizada');
+  }
+}
+
+async function uploadPhotos(input) {
+  var files = Array.from(input.files);
+  for (var i = 0; i < files.length; i++) {
+    APP.toast('Subiendo foto ' + (i+1) + ' de ' + files.length + '...', 'info');
+    var url = await uploadFile(files[i], 'businesses');
+    if (url) {
+      await fetch('/api/businesses/' + bizId + '/photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify({ url: url })
+      });
+    }
+  }
+  // Reload photos
+  var res = await fetch('/api/businesses/' + bizId).then(function(r){ return r.json(); });
+  if (res.success) { biz = res.data; renderPhotos(); APP.toast('Fotos guardadas'); }
+}
+
+async function uploadFile(file, folder) {
+  var form = new FormData();
+  form.append('image', file);
+  form.append('folder', folder);
+  var res = await fetch('/api/upload', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + getToken() },
+    body: form
+  }).then(function(r){ return r.json(); });
+  return res.success ? res.data.url : null;
+}
+
+async function saveChanges() {
+  var btn = document.getElementById('saveBtn');
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+
+  var payload = {
+    name:            document.getElementById('f_name').value.trim(),
+    category_id:     document.getElementById('f_category').value,
+    description:     document.getElementById('f_description').value,
+    what_we_offer:   document.getElementById('f_what_we_offer').value,
+    phone:           document.getElementById('f_phone').value,
+    whatsapp:        document.getElementById('f_whatsapp').value,
+    email:           document.getElementById('f_email').value,
+    website:         document.getElementById('f_website').value,
+    address:         document.getElementById('f_address').value,
+    city:            document.getElementById('f_city').value,
+    zone:            document.getElementById('f_zone').value,
+    latitude:        document.getElementById('f_latitude').value  || null,
+    longitude:       document.getElementById('f_longitude').value || null,
+    google_maps_url: document.getElementById('f_maps').value      || null,
+    accepts_delivery: document.getElementById('f_delivery').checked ? 1 : 0,
+    is_active:        document.getElementById('f_active').checked  ? 1 : 0,
+  };
+
+  if (!payload.name) { APP.toast('El nombre es requerido', 'error'); btn.textContent = '💾 Guardar cambios'; btn.disabled = false; return; }
+
+  var res = await fetch('/api/businesses/' + bizId, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+    body: JSON.stringify(payload)
+  }).then(function(r){ return r.json(); });
+
+  if (res.success) {
+    APP.toast('¡Cambios guardados!');
+    setTimeout(function() { window.location.href = 'negocios.html'; }, 1000);
+  } else {
+    APP.toast(res.message || 'Error al guardar', 'error');
+    btn.textContent = '💾 Guardar cambios'; btn.disabled = false;
+  }
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
+function toggleSidebar() {
+  var s = document.querySelector('.sidebar');
+  var o = document.getElementById('sidebarOverlay');
+  if(s) s.classList.toggle('open');
+  if(o) o.classList.toggle('open');
+}
+
+init();
+</script>
+</body>
+</html>
