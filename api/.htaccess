@@ -1,33 +1,13 @@
 Options -Indexes
-Options -ExecCGI
-
-# Prevent access to sensitive files
-<FilesMatch "\.(env|log|sql|md|git|json|lock|bak|config\.php)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
-
-# PHP security
-php_flag display_errors Off
-php_flag log_errors On
-php_value error_log /tmp/pedidos_errors.log
-
-# Route all requests to index.php
 RewriteEngine On
+
+# Pasar TODAS las peticiones a index.php independientemente de la profundidad
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ index.php [QSA,L]
 
-# Force HTTPS (uncomment in production)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# Security headers
-<IfModule mod_headers.c>
-    Header always set X-Content-Type-Options nosniff
-    Header always set X-Frame-Options SAMEORIGIN
-    Header always set X-XSS-Protection "1; mode=block"
-    Header always set Referrer-Policy strict-origin-when-cross-origin
-    Header unset Server
-    Header unset X-Powered-By
-</IfModule>
+# Bloquear acceso directo a archivos PHP excepto index.php
+<FilesMatch "^(?!index\.php$).*\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
