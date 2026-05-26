@@ -195,44 +195,45 @@ function renderResponse() {
 // ── Chat ──────────────────────────────────────────────────────
 async function loadMessages() {
   try {
-    var url = '/api/orders/'+orderId+'/messages'+(lastMsgId>0?'?after='+lastMsgId:'');
-    var res = await fetch(url, { headers:{'Authorization':'Bearer '+getToken()} }).then(function(r){ return r.json(); });
+    // Always fetch all messages — simple and reliable
+    var res = await fetch('/api/orders/'+orderId+'/messages', {
+      headers:{'Authorization':'Bearer '+getToken()}
+    }).then(function(r){ return r.json(); });
     if (!res.success) return;
 
     // Update total if changed
     if (res.data.order && parseFloat(res.data.order.total) !== parseFloat(order.total)) {
-      order = res.data.order; renderItems();
+      order = res.data.order;
+      if (typeof renderItems === 'function') renderItems();
     }
 
     var msgs = res.data.messages || [];
-    if (!msgs.length && lastMsgId === 0) {
-      document.getElementById('chatMessages').innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.85rem;padding:20px">Sin mensajes aún. ¡Escribe algo!</div>';
+    var container = document.getElementById('chatMessages');
+
+    if (!msgs.length) {
+      container.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.85rem;padding:20px">Sin mensajes aún. ¡Escribe algo!</div>';
       return;
     }
-    if (!msgs.length) return;
 
     var maxId = Math.max.apply(null, msgs.map(function(m){ return parseInt(m.id); }));
-    if (maxId <= lastMsgId) return;
+    if (maxId === lastMsgId) return; // Nothing new
 
-    if (lastMsgId === 0) {
-      // First load
-      document.getElementById('chatMessages').innerHTML = msgs.map(buildMsg).join('');
-    } else {
-      // Append new ones
-      var container = document.getElementById('chatMessages');
-      var atBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 60;
-      msgs.forEach(function(m) {
-        if (!document.getElementById('cm-'+m.id)) container.insertAdjacentHTML('beforeend', buildMsg(m));
-      });
-      if (atBottom) container.scrollTop = container.scrollHeight;
-    }
+    var atBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 80;
+
+    // Append only messages not yet in DOM
+    var hadNew = false;
+    msgs.forEach(function(m) {
+      if (!document.getElementById('cm-'+m.id)) {
+        var empty = container.querySelector('.chat-empty');
+        if (empty) empty.remove();
+        container.insertAdjacentHTML('beforeend', buildMsg(m));
+        hadNew = true;
+      }
+    });
+
+    if (hadNew && atBottom) container.scrollTop = container.scrollHeight;
     lastMsgId = maxId;
-    // Always scroll on first load
-    if (lastMsgId === maxId && msgs.length) {
-      var c = document.getElementById('chatMessages');
-      c.scrollTop = c.scrollHeight;
-    }
-  } catch(e) { console.log('chat err',e); }
+  } catch(e) { console.log('chat err', e); }
 }
 
 function buildMsg(m) {
