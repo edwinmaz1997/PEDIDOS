@@ -132,6 +132,24 @@ async function init() {
     business = data.data;
     renderBizInfo();
     renderProducts();
+
+    // Load delivery zones (only ones this business covers)
+    if (business.accepts_delivery) {
+      var zRes = await fetch('/api/businesses/' + businessId + '/zones').then(function(r){ return r.json(); });
+      var zones = (zRes.data || []).filter(function(z){ return z.covered == 1; });
+      var zoneSel = document.getElementById('zoneSelect');
+      var zoneWrap = document.getElementById('zoneSelectWrap');
+      if (zones.length) {
+        zones.forEach(function(z) {
+          var opt = document.createElement('option');
+          opt.value = z.price;
+          opt.dataset.name = z.name;
+          opt.textContent = z.name + ' — Q' + parseFloat(z.price).toFixed(2);
+          zoneSel.appendChild(opt);
+        });
+        zoneWrap.style.display = 'block';
+      }
+    }
   } catch(e) { console.error(e); }
 }
 
@@ -148,24 +166,6 @@ function renderBizInfo() {
       </div>
     </div>
   `;
-  // Load delivery zones (only ones this business covers)
-  if (business.accepts_delivery) {
-    var zRes = await fetch('/api/businesses/' + businessId + '/zones').then(function(r){ return r.json(); });
-    var zones = (zRes.data || []).filter(function(z){ return z.covered == 1; });
-    var zoneSel = document.getElementById('zoneSelect');
-    var zoneWrap = document.getElementById('zoneSelectWrap');
-    if (zones.length) {
-      zones.forEach(function(z) {
-        var opt = document.createElement('option');
-        opt.value = z.price;
-        opt.dataset.name = z.name;
-        opt.textContent = z.name + ' — Q' + parseFloat(z.price).toFixed(2);
-        zoneSel.appendChild(opt);
-      });
-      zoneWrap.style.display = 'block';
-    }
-  }
-
   // Enable/disable delivery button
   if (!business.accepts_delivery) {
     document.getElementById('deliveryBtn').disabled = true;
