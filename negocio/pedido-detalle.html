@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedido — Panel Negocio NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.order-detail-grid { display:grid; grid-template-columns:1fr 360px; gap:20px; }
+@media(max-width:768px){ .order-detail-grid { grid-template-columns:1fr; } }
+.detail-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:20px; margin-bottom:16px; }
+.detail-card h3 { font-size:1rem; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+.item-row { display:flex; justify-content:space-between; font-size:.9rem; padding:6px 0; border-bottom:1px solid var(--border); }
+.item-row:last-child { border-bottom:none; }
+.fee-row { display:flex; justify-content:space-between; font-size:.85rem; color:var(--muted); margin-bottom:6px; }
+.total-final { display:flex; justify-content:space-between; font-weight:700; font-size:1.1rem; border-top:1px solid var(--border); padding-top:10px; margin-top:6px; }
+.status-btn { padding:9px 18px; border-radius:var(--radius-sm); border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600; font-size:.85rem; transition:var(--transition); }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.8rem;margin-top:4px" id="sidebarUser"></div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html" class="active">📋 Pedidos</a></li>
+      <li><a href="perfil.html">🏪 Mi Perfil</a></li>
+      <li><a href="productos.html">📦 Productos</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:.9rem">← Pedidos</a>
+      <span style="color:var(--border)">/</span>
+      <h1 style="font-size:1.4rem" id="pageTitle">Pedido</h1>
+    </div>
+
+    <div id="loadingState" class="loading-state"><div class="spinner"></div></div>
+    <div id="content" style="display:none">
+      <div class="order-detail-grid">
+
+        <!-- Left -->
+        <div>
+          <!-- Actions -->
+          <div class="detail-card" id="actionsCard">
+            <h3>Acciones</h3>
+            <div id="actionButtons"></div>
+          </div>
+
+          <!-- Edit total -->
+          <div class="detail-card" id="editTotalCard">
+            <h3>💰 Editar total</h3>
+            <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px">Ajusta el subtotal si el cliente agregó productos personalizados.</p>
+            <div class="form-group">
+              <label>Subtotal (Q)</label>
+              <input type="number" id="newSubtotal" step="0.50" min="0" placeholder="0.00" style="max-width:200px">
+            </div>
+            <div id="totalPreview" style="font-size:.85rem;color:var(--muted);margin-bottom:12px"></div>
+            <button class="btn-primary" onclick="updateTotal()" style="padding:9px 20px">Actualizar total</button>
+          </div>
+
+          <!-- Items -->
+          <div class="detail-card">
+            <h3>Productos del pedido</h3>
+            <div id="itemsList"></div>
+            <div style="margin-top:12px">
+              <div class="fee-row"><span>Subtotal</span><span id="subtotalVal">—</span></div>
+              <div class="fee-row"><span>Tarifa de servicio</span><span id="serviceFeeVal">—</span></div>
+              <div class="fee-row" id="deliveryFeeRow" style="display:none"><span>Delivery</span><span id="deliveryFeeVal">—</span></div>
+              <div class="total-final"><span>Total</span><span id="totalVal" style="color:var(--blue)">—</span></div>
+            </div>
+          </div>
+
+          <!-- Client info -->
+          <div class="detail-card">
+            <h3>Cliente</h3>
+            <div id="clientInfo"></div>
+          </div>
+        </div>
+
+        <!-- Right: Chat -->
+        <div>
+          <div class="detail-card">
+            <h3>💬 Chat con el cliente</h3>
+            <div class="chat-wrap">
+              <div class="chat-messages" id="chatMessages">
+                <div class="loading-state" style="padding:20px"><div class="spinner"></div></div>
+              </div>
+              <div class="chat-input-wrap">
+                <textarea class="chat-input" id="chatInput" placeholder="Escribe un mensaje..." rows="1" onkeydown="handleKey(event)"></textarea>
+                <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+(function() {
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('tk=') !== -1) {
+    var parts = hash.substring(1).split('&');
+    var tk = '', us = '';
+    parts.forEach(function(p) {
+      if (p.indexOf('tk=') === 0) tk = p.substring(3);
+      if (p.indexOf('us=') === 0) us = decodeURIComponent(p.substring(3));
+    });
+    if (tk) {
+      localStorage.setItem('nuevaexpress_token', tk);
+      if (us) localStorage.setItem('nuevaexpress_user', us);
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  }
+})();
+
+var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+if (!localStorage.getItem('nuevaexpress_token') || user.role !== 'negocio') window.location.href = '/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name || '';
+
+function getToken() { return localStorage.getItem('nuevaexpress_token'); }
+
+var orderId = new URLSearchParams(window.location.search).get('id');
+if (!orderId) window.location.href = 'index.html';
+
+var order = null;
+var pollInterval = null;
+
+var statusLabels = { pendiente:'⏳ Pendiente', aceptado:'✅ Aceptado', en_preparacion:'👨‍🍳 En preparación', listo:'📦 Listo', en_camino:'🛵 En camino', entregado:'✔ Entregado', cancelado:'✕ Cancelado' };
+var nextStatus   = { aceptado:'en_preparacion', en_preparacion:'listo', listo:'entregado' };
+var nextLabel    = { aceptado:'Iniciar preparación', en_preparacion:'Marcar listo', listo:'Marcar entregado' };
+
+async function init() {
+  var res = await fetch('/api/orders/' + orderId, {
+    headers: { 'Authorization': 'Bearer ' + getToken() }
+  }).then(function(r){ return r.json(); });
+  if (!res.success) { window.location.href = 'index.html'; return; }
+  order = res.data;
+
+  document.getElementById('pageTitle').textContent = order.order_number;
+  renderActions();
+  renderItems();
+  renderClientInfo();
+  initTotalEdit();
+
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+
+  loadMessages();
+  pollInterval = setInterval(loadMessages, 8000);
+}
+
+function renderActions() {
+  var btns = '';
+  var s = order.status;
+
+  if (s === 'pendiente') {
+    btns = '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+      '<div style="flex:1;min-width:200px"><div class="form-group" style="margin-bottom:8px"><label style="font-size:.8rem">Mensaje de respuesta</label><textarea id="bizResponse" rows="2" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif;font-size:.85rem" placeholder="Indicaciones, confirmación..."></textarea></div>' +
+      '<div class="form-group" style="margin-bottom:10px"><label style="font-size:.8rem">Tiempo estimado (min)</label><input type="number" id="estTime" min="1" max="180" placeholder="30" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif"></div>' +
+      '<div style="display:flex;gap:8px">' +
+      '<button class="btn-primary" onclick="respond(\'aceptar\')" style="padding:9px 20px">✅ Aceptar</button>' +
+      '<button class="status-btn" onclick="respond(\'rechazar\')" style="background:#fdf0f0;color:var(--danger);border:1px solid #f5c2c2">✕ Rechazar</button>' +
+      '</div></div></div>';
+  } else {
+    btns = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">';
+    btns += '<span class="badge ' + getBadge(s) + '" style="font-size:.9rem;padding:6px 14px">' + (statusLabels[s]||s) + '</span>';
+    if (nextStatus[s]) {
+      btns += '<button class="btn-primary" onclick="advanceStatus(\''+nextStatus[s]+'\')" style="padding:9px 18px">' + nextLabel[s] + '</button>';
+    }
+    if (s !== 'cancelado' && s !== 'entregado') {
+      btns += '<button class="status-btn" onclick="advanceStatus(\'cancelado\')" style="background:#fdf0f0;color:var(--danger);border:1px solid #f5c2c2">✕ Cancelar</button>';
+    }
+    btns += '</div>';
+  }
+
+  document.getElementById('actionButtons').innerHTML = btns;
+}
+
+function initTotalEdit() {
+  var s = order.status;
+  var card = document.getElementById('editTotalCard');
+  if (['pendiente','aceptado','en_preparacion'].includes(s)) {
+    document.getElementById('newSubtotal').value = parseFloat(order.subtotal||0).toFixed(2);
+    updateTotalPreview();
+    document.getElementById('newSubtotal').addEventListener('input', updateTotalPreview);
+  } else {
+    card.style.display = 'none';
+  }
+}
+
+function updateTotalPreview() {
+  var sub  = parseFloat(document.getElementById('newSubtotal').value) || 0;
+  var svc  = parseFloat(order.service_fee||0);
+  var del  = parseFloat(order.delivery_fee||0);
+  var tot  = sub + svc + del;
+  document.getElementById('totalPreview').innerHTML =
+    'Subtotal Q'+sub.toFixed(2)+' + Q'+svc.toFixed(2)+' servicio' + (del>0?' + Q'+del.toFixed(2)+' delivery':'') + ' = <strong>Q'+tot.toFixed(2)+'</strong>';
+}
+
+async function updateTotal() {
+  var sub = parseFloat(document.getElementById('newSubtotal').value);
+  if (isNaN(sub) || sub < 0) { APP.toast('Ingresa un monto válido', 'error'); return; }
+  var res = await fetch('/api/orders/'+orderId+'/total', {
+    method: 'PUT',
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken() },
+    body: JSON.stringify({ subtotal: sub })
+  }).then(function(r){ return r.json(); });
+  if (res.success) {
+    order.subtotal     = res.data.subtotal;
+    order.total        = res.data.total;
+    order.service_fee  = res.data.service_fee;
+    order.delivery_fee = res.data.delivery_fee;
+    renderItems();
+    APP.toast('Total actualizado y notificado al cliente');
+    loadMessages();
+  } else APP.toast(res.message||'Error', 'error');
+}
+
+function renderItems() {
+  var items = order.items || [];
+  document.getElementById('itemsList').innerHTML = items.map(function(i) {
+    return '<div class="item-row"><span>' + esc(i.product_name) + ' ×' + i.quantity + (i.notes?' <em style="color:var(--muted);font-size:.8rem">('+esc(i.notes)+')</em>':'') + '</span>' +
+      (i.unit_price ? '<span>Q'+(parseFloat(i.unit_price)*i.quantity).toFixed(2)+'</span>' : '') + '</div>';
+  }).join('') || '<p style="color:var(--muted);font-size:.9rem">Pedido personalizado — ver notas del cliente</p>';
+
+  if (order.notes) {
+    document.getElementById('itemsList').innerHTML += '<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);margin-top:8px;font-size:.85rem"><strong>Nota:</strong> ' + esc(order.notes) + '</div>';
+  }
+
+  document.getElementById('subtotalVal').textContent  = 'Q'+parseFloat(order.subtotal||0).toFixed(2);
+  document.getElementById('serviceFeeVal').textContent = 'Q'+parseFloat(order.service_fee||0).toFixed(2);
+  document.getElementById('totalVal').textContent     = 'Q'+parseFloat(order.total||0).toFixed(2);
+  if (parseFloat(order.delivery_fee)>0) {
+    document.getElementById('deliveryFeeRow').style.display='flex';
+    document.getElementById('deliveryFeeVal').textContent='Q'+parseFloat(order.delivery_fee).toFixed(2);
+  }
+}
+
+function renderClientInfo() {
+  document.getElementById('clientInfo').innerHTML =
+    '<div style="font-weight:600">' + esc(order.client_name||'') + '</div>' +
+    (order.client_phone ? '<a href="tel:'+esc(order.client_phone)+'" style="color:var(--blue);font-size:.9rem">📞 '+esc(order.client_phone)+'</a><br>' : '') +
+    (order.delivery_type==='delivery' ?
+      '<div style="font-size:.85rem;color:var(--muted);margin-top:6px">🛵 Delivery: '+esc(order.delivery_address||'')+'</div>' :
+      '<div style="font-size:.85rem;color:var(--muted);margin-top:6px">🏃 Recoger en negocio</div>') +
+    '<div style="font-size:.8rem;color:var(--muted);margin-top:4px">'+new Date(order.created_at).toLocaleString('es-GT')+'</div>';
+}
+
+async function respond(action) {
+  var response = document.getElementById('bizResponse')?.value || '';
+  var estTime  = parseInt(document.getElementById('estTime')?.value) || null;
+  var res = await fetch('/api/orders/'+orderId+'/respond', {
+    method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+    body: JSON.stringify({ action, response, estimated_time: estTime })
+  }).then(function(r){ return r.json(); });
+  if (res.success) { APP.toast(action==='aceptar'?'Pedido aceptado':'Pedido rechazado'); order.status=action==='aceptar'?'aceptado':'cancelado'; renderActions(); loadMessages(); }
+  else APP.toast(res.message||'Error','error');
+}
+
+async function advanceStatus(status) {
+  var res = await fetch('/api/orders/'+orderId+'/status', {
+    method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+    body: JSON.stringify({ status })
+  }).then(function(r){ return r.json(); });
+  if (res.success) { APP.toast('Estado actualizado'); order.status=status; renderActions(); }
+  else APP.toast(res.message||'Error','error');
+}
+
+async function loadMessages() {
+  var res = await fetch('/api/orders/'+orderId+'/messages', {
+    headers:{'Authorization':'Bearer '+getToken()}
+  }).then(function(r){ return r.json(); });
+  if (!res.success) return;
+  renderMessages(res.data.messages||[]);
+}
+
+function renderMessages(messages) {
+  var container = document.getElementById('chatMessages');
+  var wasAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
+  container.innerHTML = messages.length ? messages.map(function(m) {
+    var mine   = m.sender_id == user.id;
+    var system = m.message.startsWith('💰');
+    var cls    = system ? 'system' : (mine ? 'mine' : 'theirs');
+    return '<div class="chat-msg '+cls+'">' +
+      (!mine&&!system ? '<div class="chat-sender">'+esc(m.sender_name)+'</div>' : '') +
+      '<div class="chat-bubble">'+esc(m.message)+'</div>' +
+      '<div class="chat-time">'+formatTime(m.created_at)+'</div>' +
+    '</div>';
+  }).join('') : '<div style="text-align:center;color:var(--muted);font-size:.85rem;padding:20px">Sin mensajes aún</div>';
+  if (wasAtBottom) container.scrollTop = container.scrollHeight;
+}
+
+async function sendMessage() {
+  var input = document.getElementById('chatInput');
+  var msg   = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  await fetch('/api/orders/'+orderId+'/messages', {
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+    body: JSON.stringify({message: msg})
+  });
+  loadMessages();
+}
+
+function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }
+function getBadge(s) { return {pendiente:'badge-pending',aceptado:'badge-accepted',en_preparacion:'badge-delivery',listo:'badge-active',en_camino:'badge-delivery',entregado:'badge-done',cancelado:'badge-cancel'}[s]||''; }
+function formatTime(str) { var d=new Date(str); return d.toLocaleTimeString('es-GT',{hour:'2-digit',minute:'2-digit'})+' · '+d.toLocaleDateString('es-GT'); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function doLogout() { localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar() { var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+init();
+window.addEventListener('beforeunload', function(){ clearInterval(pollInterval); });
+</script>
+</body>
+</html>

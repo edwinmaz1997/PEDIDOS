@@ -16,6 +16,7 @@ require_once __DIR__ . '/controllers/OrderController.php';
 require_once __DIR__ . '/controllers/DeliveryController.php';
 require_once __DIR__ . '/controllers/AdminNotificationController.php';
 require_once __DIR__ . '/controllers/PhotoController.php';
+require_once __DIR__ . '/controllers/OrderMessageController.php';
 
 // CORS
 $allowedOrigins = ['https://nuevaexpress.com', 'https://www.nuevaexpress.com'];

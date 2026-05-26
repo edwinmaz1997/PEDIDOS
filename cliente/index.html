@@ -117,7 +117,8 @@ function renderOrder(o) {
       ${o.notes ? `<div style="font-size:.85rem;color:var(--muted);margin-top:8px">📝 ${esc(o.notes)}</div>` : ''}
       ${o.business_response ? `<div class="order-response"><strong>Respuesta del negocio:</strong>${esc(o.business_response)}${o.estimated_time ? ` — ⏱ ~${o.estimated_time} min` : ''}</div>` : ''}
       <div class="order-actions">
-        ${o.status === 'entregado' ? `<button class="btn-ghost" style="font-size:.85rem;padding:7px 14px" onclick="window.location.href='/index.html'">🔁 Pedir de nuevo</button>` : ''}
+        <a href="pedido-detalle.html?id=${o.id}" class="btn-ghost" style="font-size:.85rem;padding:7px 14px">💬 Ver detalle y chat</a>
+        ${o.status === 'entregado' ? `<a href="/index.html" class="btn-ghost" style="font-size:.85rem;padding:7px 14px">🔁 Pedir de nuevo</a>` : ''}
       </div>
     </div>
   `;

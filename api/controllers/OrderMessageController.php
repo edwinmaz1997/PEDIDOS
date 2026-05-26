@@ -1,0 +1,148 @@
+<?php
+// ============================================================
+// Order Messages Controller — Chat por pedido
+// ============================================================
+class OrderMessageController {
+    private $db;
+    public function __construct() { $this->db = Database::connect(); }
+
+    // GET /api/orders/{id}/messages
+    public function index($orderId) {
+        $user  = AuthMiddleware::authenticate();
+        $order = $this->getOrder($orderId, $user);
+
+        // Mark messages as read
+        $this->db->prepare("UPDATE order_messages SET is_read = 1 WHERE order_id = ? AND sender_id != ?")
+                 ->execute([$orderId, $user['id']]);
+
+        $stmt = $this->db->prepare("
+            SELECT m.*, u.name as sender_name
+            FROM order_messages m
+            JOIN users u ON m.sender_id = u.id
+            WHERE m.order_id = ?
+            ORDER BY m.created_at ASC
+        ");
+        $stmt->execute([$orderId]);
+        $messages = $stmt->fetchAll();
+
+        // Unread count for this user
+        $unread = $this->db->prepare("SELECT COUNT(*) FROM order_messages WHERE order_id = ? AND sender_id != ? AND is_read = 0");
+        $unread->execute([$orderId, $user['id']]);
+
+        Response::success([
+            'messages'     => $messages,
+            'order'        => $order,
+            'unread_count' => (int)$unread->fetchColumn()
+        ]);
+    }
+
+    // POST /api/orders/{id}/messages
+    public function store($orderId, $body) {
+        $user    = AuthMiddleware::authenticate();
+        $order   = $this->getOrder($orderId, $user);
+        $message = trim($body['message'] ?? '');
+
+        if (!$message) Response::error('El mensaje no puede estar vacío', 400);
+        if (strlen($message) > 1000) Response::error('Mensaje muy largo (máx 1000 caracteres)', 400);
+
+        $role = $user['role'];
+        if (!in_array($role, ['cliente','negocio','admin'])) Response::forbidden();
+
+        $this->db->prepare("INSERT INTO order_messages (order_id, sender_id, sender_role, message) VALUES (?,?,?,?)")
+                 ->execute([$orderId, $user['id'], $role, $message]);
+
+        // Notify the other party
+        if ($role === 'cliente') {
+            // Notify business
+            $bizStmt = $this->db->prepare("SELECT user_id FROM businesses WHERE id = ?");
+            $bizStmt->execute([$order['business_id']]);
+            $biz = $bizStmt->fetch();
+            if ($biz) {
+                $this->notify($biz['user_id'], 'new_message', 'Nuevo mensaje', "El cliente envió un mensaje en el pedido #{$order['order_number']}");
+            }
+        } else {
+            // Notify client
+            $this->notify($order['client_id'], 'new_message', 'Respuesta del negocio', "El negocio respondió en tu pedido #{$order['order_number']}");
+        }
+
+        Response::success(['id' => $this->db->lastInsertId()], 'Mensaje enviado', 201);
+    }
+
+    // PUT /api/orders/{id}/total — negocio updates total
+    public function updateTotal($orderId, $body) {
+        $user  = AuthMiddleware::requireRole(['negocio', 'admin']);
+        $order = $this->getOrder($orderId, $user);
+
+        if (!in_array($order['status'], ['pendiente', 'aceptado', 'en_preparacion'])) {
+            Response::error('No se puede modificar el total en este estado', 400);
+        }
+
+        $subtotal    = isset($body['subtotal'])    ? (float)$body['subtotal']    : (float)$order['subtotal'];
+        $serviceFee  = (float)$order['service_fee'];
+        $deliveryFee = (float)$order['delivery_fee'];
+        $total       = $subtotal + $serviceFee + $deliveryFee;
+
+        $this->db->prepare("UPDATE orders SET subtotal = ?, total = ? WHERE id = ?")
+                 ->execute([$subtotal, $total, $orderId]);
+
+        // Notify client
+        $this->notify($order['client_id'], 'total_updated', 'Total actualizado',
+            "El negocio actualizó el total de tu pedido #{$order['order_number']} a Q" . number_format($total, 2));
+
+        // Send system message
+        $this->db->prepare("INSERT INTO order_messages (order_id, sender_id, sender_role, message) VALUES (?,?,?,?)")
+                 ->execute([$orderId, $user['id'], $user['role'],
+                    "💰 Total actualizado: Subtotal Q" . number_format($subtotal, 2) . " + Q{$serviceFee} servicio" . ($deliveryFee > 0 ? " + Q{$deliveryFee} delivery" : "") . " = Q" . number_format($total, 2)]);
+
+        Response::success([
+            'subtotal'    => $subtotal,
+            'service_fee' => $serviceFee,
+            'delivery_fee'=> $deliveryFee,
+            'total'       => $total
+        ], 'Total actualizado');
+    }
+
+    // GET /api/orders/unread — unread message counts per order
+    public function unreadCounts() {
+        $user = AuthMiddleware::authenticate();
+        $stmt = $this->db->prepare("
+            SELECT order_id, COUNT(*) as unread
+            FROM order_messages
+            WHERE sender_id != ? AND is_read = 0
+            AND order_id IN (
+                SELECT id FROM orders WHERE client_id = ? OR business_id IN (
+                    SELECT id FROM businesses WHERE user_id = ?
+                )
+            )
+            GROUP BY order_id
+        ");
+        $stmt->execute([$user['id'], $user['id'], $user['id']]);
+        $counts = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $counts[$row['order_id']] = (int)$row['unread'];
+        }
+        Response::success($counts);
+    }
+
+    private function getOrder($orderId, $user) {
+        $stmt = $this->db->prepare("SELECT * FROM orders WHERE id = ?");
+        $stmt->execute([$orderId]);
+        $order = $stmt->fetch();
+        if (!$order) Response::notFound('Pedido no encontrado');
+
+        // Verify access
+        if ($user['role'] === 'admin') return $order;
+        if ($user['role'] === 'cliente' && $order['client_id'] == $user['id']) return $order;
+        if ($user['role'] === 'negocio') {
+            $biz = $this->db->prepare("SELECT id FROM businesses WHERE user_id = ? AND id = ?");
+            $biz->execute([$user['id'], $order['business_id']]);
+            if ($biz->fetch()) return $order;
+        }
+        Response::forbidden();
+    }
+
+    private function notify($userId, $type, $title, $message) {
+        $this->db->prepare("INSERT INTO notifications (user_id, type, title, message) VALUES (?,?,?,?)")
+                 ->execute([$userId, $type, $title, $message]);
+    }
+}

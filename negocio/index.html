@@ -112,6 +112,7 @@ function renderOrder(o) {
       <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
         <span>Total</span><span style="color:var(--accent)">Q${parseFloat(o.total).toFixed(2)}</span>
       </div>
+      <div style="margin-top:8px"><a href="pedido-detalle.html?id=${o.id}" class="btn-ghost" style="font-size:.82rem;padding:6px 14px">💬 Chat y detalle</a></div>
       ${canRespond ? `
         <div class="respond-form">
           <h4>Responder pedido</h4>

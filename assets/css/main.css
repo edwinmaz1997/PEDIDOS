@@ -497,3 +497,26 @@ img { max-width: 100%; display: block; }
   .sidebar.open { left: 0; }
   .main-content { margin-left: 0 !important; padding: 70px 16px 24px; }
 }
+
+/* ── Chat / Order Messages ───────────────────────────────── */
+.chat-wrap { display:flex; flex-direction:column; height:420px; background:var(--off-white); border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
+.chat-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+.chat-msg { display:flex; flex-direction:column; max-width:75%; }
+.chat-msg.mine { align-self:flex-end; align-items:flex-end; }
+.chat-msg.theirs { align-self:flex-start; align-items:flex-start; }
+.chat-bubble { padding:10px 14px; border-radius:16px; font-size:.9rem; line-height:1.5; word-break:break-word; }
+.chat-msg.mine .chat-bubble { background:var(--blue); color:white; border-radius:16px 16px 4px 16px; }
+.chat-msg.theirs .chat-bubble { background:white; color:var(--ink); border:1px solid var(--border); border-radius:16px 16px 16px 4px; }
+.chat-msg.system .chat-bubble { background:#fff8e1; color:#795548; border:1px solid #ffe082; border-radius:10px; font-size:.82rem; align-self:center; max-width:90%; }
+.chat-time { font-size:.72rem; color:var(--muted); margin-top:3px; }
+.chat-sender { font-size:.75rem; color:var(--muted); margin-bottom:2px; font-weight:600; }
+.chat-input-wrap { display:flex; gap:8px; padding:12px; background:white; border-top:1px solid var(--border); }
+.chat-input { flex:1; padding:10px 14px; border:1.5px solid var(--border); border-radius:24px; font-family:'DM Sans',sans-serif; font-size:.9rem; outline:none; resize:none; }
+.chat-input:focus { border-color:var(--blue); }
+.chat-send-btn { background:var(--blue); color:white; border:none; border-radius:50%; width:40px; height:40px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; transition:var(--transition); }
+.chat-send-btn:hover { background:var(--blue-dark); }
+.unread-badge { background:var(--danger); color:white; border-radius:50%; width:18px; height:18px; font-size:.7rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; margin-left:6px; }
+.total-edit-wrap { background:#e3f2fd; border-radius:var(--radius-sm); padding:14px; margin-bottom:12px; }
+.total-edit-wrap h4 { font-size:.9rem; margin-bottom:10px; color:var(--blue); }
+.total-row { display:flex; justify-content:space-between; font-size:.85rem; margin-bottom:6px; color:var(--muted); }
+.total-row.final { font-weight:700; color:var(--ink); font-size:1rem; border-top:1px solid var(--border); padding-top:8px; margin-top:4px; }

@@ -276,3 +276,20 @@ CREATE TABLE IF NOT EXISTS password_resets (
     INDEX idx_token (token),
     INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- ORDER MESSAGES (chat por pedido)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS order_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    sender_id INT NOT NULL,
+    sender_role ENUM('cliente','negocio','admin') NOT NULL,
+    message TEXT NOT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    INDEX idx_order (order_id),
+    INDEX idx_unread (order_id, is_read)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
