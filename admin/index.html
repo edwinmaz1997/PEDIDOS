@@ -23,6 +23,8 @@
       <li><a href="negocios.html">🏪 Negocios</a></li>
       <li><a href="usuarios.html">👥 Usuarios</a></li>
       <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="buscar.html">🔍 Buscador</a></li>
+      <li><a href="reportes.html">📊 Reportes</a></li>
       <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
     </ul>
   </aside>
@@ -39,8 +41,11 @@
       <div class="stat-card"><div class="stat-label">Deliveries disp.</div><div class="stat-value" id="sDeliveries">—</div></div>
     </div>
 
-    <h3 style="margin-bottom:16px;font-size:1.1rem">Pedidos recientes</h3>
-    <div style="overflow-x:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <h3 style="font-size:1.1rem">Pedidos recientes</h3>
+      <a href="reportes.html" class="btn-primary" style="padding:8px 16px;font-size:.85rem">📊 Reportes</a>
+    </div>
+    <div class="table-responsive">
       <table class="data-table" id="recentTable">
         <thead><tr><th>#</th><th>Cliente</th><th>Negocio</th><th>Total</th><th>Tipo</th><th>Estado</th><th>Fecha</th></tr></thead>
         <tbody id="recentBody"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Cargando...</td></tr></tbody>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buscador — Admin NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.search-hero { background:linear-gradient(135deg,var(--charcoal),#16213e); padding:32px 24px; border-radius:var(--radius); margin-bottom:24px; }
+.search-hero h2 { color:white; font-size:1.4rem; margin-bottom:16px; }
+.search-hero-bar { display:flex; gap:10px; }
+.search-hero-bar input { flex:1; padding:12px 20px; border:none; border-radius:50px; font-family:'DM Sans',sans-serif; font-size:1rem; outline:none; }
+.search-hero-bar button { background:var(--blue); color:white; border:none; border-radius:50px; padding:12px 24px; font-weight:600; cursor:pointer; white-space:nowrap; transition:var(--transition); }
+.search-hero-bar button:hover { background:var(--blue-dark); }
+.result-section { margin-bottom:24px; }
+.result-section h3 { font-size:1rem; font-weight:700; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid var(--blue); display:flex; align-items:center; gap:8px; }
+.result-count { background:var(--blue); color:white; border-radius:20px; padding:2px 10px; font-size:.75rem; font-weight:600; }
+.result-item { background:white; border-radius:var(--radius-sm); border:1px solid var(--border); padding:14px 16px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; transition:var(--transition); }
+.result-item:hover { border-color:var(--blue); box-shadow:var(--shadow-sm); }
+.result-info { flex:1; }
+.result-title { font-weight:600; font-size:.95rem; margin-bottom:3px; }
+.result-sub { font-size:.8rem; color:var(--muted); }
+.result-actions { display:flex; gap:8px; flex-shrink:0; }
+.empty-search { text-align:center; padding:60px 24px; color:var(--muted); }
+.empty-search .icon { font-size:3rem; margin-bottom:12px; }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Administrador</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="negocios.html">🏪 Negocios</a></li>
+      <li><a href="usuarios.html">👥 Usuarios</a></li>
+      <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="buscar.html" class="active">🔍 Buscador</a></li>
+      <li><a href="reportes.html">📊 Reportes</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header"><h1>Buscador Global</h1><p>Encuentra clientes, pedidos y negocios</p></div>
+
+    <div class="search-hero">
+      <h2>🔍 ¿Qué estás buscando?</h2>
+      <div class="search-hero-bar">
+        <input type="text" id="searchInput" placeholder="Nombre, email, # pedido, negocio..." onkeydown="if(event.key==='Enter') doSearch()">
+        <button onclick="doSearch()">Buscar</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap" id="filterTabs">
+      <button class="cat-chip active" onclick="filterType('all',this)">Todos</button>
+      <button class="cat-chip" onclick="filterType('clientes',this)">👤 Clientes</button>
+      <button class="cat-chip" onclick="filterType('negocios',this)">🏪 Negocios</button>
+      <button class="cat-chip" onclick="filterType('pedidos',this)">📋 Pedidos</button>
+    </div>
+
+    <div id="results">
+      <div class="empty-search">
+        <div class="icon">🔍</div>
+        <p>Ingresa un término de búsqueda para comenzar</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+(function() {
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('tk=') !== -1) {
+    var parts = hash.substring(1).split('&');
+    var tk='',us='';
+    parts.forEach(function(p){ if(p.indexOf('tk=')===0)tk=p.substring(3); if(p.indexOf('us=')===0)us=decodeURIComponent(p.substring(3)); });
+    if(tk){ localStorage.setItem('nuevaexpress_token',tk); if(us)localStorage.setItem('nuevaexpress_user',us); history.replaceState(null,'',window.location.pathname); }
+  }
+})();
+var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if(!localStorage.getItem('nuevaexpress_token')||adminUser.role!=='admin') window.location.href='/cliente/login.html';
+function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
+
+var allData = { clientes:[], negocios:[], pedidos:[] };
+var activeFilter = 'all';
+
+async function loadAll() {
+  var [usersRes, bizsRes, ordersRes] = await Promise.all([
+    fetch('/api/admin/users',      {headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json()),
+    fetch('/api/admin/businesses', {headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json()),
+    fetch('/api/admin/orders',     {headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json()),
+  ]);
+  allData.clientes  = (usersRes.data||[]).filter(function(u){ return u.role!=='admin'; });
+  allData.negocios  = bizsRes.data||[];
+  allData.pedidos   = ordersRes.data||[];
+}
+
+async function doSearch() {
+  var q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) return;
+
+  if (!allData.clientes.length) {
+    document.getElementById('results').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+    await loadAll();
+  }
+
+  var clientes = allData.clientes.filter(function(u){
+    return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || (u.phone||'').includes(q);
+  });
+  var negocios = allData.negocios.filter(function(b){
+    return b.name.toLowerCase().includes(q) || (b.owner_name||'').toLowerCase().includes(q) || (b.city||'').toLowerCase().includes(q);
+  });
+  var pedidos = allData.pedidos.filter(function(o){
+    return (o.order_number||'').toLowerCase().includes(q) || (o.client_name||'').toLowerCase().includes(q) || (o.business_name||'').toLowerCase().includes(q);
+  });
+
+  renderResults(clientes, negocios, pedidos, q);
+}
+
+function filterType(type, btn) {
+  activeFilter = type;
+  document.querySelectorAll('#filterTabs .cat-chip').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  doSearch();
+}
+
+function renderResults(clientes, negocios, pedidos, q) {
+  var total = clientes.length + negocios.length + pedidos.length;
+  if (!total) {
+    document.getElementById('results').innerHTML = '<div class="empty-search"><div class="icon">😕</div><p>Sin resultados para "<strong>'+esc(q)+'</strong>"</p></div>';
+    return;
+  }
+
+  var html = '';
+
+  if ((activeFilter==='all'||activeFilter==='clientes') && clientes.length) {
+    html += '<div class="result-section"><h3>👤 Clientes <span class="result-count">'+clientes.length+'</span></h3>';
+    html += clientes.map(function(u){ return `
+      <div class="result-item">
+        <div class="result-info">
+          <div class="result-title">${esc(u.name)}</div>
+          <div class="result-sub">${esc(u.email)} ${u.phone?'· '+esc(u.phone):''} · <span class="badge ${u.is_active?'badge-done':'badge-cancel'}">${u.is_active?'Activo':'Inactivo'}</span></div>
+        </div>
+        <div class="result-actions">
+          <a href="editar-usuario.html?id=${u.id}" class="btn-ghost" style="padding:6px 14px;font-size:.82rem">✏️ Editar</a>
+        </div>
+      </div>`; }).join('');
+    html += '</div>';
+  }
+
+  if ((activeFilter==='all'||activeFilter==='negocios') && negocios.length) {
+    html += '<div class="result-section"><h3>🏪 Negocios <span class="result-count">'+negocios.length+'</span></h3>';
+    html += negocios.map(function(b){ return `
+      <div class="result-item">
+        <div class="result-info">
+          <div class="result-title">${esc(b.name)}</div>
+          <div class="result-sub">${esc(b.category_name)} · Dueño: ${esc(b.owner_name)} · ${esc(b.city||'')} · <span class="badge ${b.is_active?'badge-done':'badge-cancel'}">${b.is_active?'Activo':'Inactivo'}</span></div>
+        </div>
+        <div class="result-actions">
+          <a href="editar-negocio.html?id=${b.id}" class="btn-ghost" style="padding:6px 14px;font-size:.82rem">✏️ Editar</a>
+          <a href="reportes.html?negocio=${b.id}" class="btn-ghost" style="padding:6px 14px;font-size:.82rem">📊 Reporte</a>
+        </div>
+      </div>`; }).join('');
+    html += '</div>';
+  }
+
+  if ((activeFilter==='all'||activeFilter==='pedidos') && pedidos.length) {
+    var sbadge = {pendiente:'badge-pending',aceptado:'badge-accepted',en_preparacion:'badge-delivery',listo:'badge-active',en_camino:'badge-delivery',entregado:'badge-done',cancelado:'badge-cancel'};
+    var slabel = {pendiente:'Pendiente',aceptado:'Aceptado',en_preparacion:'En prep.',listo:'Listo',en_camino:'En camino',entregado:'Entregado',cancelado:'Cancelado'};
+    html += '<div class="result-section"><h3>📋 Pedidos <span class="result-count">'+pedidos.length+'</span></h3>';
+    html += pedidos.map(function(o){ return `
+      <div class="result-item">
+        <div class="result-info">
+          <div class="result-title">${esc(o.order_number)} — Q${parseFloat(o.total).toFixed(2)}</div>
+          <div class="result-sub">${esc(o.client_name)} → ${esc(o.business_name)} · ${new Date(o.created_at).toLocaleDateString('es-GT')} · <span class="badge ${sbadge[o.status]||''}">${slabel[o.status]||o.status}</span></div>
+        </div>
+        <div class="result-actions">
+          <span class="badge ${o.delivery_type==='delivery'?'badge-delivery':'badge-accepted'}">${o.delivery_type==='delivery'?'🛵 Delivery':'🏃 Recoger'}</span>
+        </div>
+      </div>`; }).join('');
+    html += '</div>';
+  }
+
+  document.getElementById('results').innerHTML = html || '<div class="empty-search"><div class="icon">😕</div><p>Sin resultados en esta categoría</p></div>';
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+// Auto-search if URL has query param
+var urlQ = new URLSearchParams(window.location.search).get('q');
+if (urlQ) { document.getElementById('searchInput').value = urlQ; doSearch(); }
+</script>
+<script>var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();</script>
+</body>
+</html>
