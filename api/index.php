@@ -139,11 +139,10 @@ try {
             $ctrl    = new OrderController();
             $msgCtrl = new OrderMessageController();
 
-            // Resolve sub-resource from URL parts
-            // /api/orders/{id}/messages  => parts[0]=orders parts[1]=id parts[2]=messages
-            // /api/orders/{id}/respond   => parts[0]=orders parts[1]=id parts[2]=respond
-            $orderId2   = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
-            $orderSub   = isset($parts[2]) ? $parts[2] : null;
+            // Re-parse URI directly to avoid any variable conflicts
+            $uriParts   = explode('/', ltrim(str_replace('/api', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), '/'));
+            $orderId2   = isset($uriParts[1]) && is_numeric($uriParts[1]) ? (int)$uriParts[1] : null;
+            $orderSub   = isset($uriParts[2]) ? trim($uriParts[2]) : null;
 
             // /orders/unread
             if ($parts[1] === 'unread') { $msgCtrl->unreadCounts(); break; }
