@@ -148,6 +148,7 @@ function renderTable(list) {
         ${b.accepts_delivery ? '<span class="badge badge-delivery">🛵 Sí</span>' : '<span style="color:var(--muted);font-size:.8rem">No</span>'}
       </div>
       <div class="action-group">
+        <button class="icon-btn" onclick="editBiz(${b.id})" title="Editar">✏️</button>
         <button class="icon-btn" onclick="viewBiz(${b.id})" title="Ver en directorio">👁</button>
         <button class="icon-btn ${b.is_verified?'':'success'}" onclick="toggleVerify(${b.id}, ${b.is_verified})" title="${b.is_verified?'Quitar verificación':'Verificar'}">
           ${b.is_verified?'⭐':'✓'}
@@ -155,6 +156,7 @@ function renderTable(list) {
         <button class="icon-btn ${b.is_active?'danger':''}" onclick="toggleActive(${b.id}, ${b.is_active})" title="${b.is_active?'Desactivar':'Activar'}">
           ${b.is_active?'⏸':'▶'}
         </button>
+        <button class="icon-btn danger" onclick="deleteBiz(${b.id}, '${b.name.replace(/'/g,'')}')" title="Eliminar">🗑️</button>
       </div>
     </div>
   `).join('');
@@ -172,7 +174,18 @@ async function toggleVerify(id, current) {
   else APP.toast('Error', 'error');
 }
 
-function viewBiz(id) { window.open(`/index.html#biz-${id}`, '_blank'); }
+function editBiz(id) { window.location.href = 'editar-negocio.html?id=' + id; }
+function viewBiz(id) { window.open('/negocio.html?id=' + id, '_blank'); }
+
+async function deleteBiz(id, name) {
+  if (!confirm('¿Eliminar "' + name + '"? Esta acción no se puede deshacer.')) return;
+  var res = await fetch('/api/businesses/' + id, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nuevaexpress_token') }
+  }).then(function(r){ return r.json(); });
+  if (res.success) { APP.toast('Negocio eliminado'); init(); }
+  else APP.toast(res.message || 'Error al eliminar', 'error');
+}
 
 init();
 </script>
