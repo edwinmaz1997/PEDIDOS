@@ -83,7 +83,14 @@
           <button class="delivery-btn" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
         </div>
         <div id="deliveryAddressWrap" style="display:none;margin-bottom:12px">
-          <input type="text" id="deliveryAddress" placeholder="Dirección de entrega" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif">
+          <input type="text" id="deliveryAddress" placeholder="Dirección de entrega" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;margin-bottom:8px">
+          <div id="zoneSelectWrap" style="display:none">
+            <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:4px">Zona de entrega</label>
+            <select id="zoneSelect" onchange="onZoneChange()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;background:white">
+              <option value="">Selecciona tu zona...</option>
+            </select>
+            <div id="zonePrice" style="font-size:.82rem;color:var(--blue);margin-top:4px;font-weight:600"></div>
+          </div>
         </div>
         <div id="cartItems"><p style="color:var(--muted);font-size:.9rem">Agrega productos a tu pedido</p></div>
         <hr class="cart-divider">
@@ -141,6 +148,24 @@ function renderBizInfo() {
       </div>
     </div>
   `;
+  // Load delivery zones
+  if (business.accepts_delivery) {
+    var zRes = await fetch('/api/businesses/' + businessId + '/zones').then(function(r){ return r.json(); });
+    var zones = zRes.data || [];
+    var zoneSel = document.getElementById('zoneSelect');
+    var zoneWrap = document.getElementById('zoneSelectWrap');
+    if (zones.length) {
+      zones.forEach(function(z) {
+        var opt = document.createElement('option');
+        opt.value = z.price;
+        opt.dataset.name = z.name;
+        opt.textContent = z.name + ' — Q' + parseFloat(z.price).toFixed(2);
+        zoneSel.appendChild(opt);
+      });
+      zoneWrap.style.display = 'block';
+    }
+  }
+
   // Enable/disable delivery button
   if (!business.accepts_delivery) {
     document.getElementById('deliveryBtn').disabled = true;
@@ -185,6 +210,20 @@ function addCustomRow() {
   div.className = 'custom-item';
   div.innerHTML = `<input type="text" class="custom-input" placeholder="Descripción del producto..." style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;width:100%"><button onclick="this.parentElement.remove();updateCart()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem">×</button>`;
   wrap.appendChild(div);
+}
+
+function onZoneChange() {
+  var sel = document.getElementById('zoneSelect');
+  var priceEl = document.getElementById('zonePrice');
+  if (sel.value) {
+    var zoneName = sel.options[sel.selectedIndex].dataset.name;
+    priceEl.textContent = '🛵 Entrega a ' + zoneName + ' — Q' + parseFloat(sel.value).toFixed(2);
+    // Update delivery fee
+    if (business) business.delivery_fee = parseFloat(sel.value);
+    updateCart();
+  } else {
+    priceEl.textContent = '';
+  }
 }
 
 function setDelivery(type, btn) {

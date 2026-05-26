@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zonas de Entrega — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.zone-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:16px 20px; margin-bottom:10px; display:flex; align-items:center; gap:14px; }
+.zone-price { font-family:'Syne',sans-serif; font-weight:700; font-size:1.2rem; color:var(--blue); white-space:nowrap; }
+.zone-info { flex:1; }
+.zone-name { font-weight:600; font-size:.95rem; }
+.zone-desc { font-size:.82rem; color:var(--muted); margin-top:2px; }
+.zone-actions { display:flex; gap:6px; flex-shrink:0; }
+.icon-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:6px 10px; cursor:pointer; font-size:.85rem; transition:var(--transition); }
+.icon-btn:hover { background:var(--off-white); }
+.icon-btn.danger:hover { background:#fdf0f0; border-color:var(--danger); color:var(--danger); }
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; }
+.modal-box { background:white; border-radius:20px; padding:28px; width:100%; max-width:420px; }
+.tip-box { background:#e3f2fd; border-radius:var(--radius-sm); padding:12px 16px; font-size:.85rem; color:#1565c0; margin-bottom:20px; }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.8rem;margin-top:4px" id="sidebarUser"></div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📋 Pedidos</a></li>
+      <li><a href="perfil.html">🏪 Mi Perfil</a></li>
+      <li><a href="productos.html">📦 Productos</a></li>
+      <li><a href="zonas-entrega.html" class="active">🗺️ Zonas de Entrega</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+      <div class="page-header" style="margin:0"><h1>🗺️ Zonas de Entrega</h1><p>Define tus tarifas por zona o distancia</p></div>
+      <button class="btn-primary" onclick="openModal()">+ Agregar zona</button>
+    </div>
+
+    <div class="tip-box">
+      💡 Cuando un cliente solicite delivery, verá estas zonas y sus tarifas para que seleccione la que corresponde a su ubicación.
+    </div>
+
+    <div id="zonesContainer"><div class="loading-state"><div class="spinner"></div></div></div>
+
+    <!-- Example zones suggestion -->
+    <div style="background:var(--off-white);border-radius:var(--radius);padding:20px;margin-top:16px">
+      <h4 style="margin-bottom:12px;font-size:.9rem">💡 Ejemplos de zonas frecuentes</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${[
+          ['Casco Urbano','Q15'],['Cruce','Q20'],['Reparto','Q25'],
+          ['Centro 2','Q40'],['Zona Central','Q15'],['Colonia','Q20'],['Residencial','Q30']
+        ].map(z=>`<button onclick="quickAdd('${z[0]}','${z[1].replace('Q','')}')" class="btn-ghost" style="padding:6px 14px;font-size:.82rem">${z[0]} — ${z[1]}</button>`).join('')}
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="zoneModal" style="display:none">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 id="modalTitle">Nueva Zona</h3>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nombre de la zona *</label>
+      <input type="text" id="z_name" placeholder="Ej: Casco Urbano, Cruce, Zona 1...">
+    </div>
+    <div class="form-group">
+      <label>Descripción <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+      <input type="text" id="z_desc" placeholder="Ej: Área central de la ciudad">
+    </div>
+    <div class="form-group">
+      <label>Tarifa de envío (Q) *</label>
+      <input type="number" id="z_price" min="0" step="1" placeholder="15">
+      <div style="font-size:.78rem;color:var(--muted);margin-top:4px">Ingresa el monto en Quetzales que cobras por entregar en esta zona.</div>
+    </div>
+    <div id="zoneError" style="color:var(--danger);font-size:.85rem;margin-bottom:12px;display:none"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-primary" onclick="saveZone()" id="saveBtn" style="flex:1;justify-content:center;padding:12px">Guardar</button>
+      <button class="btn-ghost" onclick="closeModal()" style="padding:12px 20px">Cancelar</button>
+    </div>
+    <input type="hidden" id="z_id">
+  </div>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+(function() {
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('tk=') !== -1) {
+    var parts = hash.substring(1).split('&'); var tk='',us='';
+    parts.forEach(function(p){ if(p.indexOf('tk=')===0)tk=p.substring(3); if(p.indexOf('us=')===0)us=decodeURIComponent(p.substring(3)); });
+    if(tk){ localStorage.setItem('nuevaexpress_token',tk); if(us)localStorage.setItem('nuevaexpress_user',us); history.replaceState(null,'',window.location.pathname); }
+  }
+})();
+var user = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if(!localStorage.getItem('nuevaexpress_token')||user.role!=='negocio') window.location.href='/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name || '';
+function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
+
+var bizId = null;
+var zones = [];
+
+async function init() {
+  // Get business id
+  var me = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json());
+  var bizRes = await fetch('/api/businesses?limit=50', {headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json());
+  var all = bizRes.data?.businesses || [];
+  var biz = all.find(function(b){ return b.user_id == me.data.id; }) || all[0];
+  if (!biz) { document.getElementById('zonesContainer').innerHTML = '<div class="empty-state"><p>Primero crea tu negocio en <a href="perfil.html">Mi Perfil</a>.</p></div>'; return; }
+  bizId = biz.id;
+  loadZones();
+}
+
+async function loadZones() {
+  var res = await fetch('/api/businesses/'+bizId+'/zones', {
+    headers:{'Authorization':'Bearer '+getToken()}
+  }).then(r=>r.json());
+  zones = res.data || [];
+  renderZones();
+}
+
+function renderZones() {
+  var container = document.getElementById('zonesContainer');
+  if (!zones.length) {
+    container.innerHTML = '<div class="empty-state"><p>No tienes zonas de entrega configuradas.<br>Agrega la primera usando el botón de arriba o los ejemplos de abajo.</p></div>';
+    return;
+  }
+  container.innerHTML = zones.map(function(z) {
+    return '<div class="zone-card">' +
+      '<div class="zone-price">Q' + parseFloat(z.price).toFixed(2) + '</div>' +
+      '<div class="zone-info">' +
+        '<div class="zone-name">' + esc(z.name) + (!z.is_active ? ' <span style="background:#fdf0f0;color:var(--danger);font-size:.72rem;padding:2px 8px;border-radius:10px;font-weight:600">Inactiva</span>' : '') + '</div>' +
+        (z.description ? '<div class="zone-desc">' + esc(z.description) + '</div>' : '') +
+      '</div>' +
+      '<div class="zone-actions">' +
+        '<button class="icon-btn" onclick="openModal('+z.id+')" title="Editar">✏️</button>' +
+        '<button class="icon-btn danger" onclick="deleteZone('+z.id+',\''+esc(z.name)+'\')" title="Eliminar">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function openModal(id) {
+  var z = id ? zones.find(function(x){ return x.id==id; }) : null;
+  document.getElementById('modalTitle').textContent = z ? 'Editar Zona' : 'Nueva Zona';
+  document.getElementById('z_id').value    = id || '';
+  document.getElementById('z_name').value  = z ? z.name : '';
+  document.getElementById('z_desc').value  = z ? z.description||'' : '';
+  document.getElementById('z_price').value = z ? z.price : '';
+  document.getElementById('zoneError').style.display = 'none';
+  document.getElementById('zoneModal').style.display = 'flex';
+  document.getElementById('z_name').focus();
+}
+
+function quickAdd(name, price) {
+  document.getElementById('z_name').value  = name;
+  document.getElementById('z_price').value = price;
+  document.getElementById('modalTitle').textContent = 'Nueva Zona';
+  document.getElementById('z_id').value = '';
+  document.getElementById('z_desc').value = '';
+  document.getElementById('zoneError').style.display = 'none';
+  document.getElementById('zoneModal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('zoneModal').style.display = 'none'; }
+
+async function saveZone() {
+  var id    = document.getElementById('z_id').value;
+  var name  = document.getElementById('z_name').value.trim();
+  var desc  = document.getElementById('z_desc').value.trim();
+  var price = parseFloat(document.getElementById('z_price').value);
+  var errEl = document.getElementById('zoneError');
+  var btn   = document.getElementById('saveBtn');
+
+  errEl.style.display = 'none';
+  if (!name) { errEl.textContent='El nombre es requerido'; errEl.style.display='block'; return; }
+  if (isNaN(price) || price < 0) { errEl.textContent='Ingresa un precio válido'; errEl.style.display='block'; return; }
+
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+
+  var url    = id ? '/api/businesses/'+bizId+'/zones/'+id : '/api/businesses/'+bizId+'/zones';
+  var method = id ? 'PUT' : 'POST';
+
+  var res = await fetch(url, {
+    method: method,
+    headers: {'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+    body: JSON.stringify({name:name, description:desc, price:price})
+  }).then(r=>r.json());
+
+  if (res.success) {
+    APP.toast(id ? 'Zona actualizada' : 'Zona agregada');
+    closeModal();
+    loadZones();
+  } else {
+    errEl.textContent = res.message||'Error';
+    errEl.style.display = 'block';
+  }
+  btn.textContent='Guardar'; btn.disabled=false;
+}
+
+async function deleteZone(id, name) {
+  if (!confirm('¿Eliminar la zona "'+name+'"?')) return;
+  var res = await fetch('/api/businesses/'+bizId+'/zones/'+id, {
+    method:'DELETE', headers:{'Authorization':'Bearer '+getToken()}
+  }).then(r=>r.json());
+  if (res.success) { APP.toast('Zona eliminada'); loadZones(); }
+  else APP.toast(res.message||'Error','error');
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+init();
+</script>
+<script>var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();</script>
+</body>
+</html>

@@ -17,6 +17,8 @@ require_once __DIR__ . '/controllers/DeliveryController.php';
 require_once __DIR__ . '/controllers/AdminNotificationController.php';
 require_once __DIR__ . '/controllers/PhotoController.php';
 require_once __DIR__ . '/controllers/OrderMessageController.php';
+require_once __DIR__ . '/controllers/DeliveryZoneController.php';
+require_once __DIR__ . '/controllers/CategoryController.php';
 
 // CORS
 $allowedOrigins = ['https://nuevaexpress.com', 'https://www.nuevaexpress.com'];
@@ -96,6 +98,17 @@ try {
             $ctrl      = new BusinessController();
             $photoCtrl = new PhotoController();
 
+            // /businesses/{id}/zones
+            if ($id && $subAction === 'zones') {
+                $zoneCtrl = new DeliveryZoneController();
+                $zoneId   = isset($parts[3]) && is_numeric($parts[3]) ? (int)$parts[3] : null;
+                if ($method === 'GET')                     $zoneCtrl->index($id);
+                elseif ($method === 'POST')                $zoneCtrl->store($id, $body);
+                elseif ($method === 'PUT'    && $zoneId)   $zoneCtrl->update($id, $zoneId, $body);
+                elseif ($method === 'DELETE' && $zoneId)   $zoneCtrl->destroy($id, $zoneId);
+                else Response::notFound();
+                break;
+            }
             if ($id && $subAction === 'photos') {
                 $user = AuthMiddleware::authenticate();
                 if ($method === 'POST')                    $photoCtrl->store($id, $body);
@@ -173,6 +186,14 @@ try {
                 $userCtrl->adminDelete($adminUserId);
                 break;
             }
+            // Admin categories CRUD
+            $catCtrl = new CategoryController();
+            if ($action === 'categories' && !$id && $method === 'GET')  { $catCtrl->index();  break; }
+            if ($action === 'categories' && !$id && $method === 'POST') { $catCtrl->store($body); break; }
+            $catId = isset($parts[2]) && is_numeric($parts[2]) ? (int)$parts[2] : null;
+            if ($action === 'categories' && $catId && $method === 'PUT')    { $catCtrl->update($catId, $body); break; }
+            if ($action === 'categories' && $catId && $method === 'DELETE') { $catCtrl->destroy($catId); break; }
+
             switch ($action) {
                 case 'dashboard':  $ctrl->dashboard();  break;
                 case 'users':      $ctrl->users();       break;

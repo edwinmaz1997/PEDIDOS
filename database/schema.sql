@@ -293,3 +293,19 @@ CREATE TABLE IF NOT EXISTS order_messages (
     INDEX idx_order (order_id),
     INDEX idx_unread (order_id, is_read)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- DELIVERY ZONES (per business)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS delivery_zones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    business_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL DEFAULT 15.00,
+    is_active TINYINT(1) DEFAULT 1,
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,
+    INDEX idx_business (business_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

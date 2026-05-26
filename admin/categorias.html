@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Categorías — Admin NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.cat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-bottom:24px; }
+.cat-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:20px; display:flex; align-items:center; gap:14px; }
+.cat-icon-wrap { width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
+.cat-info { flex:1; }
+.cat-name { font-weight:700; font-size:1rem; }
+.cat-count { font-size:.8rem; color:var(--muted); margin-top:2px; }
+.cat-actions { display:flex; gap:6px; flex-shrink:0; }
+.icon-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:6px 10px; cursor:pointer; font-size:.85rem; transition:var(--transition); }
+.icon-btn:hover { background:var(--off-white); }
+.icon-btn.danger:hover { background:#fdf0f0; border-color:var(--danger); color:var(--danger); }
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; }
+.modal-box { background:white; border-radius:20px; padding:28px; width:100%; max-width:440px; }
+.color-picker-wrap { display:flex; gap:10px; align-items:center; }
+.color-preview { width:40px; height:40px; border-radius:8px; border:1px solid var(--border); flex-shrink:0; }
+.icon-options { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.icon-opt { padding:8px 12px; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; font-size:1rem; transition:var(--transition); background:white; }
+.icon-opt.selected { border-color:var(--blue); background:#f0f7ff; }
+.inactive-badge { background:#fdf0f0; color:var(--danger); font-size:.72rem; padding:2px 8px; border-radius:10px; font-weight:600; }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Administrador</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="negocios.html">🏪 Negocios</a></li>
+      <li><a href="usuarios.html">👥 Usuarios</a></li>
+      <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="categorias.html" class="active">🏷️ Categorías</a></li>
+      <li><a href="buscar.html">🔍 Buscador</a></li>
+      <li><a href="reportes.html">📊 Reportes</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+      <div class="page-header" style="margin:0"><h1>🏷️ Categorías</h1><p>Gestiona las categorías del directorio</p></div>
+      <button class="btn-primary" onclick="openModal()">+ Nueva categoría</button>
+    </div>
+
+    <div id="catGrid" class="cat-grid">
+      <div class="loading-state" style="grid-column:1/-1"><div class="spinner"></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="catModal" style="display:none">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 id="modalTitle">Nueva Categoría</h3>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nombre *</label>
+      <input type="text" id="c_name" placeholder="Ej: Restaurantes">
+    </div>
+    <div class="form-group">
+      <label>Color</label>
+      <div class="color-picker-wrap">
+        <input type="color" id="c_color" value="#4A90D9" style="width:60px;height:38px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;padding:2px" onchange="updateColorPreview()">
+        <div class="color-preview" id="colorPreview" style="background:#4A90D9"></div>
+        <div style="font-size:.82rem;color:var(--muted)">Color del chip en el directorio</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        ${['#4A90D9','#2ECC71','#F5C518','#7B4FBF','#FF6B6B','#FF8C42','#00B4D8','#E63946','#2DC653','#FF6B9D'].map(c=>`<div onclick="setColor('${c}')" style="width:28px;height:28px;border-radius:6px;background:${c};cursor:pointer;border:2px solid transparent" title="${c}"></div>`).join('')}
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Ícono</label>
+      <div class="icon-options" id="iconOptions">
+        ${[
+          {k:'utensils',e:'🍴'},{k:'pills',e:'💊'},{k:'shopping-cart',e:'🛒'},
+          {k:'wrench',e:'🔧'},{k:'shirt',e:'👕'},{k:'laptop',e:'💻'},
+          {k:'heart',e:'💅'},{k:'store',e:'🏪'},{k:'car',e:'🚗'},
+          {k:'coffee',e:'☕'},{k:'book',e:'📚'},{k:'scissors',e:'✂️'},
+          {k:'pizza',e:'🍕'},{k:'flower',e:'🌸'},{k:'gym',e:'💪'},
+          {k:'camera',e:'📷'},{k:'music',e:'🎵'},{k:'pet',e:'🐾'}
+        ].map(i=>`<button class="icon-opt" data-key="${i.k}" onclick="selectIcon('${i.k}',this)">${i.e}</button>`).join('')}
+      </div>
+      <input type="hidden" id="c_icon" value="store">
+    </div>
+    <div id="modalError" style="color:var(--danger);font-size:.85rem;margin-bottom:12px;display:none"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-primary" onclick="saveCategory()" id="saveBtn" style="flex:1;justify-content:center;padding:12px">Guardar</button>
+      <button class="btn-ghost" onclick="closeModal()" style="padding:12px 20px">Cancelar</button>
+    </div>
+    <input type="hidden" id="c_id">
+  </div>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+(function() {
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('tk=') !== -1) {
+    var parts = hash.substring(1).split('&'); var tk='',us='';
+    parts.forEach(function(p){ if(p.indexOf('tk=')===0)tk=p.substring(3); if(p.indexOf('us=')===0)us=decodeURIComponent(p.substring(3)); });
+    if(tk){ localStorage.setItem('nuevaexpress_token',tk); if(us)localStorage.setItem('nuevaexpress_user',us); history.replaceState(null,'',window.location.pathname); }
+  }
+})();
+var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if(!localStorage.getItem('nuevaexpress_token')||adminUser.role!=='admin') window.location.href='/cliente/login.html';
+function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
+
+var cats = [];
+var iconEmojis = {
+  'utensils':'🍴','pills':'💊','shopping-cart':'🛒','wrench':'🔧','shirt':'👕',
+  'laptop':'💻','heart':'💅','store':'🏪','car':'🚗','coffee':'☕',
+  'book':'📚','scissors':'✂️','pizza':'🍕','flower':'🌸','gym':'💪',
+  'camera':'📷','music':'🎵','pet':'🐾'
+};
+
+async function loadCats() {
+  var res = await fetch('/api/admin/categories', {
+    headers: { 'Authorization': 'Bearer ' + getToken() }
+  }).then(function(r){ return r.json(); });
+  cats = res.data || [];
+  renderCats();
+}
+
+function renderCats() {
+  var grid = document.getElementById('catGrid');
+  if (!cats.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>No hay categorías.</p></div>'; return; }
+  grid.innerHTML = cats.map(function(c) {
+    var emoji = iconEmojis[c.icon] || '🏪';
+    return '<div class="cat-card">' +
+      '<div class="cat-icon-wrap" style="background:' + esc(c.color) + '20;color:' + esc(c.color) + '">' + emoji + '</div>' +
+      '<div class="cat-info">' +
+        '<div class="cat-name">' + esc(c.name) + (!c.is_active ? ' <span class="inactive-badge">Inactiva</span>' : '') + '</div>' +
+        '<div class="cat-count">' + (c.biz_count||0) + ' negocio' + (c.biz_count!=1?'s':'') + '</div>' +
+      '</div>' +
+      '<div class="cat-actions">' +
+        '<button class="icon-btn" onclick="openModal(' + c.id + ')" title="Editar">✏️</button>' +
+        '<button class="icon-btn" onclick="toggleActive(' + c.id + ',' + c.is_active + ')" title="' + (c.is_active?'Desactivar':'Activar') + '">' + (c.is_active?'⏸':'▶') + '</button>' +
+        '<button class="icon-btn danger" onclick="deletecat(' + c.id + ',\'' + esc(c.name) + '\')" title="Eliminar">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function openModal(id) {
+  var c = id ? cats.find(function(x){ return x.id==id; }) : null;
+  document.getElementById('modalTitle').textContent = c ? 'Editar Categoría' : 'Nueva Categoría';
+  document.getElementById('c_id').value    = id || '';
+  document.getElementById('c_name').value  = c ? c.name : '';
+  document.getElementById('c_color').value = c ? c.color : '#4A90D9';
+  document.getElementById('c_icon').value  = c ? c.icon : 'store';
+  updateColorPreview();
+  // Select icon
+  document.querySelectorAll('.icon-opt').forEach(function(b){ b.classList.remove('selected'); });
+  var sel = document.querySelector('.icon-opt[data-key="' + (c?c.icon:'store') + '"]');
+  if (sel) sel.classList.add('selected');
+  document.getElementById('modalError').style.display = 'none';
+  document.getElementById('catModal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('catModal').style.display = 'none'; }
+
+function updateColorPreview() {
+  var color = document.getElementById('c_color').value;
+  document.getElementById('colorPreview').style.background = color;
+}
+
+function setColor(color) {
+  document.getElementById('c_color').value = color;
+  updateColorPreview();
+}
+
+function selectIcon(key, btn) {
+  document.querySelectorAll('.icon-opt').forEach(function(b){ b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  document.getElementById('c_icon').value = key;
+}
+
+async function saveCategory() {
+  var id    = document.getElementById('c_id').value;
+  var name  = document.getElementById('c_name').value.trim();
+  var color = document.getElementById('c_color').value;
+  var icon  = document.getElementById('c_icon').value;
+  var errEl = document.getElementById('modalError');
+  var btn   = document.getElementById('saveBtn');
+
+  errEl.style.display = 'none';
+  if (!name) { errEl.textContent = 'El nombre es requerido'; errEl.style.display = 'block'; return; }
+
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+
+  var url    = id ? '/api/admin/categories/' + id : '/api/admin/categories';
+  var method = id ? 'PUT' : 'POST';
+
+  var res = await fetch(url, {
+    method: method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+    body: JSON.stringify({ name: name, color: color, icon: icon })
+  }).then(function(r){ return r.json(); });
+
+  if (res.success) {
+    APP.toast(id ? 'Categoría actualizada' : 'Categoría creada');
+    closeModal();
+    loadCats();
+  } else {
+    errEl.textContent = res.message || 'Error';
+    errEl.style.display = 'block';
+  }
+  btn.textContent = 'Guardar'; btn.disabled = false;
+}
+
+async function toggleActive(id, current) {
+  var res = await fetch('/api/admin/categories/' + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+    body: JSON.stringify({ is_active: current ? 0 : 1 })
+  }).then(function(r){ return r.json(); });
+  if (res.success) { APP.toast(current ? 'Categoría desactivada' : 'Categoría activada'); loadCats(); }
+  else APP.toast(res.message||'Error','error');
+}
+
+async function deletecat(id, name) {
+  if (!confirm('¿Eliminar la categoría "' + name + '"?')) return;
+  var res = await fetch('/api/admin/categories/' + id, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + getToken() }
+  }).then(function(r){ return r.json(); });
+  if (res.success) { APP.toast('Categoría eliminada'); loadCats(); }
+  else APP.toast(res.message||'Error','error');
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+loadCats();
+</script>
+<script>var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();</script>
+</body>
+</html>
