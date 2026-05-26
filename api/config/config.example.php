@@ -18,7 +18,7 @@ define('APP_ENV', 'production'); // cambiar a 'development' para debug
 
 // Security
 define('JWT_SECRET', 'cambiar_por_string_aleatorio_64_caracteres_minimo');
-define('SESSION_LIFETIME', 7200);
+define('SESSION_LIFETIME', 604800); // 7 dias
 define('CSRF_TOKEN_LIFETIME', 3600);
 
 // Rate limiting
