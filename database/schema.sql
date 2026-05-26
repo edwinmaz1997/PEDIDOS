@@ -309,3 +309,36 @@ CREATE TABLE IF NOT EXISTS delivery_zones (
     FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,
     INDEX idx_business (business_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- DELIVERY ZONES (global, managed by admin)
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS delivery_zones;
+CREATE TABLE IF NOT EXISTS delivery_zones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL DEFAULT 15.00,
+    is_active TINYINT(1) DEFAULT 1,
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Default zones
+INSERT INTO delivery_zones (name, description, price, sort_order) VALUES
+('Casco Urbano', 'Área central de la ciudad', 15.00, 1),
+('Cruce', 'Zona de cruce / intersección principal', 20.00, 2),
+('Reparto', 'Colonias y repartos', 25.00, 3),
+('Centro 2', 'Zona centro secundaria', 40.00, 4);
+
+-- Business zones coverage (which zones each business covers)
+CREATE TABLE IF NOT EXISTS business_delivery_zones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    business_id INT NOT NULL,
+    zone_id INT NOT NULL,
+    custom_price DECIMAL(10,2) DEFAULT NULL COMMENT 'NULL = use global zone price',
+    UNIQUE KEY uq_biz_zone (business_id, zone_id),
+    FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,
+    FOREIGN KEY (zone_id) REFERENCES delivery_zones(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -98,14 +98,11 @@ try {
             $ctrl      = new BusinessController();
             $photoCtrl = new PhotoController();
 
-            // /businesses/{id}/zones
+            // /businesses/{id}/zones — business zone coverage
             if ($id && $subAction === 'zones') {
                 $zoneCtrl = new DeliveryZoneController();
-                $zoneId   = isset($parts[3]) && is_numeric($parts[3]) ? (int)$parts[3] : null;
-                if ($method === 'GET')                     $zoneCtrl->index($id);
-                elseif ($method === 'POST')                $zoneCtrl->store($id, $body);
-                elseif ($method === 'PUT'    && $zoneId)   $zoneCtrl->update($id, $zoneId, $body);
-                elseif ($method === 'DELETE' && $zoneId)   $zoneCtrl->destroy($id, $zoneId);
+                if ($method === 'GET')  $zoneCtrl->bizZones($id);
+                elseif ($method === 'POST') $zoneCtrl->bizUpdateZones($id, $body);
                 else Response::notFound();
                 break;
             }
@@ -186,6 +183,14 @@ try {
                 $userCtrl->adminDelete($adminUserId);
                 break;
             }
+            // Admin delivery zones CRUD
+            $zoneCtrl2 = new DeliveryZoneController();
+            if ($action === 'delivery-zones' && !$id && $method === 'GET')  { $zoneCtrl2->adminIndex(); break; }
+            if ($action === 'delivery-zones' && !$id && $method === 'POST') { $zoneCtrl2->store($body); break; }
+            $zoneAdminId = isset($parts[2]) && is_numeric($parts[2]) ? (int)$parts[2] : null;
+            if ($action === 'delivery-zones' && $zoneAdminId && $method === 'PUT')    { $zoneCtrl2->update($zoneAdminId, $body); break; }
+            if ($action === 'delivery-zones' && $zoneAdminId && $method === 'DELETE') { $zoneCtrl2->destroy($zoneAdminId); break; }
+
             // Admin categories CRUD
             $catCtrl = new CategoryController();
             if ($action === 'categories' && !$id && $method === 'GET')  { $catCtrl->index();  break; }

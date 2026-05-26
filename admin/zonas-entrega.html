@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zonas de Entrega — Admin NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.zone-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:14px}
+.zone-price{font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--blue);white-space:nowrap;min-width:70px;text-align:right}
+.zone-info{flex:1}
+.zone-name{font-weight:600;font-size:.95rem}
+.zone-desc{font-size:.82rem;color:var(--muted);margin-top:2px}
+.zone-actions{display:flex;gap:6px;flex-shrink:0}
+.icon-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.85rem;transition:var(--transition)}
+.icon-btn:hover{background:var(--off-white)}
+.icon-btn.danger:hover{background:#fdf0f0;border-color:var(--danger);color:var(--danger)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:white;border-radius:20px;padding:28px;width:100%;max-width:420px}
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Administrador</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="negocios.html">🏪 Negocios</a></li>
+      <li><a href="usuarios.html">👥 Usuarios</a></li>
+      <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="categorias.html">🏷️ Categorías</a></li>
+      <li><a href="zonas-entrega.html" class="active">🗺️ Zonas de Entrega</a></li>
+      <li><a href="buscar.html">🔍 Buscador</a></li>
+      <li><a href="reportes.html">📊 Reportes</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:12px">
+      <div class="page-header" style="margin:0"><h1>🗺️ Zonas de Entrega</h1><p>Zonas globales disponibles para todos los negocios</p></div>
+      <button class="btn-primary" onclick="openModal()">+ Nueva zona</button>
+    </div>
+
+    <div style="background:#e3f2fd;border-radius:var(--radius-sm);padding:12px 16px;font-size:.85rem;color:#1565c0;margin-bottom:20px">
+      💡 Estas zonas son definidas por ti como administrador. Los negocios seleccionan cuáles zonas cubren desde su perfil, y los clientes eligen su zona al hacer un pedido con delivery.
+    </div>
+
+    <div id="zonesContainer"><div class="loading-state"><div class="spinner"></div></div></div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="zoneModal" style="display:none">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 id="modalTitle">Nueva Zona</h3>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nombre de la zona *</label>
+      <input type="text" id="z_name" placeholder="Ej: Casco Urbano, Cruce, Reparto...">
+    </div>
+    <div class="form-group">
+      <label>Descripción <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+      <input type="text" id="z_desc" placeholder="Descripción breve de la zona">
+    </div>
+    <div class="form-group">
+      <label>Tarifa de envío (Q) *</label>
+      <input type="number" id="z_price" min="0" step="1" placeholder="15">
+    </div>
+    <div class="form-group">
+      <label>Orden de aparición</label>
+      <input type="number" id="z_order" min="0" step="1" placeholder="1" value="0">
+    </div>
+    <div id="zoneError" style="color:var(--danger);font-size:.85rem;margin-bottom:12px;display:none"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-primary" onclick="saveZone()" id="saveBtn" style="flex:1;justify-content:center;padding:12px">Guardar</button>
+      <button class="btn-ghost" onclick="closeModal()" style="padding:12px 20px">Cancelar</button>
+    </div>
+    <input type="hidden" id="z_id">
+  </div>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+(function(){var hash=window.location.hash;if(hash&&hash.indexOf('tk=')!==-1){var parts=hash.substring(1).split('&');var tk='',us='';parts.forEach(function(p){if(p.indexOf('tk=')===0)tk=p.substring(3);if(p.indexOf('us=')===0)us=decodeURIComponent(p.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}})();
+var adminUser=JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if(!localStorage.getItem('nuevaexpress_token')||adminUser.role!=='admin') window.location.href='/cliente/login.html';
+function getToken(){return localStorage.getItem('nuevaexpress_token');}
+
+var zones=[];
+
+async function loadZones(){
+  var res=await fetch('/api/admin/delivery-zones',{headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json());
+  zones=res.data||[];
+  renderZones();
+}
+
+function renderZones(){
+  var c=document.getElementById('zonesContainer');
+  if(!zones.length){c.innerHTML='<div class="empty-state"><p>No hay zonas configuradas.</p></div>';return;}
+  c.innerHTML=zones.map(function(z){return `
+    <div class="zone-card">
+      <div class="zone-price">Q${parseFloat(z.price).toFixed(2)}</div>
+      <div class="zone-info">
+        <div class="zone-name">${esc(z.name)}${!z.is_active?` <span style="background:#fdf0f0;color:var(--danger);font-size:.72rem;padding:2px 8px;border-radius:10px;font-weight:600">Inactiva</span>`:''}</div>
+        ${z.description?`<div class="zone-desc">${esc(z.description)}</div>`:''}
+      </div>
+      <div class="zone-actions">
+        <button class="icon-btn" onclick="openModal(${z.id})" title="Editar">✏️</button>
+        <button class="icon-btn" onclick="toggleActive(${z.id},${z.is_active})" title="${z.is_active?'Desactivar':'Activar'}">${z.is_active?'⏸':'▶'}</button>
+        <button class="icon-btn danger" onclick="deleteZone(${z.id},'${esc(z.name)}')" title="Eliminar">🗑️</button>
+      </div>
+    </div>`;}).join('');
+}
+
+function openModal(id){
+  var z=id?zones.find(function(x){return x.id==id;}):null;
+  document.getElementById('modalTitle').textContent=z?'Editar Zona':'Nueva Zona';
+  document.getElementById('z_id').value=id||'';
+  document.getElementById('z_name').value=z?z.name:'';
+  document.getElementById('z_desc').value=z?z.description||'':'';
+  document.getElementById('z_price').value=z?z.price:'';
+  document.getElementById('z_order').value=z?z.sort_order:0;
+  document.getElementById('zoneError').style.display='none';
+  document.getElementById('zoneModal').style.display='flex';
+  setTimeout(function(){document.getElementById('z_name').focus();},100);
+}
+function closeModal(){document.getElementById('zoneModal').style.display='none';}
+
+async function saveZone(){
+  var id=document.getElementById('z_id').value;
+  var name=document.getElementById('z_name').value.trim();
+  var desc=document.getElementById('z_desc').value.trim();
+  var price=parseFloat(document.getElementById('z_price').value);
+  var order=parseInt(document.getElementById('z_order').value)||0;
+  var errEl=document.getElementById('zoneError');
+  var btn=document.getElementById('saveBtn');
+  errEl.style.display='none';
+  if(!name){errEl.textContent='El nombre es requerido';errEl.style.display='block';return;}
+  if(isNaN(price)||price<0){errEl.textContent='Precio inválido';errEl.style.display='block';return;}
+  btn.textContent='Guardando...';btn.disabled=true;
+  var url=id?'/api/admin/delivery-zones/'+id:'/api/admin/delivery-zones';
+  var res=await fetch(url,{method:id?'PUT':'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({name,description:desc,price,sort_order:order})}).then(r=>r.json());
+  if(res.success){APP.toast(id?'Zona actualizada':'Zona creada');closeModal();loadZones();}
+  else{errEl.textContent=res.message||'Error';errEl.style.display='block';}
+  btn.textContent='Guardar';btn.disabled=false;
+}
+
+async function toggleActive(id,current){
+  var res=await fetch('/api/admin/delivery-zones/'+id,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({is_active:current?0:1})}).then(r=>r.json());
+  if(res.success){APP.toast(current?'Zona desactivada':'Zona activada');loadZones();}
+  else APP.toast(res.message||'Error','error');
+}
+
+async function deleteZone(id,name){
+  if(!confirm('¿Eliminar la zona "'+name+'"?'))return;
+  var res=await fetch('/api/admin/delivery-zones/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json());
+  if(res.success){APP.toast('Zona eliminada');loadZones();}
+  else APP.toast(res.message||'Error','error');
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function doLogout(){localStorage.clear();window.location.href='/cliente/login.html';}
+function toggleSidebar(){var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open');}
+loadZones();
+</script>
+<script>var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();</script>
+</body>
+</html>

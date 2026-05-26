@@ -148,10 +148,10 @@ function renderBizInfo() {
       </div>
     </div>
   `;
-  // Load delivery zones
+  // Load delivery zones (only ones this business covers)
   if (business.accepts_delivery) {
     var zRes = await fetch('/api/businesses/' + businessId + '/zones').then(function(r){ return r.json(); });
-    var zones = zRes.data || [];
+    var zones = (zRes.data || []).filter(function(z){ return z.covered == 1; });
     var zoneSel = document.getElementById('zoneSelect');
     var zoneWrap = document.getElementById('zoneSelectWrap');
     if (zones.length) {
