@@ -194,14 +194,23 @@ function renderStatus() {
 
 function renderItems() {
   var items = order.items || [];
-  document.getElementById('itemsList').innerHTML = items.map(function(i) {
-    return '<div class="item-row"><span>' + esc(i.product_name) + ' ×' + i.quantity + '</span>' +
-      (i.unit_price ? '<span>Q' + (parseFloat(i.unit_price)*i.quantity).toFixed(2) + '</span>' : '') + '</div>';
+  var itemsHtml = items.map(function(i) {
+    var lineTotal = i.unit_price ? parseFloat(i.unit_price) * i.quantity : null;
+    return '<div class="item-row">' +
+      '<div>' +
+        '<div style="font-weight:500">' + esc(i.product_name) + ' <span style="color:var(--muted)">×' + i.quantity + '</span></div>' +
+        (i.unit_price ? '<div style="font-size:.78rem;color:var(--muted)">Q' + parseFloat(i.unit_price).toFixed(2) + ' c/u</div>' : '<div style="font-size:.78rem;color:var(--muted)">Precio pendiente</div>') +
+      '</div>' +
+      (lineTotal ? '<span style="font-weight:700;color:var(--blue)">Q' + lineTotal.toFixed(2) + '</span>' : '<span style="color:var(--muted);font-size:.82rem">—</span>') +
+    '</div>';
   }).join('') || '<p style="color:var(--muted);font-size:.9rem">Sin productos listados</p>';
 
-  document.getElementById('subtotalVal').textContent  = 'Q' + parseFloat(order.subtotal||0).toFixed(2);
+  if (order.notes) itemsHtml += '<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);margin-top:8px;font-size:.85rem;color:var(--muted)">📝 ' + esc(order.notes) + '</div>';
+  document.getElementById('itemsList').innerHTML = itemsHtml;
+
+  document.getElementById('subtotalVal').textContent   = 'Q' + parseFloat(order.subtotal||0).toFixed(2);
   document.getElementById('serviceFeeVal').textContent = 'Q' + parseFloat(order.service_fee||0).toFixed(2);
-  document.getElementById('totalVal').textContent     = 'Q' + parseFloat(order.total||0).toFixed(2);
+  document.getElementById('totalVal').textContent      = 'Q' + parseFloat(order.total||0).toFixed(2);
 
   if (parseFloat(order.delivery_fee) > 0) {
     document.getElementById('deliveryFeeRow').style.display = 'flex';

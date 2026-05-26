@@ -57,16 +57,16 @@
             <div id="actionButtons"></div>
           </div>
 
-          <!-- Edit total -->
+          <!-- Edit total per line -->
           <div class="detail-card" id="editTotalCard">
-            <h3>💰 Editar total</h3>
-            <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px">Ajusta el subtotal si el cliente agregó productos personalizados.</p>
-            <div class="form-group">
-              <label>Subtotal (Q)</label>
-              <input type="number" id="newSubtotal" step="0.50" min="0" placeholder="0.00" style="max-width:200px">
+            <h3>💰 Editar precios por línea</h3>
+            <p style="font-size:.85rem;color:var(--muted);margin-bottom:14px">Asigna el precio a cada producto. El cliente verá el desglose completo.</p>
+            <div id="lineEditor"></div>
+            <div style="background:var(--off-white);border-radius:var(--radius-sm);padding:12px;margin:12px 0" id="totalPreview"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn-primary" onclick="updateTotal()" style="padding:9px 20px">💾 Guardar precios</button>
+              <button class="btn-ghost" onclick="addLine()" style="padding:9px 18px">+ Agregar línea</button>
             </div>
-            <div id="totalPreview" style="font-size:.85rem;color:var(--muted);margin-bottom:12px"></div>
-            <button class="btn-primary" onclick="updateTotal()" style="padding:9px 20px">Actualizar total</button>
           </div>
 
           <!-- Items -->
@@ -190,44 +190,89 @@ function renderActions() {
   document.getElementById('actionButtons').innerHTML = btns;
 }
 
+var editableLines = [];
+
 function initTotalEdit() {
   var s = order.status;
   var card = document.getElementById('editTotalCard');
-  if (['pendiente','aceptado','en_preparacion'].includes(s)) {
-    document.getElementById('newSubtotal').value = parseFloat(order.subtotal||0).toFixed(2);
-    updateTotalPreview();
-    document.getElementById('newSubtotal').addEventListener('input', updateTotalPreview);
-  } else {
-    card.style.display = 'none';
-  }
+  if (['cancelado','entregado'].includes(s)) { card.style.display='none'; return; }
+  // Initialize lines from order items
+  editableLines = (order.items||[]).map(function(i) {
+    return {
+      name: i.product_name,
+      qty:  i.quantity,
+      price: parseFloat(i.unit_price||0)
+    };
+  });
+  // If no items, add empty line
+  if (!editableLines.length) editableLines.push({name:'', qty:1, price:0});
+  renderLineEditor();
 }
 
-function updateTotalPreview() {
-  var sub  = parseFloat(document.getElementById('newSubtotal').value) || 0;
-  var svc  = parseFloat(order.service_fee||0);
-  var del  = parseFloat(order.delivery_fee||0);
-  var tot  = sub + svc + del;
+function renderLineEditor() {
+  var svc = parseFloat(order.service_fee||0);
+  var del = parseFloat(order.delivery_fee||0);
+  var sub = editableLines.reduce(function(s,l){ return s + (l.price * l.qty); }, 0);
+  var tot = sub + svc + del;
+
+  document.getElementById('lineEditor').innerHTML = editableLines.map(function(l, i) {
+    return '<div style="display:grid;grid-template-columns:1fr 60px 90px auto;gap:6px;margin-bottom:8px;align-items:center">' +
+      '<input type="text" value="'+esc(l.name)+'" placeholder="Producto..." onchange="updateLine('+i+','name',this.value)" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem">' +
+      '<input type="number" value="'+l.qty+'" min="1" onchange="updateLine('+i+','qty',this.value)" style="padding:7px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem;text-align:center">' +
+      '<div style="display:flex;align-items:center;gap:3px"><span style="font-size:.8rem;color:var(--muted)">Q</span><input type="number" value="'+l.price+'" min="0" step="0.5" onchange="updateLine('+i+','price',this.value)" placeholder="0.00" style="padding:7px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem;width:100%"></div>' +
+      '<button onclick="removeLine('+i+')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 8px;cursor:pointer;color:var(--danger)">✕</button>' +
+    '</div>';
+  }).join('');
+
   document.getElementById('totalPreview').innerHTML =
-    'Subtotal Q'+sub.toFixed(2)+' + Q'+svc.toFixed(2)+' servicio' + (del>0?' + Q'+del.toFixed(2)+' delivery':'') + ' = <strong>Q'+tot.toFixed(2)+'</strong>';
+    editableLines.map(function(l){
+      return l.name ? '<div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:2px"><span>'+esc(l.name)+' ×'+l.qty+'</span><span>Q'+(l.price*l.qty).toFixed(2)+'</span></div>' : '';
+    }).join('') +
+    '<div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:2px"><span>Tarifa de servicio</span><span>Q'+svc.toFixed(2)+'</span></div>' +
+    (del>0?'<div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:2px"><span>Delivery</span><span>Q'+del.toFixed(2)+'</span></div>':'') +
+    '<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--border);padding-top:6px;margin-top:6px"><span>Total</span><span style="color:var(--blue)">Q'+tot.toFixed(2)+'</span></div>';
+}
+
+function updateLine(i, field, val) {
+  if (field === 'qty')   editableLines[i].qty   = Math.max(1, parseInt(val)||1);
+  if (field === 'price') editableLines[i].price = parseFloat(val)||0;
+  if (field === 'name')  editableLines[i].name  = val;
+  renderLineEditor();
+}
+
+function addLine() {
+  editableLines.push({name:'', qty:1, price:0});
+  renderLineEditor();
+}
+
+function removeLine(i) {
+  if (editableLines.length <= 1) { APP.toast('Debe haber al menos una línea','error'); return; }
+  editableLines.splice(i,1);
+  renderLineEditor();
 }
 
 async function updateTotal() {
-  var sub = parseFloat(document.getElementById('newSubtotal').value);
-  if (isNaN(sub) || sub < 0) { APP.toast('Ingresa un monto válido', 'error'); return; }
+  var sub = editableLines.reduce(function(s,l){ return s + (l.price * l.qty); }, 0);
+  // Build detail message for chat
+  var detail = editableLines.filter(function(l){return l.name;}).map(function(l){
+    return l.name + ' ×' + l.qty + (l.price>0?' = Q'+(l.price*l.qty).toFixed(2):'');
+  }).join(', ');
+
   var res = await fetch('/api/orders/'+orderId+'/total', {
     method: 'PUT',
     headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken() },
-    body: JSON.stringify({ subtotal: sub })
+    body: JSON.stringify({ subtotal: sub, detail: detail, lines: editableLines })
   }).then(function(r){ return r.json(); });
+
   if (res.success) {
     order.subtotal     = res.data.subtotal;
     order.total        = res.data.total;
     order.service_fee  = res.data.service_fee;
     order.delivery_fee = res.data.delivery_fee;
     renderItems();
-    APP.toast('Total actualizado y notificado al cliente');
+    APP.toast('Precios actualizados y notificados al cliente');
     loadMessages();
-  } else APP.toast(res.message||'Error', 'error');
+  } else APP.toast(res.message||'Error','error');
 }
 
 function renderItems() {

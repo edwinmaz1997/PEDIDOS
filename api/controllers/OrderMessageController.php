@@ -73,10 +73,6 @@ class OrderMessageController {
         $user  = AuthMiddleware::requireRole(['negocio', 'admin']);
         $order = $this->getOrder($orderId, $user);
 
-        if (!in_array($order['status'], ['pendiente', 'aceptado', 'en_preparacion'])) {
-            Response::error('No se puede modificar el total en este estado', 400);
-        }
-
         $subtotal    = isset($body['subtotal'])    ? (float)$body['subtotal']    : (float)$order['subtotal'];
         $serviceFee  = (float)$order['service_fee'];
         $deliveryFee = (float)$order['delivery_fee'];
@@ -90,9 +86,31 @@ class OrderMessageController {
             "El negocio actualizó el total de tu pedido #{$order['order_number']} a Q" . number_format($total, 2));
 
         // Send system message
+        // Build itemized message
+        $lines   = $body['lines']   ?? [];
+        $detail  = $body['detail']  ?? '';
+        $msg     = "💰 *Desglose del pedido:*
+";
+        if (!empty($lines)) {
+            foreach ($lines as $line) {
+                $lineName  = Security::sanitize($line['name']  ?? '');
+                $lineQty   = (int)($line['qty']   ?? 1);
+                $linePrice = (float)($line['price'] ?? 0);
+                if ($lineName) {
+                    $lineTotal = $linePrice * $lineQty;
+                    $msg .= "• {$lineName} ×{$lineQty}" . ($linePrice > 0 ? " = Q" . number_format($lineTotal, 2) : "") . "
+";
+                }
+            }
+        }
+        $msg .= "Tarifa servicio: Q" . number_format($serviceFee, 2) . "
+";
+        if ($deliveryFee > 0) $msg .= "Delivery: Q" . number_format($deliveryFee, 2) . "
+";
+        $msg .= "✅ *Total: Q" . number_format($total, 2) . "*";
+
         $this->db->prepare("INSERT INTO order_messages (order_id, sender_id, sender_role, message) VALUES (?,?,?,?)")
-                 ->execute([$orderId, $user['id'], $user['role'],
-                    "💰 Total actualizado: Subtotal Q" . number_format($subtotal, 2) . " + Q{$serviceFee} servicio" . ($deliveryFee > 0 ? " + Q{$deliveryFee} delivery" : "") . " = Q" . number_format($total, 2)]);
+                 ->execute([$orderId, $user['id'], $user['role'], $msg]);
 
         Response::success([
             'subtotal'    => $subtotal,

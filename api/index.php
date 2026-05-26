@@ -136,13 +136,36 @@ try {
 
         // ── ORDERS ───────────────────────────────────────────
         case 'orders':
-            $ctrl = new OrderController();
-            if ($method === 'GET'  && !$id)            $ctrl->index();
-            elseif ($method === 'GET'  && $id)         $ctrl->show($id);
-            elseif ($method === 'POST' && !$id)        $ctrl->store($body);
-            elseif ($subAction === 'respond')          $ctrl->businessRespond($id, $body);
-            elseif ($subAction === 'status')           $ctrl->updateStatus($id, $body);
-            elseif ($method === 'PUT'  && $id)         $ctrl->updateStatus($id, $body);
+            $ctrl    = new OrderController();
+            $msgCtrl = new OrderMessageController();
+
+            // Resolve sub-resource from URL parts
+            // /api/orders/{id}/messages  => parts[0]=orders parts[1]=id parts[2]=messages
+            // /api/orders/{id}/respond   => parts[0]=orders parts[1]=id parts[2]=respond
+            $orderId2   = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
+            $orderSub   = isset($parts[2]) ? $parts[2] : null;
+
+            // /orders/unread
+            if ($parts[1] === 'unread') { $msgCtrl->unreadCounts(); break; }
+
+            // /orders/{id}/messages
+            if ($orderId2 && $orderSub === 'messages' && $method === 'GET')  { $msgCtrl->index($orderId2);        break; }
+            if ($orderId2 && $orderSub === 'messages' && $method === 'POST') { $msgCtrl->store($orderId2, $body); break; }
+
+            // /orders/{id}/total
+            if ($orderId2 && $orderSub === 'total' && $method === 'PUT') { $msgCtrl->updateTotal($orderId2, $body); break; }
+
+            // /orders/{id}/respond
+            if ($orderId2 && $orderSub === 'respond') { $ctrl->businessRespond($orderId2, $body); break; }
+
+            // /orders/{id}/status
+            if ($orderId2 && $orderSub === 'status') { $ctrl->updateStatus($orderId2, $body); break; }
+
+            // Standard CRUD
+            if ($method === 'GET'  && !$id)   $ctrl->index();
+            elseif ($method === 'GET'  && $id) $ctrl->show($id);
+            elseif ($method === 'POST' && !$id)$ctrl->store($body);
+            elseif ($method === 'PUT'  && $id) $ctrl->updateStatus($id, $body);
             else Response::notFound();
             break;
 
