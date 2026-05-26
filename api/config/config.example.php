@@ -22,10 +22,10 @@ define('SESSION_LIFETIME', 604800); // 7 dias
 define('CSRF_TOKEN_LIFETIME', 3600);
 
 // Rate limiting
-define('RATE_LIMIT_MAX', 60);
+define('RATE_LIMIT_MAX', 300);
 define('RATE_LIMIT_WINDOW', 60);
-define('LOGIN_MAX_ATTEMPTS', 5);
-define('LOGIN_LOCKOUT_TIME', 900);
+define('LOGIN_MAX_ATTEMPTS', 10);
+define('LOGIN_LOCKOUT_TIME', 300);
 
 // File uploads
 define('UPLOAD_DIR', __DIR__ . '/../../uploads/');

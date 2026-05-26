@@ -2,6 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NuevaExpress">
+<link rel="apple-touch-icon" href="/assets/img/logo.jpg">
 <link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pedido — Panel Negocio NuevaExpress</title>
@@ -371,5 +378,6 @@ function toggleSidebar() { var s=document.querySelector('.sidebar');var o=docume
 init();
 window.addEventListener('beforeunload', function(){ clearInterval(pollInterval); });
 </script>
+<script src="/assets/js/pwa.js"></script>
 </body>
 </html>

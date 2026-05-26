@@ -1,0 +1,37 @@
+{
+  "name": "NuevaExpress",
+  "short_name": "NuevaExpress",
+  "description": "Tu directorio de negocios local en Guatemala",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#4A90D9",
+  "orientation": "portrait",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/assets/img/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/img/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mis Pedidos",
+      "url": "/cliente/index.html",
+      "description": "Ver mis pedidos"
+    },
+    {
+      "name": "Directorio",
+      "url": "/",
+      "description": "Explorar negocios"
+    }
+  ]
+}
