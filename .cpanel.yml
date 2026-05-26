@@ -1,0 +1,19 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/estudiocero/nuevaexpress.com
+    - /bin/cp -r admin $DEPLOYPATH/
+    - /bin/cp -r cliente $DEPLOYPATH/
+    - /bin/cp -r negocio $DEPLOYPATH/
+    - /bin/cp -r repartidor $DEPLOYPATH/
+    - /bin/cp -r assets $DEPLOYPATH/
+    - /bin/cp -r api/controllers $DEPLOYPATH/api/controllers/
+    - /bin/cp -r api/helpers $DEPLOYPATH/api/helpers/
+    - /bin/cp -r api/middleware $DEPLOYPATH/api/middleware/
+    - /bin/cp api/index.php $DEPLOYPATH/api/
+    - /bin/cp index.html $DEPLOYPATH/
+    - /bin/cp negocio.html $DEPLOYPATH/
+    - /bin/cp terminos.html $DEPLOYPATH/
+    - /bin/cp restablecer-contrasena.html $DEPLOYPATH/
+    - /bin/cp 404.html $DEPLOYPATH/
+    - /bin/cp .htaccess $DEPLOYPATH/
