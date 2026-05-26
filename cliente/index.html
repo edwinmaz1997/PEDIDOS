@@ -67,7 +67,6 @@
 
 <script>
 const API = '/api';
-const token = localStorage.getItem('pedidos_token');
 const user  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
 if (!token) window.location.href = '/cliente/login.html';
 if (user.role && user.role !== 'cliente') window.location.href = `/${user.role}/index.html`;
@@ -92,7 +91,7 @@ async function loadOrders(status = '', tabBtn = null) {
   container.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
   try {
     const qs = status ? `?status=${status}` : '';
-    const res = await fetch(`${API}/orders${qs}`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API}/orders${qs}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('pedidos_token') } });
     const data = await res.json();
     const orders = data.data?.orders || [];
     if (!orders.length) { container.innerHTML = '<div class="empty-state"><p>No tienes pedidos aún.</p></div>'; return; }

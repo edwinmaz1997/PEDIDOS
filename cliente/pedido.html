@@ -102,7 +102,6 @@
 
 <script>
 const API = '/api';
-const token = localStorage.getItem('pedidos_token');
 if (!token) window.location.href = '/cliente/login.html';
 
 const params     = new URLSearchParams(window.location.search);
@@ -252,7 +251,7 @@ async function submitOrder() {
   try {
     const res = await fetch(`${API}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('pedidos_token') },
       body: JSON.stringify({ business_id: businessId, delivery_type: deliveryType, delivery_address: deliveryAddress, notes, items })
     });
     const data = await res.json();

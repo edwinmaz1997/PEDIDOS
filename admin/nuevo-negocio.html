@@ -12,6 +12,18 @@
 .form-card h3{font-size:1rem;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:600px){.two-col{grid-template-columns:1fr}}
+.upload-area{border:2px dashed var(--border);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:var(--transition);background:var(--off-white)}
+.upload-area:hover{border-color:var(--accent);background:#fff5f3}
+.upload-area input{display:none}
+.logo-preview-wrap{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+.logo-preview{width:80px;height:80px;border-radius:12px;border:1px solid var(--border);overflow:hidden;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0}
+.logo-preview img{width:100%;height:100%;object-fit:cover;display:none}
+.photos-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.photo-thumb{width:80px;height:80px;border-radius:8px;overflow:hidden;position:relative;border:1px solid var(--border)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:.7rem;display:flex;align-items:center;justify-content:center}
+.progress-bar{background:var(--off-white);border-radius:20px;height:6px;margin-top:8px;overflow:hidden;display:none}
+.progress-fill{background:var(--accent);height:100%;border-radius:20px;transition:width .3s}
 </style>
 </head>
 <body>
@@ -26,7 +38,7 @@
       <li><a href="negocios.html" class="active">🏪 Negocios</a></li>
       <li><a href="usuarios.html">👥 Usuarios</a></li>
       <li><a href="pedidos.html">📋 Pedidos</a></li>
-      <li><a href="#" onclick="APP.logout()">🚪 Salir</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
     </ul>
   </aside>
 
@@ -37,6 +49,33 @@
       <h1 style="font-size:1.4rem">Agregar Negocio</h1>
     </div>
 
+    <!-- Logo y portada -->
+    <div class="form-card">
+      <h3>📸 Logo y Fotos</h3>
+      <div class="logo-preview-wrap">
+        <div class="logo-preview" id="logoPreview" onclick="document.getElementById('logoInput').click()">
+          <img id="logoImg" src="" alt="">
+          <span id="logoPlaceholder">🏪</span>
+        </div>
+        <div>
+          <button class="btn-ghost" style="padding:8px 16px;font-size:.85rem" onclick="document.getElementById('logoInput').click()">📷 Subir Logo</button>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:4px">JPG, PNG o WebP · Máx 5MB</div>
+          <input type="file" id="logoInput" accept="image/*" onchange="previewLogo(this)">
+        </div>
+      </div>
+
+      <label style="font-size:.85rem;font-weight:600;display:block;margin-bottom:8px">Fotos del negocio <span style="font-weight:400;color:var(--muted)">(hasta 8 fotos)</span></label>
+      <div class="upload-area" onclick="document.getElementById('photosInput').click()">
+        <div style="font-size:2rem;margin-bottom:8px">🖼️</div>
+        <div style="font-size:.9rem;font-weight:600">Haz clic para agregar fotos</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:4px">Puedes seleccionar varias a la vez</div>
+        <input type="file" id="photosInput" accept="image/*" multiple onchange="previewPhotos(this)">
+      </div>
+      <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="photos-preview" id="photosPreview"></div>
+    </div>
+
+    <!-- Información básica -->
     <div class="form-card">
       <h3>Información básica</h3>
       <div class="two-col">
@@ -50,6 +89,7 @@
       </label>
     </div>
 
+    <!-- Contacto -->
     <div class="form-card">
       <h3>Contacto del negocio</h3>
       <div class="two-col">
@@ -62,6 +102,7 @@
       </div>
     </div>
 
+    <!-- Ubicación -->
     <div class="form-card">
       <h3>Ubicación</h3>
       <div class="form-group"><label>Dirección</label><input type="text" id="f_address" placeholder="5a Avenida 10-50, Zona 1"></div>
@@ -76,6 +117,7 @@
       <div class="form-group"><label>Link Google Maps</label><input type="url" id="f_maps" placeholder="https://maps.google.com/..."></div>
     </div>
 
+    <!-- Propietario -->
     <div class="form-card">
       <h3>Cuenta del propietario</h3>
       <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">Se creará una cuenta con rol "negocio" para acceder al panel.</p>
@@ -91,6 +133,7 @@
     </div>
 
     <div id="errorMsg" style="color:var(--danger);font-size:.9rem;margin-bottom:16px;display:none;background:#fdf0f0;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid #f5c2c2"></div>
+    <div id="statusMsg" style="color:var(--success);font-size:.9rem;margin-bottom:16px;display:none;background:#d4edda;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid #c3e6cb"></div>
 
     <div style="display:flex;gap:12px;align-items:center">
       <button class="btn-primary" onclick="createBusiness()" id="submitBtn" style="padding:13px 32px">Crear negocio</button>
@@ -101,26 +144,86 @@
 
 <script src="../assets/js/app.js"></script>
 <script>
-// Verificacion manual sin redireccion automatica
 var adminUser = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
 if (!localStorage.getItem('pedidos_token') || adminUser.role !== 'admin') {
   window.location.href = '/cliente/login.html';
 }
 
+var logoFile    = null;
+var photoFiles  = [];
+var uploadedLogoUrl   = null;
+var uploadedPhotoUrls = [];
+
+function getToken() {
+  return localStorage.getItem('pedidos_token');
+}
+
 async function init() {
-  var cats = await APP.get('/categories');
+  var cats = await fetch('/api/categories').then(function(r){ return r.json(); });
   var sel  = document.getElementById('f_category');
   (cats.data || []).forEach(function(c) {
     var opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = c.name;
+    opt.value = c.id; opt.textContent = c.name;
     sel.appendChild(opt);
   });
+}
+
+function previewLogo(input) {
+  if (!input.files[0]) return;
+  logoFile = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = document.getElementById('logoImg');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('logoPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function previewPhotos(input) {
+  var files = Array.from(input.files).slice(0, 8 - photoFiles.length);
+  files.forEach(function(file) {
+    photoFiles.push(file);
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var wrap = document.createElement('div');
+      wrap.className = 'photo-thumb';
+      var idx = photoFiles.length - 1;
+      wrap.innerHTML = '<img src="' + e.target.result + '"><button class="photo-thumb-del" onclick="removePhoto(' + idx + ', this.parentElement)">✕</button>';
+      document.getElementById('photosPreview').appendChild(wrap);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removePhoto(idx, el) {
+  photoFiles.splice(idx, 1);
+  el.remove();
+}
+
+async function uploadFile(file, folder) {
+  var form = new FormData();
+  form.append('image', file);
+  form.append('folder', folder);
+  var res = await fetch('/api/upload', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + getToken() },
+    body: form
+  });
+  var data = await res.json();
+  return data.success ? data.data.url : null;
+}
+
+function setStatus(msg) {
+  var el = document.getElementById('statusMsg');
+  el.textContent = msg; el.style.display = 'block';
 }
 
 async function createBusiness() {
   var errEl = document.getElementById('errorMsg');
   errEl.style.display = 'none';
+  document.getElementById('statusMsg').style.display = 'none';
 
   var name       = document.getElementById('f_name').value.trim();
   var cat        = document.getElementById('f_category').value;
@@ -129,19 +232,41 @@ async function createBusiness() {
   var ownerPass  = document.getElementById('owner_password').value;
   var ownerPass2 = document.getElementById('owner_password2').value;
 
-  if (!name)       { showError('El nombre del negocio es requerido'); return; }
-  if (!cat)        { showError('Selecciona una categoría'); return; }
-  if (!ownerName)  { showError('El nombre del propietario es requerido'); return; }
-  if (!ownerEmail) { showError('El email del propietario es requerido'); return; }
-  if (!ownerPass)  { showError('La contraseña es requerida'); return; }
+  if (!name)            { showError('El nombre del negocio es requerido'); return; }
+  if (!cat)             { showError('Selecciona una categoría'); return; }
+  if (!ownerName)       { showError('El nombre del propietario es requerido'); return; }
+  if (!ownerEmail)      { showError('El email del propietario es requerido'); return; }
+  if (!ownerPass)       { showError('La contraseña es requerida'); return; }
   if (ownerPass.length < 8) { showError('La contraseña debe tener al menos 8 caracteres'); return; }
   if (ownerPass !== ownerPass2) { showError('Las contraseñas no coinciden'); return; }
 
   var btn = document.getElementById('submitBtn');
-  btn.textContent = 'Creando usuario...'; btn.disabled = true;
+  btn.disabled = true;
 
   try {
-    // Paso 1: Registrar al propietario
+    // Paso 1: Subir logo
+    if (logoFile) {
+      btn.textContent = 'Subiendo logo...';
+      uploadedLogoUrl = await uploadFile(logoFile, 'logos');
+    }
+
+    // Paso 2: Subir fotos
+    if (photoFiles.length > 0) {
+      var bar = document.getElementById('progressBar');
+      var fill = document.getElementById('progressFill');
+      bar.style.display = 'block';
+      uploadedPhotoUrls = [];
+      for (var i = 0; i < photoFiles.length; i++) {
+        btn.textContent = 'Subiendo foto ' + (i+1) + ' de ' + photoFiles.length + '...';
+        fill.style.width = ((i / photoFiles.length) * 100) + '%';
+        var url = await uploadFile(photoFiles[i], 'businesses');
+        if (url) uploadedPhotoUrls.push(url);
+      }
+      fill.style.width = '100%';
+    }
+
+    // Paso 3: Registrar propietario
+    btn.textContent = 'Creando usuario...';
     var userRes = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -154,52 +279,64 @@ async function createBusiness() {
       })
     });
     var userData = await userRes.json();
-
     if (!userData.success) {
-      showError('Error al crear usuario: ' + (userData.message || 'Error desconocido'));
+      showError('Error al crear usuario: ' + (userData.message || 'Error'));
       btn.textContent = 'Crear negocio'; btn.disabled = false;
       return;
     }
-
     var newUserId = userData.data.user.id;
-    btn.textContent = 'Creando negocio...';
 
-    // Paso 2: Crear negocio con TOKEN DEL ADMIN y asignar al nuevo usuario
+    // Paso 4: Crear negocio con token admin
+    btn.textContent = 'Creando negocio...';
+    var bizPayload = {
+      owner_user_id:    newUserId,
+      category_id:      cat,
+      name:             name,
+      description:      document.getElementById('f_description').value,
+      what_we_offer:    document.getElementById('f_what_we_offer').value,
+      phone:            document.getElementById('f_phone').value,
+      whatsapp:         document.getElementById('f_whatsapp').value,
+      email:            document.getElementById('f_email').value,
+      website:          document.getElementById('f_website').value,
+      address:          document.getElementById('f_address').value,
+      city:             document.getElementById('f_city').value,
+      zone:             document.getElementById('f_zone').value,
+      latitude:         document.getElementById('f_latitude').value  || null,
+      longitude:        document.getElementById('f_longitude').value || null,
+      google_maps_url:  document.getElementById('f_maps').value      || null,
+      accepts_delivery: document.getElementById('f_delivery').checked ? 1 : 0,
+      logo:             uploadedLogoUrl || null,
+    };
+
     var bizRes = await fetch('/api/businesses', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + localStorage.getItem('pedidos_token')
-      },
-      body: JSON.stringify({
-        owner_user_id:   newUserId,
-        category_id:     cat,
-        name:            name,
-        description:     document.getElementById('f_description').value,
-        what_we_offer:   document.getElementById('f_what_we_offer').value,
-        phone:           document.getElementById('f_phone').value,
-        whatsapp:        document.getElementById('f_whatsapp').value,
-        email:           document.getElementById('f_email').value,
-        website:         document.getElementById('f_website').value,
-        address:         document.getElementById('f_address').value,
-        city:            document.getElementById('f_city').value,
-        zone:            document.getElementById('f_zone').value,
-        latitude:        document.getElementById('f_latitude').value  || null,
-        longitude:       document.getElementById('f_longitude').value || null,
-        google_maps_url: document.getElementById('f_maps').value      || null,
-        accepts_delivery: document.getElementById('f_delivery').checked ? 1 : 0
-      })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify(bizPayload)
     });
     var bizData = await bizRes.json();
 
     if (!bizData.success) {
-      showError('Usuario creado pero error en negocio: ' + (bizData.message || 'Error'));
+      showError('Error al crear negocio: ' + (bizData.message || 'Error'));
       btn.textContent = 'Crear negocio'; btn.disabled = false;
       return;
     }
 
-    APP.toast('¡Negocio creado exitosamente!');
-    setTimeout(function() { window.location.href = 'negocios.html'; }, 1200);
+    var bizId = bizData.data.id;
+
+    // Paso 5: Subir fotos al negocio creado
+    if (uploadedPhotoUrls.length > 0) {
+      btn.textContent = 'Guardando fotos...';
+      for (var j = 0; j < uploadedPhotoUrls.length; j++) {
+        await fetch('/api/businesses/' + bizId + '/photos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+          body: JSON.stringify({ url: uploadedPhotoUrls[j] })
+        });
+      }
+    }
+
+    setStatus('¡Negocio creado exitosamente! Redirigiendo...');
+    setTimeout(function() { window.location.href = 'negocios.html'; }, 1500);
 
   } catch(e) {
     showError('Error de conexión: ' + e.message);
@@ -209,10 +346,11 @@ async function createBusiness() {
 
 function showError(msg) {
   var el = document.getElementById('errorMsg');
-  el.textContent = msg;
-  el.style.display = 'block';
+  el.textContent = msg; el.style.display = 'block';
   el.scrollIntoView({ behavior: 'smooth' });
 }
+
+function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
 
 init();
 </script>

@@ -89,9 +89,8 @@
 
 <script src="../assets/js/app.js"></script>
 <script>
-var adminToken = localStorage.getItem('pedidos_token');
 var adminUser  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
-if (!adminToken || adminUser.role !== 'cliente') { window.location.href = '/cliente/login.html'; }
+if (!localStorage.getItem('pedidos_token') || adminUser.role !== 'cliente') { window.location.href = '/cliente/login.html'; }
 const user = APP.user();
 document.getElementById('sidebarUser').textContent = user.name || '';
 

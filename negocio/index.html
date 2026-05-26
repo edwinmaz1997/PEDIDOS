@@ -65,7 +65,6 @@
 
 <script>
 const API = '/api';
-const token = localStorage.getItem('pedidos_token');
 const user  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
 if (!token || user.role !== 'negocio') window.location.href = '/cliente/login.html';
 document.getElementById('sidebarUser').textContent = user.name || 'Mi Negocio';
@@ -81,7 +80,7 @@ async function loadOrders(status, tabBtn) {
   container.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
   try {
     const qs = status ? `?status=${status}` : '';
-    const res = await fetch(`${API}/orders${qs}`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API}/orders${qs}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('pedidos_token') } });
     const data = await res.json();
     const orders = data.data?.orders || [];
     if (!orders.length) { container.innerHTML = '<div class="empty-state"><p>No hay pedidos en esta categoría.</p></div>'; return; }
@@ -135,7 +134,7 @@ async function respond(orderId, action) {
   const estTime  = parseInt(document.getElementById(`time-${orderId}`)?.value) || null;
   try {
     const res = await fetch(`${API}/orders/${orderId}/respond`, {
-      method: 'PUT', headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+      method: 'PUT', headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + localStorage.getItem('pedidos_token') },
       body: JSON.stringify({ action, response, estimated_time: estTime })
     });
     const data = await res.json();
@@ -147,7 +146,7 @@ async function respond(orderId, action) {
 async function advanceStatus(orderId, status) {
   try {
     const res = await fetch(`${API}/orders/${orderId}/status`, {
-      method:'PUT', headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+      method:'PUT', headers:{'Content-Type':'application/json', Authorization: 'Bearer ' + localStorage.getItem('pedidos_token')},
       body: JSON.stringify({ status })
     });
     const data = await res.json();
