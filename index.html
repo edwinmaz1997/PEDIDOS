@@ -86,18 +86,19 @@ let categories = [];
 let activeCategory = null;
 
 // ─── Init ─────────────────────────────────────────────────
-// Update navbar based on auth state
-(function() {
+// Update navbar based on auth state — runs after DOM ready
+document.addEventListener('DOMContentLoaded', function() {
   var token = localStorage.getItem('nuevaexpress_token');
   var user  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
-  if (token && user.name) {
-    var role = user.role || 'cliente';
+  var navRight = document.getElementById('navRight');
+  if (token && user.name && navRight) {
+    var role  = user.role || 'cliente';
     var panel = role === 'admin' ? '/admin/index.html' : (role === 'negocio' ? '/negocio/index.html' : (role === 'repartidor' ? '/repartidor/index.html' : '/cliente/index.html'));
-    document.getElementById('navRight').innerHTML =
+    navRight.innerHTML =
       '<a href="' + panel + '" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">👤 ' + user.name.split(' ')[0] + '</a>' +
       '<a href="' + panel + '" class="btn-primary" style="padding:7px 14px;font-size:.82rem">Mi panel</a>';
   }
-})();
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadCategories();
