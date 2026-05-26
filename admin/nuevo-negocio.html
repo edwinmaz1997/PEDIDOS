@@ -89,9 +89,17 @@
       </div>
       <div class="form-group"><label>Descripción</label><textarea id="f_description" rows="2" placeholder="Breve descripción..."></textarea></div>
       <div class="form-group"><label>¿Qué ofrecemos?</label><textarea id="f_what_we_offer" rows="2" placeholder="Ceviches, mariscos, comida típica..."></textarea></div>
-      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem">
-        <input type="checkbox" id="f_delivery" style="width:16px;height:16px"> Acepta delivery (Q15.00 tarifa)
-      </label>
+      <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem;margin-top:6px">
+          <input type="checkbox" id="f_delivery" style="width:16px;height:16px" onchange="toggleDeliveryFee()"> Acepta delivery
+        </label>
+        <div id="deliveryFeeWrap" style="display:none">
+          <div class="form-group" style="margin:0">
+            <label style="font-size:.82rem">Tarifa de envío (Q) <span style="font-weight:400;color:var(--muted)">— mínimo Q15</span></label>
+            <input type="number" id="f_delivery_fee" min="15" step="1" value="15" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif">
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Contacto -->
@@ -180,6 +188,11 @@ var uploadedPhotoUrls = [];
 
 function getToken() {
   return localStorage.getItem('nuevaexpress_token');
+}
+
+function toggleDeliveryFee() {
+  var checked = document.getElementById('f_delivery').checked;
+  document.getElementById('deliveryFeeWrap').style.display = checked ? 'block' : 'none';
 }
 
 async function init() {
@@ -329,6 +342,7 @@ async function createBusiness() {
       longitude:        document.getElementById('f_longitude').value || null,
       google_maps_url:  document.getElementById('f_maps').value      || null,
       accepts_delivery: document.getElementById('f_delivery').checked ? 1 : 0,
+      delivery_fee: parseFloat(document.getElementById('f_delivery_fee').value) || 15,
       logo:             uploadedLogoUrl || null,
     };
 

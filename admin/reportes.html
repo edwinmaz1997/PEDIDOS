@@ -186,9 +186,9 @@ function loadReport() {
         '📦 Total de pedidos: ' + orders.length + '\n' +
         '🛵 Con delivery: ' + deliveryCount + '\n\n' +
         '💰 *Detalle de cobros:*\n' +
-        '• Tarifas de servicio (Q5 × ' + orders.length + '): Q' + bizService.toFixed(2) + '\n' +
-        (bizDelivery > 0 ? '• Tarifas de delivery: Q' + bizDelivery.toFixed(2) + '\n' : '') +
-        '\n✅ *Total a cobrar: Q' + (bizService + bizDelivery).toFixed(2) + '*\n\n' +
+        '• Tarifas de servicio (Q3 × ' + orders.length + ' pedidos): Q' + bizService.toFixed(2) + '\n' +
+        '\n_Nota: Las tarifas de delivery (Q' + bizDelivery.toFixed(2) + ') corresponden a los repartidores._\n' +
+        '\n✅ *Total a cobrar a NuevaExpress: Q' + bizService.toFixed(2) + '*\n\n' +
         'Generado por NuevaExpress\nnuevaexpress.com'
       );
 
@@ -213,21 +213,21 @@ function loadReport() {
               <div style="font-size:.82rem;color:var(--muted);margin-top:3px">${orders.length} pedido${orders.length!==1?'s':''} · ${deliveryCount} con delivery</div>
             </div>
             <div style="text-align:right">
-              <div class="report-biz-total">Cobrar: Q${(bizService+bizDelivery).toFixed(2)}</div>
+              <div class="report-biz-total">Cobrar: Q${bizService.toFixed(2)}</div>
               <div style="font-size:.78rem;color:var(--muted)">Volumen: Q${bizTotal.toFixed(2)}</div>
             </div>
           </div>
 
           <div style="background:var(--off-white);border-radius:var(--radius-sm);padding:12px;margin:8px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">
             <div><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Subtotal ventas</div><div style="font-weight:700">Q${bizSubtotal.toFixed(2)}</div></div>
-            <div><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Tarifas servicio</div><div style="font-weight:700;color:var(--success)">Q${bizService.toFixed(2)}</div></div>
-            <div><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Tarifas delivery</div><div style="font-weight:700;color:var(--success)">Q${bizDelivery.toFixed(2)}</div></div>
-            <div style="background:var(--blue);border-radius:var(--radius-sm);padding:8px;color:white"><div style="font-size:.72rem;opacity:.8;text-transform:uppercase">TOTAL A COBRAR</div><div style="font-weight:700;font-size:1.1rem">Q${(bizService+bizDelivery).toFixed(2)}</div></div>
+            <div><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Tarifas servicio (Q3×peds)</div><div style="font-weight:700;color:var(--success)">Q${bizService.toFixed(2)}</div></div>
+            <div><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Delivery (repartidores)</div><div style="font-weight:700;color:var(--muted)">Q${bizDelivery.toFixed(2)}</div></div>
+            <div style="background:var(--blue);border-radius:var(--radius-sm);padding:8px;color:white"><div style="font-size:.72rem;opacity:.8;text-transform:uppercase">A COBRAR (NuevaExpress)</div><div style="font-weight:700;font-size:1.1rem">Q${bizService.toFixed(2)}</div></div>
           </div>
 
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px" class="no-print">
             <a href="https://wa.me/?text=${whatsappMsg}" target="_blank" class="btn-primary" style="padding:8px 16px;font-size:.85rem;background:linear-gradient(135deg,#25d366,#128c7e)">💬 Enviar por WhatsApp</a>
-            <button onclick="printBiz('${esc(data.name)}','${monthName} ${year}','${bid}')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">🖨️ Imprimir este</button>
+            <button onclick="printBiz('${esc(data.name)}','${monthName} ${year}','${bid}')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">🖨️ Imprimir</button>
           </div>
 
           <div class="report-orders-list" id="biz-${bid}">

@@ -34,7 +34,7 @@ define('MAX_FILE_SIZE', 5 * 1024 * 1024);
 define('ALLOWED_IMAGE_TYPES', ['image/jpeg', 'image/png', 'image/webp']);
 
 // Fees (Quetzales)
-define('SERVICE_FEE', 5.00);
-define('DELIVERY_FEE_CENTRAL', 15.00);
+define('SERVICE_FEE', 3.00);
+define('DELIVERY_FEE_CENTRAL', 15.00); // Mínimo — cada negocio puede definir el suyo
 
 date_default_timezone_set('America/Guatemala');

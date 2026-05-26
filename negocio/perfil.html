@@ -115,10 +115,17 @@
             <label>¿Qué ofrecemos? <span style="color:var(--muted);font-weight:400">(aparece en el directorio)</span></label>
             <textarea id="f_what_we_offer" rows="3" placeholder="Ceviches, mariscos frescos, comida típica guatemalteca..."></textarea>
           </div>
-          <div style="display:flex;gap:12px;align-items:center">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem">
-              <input type="checkbox" id="f_accepts_delivery" style="width:16px;height:16px"> Acepta delivery
+          <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem;margin-top:6px">
+              <input type="checkbox" id="f_accepts_delivery" style="width:16px;height:16px" onchange="toggleDeliveryFeeField()"> Acepta delivery
             </label>
+            <div id="deliveryFeeField" style="display:none">
+              <div class="form-group" style="margin:0">
+                <label style="font-size:.82rem">Tarifa de envío (Q) <span style="font-weight:400;color:var(--muted)">mínimo Q15</span></label>
+                <input type="number" id="f_delivery_fee" min="15" step="1" placeholder="15" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif">
+                <div style="font-size:.75rem;color:var(--muted);margin-top:3px">Puedes ajustar según la distancia al cliente</div>
+              </div>
+            </div>
           </div>
           <div style="margin-top:20px">
             <button class="btn-primary" onclick="saveInfo()">Guardar información</button>
@@ -295,6 +302,8 @@ function fillForm() {
   e('f_description').value = biz.description || '';
   e('f_what_we_offer').value = biz.what_we_offer || '';
   e('f_accepts_delivery').checked = !!biz.accepts_delivery;
+  e('f_delivery_fee').value = biz.delivery_fee || 15;
+  toggleDeliveryFeeField();
   e('f_phone').value = biz.phone || '';
   e('f_whatsapp').value = biz.whatsapp || '';
   e('f_email').value = biz.email || '';
@@ -357,6 +366,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+function toggleDeliveryFeeField() {
+  var checked = document.getElementById('f_accepts_delivery').checked;
+  document.getElementById('deliveryFeeField').style.display = checked ? 'block' : 'none';
+}
+
 async function saveInfo() {
   const data = {
     name: document.getElementById('f_name').value,
@@ -364,6 +378,7 @@ async function saveInfo() {
     description: document.getElementById('f_description').value,
     what_we_offer: document.getElementById('f_what_we_offer').value,
     accepts_delivery: document.getElementById('f_accepts_delivery').checked ? 1 : 0,
+    delivery_fee: parseFloat(document.getElementById('f_delivery_fee').value) || 15,
   };
   const res = await APP.put(`/businesses/${biz.id}`, data);
   if (res?.success) { APP.toast('Información guardada'); biz = {...biz, ...data}; document.getElementById('bizNameDisplay').textContent = data.name; }
