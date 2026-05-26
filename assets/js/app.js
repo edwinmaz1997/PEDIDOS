@@ -81,11 +81,11 @@ const APP = {
   date(str) {
     if (!str) return '';
     var parts = str.replace('T',' ').split(/[- :]/);
-    var d = new Date(parts[0], parts[1]-1, parts[2], parts[3]||0, parts[4]||0);
+    var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]), parseInt(parts[3])||0, parseInt(parts[4])||0);
     var h = d.getHours(), m = d.getMinutes(), ampm = h>=12?'p. m.':'a. m.';
     h = h%12||12;
-    return (String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()+
-      ', '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+ampm);
+    return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()+
+      ' '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+' '+ampm;
   },
 
   // Toast notification
