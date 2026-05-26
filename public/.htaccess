@@ -1,14 +1,10 @@
 Options -Indexes
-
-# Forzar HTTPS
 RewriteEngine On
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Rutar /api/* al backend
-RewriteCond %{REQUEST_URI} ^/api/
+# Rutar /api/* al backend PHP
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^api/(.*)$ /api/index.php [QSA,L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/index.php [QSA,L]
 
 # SPA fallback para paneles
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -24,12 +20,6 @@ RewriteRule ^(cliente|negocio|admin|repartidor)/(.*)$ /$1/$2 [L]
     Header unset Server
 </IfModule>
 
-# Cache para assets
-<FilesMatch "\.(css|js|jpg|jpeg|png|webp|svg|woff2)$">
-    Header set Cache-Control "max-age=2592000, public"
-</FilesMatch>
-
-# Bloquear acceso a archivos sensibles
 <FilesMatch "\.(sql|log|env|bak|php~)$">
     Order allow,deny
     Deny from all
