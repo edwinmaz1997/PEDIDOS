@@ -76,7 +76,9 @@
 
 <script src="../assets/js/app.js"></script>
 <script>
-APP.requireAuth(['admin']);
+var adminToken = localStorage.getItem('pedidos_token');
+var adminUser  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
+if (!adminToken || adminUser.role !== 'admin') { window.location.href = '/cliente/login.html'; }
 let allOrders = [];
 
 async function init() {

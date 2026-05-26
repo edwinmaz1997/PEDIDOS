@@ -101,9 +101,13 @@
 
 <script src="../assets/js/app.js"></script>
 <script>
-APP.requireAuth(['admin']);
+// Verificacion manual sin redireccion automatica
+var adminToken = localStorage.getItem('pedidos_token');
+var adminUser  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
 
-var adminToken = APP.token(); // guardamos el token admin antes de cualquier cosa
+if (!adminToken || adminUser.role !== 'admin') {
+  window.location.href = '/cliente/login.html';
+}
 
 async function init() {
   var cats = await APP.get('/categories');

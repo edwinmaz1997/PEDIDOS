@@ -219,7 +219,9 @@
 
 <script src="../assets/js/app.js"></script>
 <script>
-APP.requireAuth(['negocio']);
+var adminToken = localStorage.getItem('pedidos_token');
+var adminUser  = JSON.parse(localStorage.getItem('pedidos_user') || '{}');
+if (!adminToken || adminUser.role !== 'negocio') { window.location.href = '/cliente/login.html'; }
 document.getElementById('sidebarUser').textContent = APP.user().name || '';
 
 let biz = null;
