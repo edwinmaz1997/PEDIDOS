@@ -59,6 +59,17 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div class="form-group"><label>Nombre completo</label><input type="text" id="f_name" placeholder="Tu nombre"></div>
         <div class="form-group"><label>Teléfono</label><input type="tel" id="f_phone" placeholder="+502 5555 5555"></div>
+        <div class="form-group">
+          <label>Mi dirección de casa</label>
+          <input type="text" id="f_address" placeholder="Colonia, calle, número...">
+        </div>
+        <div class="form-group">
+          <label>Link Google Maps de mi casa <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+          <input type="url" id="f_maps_url" placeholder="https://maps.app.goo.gl/..." oninput="previewMapsUrl()">
+          <div id="mapsPreview" style="display:none;margin-top:6px">
+            <a id="mapsPreviewLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.78rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver mi ubicación</a>
+          </div>
+        </div>
       </div>
       <div class="form-group">
         <label>Correo electrónico</label>
