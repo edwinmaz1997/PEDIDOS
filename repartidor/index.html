@@ -432,8 +432,21 @@ function closeDetail(e) {
 }
 
 // ── Actions ───────────────────────────────────────────────────
+function showConfirm(icon, title, msg, onOk) {
+  document.getElementById('confirmIcon').textContent  = icon;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent   = msg;
+  document.getElementById('confirmOk').onclick = function() { closeConfirm(); onOk(); };
+  document.getElementById('confirmModal').style.display = 'flex';
+}
+function closeConfirm() {
+  document.getElementById('confirmModal').style.display = 'none';
+}
+
 async function releaseDelivery(id) {
-  if (!confirm('¿Está seguro que desea liberar este pedido?\n\nEl pedido quedará disponible para que otro repartidor lo tome.')) return;
+  showConfirm('⚠️', '¿Liberar este pedido?', 
+    'El pedido quedará disponible para que otro repartidor lo tome. Esta acción no se puede deshacer.',
+    async function() {
   try {
     var res = await fetch('/api/deliveries/'+id+'/release', {
       method: 'POST',
@@ -443,6 +456,7 @@ async function releaseDelivery(id) {
     if (res.success) { APP.toast('Pedido liberado'); document.getElementById('detailModal').style.display='none'; document.body.style.overflow=''; init(); }
     else APP.toast(res.message||'Error','error');
   } catch(e) { APP.toast('Error de conexión','error'); }
+  });
 }
 
 async function claimDelivery(id) {
@@ -501,5 +515,17 @@ function toggleSidebar(){var s=document.querySelector('.sidebar');var o=document
 init();
 setInterval(init, 30000);
 </script>
+<!-- Confirm Modal -->
+<div id="confirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:16px">
+  <div style="background:white;border-radius:20px;padding:28px;max-width:340px;width:100%;text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:12px" id="confirmIcon">⚠️</div>
+    <h3 style="font-size:1.1rem;margin-bottom:8px" id="confirmTitle">¿Está seguro?</h3>
+    <p style="font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:24px" id="confirmMsg"></p>
+    <div style="display:flex;gap:10px">
+      <button id="confirmCancel" onclick="closeConfirm()" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--border);background:white;font-weight:600;cursor:pointer;font-size:.9rem">Cancelar</button>
+      <button id="confirmOk" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--danger);color:white;font-weight:600;cursor:pointer;font-size:.9rem">Confirmar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
