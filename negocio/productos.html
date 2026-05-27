@@ -181,7 +181,7 @@ function filterProducts() {
   var st = document.getElementById('statusFilter')?.value || '';
   var filtered = allProducts.filter(function(p) {
     var mQ = !q || p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q);
-    var mS = st === '' || String(p.is_available) === st;
+    var mS = st === '' || parseInt(p.is_available) === parseInt(st);
     return mQ && mS;
   });
   var pc = document.getElementById('prodCount');
@@ -206,19 +206,20 @@ function renderProductRow(p) {
         <div style="flex:1;min-width:0"><div class="prod-name" style="font-weight:600;font-size:.9rem">${APP.esc(p.name)}</div>
         ${p.description ? `<div class="prod-desc">${APP.esc(p.description)}</div>` : ''}
       </div></div>
-      <div class="prod-price" style="white-space:nowrap;font-weight:700;color:var(--blue);margin-left:auto">${p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
+      <div style="white-space:nowrap;font-weight:700;color:var(--blue);flex-shrink:0;padding:0 12px">${p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
       <div class="prod-actions">
         <button onclick="openModal(${p.id})" title="Editar" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.85rem">✏️</button>
-        <button onclick="toggleAvailable(${p.id}, ${p.is_available?0:1})" title="${p.is_available?'Desactivar':'Activar'}" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.85rem">${p.is_available?'⏸':'▶'}</button>
+        <button onclick="toggleAvailable(${p.id}, ${p.is_available?'0':'1'})" title="${p.is_available?'Desactivar':'Activar'}" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.85rem">${p.is_available?'⏸':'▶'}</button>
         <button onclick="deleteProduct(${p.id})" title="Eliminar" style="background:none;border:1px solid #f5c2c2;color:var(--danger);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.85rem">🗑️</button>
       </div>
     </div>`;
 }
 
 async function toggleAvailable(id, available) {
-  const res = await APP.put(`/products/${id}`, { is_available: available });
+  const val = parseInt(available);
+  const res = await APP.put(`/products/${id}`, { is_available: val });
   if (!res?.success) APP.toast('Error al actualizar', 'error');
-  else { APP.toast(available ? 'Producto activado' : 'Producto desactivado'); loadProducts(); }
+  else { APP.toast(val ? 'Producto activado' : 'Producto desactivado'); loadProducts(); }
 }
 
 function openModal(productId = null) {
