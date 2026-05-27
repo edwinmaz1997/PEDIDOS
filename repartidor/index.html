@@ -126,10 +126,23 @@
       🗺️ Ver ruta completa en Google Maps
     </a>
 
+    <!-- Products -->
+    <div style="margin-bottom:16px">
+      <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">🛍️ Productos del pedido</div>
+      <div id="dItems" style="background:var(--off-white);border-radius:var(--radius-sm);padding:12px"></div>
+    </div>
+
+    <!-- Total to collect -->
+    <div style="background:linear-gradient(135deg,var(--blue),var(--blue-dark));border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;color:white">
+      <div style="font-size:.8rem;opacity:.8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">💰 Total a cobrar al cliente</div>
+      <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:700" id="dTotalCollect">—</div>
+      <div style="font-size:.78rem;opacity:.7;margin-top:4px" id="dTotalBreakdown">—</div>
+    </div>
+
     <!-- Order details -->
     <div style="background:var(--off-white);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.9rem"><span style="color:var(--muted)">Total del pedido</span><span style="font-weight:700" id="dTotal">—</span></div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.9rem"><span style="color:var(--muted)">Tarifa de delivery</span><span style="font-weight:700;color:var(--blue)" id="dDeliveryFee">—</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.9rem"><span style="color:var(--muted)">Subtotal productos</span><span style="font-weight:600" id="dSubtotal">—</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.9rem"><span style="color:var(--muted)">Tarifa de delivery</span><span style="font-weight:600;color:var(--blue)" id="dDeliveryFee">—</span></div>
       <div style="display:flex;justify-content:space-between;font-size:.9rem"><span style="color:var(--muted)">Tipo</span><span id="dType">—</span></div>
     </div>
 
@@ -319,10 +332,27 @@ function openDetail(id) {
     document.getElementById('dFullRoute').style.display = 'none';
   }
 
+  // Products
+  var items = d.items || [];
+  var itemsHtml = items.length ? items.map(function(i) {
+    return '<div style="display:flex;justify-content:space-between;font-size:.85rem;padding:4px 0;border-bottom:1px solid var(--border)">' +
+      '<span>' + esc(i.product_name) + ' <span style="color:var(--muted)">×' + i.quantity + '</span></span>' +
+      (i.unit_price ? '<span style="font-weight:600">Q' + (parseFloat(i.unit_price)*i.quantity).toFixed(2) + '</span>' : '<span style="color:var(--muted)">—</span>') +
+    '</div>';
+  }).join('') + (d.notes ? '<div style="margin-top:8px;font-size:.8rem;color:var(--muted)">📝 '+esc(d.notes)+'</div>' : '')
+  : '<div style="font-size:.85rem;color:var(--muted)">Sin detalle de productos</div>';
+  document.getElementById('dItems').innerHTML = itemsHtml;
+
   // Amounts
-  document.getElementById('dTotal').textContent      = 'Q' + parseFloat(d.total||0).toFixed(2);
-  document.getElementById('dDeliveryFee').textContent = 'Q' + parseFloat(d.delivery_fee||0).toFixed(2);
-  document.getElementById('dType').textContent        = d.delivery_type === 'delivery' ? '🛵 Delivery' : '🏃 Recoger';
+  var subtotal    = parseFloat(d.subtotal||0);
+  var deliveryFee = parseFloat(d.delivery_fee||0);
+  var totalCollect = subtotal + deliveryFee;
+
+  document.getElementById('dTotalCollect').textContent  = 'Q' + totalCollect.toFixed(2);
+  document.getElementById('dTotalBreakdown').textContent = 'Q' + subtotal.toFixed(2) + ' productos + Q' + deliveryFee.toFixed(2) + ' delivery';
+  document.getElementById('dSubtotal').textContent      = 'Q' + subtotal.toFixed(2);
+  document.getElementById('dDeliveryFee').textContent   = 'Q' + deliveryFee.toFixed(2);
+  document.getElementById('dType').textContent          = d.delivery_type === 'delivery' ? '🛵 Delivery' : '🏃 Recoger';
 
   // Notes
   if (d.notes) {

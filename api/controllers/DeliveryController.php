@@ -11,7 +11,7 @@ class DeliveryController {
         $user = AuthMiddleware::requireRole(['repartidor', 'admin']);
         $stmt = $this->db->prepare("
             SELECT d.*, 
-                   o.order_number, o.delivery_address, o.delivery_fee, o.total, 
+                   o.order_number, o.delivery_address, o.delivery_fee, o.total, o.subtotal,
                    o.notes, o.delivery_type, o.status as order_status,
                    o.created_at,
                    b.name as business_name, b.address as pickup_address, b.phone as business_phone,
@@ -29,9 +29,33 @@ class DeliveryController {
         $available = array_filter($all, function($d) { return $d['status'] === 'disponible'; });
         $mine      = array_filter($all, function($d) use ($user) { return $d['repartidor_id'] == $user['id']; });
 
+        // Fetch items for each delivery
+        $allData = array_values($available) + array_values($mine);
+        $orderIds = array_unique(array_column(array_merge(array_values($available), array_values($mine)), 'order_id'));
+        $items = [];
+        if (!empty($orderIds)) {
+            $placeholders = implode(',', array_fill(0, count($orderIds), '?'));
+            $itemStmt = $this->db->prepare("SELECT * FROM order_items WHERE order_id IN ($placeholders)");
+            $itemStmt->execute($orderIds);
+            foreach ($itemStmt->fetchAll() as $item) {
+                $items[$item['order_id']][] = $item;
+            }
+        }
+
+        // Attach items to each delivery
+        $attachItems = function(&$list) use ($items) {
+            foreach ($list as &$d) {
+                $d['items'] = $items[$d['order_id']] ?? [];
+            }
+        };
+        $avail = array_values($available);
+        $mine2 = array_values($mine);
+        $attachItems($avail);
+        $attachItems($mine2);
+
         Response::success([
-            'available' => array_values($available),
-            'mine'      => array_values($mine)
+            'available' => $avail,
+            'mine'      => $mine2
         ]);
     }
 
