@@ -156,7 +156,9 @@ async function saveProfile() {
   btn.textContent = 'Guardando...'; btn.disabled = true;
   const res = await APP.put('/user/profile', {
     name:  document.getElementById('f_name').value.trim(),
-    phone: document.getElementById('f_phone').value.trim(),
+    phone:          document.getElementById('f_phone').value.trim(),
+    address:        document.getElementById('f_address').value.trim(),
+    google_maps_url: document.getElementById('f_maps_url').value.trim(),
   });
   if (res?.success) {
     APP.toast('Perfil actualizado');

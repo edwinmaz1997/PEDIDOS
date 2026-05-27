@@ -90,11 +90,24 @@
           <button class="delivery-btn" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
         </div>
         <div id="deliveryAddressWrap" style="display:none;margin-bottom:12px">
-          <input type="text" id="deliveryAddress" placeholder="Dirección o link de Google Maps" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;margin-bottom:6px" oninput="previewDeliveryMap()">
-          <div id="deliveryMapPreview" style="display:none;margin-bottom:8px">
-            <a id="deliveryMapLink" href="#" target="_blank" class="map-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.82rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver en Google Maps</a>
+          <!-- Saved address option -->
+          <div id="savedAddressOption" style="display:none;background:#f0f7ff;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;border:1.5px solid #90caf9">
+            <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+              <input type="checkbox" id="useSavedAddress" style="width:18px;height:18px;margin-top:2px;flex-shrink:0" onchange="toggleAddressMode()">
+              <div>
+                <div style="font-weight:600;font-size:.9rem">🏠 Usar mi dirección registrada</div>
+                <div id="savedAddressText" style="font-size:.82rem;color:var(--muted);margin-top:2px"></div>
+              </div>
+            </label>
           </div>
-          <div style="font-size:.75rem;color:var(--muted)">Puedes escribir tu dirección o pegar un link de Google Maps</div>
+          <!-- Manual address input -->
+          <div id="manualAddressWrap">
+            <input type="text" id="deliveryAddress" placeholder="Dirección o link de Google Maps" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;margin-bottom:6px" oninput="previewDeliveryMap()">
+            <div id="deliveryMapPreview" style="display:none;margin-bottom:6px">
+              <a id="deliveryMapLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.82rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver en Google Maps</a>
+            </div>
+            <div style="font-size:.75rem;color:var(--muted)">Escribe tu dirección o pega un link de Google Maps</div>
+          </div>
           <div id="zoneSelectWrap" style="display:none">
             <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:4px">Zona de entrega</label>
             <select id="zoneSelect" onchange="onZoneChange()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;background:white">
@@ -223,6 +236,31 @@ function addCustomRow() {
   wrap.appendChild(div);
 }
 
+function toggleAddressMode() {
+  var useSaved = document.getElementById('useSavedAddress').checked;
+  document.getElementById('manualAddressWrap').style.display = useSaved ? 'none' : 'block';
+}
+
+function loadSavedAddress() {
+  var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+  // Fetch latest profile to get address
+  fetch('/api/auth/me', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nuevaexpress_token') }
+  }).then(function(r){ return r.json(); }).then(function(res) {
+    if (!res.success) return;
+    var u = res.data;
+    if (u.address || u.google_maps_url) {
+      var opt = document.getElementById('savedAddressOption');
+      var txt = document.getElementById('savedAddressText');
+      opt.style.display = 'block';
+      txt.textContent = u.address || 'Link de Google Maps guardado';
+      // Store for use when ordering
+      window._savedAddress   = u.address || '';
+      window._savedMapsUrl   = u.google_maps_url || '';
+    }
+  }).catch(function(){});
+}
+
 function previewDeliveryMap() {
   var val = document.getElementById('deliveryAddress').value.trim();
   var preview = document.getElementById('deliveryMapPreview');
@@ -261,6 +299,7 @@ function setDelivery(type, btn) {
   document.querySelectorAll('.delivery-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('deliveryAddressWrap').style.display = type === 'delivery' ? 'block' : 'none';
+  if (type === 'delivery') loadSavedAddress();
   updateCart();
 }
 
@@ -303,8 +342,16 @@ function updateCart() {
 
 async function submitOrder() {
   const notes = document.getElementById('notes').value.trim();
-  const deliveryAddress = document.getElementById('deliveryAddress').value.trim();
-  if (deliveryType === 'delivery' && !deliveryAddress) { alert('Ingresa tu dirección de entrega'); return; }
+  var useSaved = document.getElementById('useSavedAddress')?.checked;
+  var deliveryAddress = '';
+  if (deliveryType === 'delivery') {
+    if (useSaved) {
+      deliveryAddress = window._savedMapsUrl || window._savedAddress || '';
+    } else {
+      deliveryAddress = document.getElementById('deliveryAddress').value.trim();
+    }
+    if (!deliveryAddress) { alert('Ingresa tu dirección de entrega'); return; }
+  }
 
   const items = [];
   Object.entries(cart).forEach(([id, item]) => {

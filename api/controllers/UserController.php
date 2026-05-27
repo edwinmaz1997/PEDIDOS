@@ -9,7 +9,7 @@ class UserController {
     // GET /api/user/profile
     public function profile(): void {
         $user = AuthMiddleware::authenticate();
-        $stmt = $this->db->prepare("SELECT u.id, u.name, u.email, u.phone, u.created_at, u.last_login, r.name as role FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = ?");
+        $stmt = $this->db->prepare("SELECT u.id, u.name, u.email, u.phone, u.address, u.google_maps_url, u.created_at, u.last_login, r.name as role FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = ?");
         $stmt->execute([$user['id']]);
         Response::success($stmt->fetch());
     }
@@ -27,6 +27,8 @@ class UserController {
         $sets = []; $params = [];
         if ($name)  { $sets[] = 'name = ?';  $params[] = $name; }
         if ($phone) { $sets[] = 'phone = ?'; $params[] = $phone; }
+        if (isset($body['address']))       { $sets[] = 'address = ?';        $params[] = Security::sanitize($body['address']); }
+        if (isset($body['google_maps_url'])){ $sets[] = 'google_maps_url = ?'; $params[] = Security::sanitize($body['google_maps_url']); }
         if (!$sets) Response::error('Sin datos para actualizar', 400);
         $params[] = $user['id'];
         $this->db->prepare("UPDATE users SET " . implode(', ', $sets) . " WHERE id = ?")->execute($params);
