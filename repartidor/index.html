@@ -333,11 +333,15 @@ function openDetail(id) {
   }
 
   // Actions
-  var isMine = d.repartidor_id == user.id;
+  var isMine = d.repartidor_id != null && String(d.repartidor_id) === String(user.id);
   var acts = '';
-  if (!isMine && d.status === 'listo') acts += '<button onclick="claimDelivery('+d.id+')" class="btn-primary" style="padding:12px;justify-content:center">Tomar esta entrega</button>';
-  if (isMine && d.status === 'listo') acts += '<button onclick="updateStatus('+d.id+',\'en_camino\')" class="btn-primary" style="padding:12px;justify-content:center">🛵 Marcar en camino</button>';
-  if (isMine && d.status === 'en_camino') acts += '<button onclick="updateStatus('+d.id+',\'entregado\')" class="btn-primary" style="padding:12px;justify-content:center;background:var(--green)">✔ Marcar como entregado</button>';
+  if (d.status === 'disponible') {
+    acts = '<button onclick="claimDelivery('+d.id+')" class="btn-primary" style="padding:13px;width:100%;justify-content:center;font-size:1rem">🛵 Tomar esta entrega</button>';
+  } else if (isMine && d.status === 'asignado') {
+    acts = '<button onclick="updateStatus('+d.id+',&quot;recogido&quot;)" class="btn-primary" style="padding:13px;width:100%;justify-content:center">📬 Marcar como recogido</button>';
+  } else if (isMine && d.status === 'recogido') {
+    acts = '<button onclick="updateStatus('+d.id+',&quot;entregado&quot;)" class="btn-primary" style="padding:13px;width:100%;justify-content:center;background:#2ecc71">✔ Marcar como entregado</button>';
+  }
   document.getElementById('dActions').innerHTML = acts;
 
   document.getElementById('detailModal').style.display = 'flex';
