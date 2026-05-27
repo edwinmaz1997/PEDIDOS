@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .products-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
-.prod-row { display:grid; grid-template-columns:56px 1fr auto auto 130px; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid var(--border); }
+.prod-row { display:grid; grid-template-columns:56px 1fr auto 120px; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid var(--border); }
 .prod-row:last-child { border-bottom:none; }
 .prod-row:hover { background:var(--off-white); }
 .prod-thumb { width:56px; height:56px; border-radius:8px; object-fit:cover; background:var(--off-white); display:flex; align-items:center; justify-content:center; font-size:1.3rem; overflow:hidden; }
@@ -206,11 +206,9 @@ function renderProductRow(p) {
         ${p.description ? `<div class="prod-desc">${APP.esc(p.description)}</div>` : ''}
       </div>
       <div class="prod-price">${p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
-      <div>
-        <button class="icon-btn ${p.is_available?'':'success'}" onclick="toggleAvailable(${p.id}, ${p.is_available?0:1})" title="${p.is_available?'Desactivar':'Activar'}">${p.is_available?'⏸':'▶'}</button>
-      </div>
       <div class="prod-actions">
         <button class="icon-btn" onclick="openModal(${p.id})" title="Editar">✏️</button>
+        <button class="icon-btn" onclick="toggleAvailable(${p.id}, ${p.is_available?0:1})" title="${p.is_available?'Desactivar':'Activar'}">${p.is_available?'⏸':'▶'}</button>
         <button class="icon-btn danger" onclick="deleteProduct(${p.id})" title="Eliminar">🗑️</button>
       </div>
     </div>`;
