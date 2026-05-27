@@ -17,7 +17,8 @@
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .products-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
-.prod-row { display:grid; grid-template-columns:60px 1fr auto auto 100px; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border); }
+.prod-row { display:grid; grid-template-columns:52px 1fr auto auto auto; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid var(--border); }
+@media(max-width:600px){ .prod-row { grid-template-columns:44px 1fr auto; } .prod-row .prod-price,.prod-row .prod-stock { display:none; } }
 .prod-row:last-child { border-bottom:none; }
 .prod-row:hover { background:var(--off-white); }
 .prod-thumb { width:56px; height:56px; border-radius:8px; object-fit:cover; background:var(--off-white); display:flex; align-items:center; justify-content:center; font-size:1.3rem; overflow:hidden; }
@@ -25,7 +26,7 @@
 .prod-name { font-weight:600; font-size:.95rem; }
 .prod-desc { font-size:.8rem; color:var(--muted); margin-top:2px; }
 .prod-price { font-weight:700; color:var(--accent); white-space:nowrap; }
-.prod-actions { display:flex; gap:8px; }
+.prod-actions { display:flex; gap:6px; flex-wrap:nowrap; align-items:center; }
 .icon-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:6px 10px; cursor:pointer; font-size:.85rem; transition:var(--transition); }
 .icon-btn:hover { background:var(--off-white); }
 .icon-btn.danger:hover { background:#fdf0f0; border-color:var(--danger); color:var(--danger); }
