@@ -69,6 +69,7 @@
         <option value="1">Activos</option>
         <option value="0">Inactivos</option>
       </select>
+      <span id="filterCount" style="font-size:.82rem;color:var(--muted)"></span>
     </div>
 
     <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden">
@@ -128,7 +129,8 @@ function applyFilters() {
     return mQ && mC && mS;
   });
   page = 1;
-  document.getElementById('filterCount').textContent = filtered.length + ' negocios';
+  var fc = document.getElementById('filterCount');
+  if (fc) fc.textContent = filtered.length + ' negocios';
   renderGrid();
 }
 
