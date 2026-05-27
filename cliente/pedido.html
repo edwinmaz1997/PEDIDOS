@@ -90,7 +90,11 @@
           <button class="delivery-btn" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
         </div>
         <div id="deliveryAddressWrap" style="display:none;margin-bottom:12px">
-          <input type="text" id="deliveryAddress" placeholder="Dirección de entrega" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;margin-bottom:8px">
+          <input type="text" id="deliveryAddress" placeholder="Dirección o link de Google Maps" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;margin-bottom:6px" oninput="previewDeliveryMap()">
+          <div id="deliveryMapPreview" style="display:none;margin-bottom:8px">
+            <a id="deliveryMapLink" href="#" target="_blank" class="map-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.82rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver en Google Maps</a>
+          </div>
+          <div style="font-size:.75rem;color:var(--muted)">Puedes escribir tu dirección o pegar un link de Google Maps</div>
           <div id="zoneSelectWrap" style="display:none">
             <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:4px">Zona de entrega</label>
             <select id="zoneSelect" onchange="onZoneChange()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;background:white">
@@ -217,6 +221,25 @@ function addCustomRow() {
   div.className = 'custom-item';
   div.innerHTML = `<input type="text" class="custom-input" placeholder="Descripción del producto..." style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;width:100%"><button onclick="this.parentElement.remove();updateCart()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem">×</button>`;
   wrap.appendChild(div);
+}
+
+function previewDeliveryMap() {
+  var val = document.getElementById('deliveryAddress').value.trim();
+  var preview = document.getElementById('deliveryMapPreview');
+  var link    = document.getElementById('deliveryMapLink');
+  if (!val) { preview.style.display = 'none'; return; }
+
+  if (val.startsWith('http') && val.includes('google.com/maps')) {
+    // It's a Google Maps URL
+    link.href = val;
+    preview.style.display = 'block';
+  } else if (val.length > 5) {
+    // It's a text address — build search URL
+    link.href = 'https://www.google.com/maps/search/' + encodeURIComponent(val);
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
 }
 
 function onZoneChange() {

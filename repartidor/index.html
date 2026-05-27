@@ -328,9 +328,16 @@ function openDetail(id) {
   document.getElementById('dClientName').textContent = d.client_name || 'Cliente';
   var delAddr = d.delivery_address || '';
   document.getElementById('dDeliveryAddr').textContent = delAddr || 'Sin dirección';
-  document.getElementById('dDeliveryMaps').href = delAddr ?
-    'https://www.google.com/maps/search/' + encodeURIComponent(delAddr) : '#';
-  if (!delAddr) document.getElementById('dDeliveryMaps').style.display = 'none';
+  if (delAddr) {
+    // Check if it's already a Google Maps URL
+    var isGmapsUrl = delAddr.startsWith('http') && delAddr.includes('google.com/maps');
+    document.getElementById('dDeliveryMaps').href = isGmapsUrl ?
+      delAddr : 'https://www.google.com/maps/search/' + encodeURIComponent(delAddr);
+    document.getElementById('dDeliveryMaps').style.display = 'inline-flex';
+    if (isGmapsUrl) document.getElementById('dDeliveryAddr').textContent = '📍 Link de Google Maps guardado';
+  } else {
+    document.getElementById('dDeliveryMaps').style.display = 'none';
+  }
 
   // Full route — use google_maps_url for pickup if available
   if (delAddr) {
