@@ -60,11 +60,11 @@
     </div>
 
     <div class="filter-bar">
-      <input type="text" id="searchInput" placeholder="Buscar por nombre, dueño..." oninput="filterTable()">
-      <select id="catFilter" onchange="filterTable()">
+      <input type="text" id="searchQ" placeholder="🔍 Buscar negocio, dueño, ciudad..." oninput="applyFilters()">
+      <select id="catFilter" onchange="applyFilters()">
         <option value="">Todas las categorías</option>
       </select>
-      <select id="statusFilter" onchange="filterTable()">
+      <select id="statusFilter" onchange="applyFilters()">
         <option value="">Todos los estados</option>
         <option value="1">Activos</option>
         <option value="0">Inactivos</option>
@@ -115,9 +115,12 @@ var perPage = 12;
 var cats = [];
 
 function applyFilters() {
-  var q   = document.getElementById('searchQ').value.toLowerCase();
-  var cat = document.getElementById('catFilter').value;
-  var st  = document.getElementById('statusFilter').value;
+  var qEl = document.getElementById('searchQ') || document.getElementById('searchInput');
+  var q   = qEl ? qEl.value.toLowerCase() : '';
+  var catEl = document.getElementById('catFilter');
+  var stEl  = document.getElementById('statusFilter');
+  var cat = catEl ? catEl.value : '';
+  var st  = stEl  ? stEl.value  : '';
   filtered = allBiz.filter(function(b) {
     var mQ = !q || (b.name||'').toLowerCase().includes(q) || (b.owner_name||'').toLowerCase().includes(q) || (b.city||'').toLowerCase().includes(q);
     var mC = !cat || String(b.category_id) === cat;
