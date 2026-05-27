@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .products-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
-.prod-row { display:grid; grid-template-columns:52px 1fr auto auto auto; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid var(--border); }
+.prod-row { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); }
 @media(max-width:600px){ .prod-row { grid-template-columns:44px 1fr auto; } .prod-row .prod-price,.prod-row .prod-stock { display:none; } }
 .prod-row:last-child { border-bottom:none; }
 .prod-row:hover { background:var(--off-white); }
@@ -26,7 +26,7 @@
 .prod-name { font-weight:600; font-size:.95rem; }
 .prod-desc { font-size:.8rem; color:var(--muted); margin-top:2px; }
 .prod-price { font-weight:700; color:var(--accent); white-space:nowrap; }
-.prod-actions { display:flex; gap:6px; flex-wrap:nowrap; align-items:center; }
+.prod-actions { display:flex; gap:6px; align-items:center; margin-left:auto; flex-shrink:0; }
 .icon-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:6px 10px; cursor:pointer; font-size:.85rem; transition:var(--transition); }
 .icon-btn:hover { background:var(--off-white); }
 .icon-btn.danger:hover { background:#fdf0f0; border-color:var(--danger); color:var(--danger); }
@@ -74,8 +74,8 @@ input:checked + .slider:before { transform:translateX(20px); }
       <input type="text" id="searchQ" placeholder="🔍 Buscar producto..." oninput="filterProducts()" style="flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none">
       <select id="statusFilter" onchange="filterProducts()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white">
         <option value="">Todos</option>
-        <option value="1">✅ Activos</option>
-        <option value="0">⏸ Inactivos</option>
+        <option value="1">✅ Disponibles</option>
+        <option value="0">⏸ No disponibles</option>
       </select>
       <span id="prodCount" style="font-size:.82rem;color:var(--muted)"></span>
     </div>
@@ -184,14 +184,14 @@ async function loadProducts() {
 function renderProductRow(p) {
   return `
     <div class="prod-row" id="prod-row-${p.id}">
-      <div class="prod-thumb">
+      <div class="prod-thumb" style="flex-shrink:0">
         ${p.photo ? `<img src="${APP.esc(p.photo)}" alt="">` : '📦'}
       </div>
       <div>
-        <div class="prod-name">${APP.esc(p.name)}</div>
+        <div style="flex:1;min-width:0"><div class="prod-name" style="font-weight:600;font-size:.9rem">${APP.esc(p.name)}</div>
         ${p.description ? `<div class="prod-desc">${APP.esc(p.description)}</div>` : ''}
-      </div>
-      <div class="prod-price">${p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
+      </div></div>
+      <div class="prod-price" style="white-space:nowrap;font-weight:700;color:var(--blue);margin-left:auto">${p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
       <div>
         <label class="switch" title="${p.is_available?'Disponible':'No disponible'}">
           <input type="checkbox" ${p.is_available?'checked':''} onchange="toggleAvailable(${p.id}, this.checked)">
