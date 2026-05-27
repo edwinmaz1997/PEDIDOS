@@ -150,8 +150,11 @@ async function init() {
   document.getElementById('profileName').textContent  = u.name || '—';
   document.getElementById('profileEmail').textContent = u.email || '—';
   document.getElementById('profileSince').textContent = 'Miembro desde ' + new Date(u.created_at).toLocaleDateString('es-GT', {year:'numeric',month:'long'});
-  document.getElementById('f_name').value  = u.name || '';
-  document.getElementById('f_phone').value = u.phone || '';
+  document.getElementById('f_name').value    = u.name || '';
+  document.getElementById('f_phone').value   = u.phone || '';
+  document.getElementById('f_address').value = u.address || '';
+  document.getElementById('f_maps_url').value = u.google_maps_url || '';
+  previewMapsUrl();
   document.getElementById('f_email').value = u.email || '';
 
   // Load order stats
