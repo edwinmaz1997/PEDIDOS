@@ -72,8 +72,9 @@
       </select>
       <select id="statusFilter" onchange="applyFilters()">
         <option value="">Todos los estados</option>
-        <option value="listo">📦 Listo para recoger</option>
-        <option value="en_camino">🛵 En camino</option>
+        <option value="disponible">📦 Disponible</option>
+        <option value="asignado">🛵 En camino</option>
+        <option value="recogido">📬 Recogido</option>
         <option value="entregado">✔ Entregado</option>
       </select>
       <button class="btn-filter" onclick="clearFilters()">✕ Limpiar</button>
@@ -157,8 +158,8 @@ var page = 1;
 var perPage = 10;
 var currentDelivery = null;
 
-var sbadge = {listo:'badge-active',en_camino:'badge-delivery',entregado:'badge-done',cancelado:'badge-cancel'};
-var slabel = {listo:'📦 Listo',en_camino:'🛵 En camino',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
+var sbadge = {disponible:'badge-active',asignado:'badge-delivery',recogido:'badge-delivery',entregado:'badge-done',cancelado:'badge-cancel'};
+var slabel = {disponible:'📦 Disponible',asignado:'🛵 En camino',recogido:'📬 Recogido',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
 
 // ── Data loading ──────────────────────────────────────────────
 async function init() {
@@ -174,7 +175,7 @@ async function init() {
 
     // Stats
     document.getElementById('sAvailable').textContent = (data.available||[]).length;
-    document.getElementById('sActive').textContent    = (data.mine||[]).filter(function(d){ return d.status !== 'entregado'; }).length;
+    document.getElementById('sActive').textContent    = (data.mine||[]).filter(function(d){ return d.status !== 'entregado' && d.status !== 'cancelado'; }).length;
     document.getElementById('sDone').textContent      = (data.mine||[]).filter(function(d){
       return d.status === 'entregado' && d.updated_at && d.updated_at.substring(0,10) === new Date().toISOString().substring(0,10);
     }).length;

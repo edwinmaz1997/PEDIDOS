@@ -178,10 +178,14 @@ try {
         // ── DELIVERIES ───────────────────────────────────────
         case 'deliveries':
             $ctrl = new DeliveryController();
-            if ($method === 'GET')               $ctrl->index();
-            elseif ($subAction === 'assign')     $ctrl->assign($id, $body);
-            elseif ($method === 'PUT' && $id)    $ctrl->update($id, $body);
-            else Response::notFound();
+            $delId  = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
+            $delSub = isset($parts[2]) ? $parts[2] : null;
+            if ($method === 'GET' && !$delId)                     { $ctrl->index(); break; }
+            if ($delId && $delSub === 'claim' && $method === 'POST')  { $ctrl->claim($delId); break; }
+            if ($delId && $delSub === 'status' && $method === 'PUT')  { $ctrl->updateStatus($delId, $body); break; }
+            if ($delId && $delSub === 'assign' && $method === 'PUT')  { $ctrl->claim($delId); break; }
+            if ($delId && $method === 'PUT')                          { $ctrl->updateStatus($delId, $body); break; }
+            Response::notFound();
             break;
 
         // ── ADMIN ────────────────────────────────────────────
