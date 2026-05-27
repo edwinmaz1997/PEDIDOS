@@ -50,8 +50,8 @@ class AuthController {
 
         // Insert user
         $hash = Security::hashPassword($password);
-        $stmt = $this->db->prepare("INSERT INTO users (role_id, name, email, phone, password_hash) VALUES (?,?,?,?,?)");
-        $stmt->execute([$roleRow['id'], $name, $email, $phone ?: null, $hash]);
+        $stmt = $this->db->prepare("INSERT INTO users (role_id, name, email, phone, address, google_maps_url, password_hash) VALUES (?,?,?,?,?,?,?)");
+        $stmt->execute([$roleRow['id'], $name, $email, $phone ?: null, $address, $mapsUrl ?: null, $hash]);
         $userId = $this->db->lastInsertId();
 
         // Create session
