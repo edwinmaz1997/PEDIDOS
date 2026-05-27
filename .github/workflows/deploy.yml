@@ -1,0 +1,31 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ftp.estudiocero.com.gt
+          username: deploy@nuevaexpress.com
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          local-dir: ./
+          server-dir: /nuevaexpress.com/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            api/config/config.php
+            .htaccess
+            api/.htaccess
+            uploads/**
