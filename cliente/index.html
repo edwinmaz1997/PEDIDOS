@@ -67,7 +67,11 @@
       <button class="filter-tab" onclick="loadOrders('cancelado', this)">✕ Cancelados</button>
     </div>
 
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input type="text" id="searchQ" placeholder="🔍 Buscar por negocio o #pedido..." oninput="filterOrders()" style="flex:1;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none">
+    </div>
     <div id="ordersContainer"><div class="loading-state"><div class="spinner"></div></div></div>
+    <div class="pagination" id="pagination"></div>
 
     <a href="/index.html" class="btn-primary" style="display:inline-flex;margin-top:16px">
       🛒 Hacer un nuevo pedido
@@ -92,22 +96,61 @@ const statusBadge = {
   listo:'badge-active', en_camino:'badge-delivery', entregado:'badge-done', cancelado:'badge-cancel'
 };
 
+var allOrders = [];
+var filteredOrders = [];
+var currentStatus = '';
+var page = 1;
+var perPage = 8;
+
 async function loadOrders(status = '', tabBtn = null) {
   if (tabBtn) {
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     tabBtn.classList.add('active');
   }
+  currentStatus = status;
   const container = document.getElementById('ordersContainer');
   container.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
   try {
-    const qs = status ? `?status=${status}` : '';
-    const res = await fetch(`${API}/orders${qs}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+    const res = await fetch(`${API}/orders`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
     const data = await res.json();
-    const orders = data.data?.orders || [];
-    if (!orders.length) { container.innerHTML = '<div class="empty-state"><p>No tienes pedidos aún.</p></div>'; return; }
-    container.innerHTML = orders.map(renderOrder).join('');
+    allOrders = data.data?.orders || [];
+    page = 1;
+    filterOrders();
   } catch(e) { container.innerHTML = '<div class="empty-state"><p>Error cargando pedidos.</p></div>'; }
 }
+
+function filterOrders() {
+  var q = (document.getElementById('searchQ')?.value || '').toLowerCase();
+  filteredOrders = allOrders.filter(function(o) {
+    var mS = !currentStatus || o.status === currentStatus;
+    var mQ = !q || (o.order_number||'').toLowerCase().includes(q) || (o.business_name||'').toLowerCase().includes(q);
+    return mS && mQ;
+  });
+  page = 1;
+  renderPage();
+}
+
+function renderPage() {
+  var container = document.getElementById('ordersContainer');
+  var pageData = filteredOrders.slice((page-1)*perPage, page*perPage);
+  if (!filteredOrders.length) { container.innerHTML = '<div class="empty-state"><p>No hay pedidos.</p></div>'; renderPag(0); return; }
+  container.innerHTML = pageData.map(renderOrder).join('');
+  renderPag(filteredOrders.length);
+}
+
+function renderPag(total) {
+  var pages = Math.ceil(total/perPage);
+  var el = document.getElementById('pagination');
+  if (!el||pages<=1){if(el)el.innerHTML='';return;}
+  var html='<button class="page-btn" onclick="goPage('+(page-1)+')" '+(page===1?'disabled':'')+'>‹</button>';
+  for(var i=1;i<=pages;i++){
+    if(i===1||i===pages||(i>=page-2&&i<=page+2))html+='<button class="page-btn '+(i===page?'active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+    else if(i===page-3||i===page+3)html+='<span class="page-info">…</span>';
+  }
+  html+='<button class="page-btn" onclick="goPage('+(page+1)+')" '+(page===pages?'disabled':'')+'>›</button>';
+  el.innerHTML=html;
+}
+function goPage(p){var pages=Math.ceil(filteredOrders.length/perPage);if(p<1||p>pages)return;page=p;renderPage();window.scrollTo(0,0);}
 
 function renderOrder(o) {
   const items = (o.items || []).map(i => `<div class="order-item-row"><span>${esc(i.product_name)} x${i.quantity}</span>${i.unit_price ? `<span>Q${(i.unit_price*i.quantity).toFixed(2)}</span>` : ''}</div>`).join('');
