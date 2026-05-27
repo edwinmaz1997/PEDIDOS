@@ -167,18 +167,33 @@ async function init() {
   loadProducts();
 }
 
+var allProducts = [];
+
 async function loadProducts() {
-  const container = document.getElementById('productsContainer');
   const res = await APP.get(`/products?business_id=${bizId}`);
-  products = res?.data || [];
-  if (!products.length) {
-    container.innerHTML = `<div class="empty-state"><p>No tienes productos registrados.</p><button class="btn-primary" style="margin-top:16px" onclick="openModal()">+ Agregar el primero</button></div>`;
+  allProducts = res?.data || [];
+  products = allProducts;
+  filterProducts();
+}
+
+function filterProducts() {
+  var q  = (document.getElementById('searchQ')?.value || '').toLowerCase();
+  var st = document.getElementById('statusFilter')?.value || '';
+  var filtered = allProducts.filter(function(p) {
+    var mQ = !q || p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q);
+    var mS = st === '' || String(p.is_available) === st;
+    return mQ && mS;
+  });
+  var pc = document.getElementById('prodCount');
+  if (pc) pc.textContent = filtered.length + ' producto' + (filtered.length !== 1 ? 's' : '');
+  const container = document.getElementById('productsContainer');
+  if (!filtered.length) {
+    container.innerHTML = allProducts.length ?
+      '<div class="empty-state"><p>No hay productos que coincidan.</p></div>' :
+      '<div class="empty-state"><p>No tienes productos registrados.</p><button class="btn-primary" style="margin-top:16px" onclick="openModal()">+ Agregar el primero</button></div>';
     return;
   }
-  container.innerHTML = `
-    <div class="products-table-wrap">
-      ${products.map(renderProductRow).join('')}
-    </div>`;
+  container.innerHTML = `<div class="products-table-wrap">${filtered.map(renderProductRow).join('')}</div>`;
 }
 
 function renderProductRow(p) {
@@ -192,23 +207,18 @@ function renderProductRow(p) {
         ${p.description ? `<div class="prod-desc">${APP.esc(p.description)}</div>` : ''}
       </div></div>
       <div class="prod-price" style="white-space:nowrap;font-weight:700;color:var(--blue);margin-left:auto">${p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
-      <div>
-        <label class="switch" title="${p.is_available?'Disponible':'No disponible'}">
-          <input type="checkbox" ${p.is_available?'checked':''} onchange="toggleAvailable(${p.id}, this.checked)">
-          <span class="slider"></span>
-        </label>
-      </div>
       <div class="prod-actions">
-        <button class="icon-btn" onclick="openModal(${p.id})" title="Editar">✏️</button>
-        <button class="icon-btn danger" onclick="deleteProduct(${p.id})" title="Eliminar">🗑️</button>
+        <button onclick="openModal(${p.id})" title="Editar" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.85rem">✏️</button>
+        <button onclick="toggleAvailable(${p.id}, ${p.is_available?0:1})" title="${p.is_available?'Desactivar':'Activar'}" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.85rem">${p.is_available?'⏸':'▶'}</button>
+        <button onclick="deleteProduct(${p.id})" title="Eliminar" style="background:none;border:1px solid #f5c2c2;color:var(--danger);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.85rem">🗑️</button>
       </div>
     </div>`;
 }
 
 async function toggleAvailable(id, available) {
-  const res = await APP.put(`/products/${id}`, { is_available: available ? 1 : 0 });
+  const res = await APP.put(`/products/${id}`, { is_available: available });
   if (!res?.success) APP.toast('Error al actualizar', 'error');
-  else APP.toast(available ? 'Producto activado' : 'Producto desactivado');
+  else { APP.toast(available ? 'Producto activado' : 'Producto desactivado'); loadProducts(); }
 }
 
 function openModal(productId = null) {
