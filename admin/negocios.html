@@ -181,7 +181,7 @@ function filterTable() {
 }
 
 function renderTable(list) {
-  const container = document.getElementById('bizGrid');
+  const container = document.getElementById('bizGrid') || document.getElementById('bizList');
   if (!list.length) { container.innerHTML = '<div class="empty-state"><p>Sin resultados</p></div>'; return; }
   container.innerHTML = list.map(b => `
     <div class="biz-table-row">
