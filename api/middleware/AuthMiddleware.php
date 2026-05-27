@@ -11,7 +11,7 @@ class AuthMiddleware {
 
         $db = Database::connect();
         $stmt = $db->prepare("
-            SELECT s.user_id, s.expires_at, u.id, u.name, u.email, u.role_id, u.is_active, r.name as role
+            SELECT s.user_id, s.expires_at, u.id, u.name, u.email, u.phone, u.address, u.google_maps_url, u.role_id, u.is_active, r.name as role
             FROM user_sessions s
             JOIN users u ON s.user_id = u.id
             JOIN roles r ON u.role_id = r.id
