@@ -12,7 +12,7 @@ class DeliveryController {
         if ($user['role'] === 'admin') {
             $stmt = $this->db->query("SELECT d.*, o.order_number, o.delivery_address, o.total, b.name as business_name, u.name as client_name, u.phone as client_phone FROM deliveries d JOIN orders o ON d.order_id = o.id JOIN businesses b ON o.business_id = b.id JOIN users u ON o.client_id = u.id ORDER BY d.id DESC");
         } else {
-            $stmt = $this->db->prepare("SELECT d.*, o.order_number, o.delivery_address, o.total, b.name as business_name, u.name as client_name, u.phone as client_phone, b.address as pickup_address FROM deliveries d JOIN orders o ON d.order_id = o.id JOIN businesses b ON o.business_id = b.id JOIN users u ON o.client_id = u.id WHERE d.status = 'disponible' OR d.repartidor_id = ? ORDER BY d.id DESC");
+            $stmt = $this->db->prepare("SELECT d.*, o.order_number, o.delivery_address, o.delivery_fee, o.total, o.notes, o.delivery_type, b.name as business_name, b.address as pickup_address, u.name as client_name, u.phone as client_phone FROM deliveries d JOIN orders o ON d.order_id = o.id JOIN businesses b ON o.business_id = b.id JOIN users u ON o.client_id = u.id WHERE d.status = 'disponible' OR d.repartidor_id = ? ORDER BY d.id DESC");
             $stmt->execute([$user['id']]);
         }
         Response::success($stmt->fetchAll());

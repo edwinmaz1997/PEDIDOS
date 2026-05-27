@@ -16,13 +16,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.delivery-card { background:white;border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:16px; }
-.delivery-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px; }
-.delivery-route { display:flex;flex-direction:column;gap:8px;margin:12px 0; }
-.route-point { display:flex;align-items:flex-start;gap:10px;font-size:.9rem; }
-.route-icon { font-size:1.1rem;flex-shrink:0; }
-.route-label { font-weight:600;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em; }
-.route-address { color:var(--ink); }
+.delivery-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:18px;margin-bottom:14px;transition:var(--transition)}
+.delivery-card:hover{box-shadow:var(--shadow)}
+.route-wrap{background:var(--off-white);border-radius:var(--radius-sm);padding:14px;margin:12px 0;position:relative}
+.route-line{position:absolute;left:25px;top:38px;bottom:38px;width:2px;background:var(--border);z-index:0}
+.route-point{display:flex;align-items:flex-start;gap:12px;position:relative;z-index:1}
+.route-point+.route-point{margin-top:16px}
+.route-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:3px;border:2px solid white;box-shadow:0 0 0 2px var(--border)}
+.route-dot.pickup{background:#F5A623}
+.route-dot.dropoff{background:var(--blue)}
+.route-info{flex:1}
+.route-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:2px}
+.route-name{font-weight:600;font-size:.9rem}
+.route-addr{font-size:.82rem;color:var(--muted);margin-top:2px}
+.map-btn{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:5px 12px;background:white;border:1.5px solid var(--border);border-radius:20px;font-size:.78rem;font-weight:600;color:var(--ink);text-decoration:none;transition:var(--transition)}
+.map-btn:hover{border-color:var(--blue);color:var(--blue)}
+.map-embed{width:100%;height:200px;border:none;border-radius:var(--radius-sm);margin-top:8px}
+.detail-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end;justify-content:center;padding:0}
+.detail-sheet{background:white;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;padding:24px}
+.detail-sheet h2{font-size:1.2rem;margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -41,132 +53,352 @@
   </aside>
 
   <main class="main-content">
-    <div class="page-header"><h1>Mis Entregas</h1><p>Entregas disponibles y asignadas a ti</p></div>
+    <div class="page-header"><h1>🛵 Mis Entregas</h1><p>Pedidos disponibles y asignados a ti</p></div>
 
-    <div class="stats-grid">
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
       <div class="stat-card"><div class="stat-label">Disponibles</div><div class="stat-value" id="sAvailable" style="color:var(--accent)">—</div></div>
       <div class="stat-card"><div class="stat-label">Mis activas</div><div class="stat-value" id="sActive">—</div></div>
-      <div class="stat-card"><div class="stat-label">Completadas hoy</div><div class="stat-value" id="sDone" style="color:var(--success)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Completadas hoy</div><div class="stat-value" id="sDone" style="color:var(--green)">—</div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <input type="text" id="searchQ" placeholder="🔍 Buscar pedido o negocio..." oninput="applyFilters()" style="flex:1;min-width:160px">
+      <select id="periodoFilter" onchange="applyPeriodo()">
+        <option value="">Todos</option>
+        <option value="hoy">📅 Hoy</option>
+        <option value="semana">📆 Esta semana</option>
+        <option value="mes">🗓️ Este mes</option>
+      </select>
+      <select id="statusFilter" onchange="applyFilters()">
+        <option value="">Todos los estados</option>
+        <option value="listo">📦 Listo para recoger</option>
+        <option value="en_camino">🛵 En camino</option>
+        <option value="entregado">✔ Entregado</option>
+      </select>
+      <button class="btn-filter" onclick="clearFilters()">✕ Limpiar</button>
+      <span id="filterCount" style="font-size:.82rem;color:var(--muted)"></span>
     </div>
 
     <div id="deliveriesContainer"><div class="loading-state"><div class="spinner"></div></div></div>
+    <div class="pagination" id="pagination"></div>
   </main>
 </div>
 
-<script>
-const API = '/api';
-const user  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
-var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
-if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'repartidor') window.location.href = '/cliente/login.html';
-document.getElementById('sidebarUser').textContent = user.name || 'Repartidor';
-
-const statusLabels = { disponible:'Disponible', asignado:'Asignado', recogido:'Recogido', entregado:'Entregado' };
-const statusBadge  = { disponible:'badge-pending', asignado:'badge-delivery', recogido:'badge-active', entregado:'badge-done' };
-
-async function loadDeliveries() {
-  const container = document.getElementById('deliveriesContainer');
-  try {
-    const res = await fetch(`${API}/deliveries`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
-    const data = await res.json();
-    const deliveries = data.data || [];
-    const available = deliveries.filter(d => d.status === 'disponible').length;
-    const active    = deliveries.filter(d => d.repartidor_id == user.id && ['asignado','recogido'].includes(d.status)).length;
-    const done      = deliveries.filter(d => d.repartidor_id == user.id && d.status === 'entregado').length;
-    document.getElementById('sAvailable').textContent = available;
-    document.getElementById('sActive').textContent = active;
-    document.getElementById('sDone').textContent = done;
-
-    if (!deliveries.length) { container.innerHTML = '<div class="empty-state"><p>No hay entregas disponibles ahora.</p></div>'; return; }
-    container.innerHTML = deliveries.map(d => renderDelivery(d)).join('');
-  } catch(e) { container.innerHTML = '<div class="empty-state"><p>Error cargando entregas.</p></div>'; }
-}
-
-function renderDelivery(d) {
-  const isOwn = d.repartidor_id == user.id;
-  const canClaim = d.status === 'disponible';
-  const canPickup = isOwn && d.status === 'asignado';
-  const canDeliver = isOwn && d.status === 'recogido';
-
-  return `
-    <div class="delivery-card">
-      <div class="delivery-header">
-        <div>
-          <strong>${esc(d.order_number)}</strong>
-          <div style="font-size:.85rem;color:var(--muted)">👤 ${esc(d.client_name)} · ${esc(d.client_phone||'')}</div>
-          <div style="font-size:.85rem;font-weight:700;color:var(--accent);margin-top:4px">Q${parseFloat(d.total||0).toFixed(2)}</div>
-        </div>
-        <span class="badge ${statusBadge[d.status]||''}">${statusLabels[d.status]||d.status}</span>
+<!-- Detail Modal -->
+<div class="detail-modal" id="detailModal" style="display:none" onclick="closeDetail(event)">
+  <div class="detail-sheet" id="detailSheet">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+        <h2 id="dOrderNum">—</h2>
+        <span class="badge" id="dStatus"></span>
       </div>
-      <div class="delivery-route">
-        <div class="route-point">
-          <span class="route-icon">🏪</span>
-          <div><div class="route-label">Recoger en</div><div class="route-address">${esc(d.business_name)} — ${esc(d.pickup_address||'Ver dirección del negocio')}</div></div>
-        </div>
-        <div class="route-point">
-          <span class="route-icon">📍</span>
-          <div><div class="route-label">Entregar en</div><div class="route-address">${esc(d.delivery_address||'Sin dirección')}</div></div>
+      <button onclick="closeDetail()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+
+    <!-- Route with maps -->
+    <div class="route-wrap">
+      <div class="route-line"></div>
+      <div class="route-point">
+        <div class="route-dot pickup"></div>
+        <div class="route-info">
+          <div class="route-label">📦 Recoger en negocio</div>
+          <div class="route-name" id="dBizName">—</div>
+          <div class="route-addr" id="dBizAddr">—</div>
+          <a href="#" id="dBizMaps" target="_blank" class="map-btn">🗺️ Ver en Google Maps</a>
         </div>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-        ${canClaim  ? `<button class="btn-primary" onclick="claimDelivery(${d.id})" style="padding:9px 18px">🛵 Tomar entrega</button>` : ''}
-        ${canPickup ? `<button class="btn-primary" onclick="updateStatus(${d.id},'recogido')" style="padding:9px 18px">📦 Marcar recogido</button>` : ''}
-        ${canDeliver? `<button class="btn-primary" onclick="updateStatus(${d.id},'entregado')" style="padding:9px 18px">✔ Marcar entregado</button>` : ''}
-        ${d.delivery_address ? `<a href="https://www.google.com/maps/search/${encodeURIComponent(d.delivery_address)}" target="_blank" class="btn-ghost" style="padding:9px 18px">🗺️ Ver mapa</a>` : ''}
+      <div class="route-point" style="margin-top:20px">
+        <div class="route-dot dropoff"></div>
+        <div class="route-info">
+          <div class="route-label">🏠 Entregar en</div>
+          <div class="route-name" id="dClientName">—</div>
+          <div class="route-addr" id="dDeliveryAddr">—</div>
+          <a href="#" id="dDeliveryMaps" target="_blank" class="map-btn">🗺️ Ver en Google Maps</a>
+        </div>
       </div>
     </div>
-  `;
+
+    <!-- Route button (both points) -->
+    <a href="#" id="dFullRoute" target="_blank" class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;margin-bottom:16px;text-decoration:none">
+      🗺️ Ver ruta completa en Google Maps
+    </a>
+
+    <!-- Order details -->
+    <div style="background:var(--off-white);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.9rem"><span style="color:var(--muted)">Total del pedido</span><span style="font-weight:700" id="dTotal">—</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.9rem"><span style="color:var(--muted)">Tarifa de delivery</span><span style="font-weight:700;color:var(--blue)" id="dDeliveryFee">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.9rem"><span style="color:var(--muted)">Tipo</span><span id="dType">—</span></div>
+    </div>
+
+    <!-- Notes -->
+    <div id="dNotesWrap" style="display:none;background:#fff8e1;border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;font-size:.85rem">
+      <strong>📝 Notas:</strong> <span id="dNotes"></span>
+    </div>
+
+    <!-- Actions -->
+    <div id="dActions" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script src="/assets/js/pwa.js"></script>
+<script>
+(function(){var h=window.location.hash;if(h&&h.indexOf('tk=')!==-1){var p=h.substring(1).split('&'),tk='',us='';p.forEach(function(x){if(x.indexOf('tk=')===0)tk=x.substring(3);if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}})();
+
+var user = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if (!localStorage.getItem('nuevaexpress_token') || user.role !== 'repartidor') window.location.href = '/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name || 'Repartidor';
+function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
+
+var allDeliveries = [];
+var filtered = [];
+var page = 1;
+var perPage = 10;
+var currentDelivery = null;
+
+var sbadge = {listo:'badge-active',en_camino:'badge-delivery',entregado:'badge-done',cancelado:'badge-cancel'};
+var slabel = {listo:'📦 Listo',en_camino:'🛵 En camino',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
+
+// ── Data loading ──────────────────────────────────────────────
+async function init() {
+  try {
+    var res = await fetch('/api/deliveries', {
+      headers: { 'Authorization': 'Bearer ' + getToken() }
+    }).then(function(r){ return r.json(); });
+
+    if (!res.success) return;
+
+    var data = res.data || {};
+    allDeliveries = [].concat(data.available || [], data.mine || []);
+
+    // Stats
+    document.getElementById('sAvailable').textContent = (data.available||[]).length;
+    document.getElementById('sActive').textContent    = (data.mine||[]).filter(function(d){ return d.status !== 'entregado'; }).length;
+    document.getElementById('sDone').textContent      = (data.mine||[]).filter(function(d){
+      return d.status === 'entregado' && d.updated_at && d.updated_at.substring(0,10) === new Date().toISOString().substring(0,10);
+    }).length;
+
+    applyFilters();
+  } catch(e) {
+    document.getElementById('deliveriesContainer').innerHTML = '<div class="empty-state"><p>Error cargando entregas.</p></div>';
+  }
 }
 
+// ── Filters ───────────────────────────────────────────────────
+function applyPeriodo() {
+  document.getElementById('searchQ').value = '';
+  applyFilters();
+}
+
+function applyFilters() {
+  var q       = document.getElementById('searchQ').value.toLowerCase();
+  var periodo = document.getElementById('periodoFilter').value;
+  var status  = document.getElementById('statusFilter').value;
+  var today   = new Date().toISOString().substring(0,10);
+
+  // Week start (Monday)
+  var weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+  var weekStartStr = weekStart.toISOString().substring(0,10);
+
+  // Month start
+  var monthStart = today.substring(0,8) + '01';
+
+  filtered = allDeliveries.filter(function(d) {
+    var mQ = !q || (d.order_number||'').toLowerCase().includes(q) || (d.business_name||'').toLowerCase().includes(q) || (d.client_name||'').toLowerCase().includes(q);
+    var mS = !status || d.status === status;
+    var dDate = (d.created_at||'').substring(0,10);
+    var mP = true;
+    if (periodo === 'hoy')   mP = dDate === today;
+    if (periodo === 'semana') mP = dDate >= weekStartStr;
+    if (periodo === 'mes')    mP = dDate >= monthStart;
+    return mQ && mS && mP;
+  });
+
+  page = 1;
+  var fc = document.getElementById('filterCount');
+  if (fc) fc.textContent = filtered.length + ' entregas';
+  renderList();
+}
+
+function clearFilters() {
+  document.getElementById('searchQ').value = '';
+  document.getElementById('periodoFilter').value = '';
+  document.getElementById('statusFilter').value = '';
+  applyFilters();
+}
+
+// ── Render list ───────────────────────────────────────────────
+function renderList() {
+  var container = document.getElementById('deliveriesContainer');
+  renderPagination(filtered.length);
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty-state"><p>No hay entregas.</p></div>';
+    return;
+  }
+
+  var pageData = filtered.slice((page-1)*perPage, page*perPage);
+  container.innerHTML = pageData.map(renderCard).join('');
+}
+
+function renderCard(d) {
+  var isMine = d.repartidor_id == user.id;
+  var bizAddr = d.pickup_address || d.business_name || '—';
+  var delivAddr = d.delivery_address || 'Sin dirección';
+
+  return '<div class="delivery-card">' +
+    '<div class="delivery-header">' +
+      '<div><div style="font-weight:700;font-size:.95rem">'+esc(d.order_number)+'</div>' +
+        '<div style="font-size:.8rem;color:var(--muted)">'+esc(d.business_name)+(d.created_at?' · '+formatDate(d.created_at):'')+'</div>' +
+      '</div>' +
+      '<span class="badge '+(sbadge[d.status]||'')+'">'+( slabel[d.status]||d.status)+'</span>' +
+    '</div>' +
+
+    '<div class="route-wrap">' +
+      '<div class="route-line"></div>' +
+      '<div class="route-point">' +
+        '<div class="route-dot pickup"></div>' +
+        '<div class="route-info"><div class="route-label">Recoger en</div>' +
+          '<div class="route-name">'+esc(d.business_name)+'</div>' +
+          '<div class="route-addr">'+esc(bizAddr)+'</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="route-point" style="margin-top:16px">' +
+        '<div class="route-dot dropoff"></div>' +
+        '<div class="route-info"><div class="route-label">Entregar en</div>' +
+          '<div class="route-name">'+esc(d.client_name||'Cliente')+'</div>' +
+          '<div class="route-addr">'+esc(delivAddr)+'</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
+      '<button onclick="openDetail('+d.id+')" class="btn-primary" style="padding:8px 16px;font-size:.85rem">Ver detalles</button>' +
+      (!isMine && d.status === 'listo' ? '<button onclick="claimDelivery('+d.id+')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">Tomar entrega</button>' : '') +
+      (isMine && d.status === 'listo' ? '<button onclick="updateStatus('+d.id+',\'en_camino\')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">🛵 Salir</button>' : '') +
+      (isMine && d.status === 'en_camino' ? '<button onclick="updateStatus('+d.id+',\'entregado\')" class="btn-primary" style="padding:8px 16px;font-size:.85rem;background:var(--green)">✔ Entregado</button>' : '') +
+    '</div>' +
+  '</div>';
+}
+
+// ── Detail modal ──────────────────────────────────────────────
+function openDetail(id) {
+  var d = allDeliveries.find(function(x){ return x.id == id; });
+  if (!d) return;
+  currentDelivery = d;
+
+  document.getElementById('dOrderNum').textContent = d.order_number || '—';
+  var badge = document.getElementById('dStatus');
+  badge.textContent = slabel[d.status] || d.status;
+  badge.className = 'badge ' + (sbadge[d.status]||'');
+
+  // Business (pickup)
+  document.getElementById('dBizName').textContent = d.business_name || '—';
+  var bizAddr = d.pickup_address || d.business_name || '';
+  document.getElementById('dBizAddr').textContent = bizAddr;
+  document.getElementById('dBizMaps').href = 'https://www.google.com/maps/search/' + encodeURIComponent(bizAddr);
+
+  // Client (dropoff)
+  document.getElementById('dClientName').textContent = d.client_name || 'Cliente';
+  var delAddr = d.delivery_address || '';
+  document.getElementById('dDeliveryAddr').textContent = delAddr || 'Sin dirección';
+  document.getElementById('dDeliveryMaps').href = delAddr ?
+    'https://www.google.com/maps/search/' + encodeURIComponent(delAddr) : '#';
+  if (!delAddr) document.getElementById('dDeliveryMaps').style.display = 'none';
+
+  // Full route
+  if (bizAddr && delAddr) {
+    document.getElementById('dFullRoute').href =
+      'https://www.google.com/maps/dir/' + encodeURIComponent(bizAddr) + '/' + encodeURIComponent(delAddr);
+    document.getElementById('dFullRoute').style.display = 'flex';
+  } else {
+    document.getElementById('dFullRoute').style.display = 'none';
+  }
+
+  // Amounts
+  document.getElementById('dTotal').textContent      = 'Q' + parseFloat(d.total||0).toFixed(2);
+  document.getElementById('dDeliveryFee').textContent = 'Q' + parseFloat(d.delivery_fee||0).toFixed(2);
+  document.getElementById('dType').textContent        = d.delivery_type === 'delivery' ? '🛵 Delivery' : '🏃 Recoger';
+
+  // Notes
+  if (d.notes) {
+    document.getElementById('dNotes').textContent = d.notes;
+    document.getElementById('dNotesWrap').style.display = 'block';
+  } else {
+    document.getElementById('dNotesWrap').style.display = 'none';
+  }
+
+  // Actions
+  var isMine = d.repartidor_id == user.id;
+  var acts = '';
+  if (!isMine && d.status === 'listo') acts += '<button onclick="claimDelivery('+d.id+')" class="btn-primary" style="padding:12px;justify-content:center">Tomar esta entrega</button>';
+  if (isMine && d.status === 'listo') acts += '<button onclick="updateStatus('+d.id+',\'en_camino\')" class="btn-primary" style="padding:12px;justify-content:center">🛵 Marcar en camino</button>';
+  if (isMine && d.status === 'en_camino') acts += '<button onclick="updateStatus('+d.id+',\'entregado\')" class="btn-primary" style="padding:12px;justify-content:center;background:var(--green)">✔ Marcar como entregado</button>';
+  document.getElementById('dActions').innerHTML = acts;
+
+  document.getElementById('detailModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail(e) {
+  if (e && e.target !== document.getElementById('detailModal')) return;
+  document.getElementById('detailModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ── Actions ───────────────────────────────────────────────────
 async function claimDelivery(id) {
-  try {
-    const res = await fetch(`${API}/deliveries/${id}/assign`, { method:'PUT', headers:{Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token'),'Content-Type':'application/json'}, body:'{}' });
-    const data = await res.json();
-    if (data.success) loadDeliveries(); else alert(data.message);
-  } catch(e) { alert('Error'); }
+  var res = await fetch('/api/deliveries/'+id+'/claim', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + getToken() }
+  }).then(function(r){ return r.json(); });
+  if (res.success) { APP.toast('Entrega tomada'); closeDetail(); init(); }
+  else APP.toast(res.message||'Error','error');
 }
 
 async function updateStatus(id, status) {
-  try {
-    const res = await fetch(`${API}/deliveries/${id}`, { method:'PUT', headers:{Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token'),'Content-Type':'application/json'}, body: JSON.stringify({status}) });
-    const data = await res.json();
-    if (data.success) loadDeliveries(); else alert(data.message);
-  } catch(e) { alert('Error'); }
+  var res = await fetch('/api/deliveries/'+id+'/status', {
+    method: 'PUT',
+    headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
+    body: JSON.stringify({ status: status })
+  }).then(function(r){ return r.json(); });
+  if (res.success) { APP.toast('Estado actualizado'); closeDetail(); init(); }
+  else APP.toast(res.message||'Error','error');
 }
 
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
-loadDeliveries();
-setInterval(loadDeliveries, 15000);
-</script>
-
-<script>
-  // Recover token from URL hash if localStorage is empty
-  (function() {
-    var hash = window.location.hash;
-    if (hash && hash.indexOf('tk=') !== -1) {
-      var parts = hash.substring(1).split('&');
-      var tk = '', us = '';
-      parts.forEach(function(p) {
-        if (p.indexOf('tk=') === 0) tk = p.substring(3);
-        if (p.indexOf('us=') === 0) us = decodeURIComponent(p.substring(3));
-      });
-      if (tk) {
-        localStorage.setItem('nuevaexpress_token', tk);
-        if (us) localStorage.setItem('nuevaexpress_user', us);
-        // Clean URL
-        history.replaceState(null, '', window.location.pathname);
-      }
-    }
-  })();
-
-function toggleSidebar() {
-  var sidebar = document.querySelector('.sidebar');
-  var overlay = document.getElementById('sidebarOverlay');
-  if (sidebar) sidebar.classList.toggle('open');
-  if (overlay) overlay.classList.toggle('open');
+// ── Pagination ────────────────────────────────────────────────
+function renderPagination(total) {
+  var pages = Math.ceil(total/perPage);
+  var el = document.getElementById('pagination');
+  if (!el||pages<=1){if(el)el.innerHTML='';return;}
+  var html='<button class="page-btn" onclick="goPage('+(page-1)+')" '+(page===1?'disabled':'')+'>‹</button>';
+  for(var i=1;i<=pages;i++){
+    if(i===1||i===pages||(i>=page-2&&i<=page+2))html+='<button class="page-btn '+(i===page?'active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+    else if(i===page-3||i===page+3)html+='<span class="page-info">…</span>';
+  }
+  html+='<button class="page-btn" onclick="goPage('+(page+1)+')" '+(page===pages?'disabled':'')+'>›</button>';
+  html+='<span class="page-info">'+total+'</span>';
+  el.innerHTML=html;
 }
-</script>
+function goPage(p){var pages=Math.ceil(filtered.length/perPage);if(p<1||p>pages)return;page=p;renderList();window.scrollTo(0,0);}
 
-<script src="/assets/js/pwa.js"></script>
+// ── Utils ─────────────────────────────────────────────────────
+function formatDate(str) {
+  if (!str) return '';
+  var p = str.replace('T',' ').split(/[- :]/);
+  var d = new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]),parseInt(p[3])||0,parseInt(p[4])||0);
+  var h=d.getHours(),mi=d.getMinutes(),ap=h>=12?'p.m.':'a.m.';
+  h=h%12||12;
+  return String(d.getDate()).padStart(2,'0')+'/'+(d.getMonth()+1)+'/'+d.getFullYear()+' '+String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0')+' '+ap;
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function doLogout(){localStorage.clear();window.location.href='/cliente/login.html';}
+function toggleSidebar(){var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open');}
+
+init();
+setInterval(init, 30000);
+</script>
 </body>
 </html>
