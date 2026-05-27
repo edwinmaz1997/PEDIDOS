@@ -20,7 +20,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
           local-dir: ./
-          server-dir: /nuevaexpress.com/
+          server-dir: /
           exclude: |
             **/.git*
             **/.git*/**
