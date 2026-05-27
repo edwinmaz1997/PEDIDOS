@@ -154,7 +154,12 @@ async function init() {
   document.getElementById('f_phone').value   = u.phone || '';
   document.getElementById('f_address').value = u.address || '';
   document.getElementById('f_maps_url').value = u.google_maps_url || '';
-  previewMapsUrl();
+  if (u.google_maps_url) {
+    var mp = document.getElementById('mapsPreview');
+    var ml = document.getElementById('mapsPreviewLink');
+    if (mp) mp.style.display = 'block';
+    if (ml) ml.href = u.google_maps_url;
+  }
   document.getElementById('f_email').value = u.email || '';
 
   // Load order stats
@@ -216,6 +221,19 @@ function toggleSidebar() {
 }
 </script>
 
-<script src="/assets/js/pwa.js"></script>
+<script src="/assets/js/pwa.js">
+function previewMapsUrl() {
+  var val = document.getElementById('f_maps_url')?.value?.trim();
+  var mp  = document.getElementById('mapsPreview');
+  var ml  = document.getElementById('mapsPreviewLink');
+  if (!mp || !ml) return;
+  if (val && val.startsWith('http')) {
+    ml.href = val;
+    mp.style.display = 'block';
+  } else {
+    mp.style.display = 'none';
+  }
+}
+</script>
 </body>
 </html>
