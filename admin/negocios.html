@@ -131,7 +131,8 @@ function applyFilters() {
   page = 1;
   var fc = document.getElementById('filterCount');
   if (fc) fc.textContent = filtered.length + ' negocios';
-  renderGrid();
+  renderPagination(filtered.length);
+  renderTable(filtered.slice((page-1)*perPage, page*perPage));
 }
 
 function renderPagination(total) {
@@ -150,7 +151,7 @@ function renderPagination(total) {
     el.innerHTML = html;
   });
 }
-function goPage(p){var pages=Math.ceil(filtered.length/perPage);if(p<1||p>pages)return;page=p;renderGrid();window.scrollTo(0,0);}
+function goPage(p){var pages=Math.ceil(filtered.length/perPage);if(p<1||p>pages)return;page=p;renderTable(filtered.slice((page-1)*perPage, page*perPage));window.scrollTo(0,0);}
 
 async function init() {
   const [bizRes, catRes] = await Promise.all([APP.get('/admin/businesses'), APP.get('/categories')]);
@@ -180,7 +181,7 @@ function filterTable() {
 }
 
 function renderTable(list) {
-  const container = document.getElementById('bizList');
+  const container = document.getElementById('bizGrid');
   if (!list.length) { container.innerHTML = '<div class="empty-state"><p>Sin resultados</p></div>'; return; }
   container.innerHTML = list.map(b => `
     <div class="biz-table-row">
