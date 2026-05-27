@@ -16,8 +16,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.products-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; display:flex; flex-direction:column; }
-.prod-row { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); background:white; }
+.products-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
+.prod-row { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); background:white; width:100%; box-sizing:border-box; }
 .prod-info { flex:1; min-width:0; }
 .prod-price { display:none; }
 @media(max-width:600px){ .prod-row { gap:8px; padding:10px 12px; } }
@@ -208,8 +208,8 @@ function renderProductRow(p) {
         <div class="prod-info">
         <div class="prod-name" style="font-weight:600;font-size:.9rem">${APP.esc(p.name)}</div>
         ${p.description ? `<div class="prod-desc">${APP.esc(p.description)}</div>` : ''}
-        <div style="font-weight:700;color:var(--blue);font-size:.9rem;margin-top:3px">${p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
       </div>
+      <div style="font-weight:700;color:var(--blue);font-size:.95rem;white-space:nowrap;flex-shrink:0">${p.price ? APP.money(p.price) : ''}</div>
       <div class="prod-actions">
         <button onclick="openModal(${p.id})" title="Editar" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.85rem">✏️</button>
         <button onclick="toggleAvailable(${p.id}, ${p.is_available?'0':'1'})" title="${p.is_available?'Desactivar':'Activar'}" style="background:none;border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:.85rem">${p.is_available?'⏸':'▶'}</button>
