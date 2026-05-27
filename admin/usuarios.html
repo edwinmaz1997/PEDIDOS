@@ -63,7 +63,23 @@
     </div>
 
     <div style="overflow-x:auto">
-      <div class="table-responsive"><table class="data-table">
+      <div class="filter-bar">
+      <input type="text" id="searchQ" placeholder="🔍 Buscar nombre, email, teléfono..." oninput="applyFilters()">
+      <select id="roleFilter" onchange="applyFilters()">
+        <option value="">Todos los roles</option>
+        <option value="admin">👑 Admin</option>
+        <option value="negocio">🏪 Negocio</option>
+        <option value="cliente">👤 Cliente</option>
+        <option value="repartidor">🛵 Repartidor</option>
+      </select>
+      <select id="statusFilter" onchange="applyFilters()">
+        <option value="">Todos</option>
+        <option value="1">Activos</option>
+        <option value="0">Inactivos</option>
+      </select>
+      <span id="filterCount" style="font-size:.82rem;color:var(--muted)"></span>
+    </div>
+    <div class="table-responsive"><table class="data-table">
         <thead>
           <tr>
             <th>#</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Rol</th><th>Último acceso</th><th>Estado</th><th>Acciones</th>

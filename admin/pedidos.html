@@ -74,12 +74,31 @@
     </div>
 
     <div style="overflow-x:auto">
-      <div class="table-responsive"><table class="data-table">
+      <div class="filter-bar">
+      <input type="text" id="searchQ" placeholder="🔍 Buscar pedido, cliente, negocio..." oninput="applyFilters()">
+      <select id="statusFilter" onchange="applyFilters()">
+        <option value="">Todos los estados</option>
+        <option value="pendiente">⏳ Pendiente</option>
+        <option value="aceptado">✅ Aceptado</option>
+        <option value="en_preparacion">👨‍🍳 En preparación</option>
+        <option value="listo">📦 Listo</option>
+        <option value="en_camino">🛵 En camino</option>
+        <option value="entregado">✔ Entregado</option>
+        <option value="cancelado">✕ Cancelado</option>
+      </select>
+      <input type="date" id="dateFrom" onchange="applyFilters()" title="Desde">
+      <input type="date" id="dateTo" onchange="applyFilters()" title="Hasta">
+      <button class="btn-filter" onclick="setToday()" id="btnHoy">📅 Hoy</button>
+      <button class="btn-filter" onclick="clearFilters()">✕ Limpiar</button>
+      <span id="filterCount" style="font-size:.82rem;color:var(--muted);margin-left:4px"></span>
+    </div>
+    <div class="table-responsive"><table class="data-table">
         <thead>
           <tr><th>#</th><th>Cliente</th><th>Negocio</th><th>Tipo</th><th>Subtotal</th><th>Tarifa</th><th>Delivery</th><th>Total</th><th>Estado</th><th>Fecha</th><th></th></tr>
         </thead>
         <tbody id="ordersBody"><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">Cargando...</td></tr></tbody>
       </table></div>
+    <div class="pagination" id="pagination"></div>
     </div>
   </main>
 </div>

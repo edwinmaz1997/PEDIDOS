@@ -83,6 +83,7 @@
     </div>
   </main>
 </div>
+    <div class="pagination" id="pagination"></div>
 
 <script src="../assets/js/app.js"></script>
 <script>
@@ -108,6 +109,45 @@
 var adminUser  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
 if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'admin') { window.location.href = '/cliente/login.html'; }
 let allBiz = [];
+
+var allBiz = [];
+var filtered = [];
+var page = 1;
+var perPage = 12;
+var cats = [];
+
+function applyFilters() {
+  var q   = document.getElementById('searchQ').value.toLowerCase();
+  var cat = document.getElementById('catFilter').value;
+  var st  = document.getElementById('statusFilter').value;
+  filtered = allBiz.filter(function(b) {
+    var mQ = !q || (b.name||'').toLowerCase().includes(q) || (b.owner_name||'').toLowerCase().includes(q) || (b.city||'').toLowerCase().includes(q);
+    var mC = !cat || String(b.category_id) === cat;
+    var mS = st==='' || String(b.is_active) === st;
+    return mQ && mC && mS;
+  });
+  page = 1;
+  document.getElementById('filterCount').textContent = filtered.length + ' negocios';
+  renderGrid();
+}
+
+function renderPagination(total) {
+  var pages = Math.ceil(total/perPage);
+  ['pagination','paginationTop'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (pages <= 1) { el.innerHTML=''; return; }
+    var html = '<button class="page-btn" onclick="goPage('+(page-1)+')" '+(page===1?'disabled':'')+'>‹</button>';
+    for (var i=1;i<=pages;i++) {
+      if (i===1||i===pages||(i>=page-2&&i<=page+2)) html+='<button class="page-btn '+(i===page?'active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+      else if (i===page-3||i===page+3) html+='<span class="page-info">…</span>';
+    }
+    html += '<button class="page-btn" onclick="goPage('+(page+1)+')" '+(page===pages?'disabled':'')+'>›</button>';
+    html += '<span class="page-info">'+total+' negocios</span>';
+    el.innerHTML = html;
+  });
+}
+function goPage(p){var pages=Math.ceil(filtered.length/perPage);if(p<1||p>pages)return;page=p;renderGrid();window.scrollTo(0,0);}
 
 async function init() {
   const [bizRes, catRes] = await Promise.all([APP.get('/admin/businesses'), APP.get('/categories')]);
