@@ -164,17 +164,25 @@ async function checkNewNotifications() {
 
     if (unread.length > 0 && 'Notification' in window && Notification.permission === 'granted') {
       unread.forEach(function(n) {
+        // Parse URL from notification data field
+        var url = '/';
+        try {
+          var data = typeof n.data === 'string' ? JSON.parse(n.data) : (n.data || {});
+          url = data.url || '/';
+        } catch(e) {}
+
         var notif = new Notification(n.title, {
           body:    n.message,
           icon:    '/assets/img/icon-192.png',
           badge:   '/assets/img/icon-192.png',
           tag:     'notif-' + n.id,
           vibrate: [200, 100, 200],
-          requireInteraction: false
+          requireInteraction: false,
+          data:    { url: url }
         });
-        // Click opens app
+        // Click opens correct page
         notif.onclick = function() {
-          window.focus();
+          window.open(url, '_blank') || window.location.assign(url);
           notif.close();
         };
         lastNotifId = Math.max(lastNotifId, parseInt(n.id));

@@ -43,6 +43,15 @@ self.addEventListener('push', function(e) {
 
 self.addEventListener('notificationclick', function(e) {
   e.notification.close();
-  var url = e.notification.data.url || '/';
-  e.waitUntil(clients.openWindow(url));
+  var url = '/';
+  try { url = e.notification.data.url || '/'; } catch(err) {}
+  e.waitUntil(
+    clients.matchAll({type:'window', includeUncontrolled:true}).then(function(cls) {
+      // Focus existing window if open
+      for (var i = 0; i < cls.length; i++) {
+        if (cls[i].url.indexOf(url) !== -1 && 'focus' in cls[i]) return cls[i].focus();
+      }
+      return clients.openWindow(url);
+    })
+  );
 });

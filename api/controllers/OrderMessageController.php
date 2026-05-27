@@ -78,11 +78,11 @@ class OrderMessageController {
             $bizStmt->execute([$order['business_id']]);
             $biz = $bizStmt->fetch();
             if ($biz) {
-                $this->notify($biz['user_id'], 'new_message', 'Nuevo mensaje', "El cliente envió un mensaje en el pedido #{$order['order_number']}");
+                $this->notify($biz['user_id'], 'new_message', '💬 Nuevo mensaje', "El cliente envió un mensaje en el pedido #{$order['order_number']}", '/negocio/pedido-detalle.html?id='.$orderId);
             }
         } else {
             // Notify client
-            $this->notify($order['client_id'], 'new_message', 'Respuesta del negocio', "El negocio respondió en tu pedido #{$order['order_number']}");
+            $this->notify($order['client_id'], 'new_message', '💬 Respuesta del negocio', "El negocio respondió en tu pedido #{$order['order_number']}", '/cliente/pedido-detalle.html?id='.$orderId);
         }
 
         Response::success(['id' => $this->db->lastInsertId()], 'Mensaje enviado', 201);
@@ -102,8 +102,8 @@ class OrderMessageController {
                  ->execute([$subtotal, $total, $orderId]);
 
         // Notify client
-        $this->notify($order['client_id'], 'total_updated', 'Total actualizado',
-            "El negocio actualizó el total de tu pedido #{$order['order_number']} a Q" . number_format($total, 2));
+        $this->notify($order['client_id'], 'total_updated', '💰 Total actualizado',
+            "El negocio actualizó el total de tu pedido #{$order['order_number']} a Q" . number_format($total, 2), '/cliente/pedido-detalle.html?id='.$orderId);
 
         // Send system message
         // Build itemized message
@@ -179,8 +179,9 @@ class OrderMessageController {
         Response::forbidden();
     }
 
-    private function notify($userId, $type, $title, $message) {
-        $this->db->prepare("INSERT INTO notifications (user_id, type, title, message) VALUES (?,?,?,?)")
-                 ->execute([$userId, $type, $title, $message]);
+    private function notify($userId, $type, $title, $message, $url = '/') {
+        $data = json_encode(['url' => $url]);
+        $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)")
+                 ->execute([$userId, $type, $title, $message, $data]);
     }
 }
