@@ -14,7 +14,7 @@ class DeliveryController {
                    o.order_number, o.delivery_address, o.delivery_fee, o.total, o.subtotal,
                    o.notes, o.delivery_type, o.status as order_status,
                    o.created_at,
-                   b.name as business_name, b.address as pickup_address, b.phone as business_phone,
+                   b.name as business_name, b.address as pickup_address, b.phone as business_phone, b.google_maps_url as business_maps_url,
                    u.name as client_name, u.phone as client_phone
             FROM deliveries d
             JOIN orders o ON d.order_id = o.id

@@ -320,7 +320,9 @@ function openDetail(id) {
   document.getElementById('dBizName').textContent = d.business_name || '—';
   var bizAddr = d.pickup_address || d.business_name || '';
   document.getElementById('dBizAddr').textContent = bizAddr;
-  document.getElementById('dBizMaps').href = 'https://www.google.com/maps/search/' + encodeURIComponent(bizAddr);
+  // Use saved Google Maps URL if available, otherwise search by address
+  var bizMapsUrl = d.business_maps_url || ('https://www.google.com/maps/search/' + encodeURIComponent(bizAddr));
+  document.getElementById('dBizMaps').href = bizMapsUrl;
 
   // Client (dropoff)
   document.getElementById('dClientName').textContent = d.client_name || 'Cliente';
@@ -330,10 +332,23 @@ function openDetail(id) {
     'https://www.google.com/maps/search/' + encodeURIComponent(delAddr) : '#';
   if (!delAddr) document.getElementById('dDeliveryMaps').style.display = 'none';
 
-  // Full route
-  if (bizAddr && delAddr) {
-    document.getElementById('dFullRoute').href =
-      'https://www.google.com/maps/dir/' + encodeURIComponent(bizAddr) + '/' + encodeURIComponent(delAddr);
+  // Full route — use google_maps_url for pickup if available
+  if (delAddr) {
+    var routeOrigin = d.business_maps_url || encodeURIComponent(bizAddr);
+    var routeDest   = encodeURIComponent(delAddr);
+    // If we have a maps URL for origin, use it as waypoint
+    if (d.business_maps_url) {
+      document.getElementById('dFullRoute').href =
+        'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(bizAddr) + '&destination=' + routeDest;
+    } else {
+      document.getElementById('dFullRoute').href =
+        'https://www.google.com/maps/dir/' + encodeURIComponent(bizAddr) + '/' + routeDest;
+    }
+    document.getElementById('dFullRoute').style.display = 'flex';
+  } else if (d.business_maps_url) {
+    // At least show pickup location
+    document.getElementById('dFullRoute').href = d.business_maps_url;
+    document.getElementById('dFullRoute').innerHTML = '🗺️ Ver ubicación del negocio';
     document.getElementById('dFullRoute').style.display = 'flex';
   } else {
     document.getElementById('dFullRoute').style.display = 'none';
