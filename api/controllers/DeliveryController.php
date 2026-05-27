@@ -73,6 +73,27 @@ class DeliveryController {
         Response::success(null, 'Entrega tomada');
     }
 
+    // POST /api/deliveries/{id}/release — repartidor releases delivery back to available
+    public function release(int $id): void {
+        $user = AuthMiddleware::requireRole(['repartidor', 'admin']);
+        $stmt = $this->db->prepare("SELECT * FROM deliveries WHERE id = ?");
+        $stmt->execute([$id]);
+        $d = $stmt->fetch();
+        if (!$d) Response::notFound('Entrega no encontrada');
+
+        // Only owner or admin can release
+        if ($user['role'] !== 'admin' && $d['repartidor_id'] != $user['id']) Response::forbidden();
+        if (in_array($d['status'], ['entregado','cancelado'])) Response::error('No se puede liberar una entrega completada', 400);
+
+        $this->db->prepare("UPDATE deliveries SET repartidor_id = NULL, status = 'disponible', assigned_at = NULL WHERE id = ?")
+                 ->execute([$id]);
+
+        // Reset order status back to aceptado
+        $this->db->prepare("UPDATE orders SET status = 'aceptado' WHERE id = ?")->execute([$d['order_id']]);
+
+        Response::success(null, 'Entrega liberada — disponible para otros repartidores');
+    }
+
     // PUT /api/deliveries/{id}/status
     public function updateStatus(int $id, array $body): void {
         $user   = AuthMiddleware::requireRole(['repartidor', 'admin']);

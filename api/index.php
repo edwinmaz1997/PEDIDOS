@@ -182,8 +182,9 @@ try {
             $delId    = isset($delParts[1]) && is_numeric($delParts[1]) ? (int)$delParts[1] : null;
             $delSub   = isset($delParts[2]) ? trim($delParts[2]) : null;
             if ($method === 'GET' && !$delId)                          { $ctrl->index(); break; }
-            if ($delId && $delSub === 'claim' && $method === 'POST')   { $ctrl->claim($delId); break; }
-            if ($delId && $delSub === 'status' && $method === 'PUT')   { $ctrl->updateStatus($delId, $body); break; }
+            if ($delId && $delSub === 'claim'   && $method === 'POST') { $ctrl->claim($delId); break; }
+            if ($delId && $delSub === 'release' && $method === 'POST') { $ctrl->release($delId); break; }
+            if ($delId && $delSub === 'status'  && $method === 'PUT')  { $ctrl->updateStatus($delId, $body); break; }
             if ($delId && $method === 'PUT')                           { $ctrl->updateStatus($delId, $body); break; }
             Response::notFound();
             break;

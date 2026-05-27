@@ -172,9 +172,33 @@ function renderTable(list) {
       <td style="font-weight:700">${APP.money(o.total)}</td>
       <td><span class="badge ${APP.statusBadge[o.status]||''}">${APP.statusLabel[o.status]||o.status}</span></td>
       <td style="font-size:.78rem;color:var(--muted)">${APP.date(o.created_at)}</td>
-      <td><button onclick="deleteOrder(${o.id},'${(o.order_number||'').replace(/'/g,'')}')" style="background:none;border:1px solid #f5c2c2;color:var(--danger);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem">🗑️</button></td>
+      <td style="display:flex;gap:4px">
+        ${o.delivery_type==='delivery' && !['entregado','cancelado'].includes(o.status) ? `<button onclick="releaseDelivery(${o.id})" style="background:none;border:1px solid #ffe082;color:#f57f17;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem" title="Liberar repartidor">🔄</button>` : ''}
+        <button onclick="deleteOrder(${o.id},'${(o.order_number||'').replace(/'/g,'')}')" style="background:none;border:1px solid #f5c2c2;color:var(--danger);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem">🗑️</button>
+      </td>
     </tr>
   `).join('');
+}
+
+async function releaseDelivery(orderId) {
+  if (!confirm('¿Liberar el repartidor? El pedido quedará disponible de nuevo.')) return;
+  // Find delivery by order_id
+  var res = await fetch('/api/admin/orders', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nuevaexpress_token') }
+  }).then(r=>r.json());
+  // Get deliveries
+  var dRes = await fetch('/api/deliveries', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('nuevaexpress_token') }
+  }).then(r=>r.json());
+  var all = (dRes.data?.available||[]).concat(dRes.data?.mine||[]);
+  var d = all.find(function(x){ return x.order_id == orderId; });
+  if (!d) { APP.toast('No se encontró la entrega','error'); return; }
+  var r2 = await fetch('/api/deliveries/'+d.id+'/release', {
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('nuevaexpress_token')},
+    body:JSON.stringify({})
+  }).then(r=>r.json());
+  if (r2.success) { APP.toast('Pedido liberado — disponible para repartidores'); init(); }
+  else APP.toast(r2.message||'Error','error');
 }
 
 async function deleteOrder(id, num) {

@@ -411,8 +411,10 @@ function openDetail(id) {
     acts = '<button onclick="claimDelivery('+d.id+')" class="btn-primary" style="padding:13px;width:100%;justify-content:center;font-size:1rem">🛵 Tomar esta entrega</button>';
   } else if (isMine && d.status === 'asignado') {
     acts = '<button onclick="updateStatus('+d.id+',&quot;recogido&quot;)" class="btn-primary" style="padding:13px;width:100%;justify-content:center">📬 Marcar como recogido</button>';
+    acts += '<button onclick="releaseDelivery('+d.id+')" style="padding:11px;width:100%;justify-content:center;background:none;border:1.5px solid var(--danger);color:var(--danger);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;margin-top:6px">⚠️ No puedo entregar — liberar pedido</button>';
   } else if (isMine && d.status === 'recogido') {
     acts = '<button onclick="updateStatus('+d.id+',&quot;entregado&quot;)" class="btn-primary" style="padding:13px;width:100%;justify-content:center;background:#2ecc71">✔ Marcar como entregado</button>';
+    acts += '<button onclick="releaseDelivery('+d.id+')" style="padding:11px;width:100%;justify-content:center;background:none;border:1.5px solid var(--danger);color:var(--danger);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;margin-top:6px">⚠️ No puedo entregar — liberar pedido</button>';
   }
   document.getElementById('dActions').innerHTML = acts;
 
@@ -427,6 +429,19 @@ function closeDetail(e) {
 }
 
 // ── Actions ───────────────────────────────────────────────────
+async function releaseDelivery(id) {
+  if (!confirm('¿Liberar este pedido? Quedará disponible para otro repartidor.')) return;
+  try {
+    var res = await fetch('/api/deliveries/'+id+'/release', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({})
+    }).then(function(r){ return r.json(); });
+    if (res.success) { APP.toast('Pedido liberado'); document.getElementById('detailModal').style.display='none'; document.body.style.overflow=''; init(); }
+    else APP.toast(res.message||'Error','error');
+  } catch(e) { APP.toast('Error de conexión','error'); }
+}
+
 async function claimDelivery(id) {
   try {
     var res = await fetch('/api/deliveries/'+id+'/claim', {
