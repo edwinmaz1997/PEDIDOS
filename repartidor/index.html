@@ -329,32 +329,35 @@ function openDetail(id) {
   var delAddr = d.delivery_address || '';
   document.getElementById('dDeliveryAddr').textContent = delAddr || 'Sin dirección';
   if (delAddr) {
-    // Check if it's already a Google Maps URL
-    var isGmapsUrl = delAddr.startsWith('http') && delAddr.includes('google.com/maps');
-    document.getElementById('dDeliveryMaps').href = isGmapsUrl ?
+    var isUrl = delAddr.startsWith('http');
+    // If it's a URL open it directly, otherwise search by text
+    document.getElementById('dDeliveryMaps').href = isUrl ?
       delAddr : 'https://www.google.com/maps/search/' + encodeURIComponent(delAddr);
     document.getElementById('dDeliveryMaps').style.display = 'inline-flex';
-    if (isGmapsUrl) document.getElementById('dDeliveryAddr').textContent = '📍 Link de Google Maps guardado';
+    document.getElementById('dDeliveryAddr').textContent = isUrl ? '📍 Dirección guardada en Google Maps' : delAddr;
   } else {
     document.getElementById('dDeliveryMaps').style.display = 'none';
   }
 
-  // Full route — use google_maps_url for pickup if available
+  // Full route
+  var pickupForRoute = d.business_maps_url || bizAddr;
+  var destIsUrl = delAddr && delAddr.startsWith('http');
+
   if (delAddr) {
-    var routeOrigin = d.business_maps_url || encodeURIComponent(bizAddr);
-    var routeDest   = encodeURIComponent(delAddr);
-    // If we have a maps URL for origin, use it as waypoint
-    if (d.business_maps_url) {
-      document.getElementById('dFullRoute').href =
-        'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(bizAddr) + '&destination=' + routeDest;
+    var routeUrl;
+    if (destIsUrl) {
+      // Destination is a Maps URL — open it directly (can't mix with origin in dir/)
+      // Best UX: open the saved Maps link directly
+      routeUrl = delAddr;
+      document.getElementById('dFullRoute').innerHTML = '🗺️ Abrir destino en Google Maps';
     } else {
-      document.getElementById('dFullRoute').href =
-        'https://www.google.com/maps/dir/' + encodeURIComponent(bizAddr) + '/' + routeDest;
+      routeUrl = 'https://www.google.com/maps/dir/' + encodeURIComponent(pickupForRoute) + '/' + encodeURIComponent(delAddr);
+      document.getElementById('dFullRoute').innerHTML = '🗺️ Ver ruta completa en Google Maps';
     }
+    document.getElementById('dFullRoute').href = routeUrl;
     document.getElementById('dFullRoute').style.display = 'flex';
-  } else if (d.business_maps_url) {
-    // At least show pickup location
-    document.getElementById('dFullRoute').href = d.business_maps_url;
+  } else if (d.business_maps_url || bizAddr) {
+    document.getElementById('dFullRoute').href = d.business_maps_url || ('https://www.google.com/maps/search/' + encodeURIComponent(bizAddr));
     document.getElementById('dFullRoute').innerHTML = '🗺️ Ver ubicación del negocio';
     document.getElementById('dFullRoute').style.display = 'flex';
   } else {
