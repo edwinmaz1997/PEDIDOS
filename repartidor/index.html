@@ -361,8 +361,9 @@ function openDetail(id) {
   document.getElementById('dDeliveryFee').textContent   = 'Q' + deliveryFee.toFixed(2);
   document.getElementById('dType').textContent          = d.delivery_type === 'delivery' ? '🛵 Delivery' : '🏃 Recoger';
 
-  // Client phone
-  if (d.client_phone) {
+  // Client phone — only show if repartidor has claimed this delivery
+  var isClaimed = d.repartidor_id != null && String(d.repartidor_id) === String(user.id);
+  if (d.client_phone && isClaimed) {
     document.getElementById('dCallClient').href = 'tel:' + d.client_phone;
     document.getElementById('dCallClient').innerHTML = '📞 Llamar a ' + esc(d.client_name||'cliente') + ' — ' + esc(d.client_phone);
     document.getElementById('dClientContact').style.display = 'block';
