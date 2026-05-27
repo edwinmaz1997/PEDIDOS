@@ -16,11 +16,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.products-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
+.products-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; display:flex; flex-direction:column; }
 .prod-row { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--border); background:white; }
 .prod-info { flex:1; min-width:0; }
 .prod-price { display:none; }
-@media(max-width:600px){ .prod-row { grid-template-columns:44px 1fr auto; } .prod-row .prod-price,.prod-row .prod-stock { display:none; } }
+@media(max-width:600px){ .prod-row { gap:8px; padding:10px 12px; } }
 .prod-row:last-child { border-bottom:none; }
 .prod-row:hover { background:var(--off-white); }
 .prod-thumb { width:56px; height:56px; border-radius:8px; object-fit:cover; background:var(--off-white); display:flex; align-items:center; justify-content:center; font-size:1.3rem; overflow:hidden; }
