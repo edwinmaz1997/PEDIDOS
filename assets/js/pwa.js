@@ -13,11 +13,18 @@
     cliente:    '/cliente/index.html'
   }[role] || '/cliente/index.html';
 
+  var perfil = {
+    admin:      '/admin/index.html',
+    negocio:    '/negocio/perfil.html',
+    repartidor: '/repartidor/index.html',
+    cliente:    '/cliente/perfil.html'
+  }[role] || '/cliente/perfil.html';
+
   // Try by id first, then by class
   var nav = document.getElementById('navRight') || document.querySelector('.nav-right');
   if (nav) {
     nav.innerHTML =
-      '<a href="' + panel + '" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">👤 ' + user.name.split(' ')[0] + '</a>' +
+      '<a href="' + perfil + '" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">👤 ' + user.name.split(' ')[0] + '</a>' +
       '<a href="' + panel + '" class="btn-primary" style="padding:7px 14px;font-size:.82rem">Mi panel</a>';
   }
 })();
