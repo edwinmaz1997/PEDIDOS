@@ -32,8 +32,9 @@
 .map-btn{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:5px 12px;background:white;border:1.5px solid var(--border);border-radius:20px;font-size:.78rem;font-weight:600;color:var(--ink);text-decoration:none;transition:var(--transition)}
 .map-btn:hover{border-color:var(--blue);color:var(--blue)}
 .map-embed{width:100%;height:200px;border:none;border-radius:var(--radius-sm);margin-top:8px}
-.detail-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end;justify-content:center;padding:0}
-.detail-sheet{background:white;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;padding:24px}
+.detail-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px}
+.detail-sheet{background:white;border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:24px}
+@media(max-width:600px){.detail-modal{align-items:flex-end;padding:0}.detail-sheet{border-radius:20px 20px 0 0;max-height:92vh}}
 .detail-sheet h2{font-size:1.2rem;margin-bottom:4px}
 </style>
 </head>
@@ -351,22 +352,27 @@ function closeDetail(e) {
 
 // ── Actions ───────────────────────────────────────────────────
 async function claimDelivery(id) {
-  var res = await fetch('/api/deliveries/'+id+'/claim', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + getToken() }
-  }).then(function(r){ return r.json(); });
-  if (res.success) { APP.toast('Entrega tomada'); closeDetail(); init(); }
-  else APP.toast(res.message||'Error','error');
+  try {
+    var res = await fetch('/api/deliveries/'+id+'/claim', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({})
+    }).then(function(r){ return r.json(); });
+    if (res.success) { APP.toast('¡Entrega tomada!'); document.getElementById('detailModal').style.display='none'; document.body.style.overflow=''; init(); }
+    else APP.toast(res.message||'Error al tomar entrega','error');
+  } catch(e) { APP.toast('Error de conexión','error'); }
 }
 
 async function updateStatus(id, status) {
-  var res = await fetch('/api/deliveries/'+id+'/status', {
-    method: 'PUT',
-    headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
-    body: JSON.stringify({ status: status })
-  }).then(function(r){ return r.json(); });
-  if (res.success) { APP.toast('Estado actualizado'); closeDetail(); init(); }
-  else APP.toast(res.message||'Error','error');
+  try {
+    var res = await fetch('/api/deliveries/'+id+'/status', {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({ status: status })
+    }).then(function(r){ return r.json(); });
+    if (res.success) { APP.toast('Estado actualizado'); document.getElementById('detailModal').style.display='none'; document.body.style.overflow=''; init(); }
+    else APP.toast(res.message||'Error','error');
+  } catch(e) { APP.toast('Error de conexión','error'); }
 }
 
 // ── Pagination ────────────────────────────────────────────────
