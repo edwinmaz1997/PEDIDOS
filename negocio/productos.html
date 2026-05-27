@@ -69,6 +69,15 @@ input:checked + .slider:before { transform:translateX(20px); }
       <button class="btn-primary" onclick="openModal()">+ Agregar producto</button>
     </div>
 
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="searchQ" placeholder="🔍 Buscar producto..." oninput="filterProducts()" style="flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none">
+      <select id="statusFilter" onchange="filterProducts()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white">
+        <option value="">Todos</option>
+        <option value="1">✅ Activos</option>
+        <option value="0">⏸ Inactivos</option>
+      </select>
+      <span id="prodCount" style="font-size:.82rem;color:var(--muted)"></span>
+    </div>
     <div id="productsContainer"><div class="loading-state"><div class="spinner"></div></div></div>
   </main>
 </div>
