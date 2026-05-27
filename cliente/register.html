@@ -49,6 +49,18 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
     <div class="two-col">
       <div class="form-group"><label>Nombre completo</label><input type="text" id="name" placeholder="Tu nombre"></div>
       <div class="form-group"><label>Teléfono</label><input type="tel" id="phone" placeholder="+502 5555 5555"></div>
+    <div class="form-group">
+      <label>Mi dirección de casa</label>
+      <input type="text" id="address" placeholder="Colonia, calle, número...">
+      <div style="font-size:.75rem;color:var(--muted);margin-top:3px">Para delivery — puedes editarla luego en tu perfil</div>
+    </div>
+    <div class="form-group">
+      <label>Link de Google Maps de mi casa <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+      <input type="url" id="maps_url" placeholder="https://maps.app.goo.gl/..." oninput="previewMaps()">
+      <div id="mapsPreview" style="display:none;margin-top:6px">
+        <a id="mapsLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.78rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver mi ubicación</a>
+      </div>
+    </div>
     </div>
     <div class="form-group"><label>Correo electrónico</label><input type="email" id="email" placeholder="tucorreo@ejemplo.com"></div>
     <div class="form-group">
@@ -88,7 +100,11 @@ async function doRegister() {
   try {
     const res = await fetch(`${API}/auth/register`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone, email, password, role: selectedRole })
+      body: JSON.stringify({ 
+        name, phone, email, password, role: selectedRole,
+        address: document.getElementById('address').value.trim(),
+        google_maps_url: document.getElementById('maps_url').value.trim()
+      })
     });
     const data = await res.json();
     if (!data.success) { showError(data.message || 'Error al crear cuenta'); return; }
