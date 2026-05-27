@@ -407,14 +407,17 @@ function openDetail(id) {
   // Actions
   var isMine = d.repartidor_id != null && String(d.repartidor_id) === String(user.id);
   var acts = '';
+  var btnStyle = 'padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.85rem;border:none;';
   if (d.status === 'disponible') {
-    acts = '<button onclick="claimDelivery('+d.id+')" class="btn-primary" style="padding:13px;width:100%;justify-content:center;font-size:1rem">🛵 Tomar esta entrega</button>';
-  } else if (isMine && d.status === 'asignado') {
-    acts = '<button onclick="updateStatus('+d.id+',&quot;recogido&quot;)" class="btn-primary" style="padding:13px;width:100%;justify-content:center">📬 Marcar como recogido</button>';
-    acts += '<button onclick="releaseDelivery('+d.id+')" style="padding:11px;width:100%;justify-content:center;background:none;border:1.5px solid var(--danger);color:var(--danger);border-radius:8px;font-weight:600;cursor:pointer;margin-top:6px">⚠️ No puedo entregar — liberar pedido</button>';
-  } else if (isMine && d.status === 'recogido') {
-    acts = '<button onclick="updateStatus('+d.id+',&quot;entregado&quot;)" class="btn-primary" style="padding:13px;width:100%;justify-content:center;background:#2ecc71">✔ Marcar como entregado</button>';
-    acts += '<button onclick="releaseDelivery('+d.id+')" style="padding:11px;width:100%;justify-content:center;background:none;border:1.5px solid var(--danger);color:var(--danger);border-radius:8px;font-weight:600;cursor:pointer;margin-top:6px">⚠️ No puedo entregar — liberar pedido</button>';
+    acts = '<button onclick="claimDelivery('+d.id+')" style="'+btnStyle+'background:var(--blue);color:white;width:100%">🛵 Tomar esta entrega</button>';
+  } else if (isMine && (d.status === 'asignado' || d.status === 'recogido')) {
+    var mainLabel = d.status === 'asignado' ? '📬 Recogido' : '✔ Entregado';
+    var mainStatus = d.status === 'asignado' ? '&quot;recogido&quot;' : '&quot;entregado&quot;';
+    var mainColor  = d.status === 'asignado' ? 'var(--blue)' : '#2ecc71';
+    acts = '<div style="display:flex;gap:8px;align-items:center">';
+    acts += '<button onclick="updateStatus('+d.id+','+mainStatus+')" style="'+btnStyle+'background:'+mainColor+';color:white;flex:1">'+mainLabel+'</button>';
+    acts += '<button onclick="releaseDelivery('+d.id+')" style="'+btnStyle+'background:none;border:1.5px solid var(--danger);color:var(--danger);white-space:nowrap">⚠️ Liberar</button>';
+    acts += '</div>';
   }
   document.getElementById('dActions').innerHTML = acts;
 
@@ -430,7 +433,7 @@ function closeDetail(e) {
 
 // ── Actions ───────────────────────────────────────────────────
 async function releaseDelivery(id) {
-  if (!confirm('¿Liberar este pedido? Quedará disponible para otro repartidor.')) return;
+  if (!confirm('¿Está seguro que desea liberar este pedido?\n\nEl pedido quedará disponible para que otro repartidor lo tome.')) return;
   try {
     var res = await fetch('/api/deliveries/'+id+'/release', {
       method: 'POST',
