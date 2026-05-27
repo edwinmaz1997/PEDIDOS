@@ -146,6 +146,13 @@
       <div style="display:flex;justify-content:space-between;font-size:.9rem"><span style="color:var(--muted)">Tipo</span><span id="dType">—</span></div>
     </div>
 
+    <!-- Client contact -->
+    <div id="dClientContact" style="display:none;margin-bottom:16px">
+      <a id="dCallClient" href="#" class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;text-decoration:none;background:#25d366">
+        📞 Llamar al cliente
+      </a>
+    </div>
+
     <!-- Notes -->
     <div id="dNotesWrap" style="display:none;background:#fff8e1;border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;font-size:.85rem">
       <strong>📝 Notas:</strong> <span id="dNotes"></span>
@@ -353,6 +360,15 @@ function openDetail(id) {
   document.getElementById('dSubtotal').textContent      = 'Q' + subtotal.toFixed(2);
   document.getElementById('dDeliveryFee').textContent   = 'Q' + deliveryFee.toFixed(2);
   document.getElementById('dType').textContent          = d.delivery_type === 'delivery' ? '🛵 Delivery' : '🏃 Recoger';
+
+  // Client phone
+  if (d.client_phone) {
+    document.getElementById('dCallClient').href = 'tel:' + d.client_phone;
+    document.getElementById('dCallClient').innerHTML = '📞 Llamar a ' + esc(d.client_name||'cliente') + ' — ' + esc(d.client_phone);
+    document.getElementById('dClientContact').style.display = 'block';
+  } else {
+    document.getElementById('dClientContact').style.display = 'none';
+  }
 
   // Notes
   if (d.notes) {
