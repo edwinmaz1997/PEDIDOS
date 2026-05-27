@@ -20,9 +20,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
           local-dir: ./
-          server-dir: /nuevaexpress.com/
-          state-name: .ftp-deploy-sync-state.json
-          force: false
+          server-dir: /
           exclude: |
             **/.git*
             **/.git*/**
