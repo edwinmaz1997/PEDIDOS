@@ -207,10 +207,7 @@ function renderProductRow(p) {
       </div>
       <div class="prod-price">${p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
       <div>
-        <label class="switch" title="${p.is_available?'Disponible':'No disponible'}">
-          <input type="checkbox" ${p.is_available?'checked':''} onchange="toggleAvailable(${p.id}, this.checked)">
-          <span class="slider"></span>
-        </label>
+        <button class="icon-btn ${p.is_available?'':'success'}" onclick="toggleAvailable(${p.id}, ${p.is_available?0:1})" title="${p.is_available?'Desactivar':'Activar'}">${p.is_available?'⏸':'▶'}</button>
       </div>
       <div class="prod-actions">
         <button class="icon-btn" onclick="openModal(${p.id})" title="Editar">✏️</button>
@@ -220,9 +217,10 @@ function renderProductRow(p) {
 }
 
 async function toggleAvailable(id, available) {
-  const res = await APP.put(`/products/${id}`, { is_available: available ? 1 : 0 });
+  const val = parseInt(available);
+  const res = await APP.put(`/products/${id}`, { is_available: val });
   if (!res?.success) APP.toast('Error al actualizar', 'error');
-  else { APP.toast(available ? 'Producto activado' : 'Producto desactivado'); loadProducts(); }
+  else { APP.toast(val ? 'Producto activado' : 'Producto desactivado'); loadProducts(); }
 }
 
 function openModal(productId = null) {
