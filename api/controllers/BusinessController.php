@@ -192,7 +192,7 @@ class BusinessController {
             $bizName = Security::sanitize($body['name'] ?? 'Nuevo negocio');
             $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)")
                      ->execute([$admin['id'], 'new_business', '🏪 Nuevo negocio pendiente',
-                         "El negocio "$bizName" se registró y está pendiente de aprobación.",
+                         "El negocio '$bizName' se registró y está pendiente de aprobación.",
                          json_encode(['url' => '/admin/negocios.html'])]);
         }
 
