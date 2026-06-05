@@ -283,5 +283,7 @@ class OrderController {
         $data = json_encode(['url' => $url]);
         $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)")
                  ->execute([$userId, $type, $title, $message, $data]);
+        // Send real push via OneSignal
+        PushNotification::send($userId, $title, $message, $url);
     }
 }
