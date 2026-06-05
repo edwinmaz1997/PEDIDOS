@@ -77,6 +77,32 @@ try {
     switch ($resource) {
 
         // ── AUTH ─────────────────────────────────────────────
+        case 'test-push':
+            $testUid = isset($_GET['uid']) ? (int)$_GET['uid'] : 10;
+            $payload = [
+                'app_id'          => '36b01031-83d9-4f66-bad8-3c32478f9fb2',
+                'target_channel'  => 'push',
+                'include_aliases' => ['external_id' => [strval($testUid)]],
+                'headings'        => ['en' => '🧪 Test NuevaExpress'],
+                'contents'        => ['en' => 'Si ves esto las notificaciones funcionan!'],
+                'url'             => 'https://nuevaexpress.com',
+            ];
+            $ch = curl_init('https://api.onesignal.com/notifications');
+            curl_setopt_array($ch, [
+                CURLOPT_HTTPHEADER     => ['Content-Type: application/json; charset=utf-8', 'Authorization: Key os_v2_app_g2ybammd3fhwnowyhqzepd47wkheljnasx5e7pvg4oyciiqkcf6ow425ay6vikf2xt67ehgywm6frltgls4dub72mp4go6x2bfwsgsi'],
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => json_encode($payload),
+                CURLOPT_TIMEOUT        => 10,
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            $resp = curl_exec($ch);
+            $err  = curl_error($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            Response::success(['uid'=>$testUid,'http_code'=>$code,'response'=>json_decode($resp),'curl_error'=>$err]);
+            break;
+
         case 'auth':
             $ctrl   = new AuthController();
             $pwCtrl = new PasswordResetController();
