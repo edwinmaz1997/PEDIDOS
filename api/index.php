@@ -89,7 +89,7 @@ try {
             ];
             $ch = curl_init('https://api.onesignal.com/notifications');
             curl_setopt_array($ch, [
-                CURLOPT_HTTPHEADER     => ['Content-Type: application/json; charset=utf-8', 'Authorization: Key os_v2_app_g2ybammd3fhwnowyhqzepd47wkheljnasx5e7pvg4oyciiqkcf6ow425ay6vikf2xt67ehgywm6frltgls4dub72mp4go6x2bfwsgsi'],
+                CURLOPT_HTTPHEADER     => ['Content-Type: application/json; charset=utf-8', 'Authorization: Key os_v2_app_g2ybammd3fhwnowyhqzepd47wkmaikuaxwsecmmfrxp2pogqcau2tsbba3552k35za7hnsga3fdmbwyymamregwr657oimoahfl4n2i'],
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST           => true,
                 CURLOPT_POSTFIELDS     => json_encode($payload),
