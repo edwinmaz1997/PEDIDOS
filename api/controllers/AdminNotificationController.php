@@ -17,7 +17,7 @@ class AdminController {
             'pending_orders'   => $this->db->query("SELECT COUNT(*) FROM orders WHERE status='pendiente'")->fetchColumn(),
             'available_deliveries' => $this->db->query("SELECT COUNT(*) FROM deliveries WHERE status='disponible'")->fetchColumn(),
         ];
-        $recentOrders = $this->db->query("SELECT o.*, b.name as business_name, u.name as client_name FROM orders o JOIN businesses b ON o.business_id=b.id JOIN users u ON o.client_id=u.id ORDER BY o.created_at DESC LIMIT 10")->fetchAll();
+        $recentOrders = $this->db->query("SELECT o.*, b.name as business_name, u.name as client_name FROM orders o JOIN businesses b ON o.business_id=b.id JOIN users u ON o.client_id=u.id ORDER BY o.created_at DESC LIMIT 200")->fetchAll();
         Response::success(['stats' => $stats, 'recent_orders' => $recentOrders]);
     }
 
@@ -35,7 +35,7 @@ class AdminController {
 
     public function orders(): void {
         AuthMiddleware::requireRole('admin');
-        $orders = $this->db->query("SELECT o.*, b.name as business_name, u.name as client_name FROM orders o JOIN businesses b ON o.business_id=b.id JOIN users u ON o.client_id=u.id ORDER BY o.created_at DESC LIMIT 100")->fetchAll();
+        $orders = $this->db->query("SELECT o.*, b.name as business_name, u.name as client_name FROM orders o JOIN businesses b ON o.business_id=b.id JOIN users u ON o.client_id=u.id ORDER BY o.created_at DESC LIMIT 2000")->fetchAll();
         Response::success($orders);
     }
 

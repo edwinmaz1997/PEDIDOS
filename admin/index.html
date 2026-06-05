@@ -84,19 +84,52 @@ async function loadDashboard() {
     document.getElementById('sRevenue').textContent = 'Q' + parseFloat(s.revenue_today||0).toFixed(2);
     document.getElementById('sDeliveries').textContent = s.available_deliveries;
 
-    const rows = (data.data.recent_orders || []).map(o => `
-      <tr>
-        <td>${esc(o.order_number)}</td>
-        <td>${esc(o.client_name)}</td>
-        <td>${esc(o.business_name)}</td>
-        <td>Q${parseFloat(o.total).toFixed(2)}</td>
-        <td>${o.delivery_type==='delivery'?'🛵 Delivery':'🏃 Recoger'}</td>
-        <td><span class="badge ${statusBadge[o.status]||''}">${statusLabels[o.status]||o.status}</span></td>
-        <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</td>
-      </tr>
-    `).join('');
-    document.getElementById('recentBody').innerHTML = rows || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Sin pedidos</td></tr>';
+    allRecentOrders = data.data.recent_orders || [];
+    recentPage = 1;
+    renderRecentOrders();
   } catch(e) { console.error(e); }
+}
+
+var allRecentOrders = [];
+var recentPage = 1;
+var recentPerPage = 10;
+
+function renderRecentOrders() {
+  var start = (recentPage-1)*recentPerPage;
+  var pageData = allRecentOrders.slice(start, start+recentPerPage);
+  var rows = pageData.map(function(o) { return `
+    <tr>
+      <td>${esc(o.order_number)}</td>
+      <td>${esc(o.client_name)}</td>
+      <td>${esc(o.business_name)}</td>
+      <td>Q${parseFloat(o.total).toFixed(2)}</td>
+      <td>${o.delivery_type==='delivery'?'🛵 Delivery':'🏃 Recoger'}</td>
+      <td><span class="badge ${statusBadge[o.status]||''}">${statusLabels[o.status]||o.status}</span></td>
+      <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('recentBody').innerHTML = rows || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Sin pedidos</td></tr>';
+
+  // Pagination
+  var total = allRecentOrders.length;
+  var pages = Math.ceil(total/recentPerPage);
+  var el = document.getElementById('recentPagination');
+  if (!el||pages<=1){if(el)el.innerHTML='';return;}
+  var html='<button class="page-btn" onclick="goRecentPage('+(recentPage-1)+')" '+(recentPage===1?'disabled':'')+'>‹</button>';
+  for(var i=1;i<=pages;i++){
+    if(i===1||i===pages||(i>=recentPage-2&&i<=recentPage+2)) html+='<button class="page-btn '+(i===recentPage?'active':'')+'" onclick="goRecentPage('+i+')">'+i+'</button>';
+    else if(i===recentPage-3||i===recentPage+3) html+='<span class="page-info">…</span>';
+  }
+  html+='<button class="page-btn" onclick="goRecentPage('+(recentPage+1)+')" '+(recentPage===pages?'disabled':'')+'>›</button>';
+  html+='<span class="page-info">'+total+' pedidos</span>';
+  el.innerHTML=html;
+}
+
+function goRecentPage(p) {
+  var pages = Math.ceil(allRecentOrders.length/recentPerPage);
+  if(p<1||p>pages) return;
+  recentPage=p;
+  renderRecentOrders();
 }
 
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
