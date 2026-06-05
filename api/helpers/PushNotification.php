@@ -31,10 +31,14 @@ class PushNotification {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => json_encode($payload),
-            CURLOPT_TIMEOUT        => 5,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_SSL_VERIFYPEER => false,
         ]);
-        curl_exec($ch);
+        $response = curl_exec($ch);
+        $error    = curl_error($ch);
         curl_close($ch);
+        // Log result
+        error_log('OneSignal push to user ' . $userId . ': ' . ($error ?: $response));
     }
 
     /**
@@ -62,9 +66,13 @@ class PushNotification {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
             CURLOPT_POSTFIELDS     => json_encode($payload),
-            CURLOPT_TIMEOUT        => 5,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_SSL_VERIFYPEER => false,
         ]);
-        curl_exec($ch);
+        $response = curl_exec($ch);
+        $error    = curl_error($ch);
         curl_close($ch);
+        // Log result
+        error_log('OneSignal push to user ' . $userId . ': ' . ($error ?: $response));
     }
 }
