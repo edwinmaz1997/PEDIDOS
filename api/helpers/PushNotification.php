@@ -5,7 +5,7 @@
 class PushNotification {
 
     const APP_ID  = '36b01031-83d9-4f66-bad8-3c32478f9fb2';
-    const API_KEY = 'os_v2_app_ywvbzxddobhpffmipuipyh3idxlm6e6rvjhghpwnzs5wlajbxl3mgijqmqyv5i3f5sgyukp4uqyxz4p33lgabq7nrfzexo5lqoyuwy'; // REST API Key
+    const API_KEY = 'os_v2_app_g2ybammd3fhwnowyhqzepd47wkheljnasx5e7pvg4oyciiqkcf6ow425ay6vikf2xt67ehgywm6frltgls4dub72mp4go6x2bfwsgsi'; // REST API Key
 
     /**
      * Send push to specific user by their External ID (our user ID)
