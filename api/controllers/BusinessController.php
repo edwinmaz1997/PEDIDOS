@@ -156,8 +156,8 @@ class BusinessController {
                 (user_id, category_id, name, slug, description, what_we_offer,
                  address, city, zone, phone, whatsapp, email, website,
                  latitude, longitude, google_maps_url, opening_hours,
-                 accepts_delivery, delivery_fee, service_fee)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                 accepts_delivery, delivery_fee, service_fee, is_active, is_verified)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         ");
         $stmt->execute([
             $ownerId,
@@ -180,10 +180,23 @@ class BusinessController {
             isset($body['accepts_delivery']) ? (int)$body['accepts_delivery'] : 0,
             DELIVERY_FEE_CENTRAL,
             SERVICE_FEE,
+            0, // is_active - pending admin approval
+            0, // is_verified
         ]);
 
         $id = $this->db->lastInsertId();
-        Response::success(['id' => $id, 'slug' => $slug], 'Negocio creado exitosamente', 201);
+
+        // Notify all admins of new business pending approval
+        $adminStmt = $this->db->query("SELECT id FROM users WHERE role_id = 1 AND is_active = 1");
+        foreach ($adminStmt->fetchAll() as $admin) {
+            $bizName = Security::sanitize($body['name'] ?? 'Nuevo negocio');
+            $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)")
+                     ->execute([$admin['id'], 'new_business', '🏪 Nuevo negocio pendiente',
+                         "El negocio "$bizName" se registró y está pendiente de aprobación.",
+                         json_encode(['url' => '/admin/negocios.html'])]);
+        }
+
+        Response::success(['id' => $id, 'slug' => $slug], 'Negocio creado. Pendiente de aprobación del administrador.', 201);
     }
 
     // PUT /api/businesses/{id}

@@ -264,6 +264,15 @@ const days = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Doming
 const dayKeys = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
 
 async function init() {
+  // Check if business is pending approval
+  var biz = await APP.get('/businesses?limit=1');
+  var b = biz?.data?.businesses?.[0];
+  if (b && !b.is_active) {
+    var notice = document.createElement('div');
+    notice.style.cssText = 'background:#fff8e1;border:1px solid #ffe082;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px;font-size:.9rem;color:#795548';
+    notice.innerHTML = '⏳ <strong>Tu negocio está pendiente de aprobación.</strong> El administrador lo revisará y activará pronto. Te notificaremos cuando esté disponible en el directorio.';
+    document.querySelector('.main-content')?.prepend(notice);
+  }
   // Load categories
   const cats = await APP.get('/categories');
   const sel = document.getElementById('f_category');

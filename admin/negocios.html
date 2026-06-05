@@ -66,8 +66,9 @@
       </select>
       <select id="statusFilter" onchange="applyFilters()">
         <option value="">Todos los estados</option>
-        <option value="1">Activos</option>
-        <option value="0">Inactivos</option>
+        <option value="pending">⏳ Pendientes aprobación</option>
+        <option value="1">✅ Activos</option>
+        <option value="0">⏸ Inactivos</option>
       </select>
       <span id="filterCount" style="font-size:.82rem;color:var(--muted)"></span>
     </div>
@@ -125,7 +126,10 @@ function applyFilters() {
   filtered = allBiz.filter(function(b) {
     var mQ = !q || (b.name||'').toLowerCase().includes(q) || (b.owner_name||'').toLowerCase().includes(q) || (b.city||'').toLowerCase().includes(q);
     var mC = !cat || String(b.category_id) === cat;
-    var mS = st==='' || String(b.is_active) === st;
+    var mS = st==='' ||
+             (st==='pending' && !b.is_active && !b.is_verified) ||
+             (st==='1' && b.is_active) ||
+             (st==='0' && !b.is_active && b.is_verified);
     return mQ && mC && mS;
   });
   page = 1;
