@@ -170,7 +170,6 @@ function renderItems() {
   }).join('') || '<p style="color:var(--muted);font-size:.9rem">Sin productos listados</p>';
   if (order.notes) document.getElementById('itemsList').innerHTML += '<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);margin-top:8px;font-size:.85rem;color:var(--muted)">📝 '+esc(order.notes)+'</div>';
   document.getElementById('subtotalVal').textContent = 'Q'+parseFloat(order.subtotal||0).toFixed(2);
-  document.getElementById('serviceFeeVal').textContent = 'Q'+parseFloat(order.service_fee||0).toFixed(2);
   document.getElementById('totalVal').textContent = 'Q'+parseFloat(order.total||0).toFixed(2);
   if (parseFloat(order.delivery_fee)>0) {
     document.getElementById('deliveryFeeRow').style.display='flex';
