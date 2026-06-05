@@ -116,11 +116,4 @@ function dismissInstall() {
   localStorage.setItem('pwa_dismissed', '1');
 }
 
-// Register service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/OneSignalSDKWorker.js')
-      .then(function(reg) { console.log('SW registered'); })
-      .catch(function(err) { console.log('SW error:', err); });
-  });
-}
+
