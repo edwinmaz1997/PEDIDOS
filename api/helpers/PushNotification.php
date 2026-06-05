@@ -5,7 +5,7 @@
 class PushNotification {
 
     const APP_ID  = '36b01031-83d9-4f66-bad8-3c32478f9fb2';
-    const API_KEY = 'os_v2_app_g2ybammd3fhwnowyhqzepd47wkmaikuaxwsecmmfrxp2pogqcau2tsbba3552k35za7hnsga3fdmbwyymamregwr657oimoahfl4n2i'; // REST API Key
+    // API key defined in config.php as ONESIGNAL_API_KEY // REST API Key
 
     /**
      * Send push to specific user by their External ID (our user ID)
@@ -26,7 +26,7 @@ class PushNotification {
         curl_setopt_array($ch, [
             CURLOPT_HTTPHEADER     => [
                 'Content-Type: application/json; charset=utf-8',
-                'Authorization: Key ' . self::API_KEY,
+                'Authorization: Key ' . ONESIGNAL_API_KEY,
             ],
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
@@ -61,7 +61,7 @@ class PushNotification {
         curl_setopt_array($ch, [
             CURLOPT_HTTPHEADER     => [
                 'Content-Type: application/json; charset=utf-8',
-                'Authorization: Key ' . self::API_KEY,
+                'Authorization: Key ' . ONESIGNAL_API_KEY,
             ],
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
