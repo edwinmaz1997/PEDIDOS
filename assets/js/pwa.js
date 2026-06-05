@@ -72,6 +72,31 @@ OneSignalDeferred.push(async function(OneSignal) {
   }
 })();
 
+// ── Manual notification subscribe ────────────────────────────
+function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    alert('Tu navegador no soporta notificaciones');
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    alert('Las notificaciones ya están activadas ✅');
+    return;
+  }
+  if (window.OneSignal) {
+    window.OneSignal.Notifications.requestPermission().then(function(accepted) {
+      if (accepted) {
+        alert('¡Notificaciones activadas! ✅ Recibirás avisos de tus pedidos.');
+      } else {
+        alert('Notificaciones rechazadas. Puedes activarlas desde la configuración del navegador.');
+      }
+    });
+  } else if (window.OneSignalDeferred) {
+    window.OneSignalDeferred.push(function(OneSignal) {
+      OneSignal.Notifications.requestPermission();
+    });
+  }
+}
+
 // ── PWA Install Prompt ────────────────────────────────────────
 var deferredPrompt = null;
 

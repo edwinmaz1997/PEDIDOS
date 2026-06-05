@@ -136,7 +136,14 @@
             </div>
           </div>
           <div style="margin-top:20px">
-            <button class="btn-primary" onclick="saveInfo()">Guardar información</button>
+            <div style="background:#e3f2fd;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-weight:600;font-size:.9rem">🔔 Notificaciones push</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Recibe avisos de pedidos y mensajes en tiempo real</div>
+        </div>
+        <button onclick="requestNotificationPermission()" class="btn-primary" style="padding:9px 18px;font-size:.85rem;white-space:nowrap">Activar notificaciones</button>
+      </div>
+      <button class="btn-primary" onclick="saveInfo()">Guardar información</button>
           </div>
         </div>
       </div>
