@@ -267,7 +267,7 @@ function renderProductModal(searchQ, catId) {
       '<div class="qty-ctrl">' +
         '<button class="qty-btn" onclick="changeQty('+p.id+',-1)">−</button>' +
         '<span class="qty-num" id="qty-'+p.id+'">'+qty+'</span>' +
-        '<button class="qty-btn" onclick="changeQty('+p.id+',1,''+esc(p.name)+'','+( p.price||0)+')">+</button>' +
+        '<button class="qty-btn" onclick="changeQty('+p.id+',1,this)">+</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -282,7 +282,16 @@ function filterProdCat(catId, btn) {
   renderProductModal();
 }
 
-function changeQty(id, delta, name, price) {
+function changeQty(id, delta, nameOrBtn, price) {
+  var name = typeof nameOrBtn === 'string' ? nameOrBtn : '';
+  if (typeof nameOrBtn === 'object' && nameOrBtn) {
+    // Get name and price from nearby product card
+    var card = nameOrBtn.closest('.product-pick');
+    if (card) {
+      name = card.querySelector('.prod-name')?.textContent || '';
+      price = price || parseFloat(card.querySelector('.prod-price')?.textContent?.replace('Q','')) || 0;
+    }
+  }
   if (!cart[id]) cart[id] = { name: name || '', price: parseFloat(price)||0, qty: 0 };
   cart[id].qty = Math.max(0, cart[id].qty + delta);
   if (cart[id].qty === 0) delete cart[id];
