@@ -242,9 +242,9 @@ function renderProductModal(searchQ, catId) {
   });
 
   // Category tabs
-  var catTabs = '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat===null?'var(--blue)':'var(--border)')+';background:'+(cat===null?'var(--blue)':'white')+';color:'+(cat===null?'white':'var(--ink)')+';font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="filterProdCat(null,this)">🏷️ Todas</button>';" onclick="filterProdCat(null,this)">🏷️ Todas</button>';
+  var catTabs = '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat===null?'var(--blue)':'var(--border)')+';background:'+(cat===null?'var(--blue)':'white')+';color:'+(cat===null?'white':'var(--ink)')+';font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="filterProdCat(null,this)">🏷️ Todas</button>';
   Object.entries(catMap).forEach(function(e){
-    catTabs += '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat==e[0]?'var(--blue)':'var(--border)')+';background:'+(cat==e[0]?'var(--blue)':'white')+';color:'+(cat==e[0]?'white':'var(--ink)')+';font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="filterProdCat('+e[0]+',this)">" onclick="filterProdCat('+e[0]+',this)">'+(e[1].icon)+' '+esc(e[1].name)+'</button>';
+    catTabs += '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat==e[0]?'var(--blue)':'var(--border)')+';background:'+(cat==e[0]?'var(--blue)':'white')+';color:'+(cat==e[0]?'white':'var(--ink)')+';font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="filterProdCat('+e[0]+',this)">'+(e[1].icon)+' '+esc(e[1].name)+'</button>';
   });
   document.getElementById('prodCatTabs').innerHTML = catTabs;
 
