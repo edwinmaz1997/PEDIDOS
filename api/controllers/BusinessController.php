@@ -190,10 +190,9 @@ class BusinessController {
         $adminStmt = $this->db->query("SELECT id FROM users WHERE role_id = 1 AND is_active = 1");
         foreach ($adminStmt->fetchAll() as $admin) {
             $bizName = Security::sanitize($body['name'] ?? 'Nuevo negocio');
-            $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)")
-                     ->execute([$admin['id'], 'new_business', '🏪 Nuevo negocio pendiente',
-                         "El negocio '$bizName' se registró y está pendiente de aprobación.",
-                         json_encode(['url' => '/admin/negocios.html'])]);
+            PushNotification::send($admin['id'], '🏪 Nuevo negocio pendiente',
+                        "El negocio '$bizName' se registró y está pendiente de aprobación.",
+                        '/admin/negocios.html');
         }
 
         Response::success(['id' => $id, 'slug' => $slug], 'Negocio creado. Pendiente de aprobación del administrador.', 201);

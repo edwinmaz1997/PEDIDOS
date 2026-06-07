@@ -180,11 +180,7 @@ class OrderMessageController {
     }
 
     private function notify($userId, $type, $title, $message, $url = '/') {
-        // Save to DB
-        $data = json_encode(['url' => $url]);
-        $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)")
-                 ->execute([$userId, $type, $title, $message, $data]);
-        // Send real push via OneSignal
+        // Send push via OneSignal only
         PushNotification::send($userId, $title, $message, $url);
     }
 }
