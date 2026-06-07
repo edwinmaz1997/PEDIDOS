@@ -111,8 +111,7 @@ function renderPagination(total) {
 }
 
 function goPage(p){
-  var list = filteredOrders.length || document.getElementById('searchQ')?.value ? filteredOrders : allOrders;
-  var pages=Math.ceil(list.length/perPage);
+  var pages=Math.ceil(filteredOrders.length/perPage);
   if(p<1||p>pages)return;
   page=p;
   renderOrders();
@@ -134,12 +133,11 @@ function applySearch() {
 }
 
 function renderOrders() {
-  var list = filteredOrders.length || document.getElementById('searchQ')?.value ? filteredOrders : allOrders;
-  var pageData = list.slice((page-1)*perPage, page*perPage);
+  var pageData = filteredOrders.slice((page-1)*perPage, page*perPage);
   var container = document.getElementById('ordersContainer');
   var oc = document.getElementById('orderCount');
-  if (oc) oc.textContent = list.length + ' pedido' + (list.length !== 1 ? 's' : '');
-  renderPagination(list.length);
+  if (oc) oc.textContent = filteredOrders.length + ' pedido' + (filteredOrders.length !== 1 ? 's' : '');
+  renderPagination(filteredOrders.length);
   if (!pageData.length) {
     container.innerHTML = '<div class="empty-state"><p>No hay pedidos.</p></div>';
     return;
