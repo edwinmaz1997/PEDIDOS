@@ -71,6 +71,10 @@
       <button class="tab-btn" onclick="loadOrders('',this)">Todos</button>
     </div>
 
+    <div style="display:flex;gap:10px;margin:12px 0;flex-wrap:wrap">
+      <input type="text" id="searchQ" placeholder="🔍 Buscar por #pedido, cliente..." oninput="applySearch()" style="flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none">
+      <span id="orderCount" style="font-size:.82rem;color:var(--muted);align-self:center"></span>
+    </div>
     <div id="ordersContainer"><div class="loading-state"><div class="spinner"></div></div></div>
     <div class="pagination" id="pagination"></div>
   </main>
@@ -103,22 +107,39 @@ function renderPagination(total) {
     else if(i===page-3||i===page+3)html+='<span class="page-info">…</span>';
   }
   html+='<button class="page-btn" onclick="goPage('+(page+1)+')" '+(page===pages?'disabled':'')+'>›</button>';
-  html+='<span class="page-info">'+total+' pedidos</span>';
   el.innerHTML=html;
 }
 
 function goPage(p){
-  var pages=Math.ceil(allOrders.length/perPage);
+  var list = filteredOrders.length || document.getElementById('searchQ')?.value ? filteredOrders : allOrders;
+  var pages=Math.ceil(list.length/perPage);
   if(p<1||p>pages)return;
   page=p;
   renderOrders();
   window.scrollTo(0,0);
 }
 
+var filteredOrders = [];
+
+function applySearch() {
+  var q = (document.getElementById('searchQ')?.value || '').toLowerCase();
+  filteredOrders = allOrders.filter(function(o) {
+    return !q ||
+      (o.order_number||'').toLowerCase().includes(q) ||
+      (o.client_name||'').toLowerCase().includes(q) ||
+      (o.client_phone||'').toLowerCase().includes(q);
+  });
+  page = 1;
+  renderOrders();
+}
+
 function renderOrders() {
-  var pageData = allOrders.slice((page-1)*perPage, page*perPage);
+  var list = filteredOrders.length || document.getElementById('searchQ')?.value ? filteredOrders : allOrders;
+  var pageData = list.slice((page-1)*perPage, page*perPage);
   var container = document.getElementById('ordersContainer');
-  renderPagination(allOrders.length);
+  var oc = document.getElementById('orderCount');
+  if (oc) oc.textContent = list.length + ' pedido' + (list.length !== 1 ? 's' : '');
+  renderPagination(list.length);
   if (!pageData.length) {
     container.innerHTML = '<div class="empty-state"><p>No hay pedidos.</p></div>';
     return;
@@ -228,6 +249,8 @@ setInterval(async function() {
   const res = await APP.get('/orders' + (currentStatus ? '?status=' + currentStatus : ''));
   if (!res?.success) return;
   allOrders = res.data?.orders || [];
+  filteredOrders = allOrders.slice();
+  document.getElementById('searchQ').value = '';
   renderOrders();
 }, 20000);
 </script>
