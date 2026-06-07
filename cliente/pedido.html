@@ -218,8 +218,12 @@ function renderProducts() {
 }
 
 var activeProdCat = null;
+var productMap = {};
 
 function openProductModal() {
+  // Build product lookup
+  var products = business.products || [];
+  products.forEach(function(p){ productMap[p.id] = { name: p.name, price: parseFloat(p.price||0) }; });
   var pm = document.getElementById('productModal'); pm.style.display = 'flex'; pm.style.alignItems = 'center';
   document.body.style.overflow = 'hidden';
   renderProductModal();
@@ -268,7 +272,7 @@ function renderProductModal(searchQ, catId) {
       '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
         '<button onclick="changeQty('+p.id+',-1)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:white;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">−</button>' +
         '<span id="qty-'+p.id+'" style="font-weight:700;min-width:20px;text-align:center;font-size:.95rem">'+qty+'</span>' +
-        '<button onclick="changeQty('+p.id+',1,this)" style="width:32px;height:32px;border-radius:50%;border:none;background:var(--blue);color:white;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">+</button>' +
+        '<button onclick="changeQty('+p.id+',1)" style="width:32px;height:32px;border-radius:50%;border:none;background:var(--blue);color:white;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">+</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -281,17 +285,9 @@ function filterProdCat(catId, btn) {
   renderProductModal();
 }
 
-function changeQty(id, delta, nameOrBtn, price) {
-  var name = typeof nameOrBtn === 'string' ? nameOrBtn : '';
-  if (typeof nameOrBtn === 'object' && nameOrBtn) {
-    // Get name and price from nearby product card
-    var card = nameOrBtn.closest('.product-pick');
-    if (card) {
-      name = card.querySelector('.prod-name')?.textContent || '';
-      price = price || parseFloat(card.querySelector('.prod-price')?.textContent?.replace('Q','')) || 0;
-    }
-  }
-  if (!cart[id]) cart[id] = { name: name || '', price: parseFloat(price)||0, qty: 0 };
+function changeQty(id, delta) {
+  var pm = productMap[id] || {};
+  if (!cart[id]) cart[id] = { name: pm.name || '', price: pm.price || 0, qty: 0 };
   cart[id].qty = Math.max(0, cart[id].qty + delta);
   if (cart[id].qty === 0) delete cart[id];
   var qEl = document.getElementById('qty-'+id);
@@ -390,7 +386,7 @@ function updateCart() {
   if (cartBar) {
     cartBar.style.display = totalItems > 0 ? 'flex' : 'none';
     var cc = document.getElementById('cartCount');
-    var ct = document.getElementById('cartTotal');
+    var ct = document.getElementById('cartBarTotal');
     if(cc) cc.textContent = totalItems;
     if(ct) ct.textContent = 'Q'+totalPrice.toFixed(2);
   }
@@ -419,11 +415,10 @@ function updateCart() {
   else { cartEl.innerHTML = lines.join(''); }
 
   const deliveryFee = deliveryType === 'delivery' && business?.accepts_delivery ? parseFloat(business.delivery_fee || 15) : 0;
-  const total = subtotal + SERVICE_FEE + deliveryFee;
+  const total = subtotal + deliveryFee;
 
   feeEl.innerHTML = `
     ${subtotal > 0 ? `<div class="fee-row"><span>Subtotal</span><span>Q${subtotal.toFixed(2)}</span></div>` : ''}
-    <div class="fee-row"><span>Tarifa de servicio</span><span>Q${SERVICE_FEE.toFixed(2)}</span></div>
     ${deliveryFee > 0 ? `<div class="fee-row"><span>Delivery</span><span>Q${deliveryFee.toFixed(2)}</span></div>` : ''}
   `;
   totalEl.textContent = `Q${total.toFixed(2)}`;
