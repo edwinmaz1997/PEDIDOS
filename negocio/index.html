@@ -70,6 +70,7 @@
       <button class="tab-btn" onclick="loadOrders('en_preparacion',this)">👨‍🍳 En prep.</button>
       <button class="tab-btn" onclick="loadOrders('listo',this)">📦 Listos</button>
       <button class="tab-btn" onclick="loadOrders('cancelado',this)">✕ Cancelados</button>
+      <button class="tab-btn" onclick="loadEntregadosHoy(this)">✔ Entregados hoy</button>
       <button class="tab-btn" onclick="loadOrders('',this)">Todos</button>
     </div>
 
@@ -147,7 +148,53 @@ function renderOrders() {
   container.innerHTML = pageData.map(renderOrder).join('');
 }
 
+async function loadEntregadosHoy(tabBtn) {
+  if (tabBtn) { document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); }); tabBtn.classList.add('active'); }
+  currentStatus = 'entregado';
+  page = 1;
+  document.getElementById('ordersContainer').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  try {
+    var res = await fetch(API + '/orders?status=entregado', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+    var data = await res.json();
+    var today = new Date().toISOString().substring(0,10);
+    allOrders = (data.data?.orders || []).filter(function(o){
+      return o.updated_at && o.updated_at.substring(0,10) === today;
+    });
+    filteredOrders = allOrders.slice();
+    if (document.getElementById('searchQ')) document.getElementById('searchQ').value = '';
+    document.getElementById('downloadBtn').style.display = 'inline-flex';
+    renderOrders();
+  } catch(e) { document.getElementById('ordersContainer').innerHTML = '<div class="empty-state"><p>Error cargando pedidos.</p></div>'; }
+}
+
+function downloadOrders() {
+  var rows = [['#Pedido','Cliente','Teléfono','Tipo','Productos','Subtotal','Delivery','Total','Fecha']];
+  filteredOrders.forEach(function(o){
+    var items = (o.items||[]).map(function(i){ return i.product_name + ' x' + i.quantity; }).join(', ');
+    var subtotal = parseFloat(o.subtotal||0);
+    var delivery = parseFloat(o.delivery_fee||0);
+    rows.push([
+      o.order_number,
+      '"' + (o.client_name||'') + '"',
+      o.client_phone||'',
+      o.delivery_type==='delivery'?'Delivery':'Recoger',
+      '"' + items + '"',
+      subtotal.toFixed(2),
+      delivery.toFixed(2),
+      (subtotal+delivery).toFixed(2),
+      o.created_at||''
+    ]);
+  });
+  var csv = rows.map(function(r){ return r.join(','); }).join('\n');
+  var today = new Date().toISOString().substring(0,10);
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'entregados_' + today + '.csv';
+  a.click();
+}
+
 async function loadOrders(status, tabBtn) {
+  document.getElementById('downloadBtn').style.display = 'none';
   if (tabBtn) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); tabBtn.classList.add('active'); }
   currentStatus = status || '';
   page = 1;
