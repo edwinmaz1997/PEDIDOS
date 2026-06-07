@@ -290,11 +290,7 @@ try {
 
         // ── NOTIFICATIONS ────────────────────────────────────
         case 'notifications':
-            $ctrl = new NotificationController();
-            if ($method === 'GET')              $ctrl->index();
-            elseif ($subAction === 'read')      $ctrl->markRead($id);
-            elseif ($action === 'read-all')     $ctrl->markAllRead();
-            else Response::notFound();
+            Response::success([]);
             break;
 
         // ── CATEGORIES ───────────────────────────────────────
