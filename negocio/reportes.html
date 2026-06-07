@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reportes — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.report-tabs { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+.report-tab { padding:10px 20px; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-weight:600; font-size:.88rem; cursor:pointer; transition:var(--transition); }
+.report-tab.active { background:var(--blue); color:white; border-color:var(--blue); }
+.report-section { display:none; }
+.report-section.active { display:block; }
+.report-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:20px; margin-bottom:16px; }
+.report-card h3 { font-size:1rem; margin-bottom:16px; color:var(--ink); }
+.report-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+.report-table th { text-align:left; padding:10px 12px; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); border-bottom:2px solid var(--border); }
+.report-table td { padding:10px 12px; border-bottom:1px solid var(--border); }
+.report-table tr:last-child td { border-bottom:none; }
+.report-table tr:hover td { background:var(--off-white); }
+.metric-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:20px; }
+.metric-box { background:var(--off-white); border-radius:var(--radius-sm); padding:16px; text-align:center; }
+.metric-box .val { font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:700; }
+.metric-box .lbl { font-size:.75rem; color:var(--muted); margin-top:4px; }
+.saldo-box { background:linear-gradient(135deg,#1a1a2e,#16213e); color:white; border-radius:var(--radius); padding:28px; margin-bottom:20px; text-align:center; }
+.saldo-box .amount { font-family:'Syne',sans-serif; font-size:2.8rem; font-weight:800; margin:12px 0; }
+.saldo-box .period { font-size:.9rem; opacity:.7; }
+.star-badge { background:#fff8e1; color:#f57f17; border-radius:20px; padding:3px 10px; font-size:.78rem; font-weight:700; }
+.filter-row { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
+.filter-row select, .filter-row input { padding:9px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:.88rem; outline:none; background:white; }
+.bar-wrap { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.bar-label { font-size:.82rem; min-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bar-track { flex:1; height:10px; background:var(--off-white); border-radius:10px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:10px; background:var(--blue); transition:width .4s ease; }
+.bar-val { font-size:.82rem; font-weight:700; min-width:60px; text-align:right; }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress" style="height:38px;border-radius:8px"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px" id="sidebarUser"></div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📋 Pedidos</a></li>
+      <li><a href="productos.html">🛍️ Productos</a></li>
+      <li><a href="zonas-entrega.html">📍 Zonas</a></li>
+      <li><a href="perfil.html">⚙️ Mi Negocio</a></li>
+      <li><a href="reportes.html" class="active">📊 Reportes</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>📊 Reportes</h1>
+      <p>Análisis de tu negocio en NuevaExpress</p>
+    </div>
+
+    <!-- Tab buttons -->
+    <div class="report-tabs">
+      <button class="report-tab active" onclick="showTab('clientes')">👥 Clientes</button>
+      <button class="report-tab" onclick="showTab('contabilidad')">💰 Contabilidad</button>
+      <button class="report-tab" onclick="showTab('saldo')">🧾 Saldo NuevaExpress</button>
+    </div>
+
+    <!-- ── CLIENTES ── -->
+    <div class="report-section active" id="tab-clientes">
+      <div class="filter-row">
+        <select id="clientPeriod" onchange="loadClientes()">
+          <option value="all">Todo el tiempo</option>
+          <option value="month">Este mes</option>
+          <option value="3months">Últimos 3 meses</option>
+          <option value="year">Este año</option>
+        </select>
+        <input type="text" id="clientSearch" placeholder="🔍 Buscar cliente..." oninput="filterClientes()" style="flex:1;min-width:160px">
+        <span id="clientCount" style="font-size:.82rem;color:var(--muted)"></span>
+      </div>
+
+      <div class="report-card">
+        <h3>🏆 Clientes más frecuentes</h3>
+        <div id="clientsTable"><div class="loading-state"><div class="spinner"></div></div></div>
+      </div>
+
+      <div class="report-card">
+        <h3>⭐ Productos estrella por cliente</h3>
+        <div id="starProducts"><div class="loading-state"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ── CONTABILIDAD ── -->
+    <div class="report-section" id="tab-contabilidad">
+      <div class="filter-row">
+        <select id="contabYear" onchange="loadContabilidad()">
+        </select>
+        <button class="btn-ghost" onclick="exportContabilidad()" style="padding:9px 16px;font-size:.85rem">📥 Exportar CSV</button>
+      </div>
+
+      <div class="metric-grid" id="contabMetrics">
+        <div class="metric-box"><div class="val" id="mTotalOrders">—</div><div class="lbl">Pedidos totales</div></div>
+        <div class="metric-box"><div class="val" id="mTotalIncome">—</div><div class="lbl">Ingresos brutos</div></div>
+        <div class="metric-box"><div class="val" id="mNetIncome">—</div><div class="lbl">Ingreso neto</div></div>
+        <div class="metric-box"><div class="val" id="mAvgOrder">—</div><div class="lbl">Ticket promedio</div></div>
+      </div>
+
+      <div class="report-card">
+        <h3>📅 Pedidos y ventas por mes</h3>
+        <div id="monthlyTable"><div class="loading-state"><div class="spinner"></div></div></div>
+      </div>
+
+      <div class="report-card">
+        <h3>📈 Productos más vendidos</h3>
+        <div id="topProducts"><div class="loading-state"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ── SALDO NUEVAEXPRESS ── -->
+    <div class="report-section" id="tab-saldo">
+      <div class="filter-row">
+        <select id="saldoMonth" onchange="loadSaldo()"></select>
+        <select id="saldoYear" onchange="loadSaldo()"></select>
+      </div>
+
+      <div class="saldo-box" id="saldoBox">
+        <div class="period" id="saldoPeriod">—</div>
+        <div style="font-size:.9rem;opacity:.7;margin-top:8px">Saldo a pagar por uso de plataforma</div>
+        <div class="amount" id="saldoAmount">—</div>
+        <div style="font-size:.85rem;opacity:.6" id="saldoDetail">—</div>
+      </div>
+
+      <div class="report-card">
+        <h3>🧾 Detalle por mes</h3>
+        <div id="saldoTable"><div class="loading-state"><div class="spinner"></div></div></div>
+      </div>
+
+      <div style="background:#e8f5e9;border-radius:var(--radius-sm);padding:16px;font-size:.85rem;color:#2e7d32">
+        <strong>ℹ️ ¿Cómo se calcula?</strong> Cada pedido completado genera una tarifa de <strong>Q3.00</strong> por uso de la plataforma NuevaExpress. Este saldo debe pagarse mensualmente.
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script src="/assets/js/pwa.js"></script>
+<script>
+(function(){var h=window.location.hash;if(h&&h.indexOf('tk=')!==-1){var p=h.substring(1).split('&'),tk='',us='';p.forEach(function(x){if(x.indexOf('tk=')===0)tk=x.substring(3);if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}})();
+
+var user = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if (!localStorage.getItem('nuevaexpress_token') || !['negocio','admin'].includes(user.role)) window.location.href = '/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name || '';
+
+var bizId = null;
+var allOrders = [];
+var allClientsData = [];
+var SERVICE_FEE = 3;
+
+function getToken() { return localStorage.getItem('nuevaexpress_token'); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function money(n) { return 'Q' + parseFloat(n||0).toFixed(2); }
+
+// ── Tab navigation ────────────────────────────────────────────
+function showTab(tab) {
+  document.querySelectorAll('.report-tab').forEach(function(b,i){ b.classList.toggle('active', ['clientes','contabilidad','saldo'][i]===tab); });
+  document.querySelectorAll('.report-section').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ── Load all orders ───────────────────────────────────────────
+async function loadAllOrders() {
+  var res = await fetch('/api/orders', { headers: { Authorization: 'Bearer ' + getToken() } }).then(function(r){ return r.json(); });
+  allOrders = res.data?.orders || [];
+  return allOrders;
+}
+
+// ── CLIENTES ─────────────────────────────────────────────────
+async function loadClientes() {
+  document.getElementById('clientsTable').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  await loadAllOrders();
+
+  var period = document.getElementById('clientPeriod').value;
+  var orders = filterByPeriod(allOrders, period).filter(function(o){ return o.status !== 'cancelado'; });
+
+  // Group by client
+  var clients = {};
+  orders.forEach(function(o) {
+    var key = o.client_id || o.client_name;
+    if (!clients[key]) clients[key] = { name: o.client_name, phone: o.client_phone||'', orders: 0, total: 0, products: {} };
+    clients[key].orders++;
+    clients[key].total += parseFloat(o.subtotal||0);
+    (o.items||[]).forEach(function(i) {
+      var pn = i.product_name || 'Producto';
+      clients[key].products[pn] = (clients[key].products[pn]||0) + (i.quantity||1);
+    });
+  });
+
+  allClientsData = Object.values(clients).sort(function(a,b){ return b.total - a.total; });
+  document.getElementById('clientCount').textContent = allClientsData.length + ' clientes';
+  renderClientes(allClientsData);
+  renderStarProducts(allClientsData);
+}
+
+function filterClientes() {
+  var q = document.getElementById('clientSearch').value.toLowerCase();
+  var filtered = allClientsData.filter(function(c){ return !q || c.name.toLowerCase().includes(q) || c.phone.includes(q); });
+  renderClientes(filtered);
+}
+
+function renderClientes(list) {
+  if (!list.length) { document.getElementById('clientsTable').innerHTML = '<div class="empty-state"><p>No hay clientes.</p></div>'; return; }
+  var html = '<div style="overflow-x:auto"><table class="report-table"><thead><tr>' +
+    '<th>Cliente</th><th>Teléfono</th><th>Pedidos</th><th>Total consumido</th><th>Promedio</th><th>Producto favorito</th>' +
+    '</tr></thead><tbody>';
+  list.forEach(function(c, i) {
+    var star = Object.entries(c.products).sort(function(a,b){ return b[1]-a[1]; })[0];
+    html += '<tr>' +
+      '<td><strong>' + esc(c.name) + '</strong>' + (i===0?'  <span class="star-badge">🏆 Top cliente</span>':'') + '</td>' +
+      '<td>' + (c.phone ? '<a href="tel:'+esc(c.phone)+'">'+esc(c.phone)+'</a>' : '—') + '</td>' +
+      '<td><strong>' + c.orders + '</strong></td>' +
+      '<td><strong style="color:var(--blue)">' + money(c.total) + '</strong></td>' +
+      '<td>' + money(c.orders ? c.total/c.orders : 0) + '</td>' +
+      '<td>' + (star ? '<span class="star-badge">⭐ '+esc(star[0])+'</span> ×'+star[1] : '—') + '</td>' +
+    '</tr>';
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('clientsTable').innerHTML = html;
+}
+
+function renderStarProducts(clients) {
+  // Top products across all clients
+  var products = {};
+  clients.forEach(function(c) {
+    Object.entries(c.products).forEach(function(entry) {
+      products[entry[0]] = (products[entry[0]]||0) + entry[1];
+    });
+  });
+  var sorted = Object.entries(products).sort(function(a,b){ return b[1]-a[1]; }).slice(0,10);
+  if (!sorted.length) { document.getElementById('starProducts').innerHTML = '<div class="empty-state"><p>Sin datos.</p></div>'; return; }
+  var max = sorted[0][1];
+  var html = sorted.map(function(entry, i) {
+    return '<div class="bar-wrap">' +
+      '<div class="bar-label">' + (i===0?'⭐ ':'') + esc(entry[0]) + '</div>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:'+Math.round(entry[1]/max*100)+'%"></div></div>' +
+      '<div class="bar-val">×'+entry[1]+'</div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('starProducts').innerHTML = html;
+}
+
+// ── CONTABILIDAD ─────────────────────────────────────────────
+async function loadContabilidad() {
+  document.getElementById('monthlyTable').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  await loadAllOrders();
+
+  var year = parseInt(document.getElementById('contabYear').value);
+  var orders = allOrders.filter(function(o){ return new Date(o.created_at).getFullYear()===year && o.status!=='cancelado'; });
+
+  // Metrics
+  var totalOrders = orders.length;
+  var totalIncome = orders.reduce(function(s,o){ return s+parseFloat(o.subtotal||0); }, 0);
+  var totalFees   = totalOrders * SERVICE_FEE;
+  var netIncome   = totalIncome - totalFees;
+  var avgOrder    = totalOrders ? totalIncome/totalOrders : 0;
+
+  document.getElementById('mTotalOrders').textContent = totalOrders;
+  document.getElementById('mTotalIncome').textContent = money(totalIncome);
+  document.getElementById('mNetIncome').textContent   = money(netIncome);
+  document.getElementById('mAvgOrder').textContent    = money(avgOrder);
+
+  // Monthly breakdown
+  var months = {};
+  var monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  orders.forEach(function(o) {
+    var m = new Date(o.created_at).getMonth();
+    if (!months[m]) months[m] = { orders:0, income:0 };
+    months[m].orders++;
+    months[m].income += parseFloat(o.subtotal||0);
+  });
+
+  var html = '<div style="overflow-x:auto"><table class="report-table"><thead><tr>' +
+    '<th>Mes</th><th>Pedidos</th><th>Ingresos brutos</th><th>Tarifa NuevaExpress</th><th>Ingreso neto</th><th>Ticket promedio</th>' +
+    '</tr></thead><tbody>';
+  
+  var hasData = false;
+  monthNames.forEach(function(name, i) {
+    if (!months[i]) return;
+    hasData = true;
+    var m = months[i];
+    var fee = m.orders * SERVICE_FEE;
+    var net = m.income - fee;
+    html += '<tr>' +
+      '<td><strong>' + name + ' ' + year + '</strong></td>' +
+      '<td>' + m.orders + '</td>' +
+      '<td>' + money(m.income) + '</td>' +
+      '<td style="color:var(--danger)">- ' + money(fee) + '</td>' +
+      '<td><strong style="color:var(--green)">' + money(net) + '</strong></td>' +
+      '<td>' + money(m.orders ? m.income/m.orders : 0) + '</td>' +
+    '</tr>';
+  });
+  if (!hasData) html += '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">Sin pedidos este año</td></tr>';
+  html += '</tbody></table></div>';
+  document.getElementById('monthlyTable').innerHTML = html;
+
+  // Top products
+  var products = {};
+  orders.forEach(function(o) {
+    (o.items||[]).forEach(function(i) {
+      var pn = i.product_name || 'Producto';
+      if (!products[pn]) products[pn] = { qty:0, income:0 };
+      products[pn].qty += (i.quantity||1);
+      products[pn].income += parseFloat(i.unit_price||0) * (i.quantity||1);
+    });
+  });
+  var topList = Object.entries(products).sort(function(a,b){ return b[1].qty-a[1].qty; }).slice(0,10);
+  if (!topList.length) { document.getElementById('topProducts').innerHTML = '<div class="empty-state"><p>Sin datos.</p></div>'; return; }
+  var maxQty = topList[0][1].qty;
+  var tpHtml = topList.map(function(entry, i) {
+    return '<div class="bar-wrap">' +
+      '<div class="bar-label">' + (i===0?'⭐ ':'') + esc(entry[0]) + '</div>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:'+Math.round(entry[1].qty/maxQty*100)+'%"></div></div>' +
+      '<div class="bar-val">×'+entry[1].qty+'</div>' +
+    '</div>';
+  }).join('');
+  document.getElementById('topProducts').innerHTML = tpHtml;
+}
+
+function exportContabilidad() {
+  var year = document.getElementById('contabYear').value;
+  var monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var orders = allOrders.filter(function(o){ return new Date(o.created_at).getFullYear()===parseInt(year) && o.status!=='cancelado'; });
+  var rows = [['Mes','Pedidos','Ingresos brutos','Tarifa NuevaExpress','Ingreso neto']];
+  var months = {};
+  orders.forEach(function(o){
+    var m = new Date(o.created_at).getMonth();
+    if(!months[m])months[m]={orders:0,income:0};
+    months[m].orders++;
+    months[m].income+=parseFloat(o.subtotal||0);
+  });
+  monthNames.forEach(function(name,i){
+    if(!months[i])return;
+    var fee=months[i].orders*SERVICE_FEE;
+    rows.push([name+' '+year, months[i].orders, months[i].income.toFixed(2), fee.toFixed(2), (months[i].income-fee).toFixed(2)]);
+  });
+  var csv = rows.map(function(r){ return r.join(','); }).join('\n');
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'contabilidad_' + year + '.csv';
+  a.click();
+}
+
+// ── SALDO NUEVAEXPRESS ────────────────────────────────────────
+async function loadSaldo() {
+  var month = parseInt(document.getElementById('saldoMonth').value);
+  var year  = parseInt(document.getElementById('saldoYear').value);
+  var monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+  await loadAllOrders();
+  var completed = allOrders.filter(function(o){ return o.status === 'entregado'; });
+
+  // Current month saldo
+  var monthOrders = completed.filter(function(o){
+    var d = new Date(o.created_at);
+    return d.getMonth()===month && d.getFullYear()===year;
+  });
+  var saldo = monthOrders.length * SERVICE_FEE;
+
+  document.getElementById('saldoPeriod').textContent = monthNames[month] + ' ' + year;
+  document.getElementById('saldoAmount').textContent = money(saldo);
+  document.getElementById('saldoDetail').textContent = monthOrders.length + ' pedidos × Q' + SERVICE_FEE + '.00 = ' + money(saldo);
+
+  // All months breakdown
+  var byMonth = {};
+  completed.forEach(function(o){
+    var d = new Date(o.created_at);
+    var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    if(!byMonth[key])byMonth[key]={orders:0,year:d.getFullYear(),month:d.getMonth()};
+    byMonth[key].orders++;
+  });
+
+  var sorted = Object.entries(byMonth).sort(function(a,b){ return b[0].localeCompare(a[0]); });
+  if (!sorted.length) { document.getElementById('saldoTable').innerHTML = '<div class="empty-state"><p>Sin pedidos completados.</p></div>'; return; }
+
+  var html = '<div style="overflow-x:auto"><table class="report-table"><thead><tr>' +
+    '<th>Período</th><th>Pedidos completados</th><th>Tarifa unitaria</th><th>Total a pagar</th><th>Estado</th>' +
+    '</tr></thead><tbody>';
+  var now = new Date();
+  sorted.forEach(function(entry){
+    var d = byMonth[entry[0]];
+    var isPast = d.year < now.getFullYear() || (d.year===now.getFullYear() && d.month < now.getMonth());
+    var isCurrent = d.year===now.getFullYear() && d.month===now.getMonth();
+    html += '<tr>' +
+      '<td><strong>' + monthNames[d.month] + ' ' + d.year + '</strong></td>' +
+      '<td>' + d.orders + '</td>' +
+      '<td>Q' + SERVICE_FEE + '.00</td>' +
+      '<td><strong style="color:var(--danger)">' + money(d.orders*SERVICE_FEE) + '</strong></td>' +
+      '<td>' + (isCurrent ? '<span class="badge badge-active">Mes actual</span>' : isPast ? '<span class="badge">Cerrado</span>' : '') + '</td>' +
+    '</tr>';
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('saldoTable').innerHTML = html;
+}
+
+// ── Init ─────────────────────────────────────────────────────
+async function init() {
+  var res = await APP.get('/businesses');
+  var biz = res?.data?.businesses?.[0];
+  if (!biz) { window.location.href = 'crear-negocio.html'; return; }
+  bizId = biz.id;
+
+  // Populate year selectors
+  var currentYear = new Date().getFullYear();
+  var years = [currentYear, currentYear-1, currentYear-2];
+  var contabYearEl = document.getElementById('contabYear');
+  var saldoYearEl  = document.getElementById('saldoYear');
+  years.forEach(function(y){
+    contabYearEl.innerHTML += '<option value="'+y+'">'+ y +'</option>';
+    saldoYearEl.innerHTML  += '<option value="'+y+'">'+ y +'</option>';
+  });
+
+  // Populate month selector
+  var monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var currentMonth = new Date().getMonth();
+  monthNames.forEach(function(name, i){
+    document.getElementById('saldoMonth').innerHTML += '<option value="'+i+'" '+(i===currentMonth?'selected':'')+'>'+name+'</option>';
+  });
+
+  // Load initial data
+  await loadClientes();
+  loadContabilidad();
+  loadSaldo();
+}
+
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+function filterByPeriod(orders, period) {
+  var now = new Date();
+  return orders.filter(function(o){
+    var d = new Date(o.created_at);
+    if(period==='month') return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    if(period==='3months') return (now-d) <= 90*24*60*60*1000;
+    if(period==='year') return d.getFullYear()===now.getFullYear();
+    return true;
+  });
+}
+
+init();
+</script>
+</body>
+</html>
