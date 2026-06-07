@@ -140,6 +140,15 @@ CREATE TABLE IF NOT EXISTS business_photos (
 -- ------------------------------------------------------------
 -- PRODUCTS / SERVICES (for search/filter + ordering)
 -- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS product_categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    business_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    icon VARCHAR(10) DEFAULT '🏷️',
+    sort_order INT DEFAULT 0,
+    FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS products_services (
     id INT AUTO_INCREMENT PRIMARY KEY,
     business_id INT NOT NULL,
@@ -147,6 +156,7 @@ CREATE TABLE IF NOT EXISTS products_services (
     description TEXT,
     price DECIMAL(10,2),
     photo VARCHAR(255),
+    category_id INT DEFAULT NULL,
     is_available TINYINT(1) DEFAULT 1,
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

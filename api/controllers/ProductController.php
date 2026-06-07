@@ -9,7 +9,7 @@ class ProductController {
     public function index(): void {
         $businessId = (int)($_GET['business_id'] ?? 0);
         if (!$businessId) Response::error('business_id requerido', 400);
-        $stmt = $this->db->prepare("SELECT * FROM products_services WHERE business_id = ? ORDER BY is_available DESC, sort_order");
+        $stmt = $this->db->prepare("SELECT p.*, c.name as category_name, c.icon as category_icon FROM products_services p LEFT JOIN product_categories c ON p.category_id = c.id WHERE p.business_id = ? ORDER BY p.is_available DESC, c.sort_order, p.sort_order, p.name");
         $stmt->execute([$businessId]);
         Response::success($stmt->fetchAll());
     }

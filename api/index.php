@@ -18,6 +18,7 @@ require_once __DIR__ . '/controllers/AdminNotificationController.php';
 require_once __DIR__ . '/controllers/PhotoController.php';
 require_once __DIR__ . '/controllers/OrderMessageController.php';
 require_once __DIR__ . '/helpers/PushNotification.php';
+require_once __DIR__ . '/controllers/ProductCategoryController.php';
 require_once __DIR__ . '/controllers/DeliveryZoneController.php';
 require_once __DIR__ . '/controllers/CategoryController.php';
 
@@ -163,6 +164,15 @@ try {
             break;
 
         // ── PRODUCTS ─────────────────────────────────────────
+        case 'product-categories':
+            $catCtrl = new ProductCategoryController();
+            if ($method === 'GET')                        { $catCtrl->index(); break; }
+            if ($method === 'POST')                       { $catCtrl->store($body); break; }
+            if ($id && $method === 'PUT')                 { $catCtrl->update($id, $body); break; }
+            if ($id && $method === 'DELETE')              { $catCtrl->destroy($id); break; }
+            Response::notFound();
+            break;
+
         case 'products':
             $ctrl = new ProductController();
             if ($method === 'GET'    && !$id)    $ctrl->index();

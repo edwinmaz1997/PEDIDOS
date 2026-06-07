@@ -42,6 +42,10 @@
 input:checked + .slider { background:var(--success); }
 input:checked + .slider:before { transform:translateX(20px); }
 .header-actions { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+.cat-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.cat-tab { padding:7px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:.82rem; font-weight:600; cursor:pointer; transition:var(--transition); }
+.cat-tab.active { background:var(--blue); color:white; border-color:var(--blue); }
+.cat-tag { background:var(--off-white); border-radius:12px; padding:2px 8px; font-size:.75rem; color:var(--muted); }
 </style>
 </head>
 <body>
@@ -81,6 +85,22 @@ input:checked + .slider:before { transform:translateX(20px); }
     </div>
     <div id="productsContainer"><div class="loading-state"><div class="spinner"></div></div></div>
   </main>
+</div>
+
+<!-- Category Modal -->
+<div class="modal-form" id="catModal" style="display:none">
+  <div class="modal-form-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="font-size:1.1rem">🏷️ Categorías de productos</h2>
+      <button onclick="closeCatModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div id="catList" style="margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="newCatIcon" placeholder="🏷️" maxlength="4" style="width:56px;padding:9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;text-align:center;font-size:1.2rem;outline:none">
+      <input type="text" id="newCatName" placeholder="Nombre de categoría..." style="flex:1;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none">
+      <button onclick="addCategory()" class="btn-primary" style="padding:9px 16px">+ Agregar</button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal -->
@@ -153,6 +173,75 @@ if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'negocio')
 document.getElementById('sidebarUser').textContent = APP.user().name || '';
 
 let bizId = null;
+let categories = [];
+let activeCatId = null;
+
+// ── Category management ───────────────────────────────────────
+async function loadCategories() {
+  const res = await APP.get(`/product-categories?business_id=${bizId}`);
+  categories = res?.data || [];
+  renderCatTabs();
+  renderCatSelect();
+  renderCatList();
+}
+
+function renderCatTabs() {
+  const tabs = document.getElementById('catTabs');
+  let html = '<button class="cat-tab '+(activeCatId===null?'active':'')+'" onclick="filterByCat(null,this)">🏷️ Todas</button>';
+  categories.forEach(function(c){
+    html += '<button class="cat-tab '+(activeCatId===c.id?'active':'')+'" onclick="filterByCat('+c.id+',this)">'+(c.icon||'🏷️')+' '+APP.esc(c.name)+'</button>';
+  });
+  tabs.innerHTML = html;
+}
+
+function renderCatSelect() {
+  const sel = document.getElementById('p_category');
+  sel.innerHTML = '<option value="">Sin categoría</option>';
+  categories.forEach(function(c){
+    sel.innerHTML += '<option value="'+c.id+'">'+(c.icon||'🏷️')+' '+APP.esc(c.name)+'</option>';
+  });
+}
+
+function renderCatList() {
+  const el = document.getElementById('catList');
+  if (!categories.length) { el.innerHTML = '<p style="color:var(--muted);font-size:.85rem">No hay categorías aún.</p>'; return; }
+  el.innerHTML = categories.map(function(c){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">' +
+      '<span style="font-size:1.2rem">'+c.icon+'</span>' +
+      '<span style="flex:1;font-weight:600">'+APP.esc(c.name)+'</span>' +
+      '<button onclick="deleteCategory('+c.id+')" class="icon-btn danger" style="padding:5px 10px;font-size:.8rem">🗑️</button>' +
+    '</div>';
+  }).join('');
+}
+
+function filterByCat(catId, btn) {
+  activeCatId = catId;
+  document.querySelectorAll('.cat-tab').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  filterProducts();
+}
+
+function openCatModal() { document.getElementById('catModal').style.display = 'flex'; }
+function closeCatModal() { document.getElementById('catModal').style.display = 'none'; }
+
+async function addCategory() {
+  const name = document.getElementById('newCatName').value.trim();
+  const icon = document.getElementById('newCatIcon').value.trim() || '🏷️';
+  if (!name) return;
+  const res = await APP.post('/product-categories', { business_id: bizId, name, icon });
+  if (res?.success) {
+    document.getElementById('newCatName').value = '';
+    document.getElementById('newCatIcon').value = '';
+    await loadCategories();
+    APP.toast('Categoría creada');
+  }
+}
+
+async function deleteCategory(id) {
+  if (!confirm('¿Eliminar esta categoría? Los productos quedarán sin categoría.')) return;
+  const res = await APP.delete('/product-categories/' + id);
+  if (res?.success) { await loadCategories(); await loadProducts(); APP.toast('Categoría eliminada'); }
+}
 let products = [];
 let photoFileToUpload = null;
 
@@ -182,7 +271,8 @@ function filterProducts() {
   var filtered = allProducts.filter(function(p) {
     var mQ = !q || p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q);
     var mS = st === '' || parseInt(p.is_available) === parseInt(st);
-    return mQ && mS;
+    var mC = activeCatId === null || p.category_id == activeCatId;
+    return mQ && mS && mC;
   });
   var pc = document.getElementById('prodCount');
   if (pc) pc.textContent = filtered.length + ' producto' + (filtered.length !== 1 ? 's' : '');
@@ -231,6 +321,7 @@ function openModal(productId = null) {
   document.getElementById('p_description').value = p?.description || '';
   document.getElementById('p_price').value = p?.price || '';
   document.getElementById('p_available').checked = p ? !!p.is_available : true;
+  document.getElementById('p_category').value = p?.category_id || '';
   const preview = document.getElementById('p_photoPreview');
   const placeholder = document.getElementById('p_photoPlaceholder');
   if (p?.photo) { preview.src = p.photo; preview.style.display = 'block'; placeholder.style.display = 'none'; }

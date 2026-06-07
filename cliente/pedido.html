@@ -201,31 +201,99 @@ function renderBizInfo() {
 
 function renderProducts() {
   const section = document.getElementById('productsSection');
-  const list    = document.getElementById('productsList');
-  const products = business.products || [];
   section.style.display = 'block';
-  if (!products.length) { list.innerHTML = '<p style="color:var(--muted);font-size:.9rem">Este negocio no tiene productos listados. Usa el campo personalizado.</p>'; return; }
-  list.innerHTML = products.map(p => `
-    <div class="product-pick" id="pp-${p.id}">
-      <div>
-        <div class="prod-name">${esc(p.name)}</div>
-        ${p.description ? `<div style="font-size:.8rem;color:var(--muted)">${esc(p.description)}</div>` : ''}
-        ${p.price ? `<div class="prod-price">Q${parseFloat(p.price).toFixed(2)}</div>` : ''}
-      </div>
-      <div class="qty-ctrl">
-        <button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button>
-        <span class="qty-num" id="qty-${p.id}">0</span>
-        <button class="qty-btn" onclick="changeQty(${p.id},1,'${esc(p.name)}',${p.price||0})">+</button>
-      </div>
-    </div>
-  `).join('');
+  const products = business.products || [];
+  if (!products.length) {
+    document.getElementById('productsList').innerHTML = '<p style="color:var(--muted);font-size:.9rem">Este negocio no tiene productos. Usa el campo personalizado.</p>';
+    return;
+  }
+  // Show button to open product modal
+  document.getElementById('productsList').innerHTML = `
+    <button onclick="openProductModal()" class="btn-primary" style="width:100%;padding:14px;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:8px">
+      🛍️ Ver productos (${products.length})
+    </button>
+    <div id="cartSummaryInline" style="margin-top:8px"></div>
+  `;
+  updateCart();
+}
+
+var activeProdCat = null;
+
+function openProductModal() {
+  document.getElementById('productModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  renderProductModal();
+}
+
+function closeProductModal() {
+  document.getElementById('productModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function renderProductModal(searchQ, catId) {
+  var products = business.products || [];
+  var q = (searchQ || document.getElementById('prodSearch')?.value || '').toLowerCase();
+  var cat = catId !== undefined ? catId : activeProdCat;
+
+  // Build categories from products
+  var catMap = {};
+  products.forEach(function(p){
+    if(p.category_id) catMap[p.category_id] = {name:p.category_name||'—', icon:p.category_icon||'🏷️'};
+  });
+
+  // Category tabs
+  var catTabs = '<button class="cat-tab '+(cat===null?'active':'')+'" onclick="filterProdCat(null,this)">🏷️ Todas</button>';
+  Object.entries(catMap).forEach(function(e){
+    catTabs += '<button class="cat-tab '+(cat==e[0]?'active':'')+'" onclick="filterProdCat('+e[0]+',this)">'+(e[1].icon)+' '+esc(e[1].name)+'</button>';
+  });
+  document.getElementById('prodCatTabs').innerHTML = catTabs;
+
+  // Filter products
+  var filtered = products.filter(function(p){
+    var mQ = !q || p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q);
+    var mC = cat === null || p.category_id == cat;
+    return mQ && mC && p.is_available;
+  });
+
+  var html = filtered.map(function(p){
+    var qty = cart[p.id]?.qty || 0;
+    return '<div class="product-pick" id="pp-'+p.id+'" style="'+(qty>0?'border-color:var(--blue);background:#f0f7ff':'')+'">' +
+      '<div style="flex:1">' +
+        (p.category_name?'<div style="font-size:.7rem;color:var(--muted);margin-bottom:2px">'+(p.category_icon||'🏷️')+' '+esc(p.category_name)+'</div>':'') +
+        '<div class="prod-name">'+esc(p.name)+'</div>' +
+        (p.description?'<div style="font-size:.78rem;color:var(--muted);margin-top:2px">'+esc(p.description)+'</div>':'') +
+        (p.price?'<div class="prod-price">Q'+parseFloat(p.price).toFixed(2)+'</div>':'') +
+      '</div>' +
+      '<div class="qty-ctrl">' +
+        '<button class="qty-btn" onclick="changeQty('+p.id+',-1)">−</button>' +
+        '<span class="qty-num" id="qty-'+p.id+'">'+qty+'</span>' +
+        '<button class="qty-btn" onclick="changeQty('+p.id+',1,''+esc(p.name)+'','+( p.price||0)+')">+</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('prodList').innerHTML = html || '<p style="color:var(--muted);text-align:center;padding:20px">Sin productos</p>';
+}
+
+function filterProdCat(catId, btn) {
+  activeProdCat = catId;
+  document.querySelectorAll('#prodCatTabs .cat-tab').forEach(function(b){ b.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+  renderProductModal();
 }
 
 function changeQty(id, delta, name, price) {
   if (!cart[id]) cart[id] = { name: name || '', price: parseFloat(price)||0, qty: 0 };
   cart[id].qty = Math.max(0, cart[id].qty + delta);
   if (cart[id].qty === 0) delete cart[id];
-  document.getElementById(`qty-${id}`).textContent = cart[id]?.qty || 0;
+  var qEl = document.getElementById('qty-'+id);
+  if (qEl) qEl.textContent = cart[id]?.qty || 0;
+  // Highlight product card if in cart
+  var ppEl = document.getElementById('pp-'+id);
+  if (ppEl) {
+    ppEl.style.borderColor = cart[id]?.qty ? 'var(--blue)' : '';
+    ppEl.style.background  = cart[id]?.qty ? '#f0f7ff' : '';
+  }
   updateCart();
 }
 
@@ -305,6 +373,19 @@ function setDelivery(type, btn) {
 }
 
 function updateCart() {
+  // Update modal footer button
+  var totalItems = Object.values(cart).reduce(function(s,i){ return s+i.qty; }, 0);
+  var totalPrice = Object.values(cart).reduce(function(s,i){ return s+i.price*i.qty; }, 0);
+  var btn = document.getElementById('prodModalBtn');
+  if (btn) btn.textContent = totalItems > 0 ? '✓ Listo — '+totalItems+' productos (Q'+totalPrice.toFixed(2)+')' : 'Ver carrito';
+  var cartBar = document.getElementById('cartBar');
+  if (cartBar) {
+    cartBar.style.display = totalItems > 0 ? 'flex' : 'none';
+    var cc = document.getElementById('cartCount');
+    var ct = document.getElementById('cartTotal');
+    if(cc) cc.textContent = totalItems;
+    if(ct) ct.textContent = 'Q'+totalPrice.toFixed(2);
+  }
   const cartEl = document.getElementById('cartItems');
   const feeEl  = document.getElementById('feesBreakdown');
   const totalEl = document.getElementById('cartTotal');
