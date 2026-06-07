@@ -250,7 +250,7 @@ class BusinessController {
     }
 
     private function getAllProducts($businessId) {
-        $stmt = $this->db->prepare("SELECT * FROM products_services WHERE business_id = ? AND is_available = 1 ORDER BY sort_order");
+        $stmt = $this->db->prepare("SELECT p.*, c.name as category_name, c.icon as category_icon FROM products_services p LEFT JOIN product_categories c ON p.category_id = c.id WHERE p.business_id = ? AND p.is_available = 1 ORDER BY c.sort_order, p.sort_order, p.name");
         $stmt->execute([$businessId]);
         return $stmt->fetchAll();
     }
