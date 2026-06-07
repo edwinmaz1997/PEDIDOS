@@ -27,6 +27,7 @@ class PushNotification {
             CURLOPT_HTTPHEADER     => [
                 'Content-Type: application/json; charset=utf-8',
                 'Authorization: Key ' . ONESIGNAL_API_KEY,
+                'accept: application/json',
             ],
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
@@ -62,6 +63,7 @@ class PushNotification {
             CURLOPT_HTTPHEADER     => [
                 'Content-Type: application/json; charset=utf-8',
                 'Authorization: Key ' . ONESIGNAL_API_KEY,
+                'accept: application/json',
             ],
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
