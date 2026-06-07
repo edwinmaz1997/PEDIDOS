@@ -61,18 +61,21 @@ class DeliveryZoneController {
 
     // GET /api/businesses/{id}/zones — zones a business covers
     public function bizZones($bizId) {
-        // Return all zones with flag if business covers them
-        $stmt = $this->db->prepare("
-            SELECT z.*, 
-                   CASE WHEN bdz.id IS NOT NULL THEN 1 ELSE 0 END as covered,
-                   bdz.custom_price
-            FROM delivery_zones z
-            LEFT JOIN business_delivery_zones bdz ON z.id = bdz.zone_id AND bdz.business_id = ?
-            WHERE z.is_active = 1
-            ORDER BY z.sort_order, z.price
-        ");
-        $stmt->execute([$bizId]);
-        Response::success($stmt->fetchAll());
+        try {
+            $stmt = $this->db->prepare("
+                SELECT z.*, 
+                       CASE WHEN bdz.id IS NOT NULL THEN 1 ELSE 0 END as covered,
+                       bdz.custom_price
+                FROM delivery_zones z
+                LEFT JOIN business_delivery_zones bdz ON z.id = bdz.zone_id AND bdz.business_id = ?
+                WHERE z.is_active = 1
+                ORDER BY z.sort_order, z.price
+            ");
+            $stmt->execute([$bizId]);
+            Response::success($stmt->fetchAll());
+        } catch (\Exception \$e) {
+            Response::success([]); // Return empty if table doesn't exist yet
+        }
     }
 
     // POST /api/businesses/{id}/zones — business selects which zones it covers
