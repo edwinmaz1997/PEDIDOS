@@ -74,6 +74,10 @@ input:checked + .slider:before { transform:translateX(20px); }
       <button class="btn-primary" onclick="openModal()">+ Agregar producto</button>
     </div>
 
+    <!-- Category tabs -->
+    <div class="cat-tabs" id="catTabs" style="margin-bottom:10px">
+      <button class="cat-tab active" onclick="filterByCat(null,this)">🏷️ Todas</button>
+    </div>
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
       <input type="text" id="searchQ" placeholder="🔍 Buscar producto..." oninput="filterProducts()" style="flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none">
       <select id="statusFilter" onchange="filterProducts()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white">
@@ -81,6 +85,7 @@ input:checked + .slider:before { transform:translateX(20px); }
         <option value="1">✅ Activos</option>
         <option value="0">⏸ Inactivos</option>
       </select>
+      <button onclick="openCatModal()" class="btn-ghost" style="padding:9px 14px;font-size:.85rem;white-space:nowrap">🏷️ Categorías</button>
       <span id="prodCount" style="font-size:.82rem;color:var(--muted)"></span>
     </div>
     <div id="productsContainer"><div class="loading-state"><div class="spinner"></div></div></div>
@@ -134,6 +139,12 @@ input:checked + .slider:before { transform:translateX(20px); }
           <button class="btn-ghost" style="padding:7px 14px;font-size:.85rem" onclick="document.getElementById('p_photoInput').click()">📷 Subir foto</button>
         </div>
       </div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label>Categoría</label>
+      <select id="p_category" style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white">
+        <option value="">Sin categoría</option>
+      </select>
     </div>
     <div class="toggle-available" style="margin-bottom:20px">
       <label class="switch"><input type="checkbox" id="p_available" checked><span class="slider"></span></label>
@@ -321,7 +332,7 @@ function openModal(productId = null) {
   document.getElementById('p_description').value = p?.description || '';
   document.getElementById('p_price').value = p?.price || '';
   document.getElementById('p_available').checked = p ? !!p.is_available : true;
-  document.getElementById('p_category').value = p?.category_id || '';
+  var pCatEl = document.getElementById('p_category'); if (pCatEl) pCatEl.value = p?.category_id || '';
   const preview = document.getElementById('p_photoPreview');
   const placeholder = document.getElementById('p_photoPlaceholder');
   if (p?.photo) { preview.src = p.photo; preview.style.display = 'block'; placeholder.style.display = 'none'; }
