@@ -147,17 +147,19 @@ function renderOrders() {
 
 async function loadOrders(status, tabBtn) {
   if (tabBtn) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); tabBtn.classList.add('active'); }
-  const container = document.getElementById('ordersContainer');
-  container.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  currentStatus = status || '';
+  page = 1;
+  document.getElementById('ordersContainer').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
   try {
-    const qs = status ? `?status=${status}` : '';
-    const res = await fetch(`${API}/orders${qs}`, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+    const qs = status ? '?status=' + status : '';
+    const res = await fetch(API + '/orders' + qs, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
     const data = await res.json();
-    const orders = data.data?.orders || [];
-    if (!orders.length) { container.innerHTML = '<div class="empty-state"><p>No hay pedidos en esta categoría.</p></div>'; return; }
-    container.innerHTML = orders.map(renderOrder).join('');
-    updateStats(orders);
-  } catch(e) { container.innerHTML = '<div class="empty-state"><p>Error cargando pedidos.</p></div>'; }
+    allOrders = data.data?.orders || [];
+    filteredOrders = allOrders.slice();
+    if (document.getElementById('searchQ')) document.getElementById('searchQ').value = '';
+    updateStats(allOrders);
+    renderOrders();
+  } catch(e) { document.getElementById('ordersContainer').innerHTML = '<div class="empty-state"><p>Error cargando pedidos.</p></div>'; }
 }
 
 function renderOrder(o) {
