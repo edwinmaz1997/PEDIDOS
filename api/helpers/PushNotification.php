@@ -74,7 +74,6 @@ class PushNotification {
         $response = curl_exec($ch);
         $error    = curl_error($ch);
         curl_close($ch);
-        // Log result
-        error_log('OneSignal push to user ' . $userId . ': ' . ($error ?: $response));
+        error_log('OneSignal push to many: ' . ($error ?: $response));
     }
 }

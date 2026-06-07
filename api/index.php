@@ -78,37 +78,6 @@ try {
     switch ($resource) {
 
         // ── AUTH ─────────────────────────────────────────────
-        case 'test-push':
-            $testUid = isset($_GET['uid']) ? (int)$_GET['uid'] : 10;
-            $payload = [
-                'app_id'          => '36b01031-83d9-4f66-bad8-3c32478f9fb2',
-                'target_channel'  => 'push',
-                'include_aliases' => ['external_id' => [strval($testUid)]],
-                'headings'        => ['en' => '🧪 Test NuevaExpress'],
-                'contents'        => ['en' => 'Si ves esto las notificaciones funcionan!'],
-                'url'             => 'https://nuevaexpress.com',
-            ];
-            $ch = curl_init('https://api.onesignal.com/notifications');
-            curl_setopt_array($ch, [
-                CURLOPT_HTTPHEADER     => ['Content-Type: application/json; charset=utf-8', 'Authorization: Key ' . ONESIGNAL_API_KEY],
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST           => true,
-                CURLOPT_POSTFIELDS     => json_encode($payload),
-                CURLOPT_TIMEOUT        => 10,
-                CURLOPT_SSL_VERIFYPEER => false,
-            ]);
-            // Debug: show what key is being used
-            if (isset($_GET['debug'])) {
-                Response::success(['key_defined' => defined('ONESIGNAL_API_KEY'), 'key_length' => defined('ONESIGNAL_API_KEY') ? strlen(ONESIGNAL_API_KEY) : 0, 'key_start' => defined('ONESIGNAL_API_KEY') ? substr(ONESIGNAL_API_KEY, 0, 20) : 'NOT DEFINED']);
-                break;
-            }
-            $resp = curl_exec($ch);
-            $err  = curl_error($ch);
-            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            Response::success(['uid'=>$testUid,'http_code'=>$code,'response'=>json_decode($resp),'curl_error'=>$err]);
-            break;
-
         case 'auth':
             $ctrl   = new AuthController();
             $pwCtrl = new PasswordResetController();

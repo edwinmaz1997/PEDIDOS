@@ -73,7 +73,7 @@ class DeliveryZoneController {
             ");
             $stmt->execute([$bizId]);
             Response::success($stmt->fetchAll());
-        } catch (\Exception \$e) {
+        } catch (Exception $e) {
             Response::success([]); // Return empty if table doesn't exist yet
         }
     }
