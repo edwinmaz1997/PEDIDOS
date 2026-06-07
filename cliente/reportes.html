@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Reportes — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.metric-box{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:18px;text-align:center}
+.metric-box .val{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:700}
+.metric-box .lbl{font-size:.75rem;color:var(--muted);margin-top:4px}
+.report-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:16px}
+.report-card h3{font-size:1rem;margin-bottom:16px}
+.report-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.report-table th{text-align:left;padding:10px 12px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:2px solid var(--border)}
+.report-table td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.report-table tr:last-child td{border-bottom:none}
+.report-table tr:hover td{background:var(--off-white)}
+.bar-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-label{font-size:.82rem;min-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:10px;background:var(--off-white);border-radius:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:10px;transition:width .4s ease}
+.bar-val{font-size:.82rem;font-weight:700;min-width:50px;text-align:right}
+.star-badge{background:#fff8e1;color:#f57f17;border-radius:20px;padding:3px 10px;font-size:.78rem;font-weight:700}
+.biz-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:18px;margin-bottom:14px;transition:var(--transition)}
+.biz-card:hover{box-shadow:var(--shadow)}
+.biz-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.filter-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.filter-row select{padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;background:white}
+.timeline-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.timeline-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.timeline-row:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress" style="height:38px;border-radius:8px"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px" id="sidebarUser"></div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📋 Mis Pedidos</a></li>
+      <li><a href="perfil.html">👤 Mi Perfil</a></li>
+      <li><a href="reportes.html" class="active">📊 Mis Reportes</a></li>
+      <li><a href="/index.html">🏪 Directorio</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>📊 Mis Reportes</h1>
+      <p>Resumen de tu actividad en NuevaExpress</p>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-row">
+      <select id="periodFilter" onchange="init()">
+        <option value="all">Todo el tiempo</option>
+        <option value="month">Este mes</option>
+        <option value="3months">Últimos 3 meses</option>
+        <option value="year">Este año</option>
+      </select>
+      <span id="periodLabel" style="font-size:.82rem;color:var(--muted)"></span>
+    </div>
+
+    <!-- Global metrics -->
+    <div class="metric-grid">
+      <div class="metric-box">
+        <div class="val" id="mTotal" style="color:var(--blue)">—</div>
+        <div class="lbl">Total gastado</div>
+      </div>
+      <div class="metric-box">
+        <div class="val" id="mOrders">—</div>
+        <div class="lbl">Pedidos realizados</div>
+      </div>
+      <div class="metric-box">
+        <div class="val" id="mAvg">—</div>
+        <div class="lbl">Ticket promedio</div>
+      </div>
+      <div class="metric-box">
+        <div class="val" id="mBizCount">—</div>
+        <div class="lbl">Negocios visitados</div>
+      </div>
+      <div class="metric-box">
+        <div class="val" id="mDelivery">—</div>
+        <div class="lbl">En deliveries</div>
+      </div>
+      <div class="metric-box">
+        <div class="val" id="mPickup">—</div>
+        <div class="lbl">Para recoger</div>
+      </div>
+    </div>
+
+    <!-- Negocios favoritos -->
+    <div class="report-card">
+      <h3>🏪 Negocios donde he consumido</h3>
+      <div id="bizList"><div class="loading-state"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- Productos favoritos -->
+    <div class="report-card">
+      <h3>⭐ Mis productos más pedidos</h3>
+      <div id="topProducts"><div class="loading-state"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- Historial por mes -->
+    <div class="report-card">
+      <h3>📅 Mi historial por mes</h3>
+      <div id="monthlyHistory"><div class="loading-state"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- Últimos pedidos -->
+    <div class="report-card">
+      <h3>🕐 Actividad reciente</h3>
+      <div id="recentActivity"><div class="loading-state"><div class="spinner"></div></div></div>
+    </div>
+
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script src="/assets/js/pwa.js"></script>
+<script>
+(function(){var h=window.location.hash;if(h&&h.indexOf('tk=')!==-1){var p=h.substring(1).split('&'),tk='',us='';p.forEach(function(x){if(x.indexOf('tk=')===0)tk=x.substring(3);if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}})();
+
+var user = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if (!localStorage.getItem('nuevaexpress_token') || !user.id) window.location.href = '/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name || '';
+
+function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function money(n){ return 'Q'+parseFloat(n||0).toFixed(2); }
+
+function filterByPeriod(orders, period) {
+  var now = new Date();
+  return orders.filter(function(o){
+    if(o.status==='cancelado') return false;
+    var d = new Date(o.created_at);
+    if(period==='month') return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+    if(period==='3months') return (now-d)<=90*24*60*60*1000;
+    if(period==='year') return d.getFullYear()===now.getFullYear();
+    return true;
+  });
+}
+
+async function init() {
+  var period = document.getElementById('periodFilter').value;
+
+  // Load orders
+  var res = await fetch('/api/orders', { headers:{ Authorization:'Bearer '+getToken() } }).then(function(r){ return r.json(); });
+  var allOrders = res.data?.orders || [];
+  var orders = filterByPeriod(allOrders, period);
+
+  // Period label
+  var labels = {all:'Todos los pedidos',month:'Este mes',['3months']:'Últimos 3 meses',year:'Este año'};
+  document.getElementById('periodLabel').textContent = orders.length + ' pedidos — ' + labels[period];
+
+  // ── Global metrics ──────────────────────────────────────────
+  var total    = orders.reduce(function(s,o){ return s+parseFloat(o.subtotal||0)+parseFloat(o.delivery_fee||0); }, 0);
+  var avgTicket = orders.length ? total/orders.length : 0;
+  var bizSet   = new Set(orders.map(function(o){ return o.business_id; }));
+  var deliveries = orders.filter(function(o){ return o.delivery_type==='delivery'; }).length;
+  var pickups    = orders.filter(function(o){ return o.delivery_type==='pickup'; }).length;
+
+  document.getElementById('mTotal').textContent    = money(total);
+  document.getElementById('mOrders').textContent   = orders.length;
+  document.getElementById('mAvg').textContent      = money(avgTicket);
+  document.getElementById('mBizCount').textContent = bizSet.size;
+  document.getElementById('mDelivery').textContent = deliveries;
+  document.getElementById('mPickup').textContent   = pickups;
+
+  // ── Negocios ────────────────────────────────────────────────
+  var bizMap = {};
+  orders.forEach(function(o){
+    var bid = o.business_id||o.business_name;
+    if(!bizMap[bid]) bizMap[bid] = {name:o.business_name||'—', orders:0, total:0, products:{}, lastOrder:null};
+    bizMap[bid].orders++;
+    bizMap[bid].total += parseFloat(o.subtotal||0)+parseFloat(o.delivery_fee||0);
+    if(!bizMap[bid].lastOrder || o.created_at > bizMap[bid].lastOrder) bizMap[bid].lastOrder = o.created_at;
+    (o.items||[]).forEach(function(i){
+      var pn = i.product_name||'Producto';
+      bizMap[bid].products[pn] = (bizMap[bid].products[pn]||0)+(i.quantity||1);
+    });
+  });
+
+  var bizList = Object.values(bizMap).sort(function(a,b){ return b.total-a.total; });
+
+  if(!bizList.length){
+    document.getElementById('bizList').innerHTML = '<div class="empty-state"><p>Sin pedidos en este período.</p></div>';
+  } else {
+    var maxTotal = bizList[0].total;
+    var html = bizList.map(function(b, i){
+      var star = Object.entries(b.products).sort(function(a,c){ return c[1]-a[1]; })[0];
+      var avg = b.orders ? b.total/b.orders : 0;
+      return '<div class="biz-card">' +
+        '<div class="biz-card-header">' +
+          '<div>' +
+            '<div style="font-weight:700;font-size:1rem">'+esc(b.name)+(i===0?' 🏆':'')+'</div>' +
+            '<div style="font-size:.78rem;color:var(--muted);margin-top:2px">Último pedido: '+(b.lastOrder?new Date(b.lastOrder).toLocaleDateString('es-GT'):'—')+'</div>' +
+          '</div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-family:Syne,sans-serif;font-weight:700;color:var(--blue);font-size:1.2rem">'+money(b.total)+'</div>' +
+            '<div style="font-size:.75rem;color:var(--muted)">'+b.orders+' pedido'+(b.orders!==1?'s':'')+'</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:10px">' +
+          '<div style="font-size:.82rem"><span style="color:var(--muted)">Ticket promedio:</span> <strong>'+money(avg)+'</strong></div>' +
+          (star?'<div style="font-size:.82rem"><span style="color:var(--muted)">Producto favorito:</span> <span class="star-badge">⭐ '+esc(star[0])+'</span> ×'+star[1]+'</div>':'') +
+        '</div>' +
+        '<div class="bar-track" style="height:6px"><div class="bar-fill" style="width:'+Math.round(b.total/maxTotal*100)+'%;background:var(--blue)"></div></div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('bizList').innerHTML = html;
+  }
+
+  // ── Top products ────────────────────────────────────────────
+  var products = {};
+  orders.forEach(function(o){
+    (o.items||[]).forEach(function(i){
+      var pn = i.product_name||'Producto';
+      if(!products[pn]) products[pn]={qty:0,spent:0,biz:o.business_name||'—'};
+      products[pn].qty += (i.quantity||1);
+      products[pn].spent += parseFloat(i.unit_price||0)*(i.quantity||1);
+    });
+  });
+  var topList = Object.entries(products).sort(function(a,b){ return b[1].qty-a[1].qty; }).slice(0,10);
+  if(!topList.length){
+    document.getElementById('topProducts').innerHTML = '<div class="empty-state"><p>Sin datos de productos.</p></div>';
+  } else {
+    var maxQty = topList[0][1].qty;
+    var colors = ['#4A90D9','#27ae60','#e67e22','#8e44ad','#e74c3c','#16a085','#2980b9','#f39c12','#c0392b','#1abc9c'];
+    var html2 = topList.map(function(entry, i){
+      return '<div class="bar-wrap">' +
+        '<div class="bar-label">'+(i===0?'⭐ ':'')+esc(entry[0])+'<div style="font-size:.7rem;color:var(--muted)">'+esc(entry[1].biz)+'</div></div>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:'+Math.round(entry[1].qty/maxQty*100)+'%;background:'+colors[i%colors.length]+'"></div></div>' +
+        '<div class="bar-val">×'+entry[1].qty+'</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('topProducts').innerHTML = html2;
+  }
+
+  // ── Monthly history ─────────────────────────────────────────
+  var monthNames = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  var months = {};
+  filterByPeriod(allOrders, 'all').forEach(function(o){
+    var d = new Date(o.created_at);
+    var key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!months[key]) months[key]={orders:0,total:0,month:d.getMonth(),year:d.getFullYear()};
+    months[key].orders++;
+    months[key].total += parseFloat(o.subtotal||0)+parseFloat(o.delivery_fee||0);
+  });
+  var sortedMonths = Object.entries(months).sort(function(a,b){ return b[0].localeCompare(a[0]); }).slice(0,12);
+  if(!sortedMonths.length){
+    document.getElementById('monthlyHistory').innerHTML = '<div class="empty-state"><p>Sin historial.</p></div>';
+  } else {
+    var maxM = Math.max.apply(null, sortedMonths.map(function(e){ return e[1].total; }));
+    var html3 = '<div style="overflow-x:auto"><table class="report-table"><thead><tr>' +
+      '<th>Mes</th><th>Pedidos</th><th>Total gastado</th><th>Promedio</th><th></th>' +
+      '</tr></thead><tbody>';
+    sortedMonths.forEach(function(entry){
+      var m = entry[1];
+      var pct = Math.round(m.total/maxM*100);
+      html3 += '<tr>' +
+        '<td><strong>'+monthNames[m.month]+' '+m.year+'</strong></td>' +
+        '<td>'+m.orders+'</td>' +
+        '<td><strong style="color:var(--blue)">'+money(m.total)+'</strong></td>' +
+        '<td>'+money(m.orders?m.total/m.orders:0)+'</td>' +
+        '<td style="width:120px"><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:var(--blue)"></div></div></td>' +
+      '</tr>';
+    });
+    html3 += '</tbody></table></div>';
+    document.getElementById('monthlyHistory').innerHTML = html3;
+  }
+
+  // ── Recent activity ─────────────────────────────────────────
+  var statusColors = {pendiente:'#f39c12',aceptado:'#27ae60',en_preparacion:'#8e44ad',listo:'#2980b9',en_camino:'#16a085',entregado:'#27ae60',cancelado:'#e74c3c'};
+  var statusLabels = {pendiente:'⏳ Pendiente',aceptado:'✅ Aceptado',en_preparacion:'👨‍🍳 En preparación',listo:'📦 Listo',en_camino:'🛵 En camino',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
+  var recent = allOrders.slice(0,15);
+  if(!recent.length){
+    document.getElementById('recentActivity').innerHTML = '<div class="empty-state"><p>Sin actividad.</p></div>';
+  } else {
+    var html4 = recent.map(function(o){
+      var color = statusColors[o.status]||'#95a5a6';
+      var total = parseFloat(o.subtotal||0)+parseFloat(o.delivery_fee||0);
+      return '<div class="timeline-row">' +
+        '<div class="timeline-dot" style="background:'+color+'"></div>' +
+        '<div style="flex:1">' +
+          '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px">' +
+            '<div><strong>'+esc(o.order_number)+'</strong> · <span style="font-size:.82rem;color:var(--muted)">'+esc(o.business_name)+'</span></div>' +
+            '<div style="font-weight:700;color:var(--blue)">'+money(total)+'</div>' +
+          '</div>' +
+          '<div style="font-size:.78rem;color:var(--muted);margin-top:2px">' +
+            (statusLabels[o.status]||o.status)+' · '+new Date(o.created_at).toLocaleDateString('es-GT') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('recentActivity').innerHTML = html4;
+  }
+}
+
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+init();
+</script>
+</body>
+</html>
