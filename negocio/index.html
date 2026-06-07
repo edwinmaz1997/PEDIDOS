@@ -72,6 +72,7 @@
     </div>
 
     <div id="ordersContainer"><div class="loading-state"><div class="spinner"></div></div></div>
+    <div class="pagination" id="pagination"></div>
   </main>
 </div>
 
@@ -86,6 +87,44 @@ const statusLabels = { pendiente:'⏳ Pendiente', aceptado:'✅ Aceptado', en_pr
 const statusBadge  = { pendiente:'badge-pending', aceptado:'badge-accepted', en_preparacion:'badge-delivery', listo:'badge-active', en_camino:'badge-delivery', entregado:'badge-done', cancelado:'badge-cancel' };
 const nextStatus   = { aceptado:'en_preparacion', en_preparacion:'listo', listo:'entregado' };
 const nextLabel    = { aceptado:'Iniciar preparación', en_preparacion:'Marcar listo', listo:'Marcar entregado' };
+
+var allOrders = [];
+var currentStatus = '';
+var page = 1;
+var perPage = 10;
+
+function renderPagination(total) {
+  var pages = Math.ceil(total/perPage);
+  var el = document.getElementById('pagination');
+  if (!el||pages<=1){if(el)el.innerHTML='';return;}
+  var html='<button class="page-btn" onclick="goPage('+(page-1)+')" '+(page===1?'disabled':'')+'>‹</button>';
+  for(var i=1;i<=pages;i++){
+    if(i===1||i===pages||(i>=page-2&&i<=page+2))html+='<button class="page-btn '+(i===page?'active':'')+'" onclick="goPage('+i+')">'+i+'</button>';
+    else if(i===page-3||i===page+3)html+='<span class="page-info">…</span>';
+  }
+  html+='<button class="page-btn" onclick="goPage('+(page+1)+')" '+(page===pages?'disabled':'')+'>›</button>';
+  html+='<span class="page-info">'+total+' pedidos</span>';
+  el.innerHTML=html;
+}
+
+function goPage(p){
+  var pages=Math.ceil(allOrders.length/perPage);
+  if(p<1||p>pages)return;
+  page=p;
+  renderOrders();
+  window.scrollTo(0,0);
+}
+
+function renderOrders() {
+  var pageData = allOrders.slice((page-1)*perPage, page*perPage);
+  var container = document.getElementById('ordersContainer');
+  renderPagination(allOrders.length);
+  if (!pageData.length) {
+    container.innerHTML = '<div class="empty-state"><p>No hay pedidos.</p></div>';
+    return;
+  }
+  container.innerHTML = pageData.map(renderOrder).join('');
+}
 
 async function loadOrders(status, tabBtn) {
   if (tabBtn) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); tabBtn.classList.add('active'); }
@@ -184,7 +223,13 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
 
 loadOrders('pendiente', null);
-setInterval(() => loadOrders('pendiente', null), 20000);
+setInterval(async function() {
+  // Silent refresh - keep current tab and page
+  const res = await APP.get('/orders' + (currentStatus ? '?status=' + currentStatus : ''));
+  if (!res?.success) return;
+  allOrders = res.data?.orders || [];
+  renderOrders();
+}, 20000);
 </script>
 
 <script>
