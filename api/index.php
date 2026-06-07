@@ -96,6 +96,11 @@ try {
                 CURLOPT_TIMEOUT        => 10,
                 CURLOPT_SSL_VERIFYPEER => false,
             ]);
+            // Debug: show what key is being used
+            if (isset($_GET['debug'])) {
+                Response::success(['key_defined' => defined('ONESIGNAL_API_KEY'), 'key_length' => defined('ONESIGNAL_API_KEY') ? strlen(ONESIGNAL_API_KEY) : 0, 'key_start' => defined('ONESIGNAL_API_KEY') ? substr(ONESIGNAL_API_KEY, 0, 20) : 'NOT DEFINED']);
+                break;
+            }
             $resp = curl_exec($ch);
             $err  = curl_error($ch);
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
