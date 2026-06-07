@@ -28,14 +28,14 @@ class ProductController {
         if (!$businessId) Response::error('business_id requerido', 400);
         if (empty($body['name'])) Response::error('Nombre requerido', 400);
 
-        $stmt = $this->db->prepare("INSERT INTO products_services (business_id, name, description, price, sort_order) VALUES (?,?,?,?,?)");
-        $stmt->execute([$businessId, $body['name'], $body['description'] ?? null, $body['price'] ?? null, $body['sort_order'] ?? 0]);
+        $stmt = $this->db->prepare("INSERT INTO products_services (business_id, name, description, price, sort_order, category_id) VALUES (?,?,?,?,?,?)");
+        $stmt->execute([$businessId, $body['name'], $body['description'] ?? null, $body['price'] ?? null, $body['sort_order'] ?? 0, $body['category_id'] ?? null]);
         Response::success(['id' => $this->db->lastInsertId()], 'Producto creado', 201);
     }
 
     public function update(int $id, array $body): void {
         AuthMiddleware::requireRole(['negocio', 'admin']);
-        $fields = ['name','description','price','is_available','sort_order'];
+        $fields = ['name','description','price','is_available','sort_order','category_id'];
         $sets = []; $params = [];
         foreach ($fields as $f) {
             if (array_key_exists($f, $body)) { $sets[] = "$f = ?"; $params[] = $body[$f]; }

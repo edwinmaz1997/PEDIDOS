@@ -264,7 +264,8 @@ async function init() {
   const biz = all.find(b => b.user_id == me.data.id) || all[0];
   if (!biz) { document.getElementById('productsContainer').innerHTML = '<div class="empty-state"><p>Primero crea tu negocio en <a href="perfil.html" style="color:var(--accent)">Mi Perfil</a>.</p></div>'; return; }
   bizId = biz.id;
-  loadProducts();
+  await loadCategories();
+  await loadProducts();
 }
 
 var allProducts = [];
@@ -372,6 +373,7 @@ async function saveProduct() {
     description: document.getElementById('p_description').value,
     price: document.getElementById('p_price').value || null,
     is_available: document.getElementById('p_available').checked ? 1 : 0,
+    category_id: document.getElementById('p_category').value || null,
   };
   if (photoUrl) payload.photo = photoUrl;
 
