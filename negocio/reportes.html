@@ -212,7 +212,7 @@ function showTab(tab) {
 
 // ── Load all orders ───────────────────────────────────────────
 async function loadAllOrders() {
-  var res = await fetch('/api/orders', { headers: { Authorization: 'Bearer ' + getToken() } }).then(function(r){ return r.json(); });
+  var res = await fetch('/api/orders?all=1', { headers: { Authorization: 'Bearer ' + getToken() } }).then(function(r){ return r.json(); });
   allOrders = res.data?.orders || [];
   return allOrders;
 }
