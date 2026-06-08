@@ -21,6 +21,7 @@ require_once __DIR__ . '/helpers/PushNotification.php';
 require_once __DIR__ . '/helpers/Mailer.php';
 require_once __DIR__ . '/controllers/ProductCategoryController.php';
 require_once __DIR__ . '/controllers/DeliveryZoneController.php';
+require_once __DIR__ . '/controllers/BusinessServiceController.php';
 require_once __DIR__ . '/controllers/CategoryController.php';
 
 // CORS
@@ -110,6 +111,17 @@ try {
             $ctrl      = new BusinessController();
             $photoCtrl = new PhotoController();
 
+            // /businesses/{id}/services
+            if ($id && $subAction === 'services') {
+                $svcCtrl = new BusinessServiceController();
+                if ($method === 'GET')                        $svcCtrl->index($id);
+                elseif ($method === 'POST')                   $svcCtrl->store($id, $body);
+                elseif ($method === 'PUT'    && $subId)       $svcCtrl->update($id, $subId, $body);
+                elseif ($method === 'DELETE' && $subId)       $svcCtrl->destroy($id, $subId);
+                else Response::notFound();
+                break;
+            }
+
             // /businesses/{id}/zones — business zone coverage
             if ($id && $subAction === 'zones') {
                 $zoneCtrl = new DeliveryZoneController();
@@ -127,6 +139,7 @@ try {
             }
             if ($action === 'search')       { $ctrl->search();                          break; }
             if ($action === 'by-category')  { $ctrl->byCategory((int)($parts[2]??0));   break; }
+            if ($action === 'mine')         { $ctrl->mine();                             break; }
             if ($method === 'GET'    && !$id)    $ctrl->index();
             elseif ($method === 'GET'    && $id) $ctrl->show($id);
             elseif ($method === 'POST'   && !$id)$ctrl->store($body);

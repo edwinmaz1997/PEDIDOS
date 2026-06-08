@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NuevaExpress">
+<link rel="apple-touch-icon" href="/assets/img/logo.jpg">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Servicios — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.svc-row { display:grid; grid-template-columns:1fr auto 140px; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border); background:white; }
+.svc-row:last-child { border-bottom:none; }
+.svc-row:hover { background:var(--off-white); }
+.svc-name { font-weight:600; font-size:.95rem; }
+.svc-desc { font-size:.8rem; color:var(--muted); margin-top:2px; }
+.svc-price { font-weight:700; color:var(--accent); font-size:.9rem; white-space:nowrap; }
+.svc-actions { display:flex; gap:6px; align-items:center; justify-content:flex-end; }
+.icon-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:6px 10px; cursor:pointer; font-size:.85rem; transition:var(--transition); }
+.icon-btn:hover { background:var(--off-white); }
+.icon-btn.danger:hover { background:#fdf0f0; border-color:var(--danger); color:var(--danger); }
+.modal-form { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:flex-end; justify-content:center; }
+@media(min-width:640px){ .modal-form { align-items:center; } }
+.modal-form-box { background:white; border-radius:20px 20px 0 0; padding:28px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; }
+@media(min-width:640px){ .modal-form-box { border-radius:20px; } }
+.switch { position:relative; width:44px; height:24px; }
+.switch input { opacity:0; width:0; height:0; }
+.slider { position:absolute; inset:0; background:var(--border); border-radius:24px; cursor:pointer; transition:.3s; }
+.slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
+input:checked + .slider { background:var(--success); }
+input:checked + .slider:before { transform:translateX(20px); }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.8rem;margin-top:4px" id="sidebarUser"></div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📋 Pedidos</a></li>
+      <li><a href="perfil.html">🏪 Mi Perfil</a></li>
+      <li><a href="servicios.html" class="active">🔧 Mis Servicios</a></li>
+      <li><a href="reportes.html">📊 Reportes</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <h1 class="page-title">🔧 Mis Servicios</h1>
+        <p style="color:var(--muted);font-size:.9rem">Los clientes verán estos servicios en tu perfil público</p>
+      </div>
+      <button class="btn-primary" onclick="openModal()">+ Agregar servicio</button>
+    </div>
+
+    <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden" id="servicesList">
+      <div class="loading-state"><div class="spinner"></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal agregar/editar -->
+<div class="modal-form" id="modal" style="display:none">
+  <div class="modal-form-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 id="modalTitle">Agregar servicio</h3>
+      <button onclick="closeModal()" style="background:var(--off-white);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nombre del servicio *</label>
+      <input type="text" id="f_name" placeholder="Ej: Cambio de aceite, Instalación eléctrica...">
+    </div>
+    <div class="form-group">
+      <label>Descripción <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+      <textarea id="f_desc" rows="3" placeholder="Detalla en qué consiste el servicio..."></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Precio desde (Q) <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <input type="number" id="f_price_from" min="0" step="1" placeholder="50">
+      </div>
+      <div class="form-group">
+        <label>Precio hasta (Q) <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <input type="number" id="f_price_to" min="0" step="1" placeholder="200">
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+      <label class="switch"><input type="checkbox" id="f_available" checked><span class="slider"></span></label>
+      <span style="font-size:.9rem">Servicio disponible</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-ghost" onclick="closeModal()" style="flex:1;justify-content:center;padding:12px">Cancelar</button>
+      <button class="btn-primary" onclick="saveService()" id="saveBtn" style="flex:2;justify-content:center;padding:12px">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/js/app.js"></script>
+<script>
+const API = '/api';
+const user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+if (!localStorage.getItem('nuevaexpress_token') || user.role !== 'negocio') window.location.href = '/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name || '';
+
+let businessId = null;
+let editingId  = null;
+
+async function init() {
+  const res = await fetch(API + '/businesses/mine', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+  const data = await res.json();
+  if (!data.success) { window.location.href = 'crear-negocio.html'; return; }
+  businessId = data.data.id;
+  await loadServices();
+}
+
+async function loadServices() {
+  const res  = await fetch(API + '/businesses/' + businessId + '/services');
+  const data = await res.json();
+  const services = data.data || [];
+
+  if (!services.length) {
+    document.getElementById('servicesList').innerHTML = '<div class="empty-state" style="padding:40px;text-align:center"><p style="color:var(--muted)">Aún no tienes servicios. Agrega el primero.</p></div>';
+    return;
+  }
+
+  document.getElementById('servicesList').innerHTML = services.map(function(s) {
+    var price = '';
+    if (s.price_from && s.price_to)   price = 'Q'+parseFloat(s.price_from).toFixed(0)+' – Q'+parseFloat(s.price_to).toFixed(0);
+    else if (s.price_from)            price = 'Desde Q'+parseFloat(s.price_from).toFixed(0);
+    else if (s.price_to)              price = 'Hasta Q'+parseFloat(s.price_to).toFixed(0);
+    else                              price = 'Precio a consultar';
+
+    return '<div class="svc-row">' +
+      '<div>' +
+        '<div class="svc-name">' + esc(s.name) + (s.is_available ? '' : ' <span style="font-size:.75rem;color:var(--muted);font-weight:400">(no disponible)</span>') + '</div>' +
+        (s.description ? '<div class="svc-desc">' + esc(s.description) + '</div>' : '') +
+      '</div>' +
+      '<div class="svc-price">' + price + '</div>' +
+      '<div class="svc-actions">' +
+        '<button class="icon-btn" onclick="editService(' + JSON.stringify(s).replace(/"/g,'&quot;') + ')">✏️</button>' +
+        '<button class="icon-btn danger" onclick="deleteService(' + s.id + ')">🗑️</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function openModal(s) {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'Agregar servicio';
+  document.getElementById('f_name').value      = '';
+  document.getElementById('f_desc').value      = '';
+  document.getElementById('f_price_from').value = '';
+  document.getElementById('f_price_to').value   = '';
+  document.getElementById('f_available').checked = true;
+  document.getElementById('modal').style.display = 'flex';
+  document.getElementById('f_name').focus();
+}
+
+function editService(s) {
+  editingId = s.id;
+  document.getElementById('modalTitle').textContent = 'Editar servicio';
+  document.getElementById('f_name').value       = s.name || '';
+  document.getElementById('f_desc').value       = s.description || '';
+  document.getElementById('f_price_from').value = s.price_from || '';
+  document.getElementById('f_price_to').value   = s.price_to || '';
+  document.getElementById('f_available').checked = s.is_available == 1;
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+async function saveService() {
+  var name = document.getElementById('f_name').value.trim();
+  if (!name) { alert('El nombre del servicio es requerido'); return; }
+
+  var btn = document.getElementById('saveBtn');
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+
+  var payload = {
+    name,
+    description:  document.getElementById('f_desc').value.trim(),
+    price_from:   document.getElementById('f_price_from').value || null,
+    price_to:     document.getElementById('f_price_to').value || null,
+    is_available: document.getElementById('f_available').checked ? 1 : 0
+  };
+
+  try {
+    var url    = API + '/businesses/' + businessId + '/services' + (editingId ? '/' + editingId : '');
+    var method = editingId ? 'PUT' : 'POST';
+    var res    = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') }, body: JSON.stringify(payload) });
+    var data   = await res.json();
+    if (data.success) { closeModal(); await loadServices(); }
+    else alert(data.message || 'Error al guardar');
+  } catch(e) { alert('Error de conexión'); }
+  finally { btn.textContent = 'Guardar'; btn.disabled = false; }
+}
+
+async function deleteService(id) {
+  if (!confirm('¿Eliminar este servicio?')) return;
+  await fetch(API + '/businesses/' + businessId + '/services/' + id, {
+    method: 'DELETE', headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') }
+  });
+  await loadServices();
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
+function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+
+init();
+</script>
+<script src="/assets/js/pwa.js"></script>
+</body>
+</html>

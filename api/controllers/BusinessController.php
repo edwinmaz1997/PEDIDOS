@@ -50,6 +50,16 @@ class BusinessController {
     }
 
     // GET /api/businesses/{id}
+    // GET /api/businesses/mine
+    public function mine(): void {
+        $user = AuthMiddleware::requireRole(["negocio", "admin"]);
+        $stmt = $this->db->prepare("SELECT b.*, bc.name as category_name FROM businesses b JOIN business_categories bc ON b.category_id = bc.id WHERE b.user_id = ? LIMIT 1");
+        $stmt->execute([$user["id"]]);
+        $biz = $stmt->fetch();
+        if (!$biz) Response::notFound("No tienes un negocio registrado");
+        Response::success($biz);
+    }
+
     public function show(int $id): void {
         $stmt = $this->db->prepare("
             SELECT b.*, bc.name as category_name, bc.icon as category_icon,
@@ -151,17 +161,20 @@ class BusinessController {
             $ownerId = (int)$body['owner_user_id'];
         }
 
+        $businessType = in_array($body['business_type'] ?? '', ['pedidos','servicios']) ? $body['business_type'] : 'pedidos';
+
         $stmt = $this->db->prepare("
             INSERT INTO businesses
-                (user_id, category_id, name, slug, description, what_we_offer,
+                (user_id, category_id, business_type, name, slug, description, what_we_offer,
                  address, city, zone, phone, whatsapp, email, website,
                  latitude, longitude, google_maps_url, opening_hours,
                  accepts_delivery, delivery_fee, service_fee, is_active, is_verified)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         ");
         $stmt->execute([
             $ownerId,
             (int)$body['category_id'],
+            $businessType,
             $body['name'],
             $slug,
             $body['description'] ?? null,
@@ -205,7 +218,7 @@ class BusinessController {
 
         $allowed = ['category_id','name','description','what_we_offer','address','city','zone',
                     'phone','whatsapp','email','website','latitude','longitude','google_maps_url',
-                    'opening_hours','accepts_delivery','is_active','logo','cover_photo','is_verified','owner_user_id'];
+                    'opening_hours','accepts_delivery','is_active','logo','cover_photo','is_verified','owner_user_id','business_type'];
         $sets = [];
         $params = [];
         foreach ($allowed as $field) {

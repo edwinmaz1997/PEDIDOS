@@ -58,17 +58,32 @@
       <div class="step" id="step3"><div class="step-num">3</div><span>Ubicación</span></div>
     </div>
 
-    <!-- Step 1 -->
+    <!-- Step 1 -->\
     <div id="panel1">
       <div class="form-card">
+        <h3>Tipo de negocio</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+          <div id="type_pedidos" onclick="setBusinessType('pedidos')" style="border:2px solid var(--accent);border-radius:12px;padding:20px;cursor:pointer;text-align:center;background:#f0f7ff">
+            <div style="font-size:2rem;margin-bottom:8px">🛒</div>
+            <div style="font-weight:700;font-size:.95rem">Pedidos</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:4px">Restaurantes, tiendas, farmacias — con productos y carrito</div>
+          </div>
+          <div id="type_servicios" onclick="setBusinessType('servicios')" style="border:2px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;text-align:center;background:white">
+            <div style="font-size:2rem;margin-bottom:8px">🔧</div>
+            <div style="font-weight:700;font-size:.95rem">Servicios</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:4px">Mecánicos, plomeros, electricistas — perfil de contacto</div>
+          </div>
+        </div>
         <h3>Información del negocio</h3>
         <div class="form-group"><label>Nombre del negocio *</label><input type="text" id="f_name" placeholder="Ej: Restaurante El Sabor"></div>
         <div class="form-group"><label>Categoría *</label><select id="f_category"><option value="">Selecciona...</option></select></div>
         <div class="form-group"><label>Descripción</label><textarea id="f_description" rows="3" placeholder="Cuéntanos sobre tu negocio..."></textarea></div>
         <div class="form-group"><label>¿Qué ofrecemos? <span style="font-weight:400;color:var(--muted)">(ej: ceviches, hamburguesas, servicio a domicilio)</span></label><textarea id="f_what_we_offer" rows="2" placeholder="Lista tus productos o servicios principales..."></textarea></div>
-        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem">
-          <input type="checkbox" id="f_delivery" style="width:16px;height:16px"> Mi negocio ofrece delivery (tarifa Q15)
-        </label>
+        <div id="deliveryOption">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9rem">
+            <input type="checkbox" id="f_delivery" style="width:16px;height:16px"> Mi negocio ofrece delivery (tarifa Q15)
+          </label>
+        </div>
       </div>
       <button class="btn-primary" onclick="goStep(2)" style="padding:12px 32px">Siguiente →</button>
     </div>
@@ -143,6 +158,20 @@ var adminUser  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
 if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'negocio') { window.location.href = '/cliente/login.html'; }
 document.getElementById('sidebarUser').textContent = APP.user().name || '';
 
+var selectedBusinessType = 'pedidos';
+
+function setBusinessType(type) {
+  selectedBusinessType = type;
+  var pedidos  = document.getElementById('type_pedidos');
+  var servicios = document.getElementById('type_servicios');
+  pedidos.style.border   = type === 'pedidos'  ? '2px solid var(--accent)' : '2px solid var(--border)';
+  pedidos.style.background = type === 'pedidos' ? '#f0f7ff' : 'white';
+  servicios.style.border = type === 'servicios' ? '2px solid var(--accent)' : '2px solid var(--border)';
+  servicios.style.background = type === 'servicios' ? '#f0f7ff' : 'white';
+  // Ocultar delivery si es servicios
+  document.getElementById('deliveryOption').style.display = type === 'pedidos' ? 'block' : 'none';
+}
+
 async function init() {
   // If already has business, redirect to profile
   const me = await APP.fetch('/auth/me');
@@ -189,9 +218,10 @@ async function create() {
 
   const payload = {
     name, category_id: cat,
+    business_type: selectedBusinessType,
     description:   document.getElementById('f_description').value,
     what_we_offer: document.getElementById('f_what_we_offer').value,
-    accepts_delivery: document.getElementById('f_delivery').checked ? 1 : 0,
+    accepts_delivery: selectedBusinessType === 'pedidos' && document.getElementById('f_delivery').checked ? 1 : 0,
     phone:    document.getElementById('f_phone').value,
     whatsapp: document.getElementById('f_whatsapp').value,
     email:    document.getElementById('f_email').value,

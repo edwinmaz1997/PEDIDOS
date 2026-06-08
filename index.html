@@ -287,36 +287,74 @@ async function openBusiness(id) {
           ${b.address ? `<div class="meta-item">📍 <span>${escHtml(b.address)}${b.zone ? ', ' + escHtml(b.zone) : ''}</span></div>` : ''}
           ${b.phone ? `<div class="meta-item">📞 <a href="tel:${escHtml(b.phone)}">${escHtml(b.phone)}</a></div>` : ''}
           ${b.email ? `<div class="meta-item">✉️ <a href="mailto:${escHtml(b.email)}">${escHtml(b.email)}</a></div>` : ''}
-          ${b.accepts_delivery ? `<div class="meta-item">🛵 <span>Delivery disponible — Q${b.delivery_fee} + Q${b.service_fee} servicio</span></div>` : ''}
+        ${b.accepts_delivery && b.business_type !== 'servicios' ? `<div class="meta-item">🛵 <span>Delivery disponible</span></div>` : ''}
         </div>
         ${b.latitude && b.longitude ? `
           <a href="https://www.google.com/maps?q=${b.latitude},${b.longitude}" target="_blank" class="btn-maps">
             🗺️ Ver en Google Maps
           </a>` : b.google_maps_url ? `<a href="${escHtml(b.google_maps_url)}" target="_blank" class="btn-maps">🗺️ Ver en Google Maps</a>` : ''}
-        ${products.length ? `
-          <div class="modal-section">
-            <h4>Productos / Servicios</h4>
-            <div class="products-grid">
-              ${products.map(p => `
-                <div class="product-card">
-                  ${p.photo ? `<img src="${escHtml(p.photo)}" alt="">` : ''}
-                  <div class="product-info">
-                    <span class="product-name">${escHtml(p.name)}</span>
-                    ${p.price ? `<span class="product-price">Q${parseFloat(p.price).toFixed(2)}</span>` : ''}
-                  </div>
-                </div>
-              `).join('')}
-            </div>
+        ${b.business_type === 'servicios' ? `
+          <div class="modal-section" id="servicesSection">
+            <h4>🔧 Servicios que ofrecemos</h4>
+            <div id="servicesList"><div class="loading-state" style="padding:20px"><div class="spinner"></div></div></div>
           </div>
-        ` : ''}
-        <a href="cliente/pedido.html?business=${b.id}" class="btn-order">
-          🛒 Hacer un Pedido
-        </a>
+          <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+            ${b.phone ? `<a href="tel:${escHtml(b.phone)}" class="btn-order" style="flex:1;text-align:center;text-decoration:none">📞 Llamar ahora</a>` : ''}
+            ${b.whatsapp ? `<a href="https://wa.me/${escHtml(b.whatsapp.replace(/\D/g,''))}?text=${encodeURIComponent('Hola, encontré tus servicios en NuevaExpress y me gustaría más información.')}" target="_blank" class="btn-order" style="flex:1;text-align:center;text-decoration:none;background:#25d366">💬 WhatsApp</a>` : ''}
+          </div>
+        ` : `
+          ${products.length ? `
+            <div class="modal-section">
+              <h4>Productos / Servicios</h4>
+              <div class="products-grid">
+                ${products.map(p => `
+                  <div class="product-card">
+                    ${p.photo ? `<img src="${escHtml(p.photo)}" alt="">` : ''}
+                    <div class="product-info">
+                      <span class="product-name">${escHtml(p.name)}</span>
+                      ${p.price ? `<span class="product-price">Q${parseFloat(p.price).toFixed(2)}</span>` : ''}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+          <a href="cliente/pedido.html?business=${b.id}" class="btn-order">
+            🛒 Hacer un Pedido
+          </a>
+        `}
       </div>
     `;
   } catch(e) {
     content.innerHTML = '<div class="empty-state"><p>Error cargando negocio.</p></div>';
   }
+
+  // Si es negocio de servicios, cargar sus servicios
+  try {
+    const b = (await (await fetch(`${API}/businesses/${id}`)).json()).data;
+    if (b && b.business_type === 'servicios') {
+      const sRes  = await fetch(`${API}/businesses/${id}/services`);
+      const sData = await sRes.json();
+      const svcs  = (sData.data || []).filter(s => s.is_available);
+      const el = document.getElementById('servicesList');
+      if (!el) return;
+      if (!svcs.length) { el.innerHTML = '<p style="color:var(--muted);font-size:.9rem">Servicios disponibles — contáctanos para más info</p>'; return; }
+      el.innerHTML = svcs.map(s => {
+        var price = '';
+        if (s.price_from && s.price_to) price = `<span style="color:var(--accent);font-weight:700;font-size:.85rem">Q${parseFloat(s.price_from).toFixed(0)} – Q${parseFloat(s.price_to).toFixed(0)}</span>`;
+        else if (s.price_from) price = `<span style="color:var(--accent);font-weight:700;font-size:.85rem">Desde Q${parseFloat(s.price_from).toFixed(0)}</span>`;
+        return `<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <div>
+              <div style="font-weight:600">${escHtml(s.name)}</div>
+              ${s.description ? `<div style="font-size:.82rem;color:var(--muted);margin-top:2px">${escHtml(s.description)}</div>` : ''}
+            </div>
+            ${price}
+          </div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {}
 }
 
 function closeModal() {

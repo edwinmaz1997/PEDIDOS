@@ -364,3 +364,21 @@ CREATE TABLE IF NOT EXISTS email_verifications (
     INDEX idx_email (email),
     INDEX idx_expires (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Business type (pedidos / servicios)
+ALTER TABLE businesses ADD COLUMN IF NOT EXISTS business_type ENUM('pedidos','servicios') DEFAULT 'pedidos' AFTER category_id;
+
+-- Services offered by service-type businesses
+CREATE TABLE IF NOT EXISTS business_services (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    business_id INT NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    description TEXT,
+    price_from DECIMAL(10,2) DEFAULT NULL COMMENT 'Precio referencial desde',
+    price_to DECIMAL(10,2) DEFAULT NULL COMMENT 'Precio referencial hasta',
+    is_available TINYINT(1) DEFAULT 1,
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,
+    INDEX idx_business (business_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -44,8 +44,9 @@
     <ul class="sidebar-nav">
       <li><a href="index.html" class="active">📋 Pedidos</a></li>
       <li><a href="perfil.html">🏪 Mi Perfil</a></li>
-      <li><a href="productos.html">📦 Productos</a></li>
-      <li><a href="zonas-entrega.html">🗺️ Zonas de Entrega</a></li>
+      <li id="navProductos"><a href="productos.html">📦 Productos</a></li>
+      <li id="navServicios" style="display:none"><a href="servicios.html">🔧 Mis Servicios</a></li>
+      <li id="navZonas"><a href="zonas-entrega.html">🗺️ Zonas de Entrega</a></li>
       <li><a href="reportes.html">📊 Reportes</a></li>
       <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
     </ul>
@@ -90,6 +91,20 @@ const user  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
 var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
 if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'negocio') window.location.href = '/cliente/login.html';
 document.getElementById('sidebarUser').textContent = user.name || 'Mi Negocio';
+
+// Adaptar sidebar según tipo de negocio
+(async function() {
+  try {
+    const res = await fetch(API + '/businesses/mine', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+    const data = await res.json();
+    const biz = data.data;
+    if (biz && biz.business_type === 'servicios') {
+      document.getElementById('navProductos').style.display = 'none';
+      document.getElementById('navServicios').style.display = 'block';
+      document.getElementById('navZonas').style.display = 'none';
+    }
+  } catch(e) {}
+})();
 
 const statusLabels = { pendiente:'⏳ Pendiente', aceptado:'✅ Aceptado', en_preparacion:'👨‍🍳 En preparación', listo:'📦 Listo', en_camino:'🛵 En camino', entregado:'✔ Entregado', cancelado:'✕ Cancelado' };
 const statusBadge  = { pendiente:'badge-pending', aceptado:'badge-accepted', en_preparacion:'badge-delivery', listo:'badge-active', en_camino:'badge-delivery', entregado:'badge-done', cancelado:'badge-cancel' };
