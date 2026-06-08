@@ -17,24 +17,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.cat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-bottom:24px; }
-.cat-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:20px; display:flex; align-items:center; gap:14px; }
+.cat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+.cat-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:18px 20px; display:flex; align-items:center; gap:14px; transition:var(--transition); }
+.cat-card:hover { box-shadow:var(--shadow); }
 .cat-icon-wrap { width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
-.cat-info { flex:1; }
 .cat-name { font-weight:700; font-size:1rem; }
 .cat-count { font-size:.8rem; color:var(--muted); margin-top:2px; }
-.cat-actions { display:flex; gap:6px; flex-shrink:0; }
+.cat-actions { display:flex; gap:6px; flex-shrink:0; margin-left:auto; }
 .icon-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:6px 10px; cursor:pointer; font-size:.85rem; transition:var(--transition); }
 .icon-btn:hover { background:var(--off-white); }
 .icon-btn.danger:hover { background:#fdf0f0; border-color:var(--danger); color:var(--danger); }
+.inactive-badge { background:#fdf0f0; color:var(--danger); font-size:.72rem; padding:2px 8px; border-radius:10px; font-weight:600; margin-left:6px; }
+/* Modal */
 .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; }
-.modal-box { background:white; border-radius:20px; padding:28px; width:100%; max-width:440px; }
-.color-picker-wrap { display:flex; gap:10px; align-items:center; }
-.color-preview { width:40px; height:40px; border-radius:8px; border:1px solid var(--border); flex-shrink:0; }
+.modal-box { background:white; border-radius:20px; padding:28px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; }
+/* Color swatches */
+.color-swatches { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.color-swatch { width:30px; height:30px; border-radius:8px; cursor:pointer; border:3px solid transparent; transition:.15s; }
+.color-swatch.selected { border-color:var(--charcoal); transform:scale(1.15); }
+/* Icon options */
 .icon-options { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
-.icon-opt { padding:8px 12px; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; font-size:1rem; transition:var(--transition); background:white; }
+.icon-opt { width:44px; height:44px; border:1.5px solid var(--border); border-radius:10px; cursor:pointer; font-size:1.2rem; background:white; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+.icon-opt:hover { background:var(--off-white); }
 .icon-opt.selected { border-color:var(--blue); background:#f0f7ff; }
-.inactive-badge { background:#fdf0f0; color:var(--danger); font-size:.72rem; padding:2px 8px; border-radius:10px; font-weight:600; }
 </style>
 </head>
 <body>
@@ -63,7 +68,6 @@
       <div class="page-header" style="margin:0"><h1>🏷️ Categorías</h1><p>Gestiona las categorías del directorio</p></div>
       <button class="btn-primary" onclick="openModal()">+ Nueva categoría</button>
     </div>
-
     <div id="catGrid" class="cat-grid">
       <div class="loading-state" style="grid-column:1/-1"><div class="spinner"></div></div>
     </div>
@@ -77,39 +81,32 @@
       <h3 id="modalTitle">Nueva Categoría</h3>
       <button onclick="closeModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)">✕</button>
     </div>
+
     <div class="form-group">
       <label>Nombre *</label>
       <input type="text" id="c_name" placeholder="Ej: Restaurantes">
     </div>
+
     <div class="form-group">
       <label>Color</label>
-      <div class="color-picker-wrap">
-        <input type="color" id="c_color" value="#4A90D9" style="width:60px;height:38px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;padding:2px" onchange="updateColorPreview()">
-        <div class="color-preview" id="colorPreview" style="background:#4A90D9"></div>
-        <div style="font-size:.82rem;color:var(--muted)">Color del chip en el directorio</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <input type="color" id="c_color" value="#4A90D9" style="width:56px;height:38px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:2px" oninput="syncColorSwatch()">
+        <div id="colorPreview" style="width:38px;height:38px;border-radius:8px;border:1px solid var(--border);background:#4A90D9"></div>
+        <span style="font-size:.82rem;color:var(--muted)">Color del chip en el directorio</span>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-        ${['#4A90D9','#2ECC71','#F5C518','#7B4FBF','#FF6B6B','#FF8C42','#00B4D8','#E63946','#2DC653','#FF6B9D'].map(c=>`<div onclick="setColor('${c}')" style="width:28px;height:28px;border-radius:6px;background:${c};cursor:pointer;border:2px solid transparent" title="${c}"></div>`).join('')}
-      </div>
+      <div class="color-swatches" id="colorSwatches"></div>
     </div>
+
     <div class="form-group">
       <label>Ícono</label>
-      <div class="icon-options" id="iconOptions">
-        ${[
-          {k:'utensils',e:'🍴'},{k:'pills',e:'💊'},{k:'shopping-cart',e:'🛒'},
-          {k:'wrench',e:'🔧'},{k:'shirt',e:'👕'},{k:'laptop',e:'💻'},
-          {k:'heart',e:'💅'},{k:'store',e:'🏪'},{k:'car',e:'🚗'},
-          {k:'coffee',e:'☕'},{k:'book',e:'📚'},{k:'scissors',e:'✂️'},
-          {k:'pizza',e:'🍕'},{k:'flower',e:'🌸'},{k:'gym',e:'💪'},
-          {k:'camera',e:'📷'},{k:'music',e:'🎵'},{k:'pet',e:'🐾'}
-        ].map(i=>`<button class="icon-opt" data-key="${i.k}" onclick="selectIcon('${i.k}',this)">${i.e}</button>`).join('')}
-      </div>
+      <div class="icon-options" id="iconOptions"></div>
       <input type="hidden" id="c_icon" value="store">
     </div>
+
     <div id="modalError" style="color:var(--danger);font-size:.85rem;margin-bottom:12px;display:none"></div>
-    <div style="display:flex;gap:10px">
+    <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn-primary" onclick="saveCategory()" id="saveBtn" style="flex:1;justify-content:center;padding:12px">Guardar</button>
-      <button class="btn-ghost" onclick="closeModal()" style="padding:12px 20px">Cancelar</button>
+      <button class="btn-ghost" onclick="closeModal()" style="padding:12px 24px">Cancelar</button>
     </div>
     <input type="hidden" id="c_id">
   </div>
@@ -125,17 +122,62 @@
     if(tk){ localStorage.setItem('nuevaexpress_token',tk); if(us)localStorage.setItem('nuevaexpress_user',us); history.replaceState(null,'',window.location.pathname); }
   }
 })();
+
 var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
 if(!localStorage.getItem('nuevaexpress_token')||adminUser.role!=='admin') window.location.href='/cliente/login.html';
 function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
 
 var cats = [];
-var iconEmojis = {
-  'utensils':'🍴','pills':'💊','shopping-cart':'🛒','wrench':'🔧','shirt':'👕',
-  'laptop':'💻','heart':'💅','store':'🏪','car':'🚗','coffee':'☕',
-  'book':'📚','scissors':'✂️','pizza':'🍕','flower':'🌸','gym':'💪',
-  'camera':'📷','music':'🎵','pet':'🐾'
-};
+
+var COLORS = ['#4A90D9','#2ECC71','#F5C518','#7B4FBF','#FF6B6B','#FF8C42','#00B4D8','#E63946','#2DC653','#FF6B9D','#1ABC9C','#F39C12'];
+var ICONS = [
+  {k:'utensils',e:'🍴'},{k:'pills',e:'💊'},{k:'shopping-cart',e:'🛒'},
+  {k:'wrench',e:'🔧'},{k:'shirt',e:'👕'},{k:'laptop',e:'💻'},
+  {k:'heart',e:'💅'},{k:'store',e:'🏪'},{k:'car',e:'🚗'},
+  {k:'coffee',e:'☕'},{k:'book',e:'📚'},{k:'scissors',e:'✂️'},
+  {k:'pizza',e:'🍕'},{k:'flower',e:'🌸'},{k:'gym',e:'💪'},
+  {k:'camera',e:'📷'},{k:'music',e:'🎵'},{k:'pet',e:'🐾'}
+];
+var iconMap = {};
+ICONS.forEach(function(i){ iconMap[i.k] = i.e; });
+
+// Render color swatches
+function renderSwatches(selected) {
+  var wrap = document.getElementById('colorSwatches');
+  wrap.innerHTML = COLORS.map(function(c) {
+    return '<div class="color-swatch' + (c === selected ? ' selected' : '') + '" style="background:' + c + '" onclick="setColor(\'' + c + '\')" title="' + c + '"></div>';
+  }).join('');
+}
+
+// Render icon options
+function renderIcons(selected) {
+  var wrap = document.getElementById('iconOptions');
+  wrap.innerHTML = ICONS.map(function(i) {
+    return '<button class="icon-opt' + (i.k === selected ? ' selected' : '') + '" data-key="' + i.k + '" onclick="selectIcon(\'' + i.k + '\',this)" title="' + i.k + '">' + i.e + '</button>';
+  }).join('');
+}
+
+function setColor(color) {
+  document.getElementById('c_color').value = color;
+  document.getElementById('colorPreview').style.background = color;
+  document.querySelectorAll('.color-swatch').forEach(function(s){
+    s.classList.toggle('selected', s.title === color);
+  });
+}
+
+function syncColorSwatch() {
+  var color = document.getElementById('c_color').value;
+  document.getElementById('colorPreview').style.background = color;
+  document.querySelectorAll('.color-swatch').forEach(function(s){
+    s.classList.toggle('selected', s.title === color);
+  });
+}
+
+function selectIcon(key, btn) {
+  document.querySelectorAll('.icon-opt').forEach(function(b){ b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  document.getElementById('c_icon').value = key;
+}
 
 async function loadCats() {
   var res = await fetch('/api/admin/categories', {
@@ -147,19 +189,23 @@ async function loadCats() {
 
 function renderCats() {
   var grid = document.getElementById('catGrid');
-  if (!cats.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>No hay categorías.</p></div>'; return; }
+  if (!cats.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>No hay categorías. Crea la primera.</p></div>';
+    return;
+  }
   grid.innerHTML = cats.map(function(c) {
-    var emoji = iconEmojis[c.icon] || '🏪';
+    var emoji = iconMap[c.icon] || '🏪';
+    var color = c.color || '#4A90D9';
     return '<div class="cat-card">' +
-      '<div class="cat-icon-wrap" style="background:' + esc(c.color) + '20;color:' + esc(c.color) + '">' + emoji + '</div>' +
-      '<div class="cat-info">' +
-        '<div class="cat-name">' + esc(c.name) + (!c.is_active ? ' <span class="inactive-badge">Inactiva</span>' : '') + '</div>' +
-        '<div class="cat-count">' + (c.biz_count||0) + ' negocio' + (c.biz_count!=1?'s':'') + '</div>' +
+      '<div class="cat-icon-wrap" style="background:' + color + '22;color:' + color + '">' + emoji + '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div class="cat-name">' + esc(c.name) + (!c.is_active ? '<span class="inactive-badge">Inactiva</span>' : '') + '</div>' +
+        '<div class="cat-count">' + (c.biz_count||0) + ' negocio' + ((c.biz_count||0)!==1?'s':'') + '</div>' +
       '</div>' +
       '<div class="cat-actions">' +
         '<button class="icon-btn" onclick="openModal(' + c.id + ')" title="Editar">✏️</button>' +
         '<button class="icon-btn" onclick="toggleActive(' + c.id + ',' + c.is_active + ')" title="' + (c.is_active?'Desactivar':'Activar') + '">' + (c.is_active?'⏸':'▶') + '</button>' +
-        '<button class="icon-btn danger" onclick="deletecat(' + c.id + ',\'' + esc(c.name) + '\')" title="Eliminar">🗑️</button>' +
+        '<button class="icon-btn danger" onclick="deleteCat(' + c.id + ',\'' + esc(c.name) + '\')" title="Eliminar">🗑️</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -167,37 +213,22 @@ function renderCats() {
 
 function openModal(id) {
   var c = id ? cats.find(function(x){ return x.id==id; }) : null;
+  var color = c ? (c.color||'#4A90D9') : '#4A90D9';
+  var icon  = c ? (c.icon||'store') : 'store';
   document.getElementById('modalTitle').textContent = c ? 'Editar Categoría' : 'Nueva Categoría';
   document.getElementById('c_id').value    = id || '';
   document.getElementById('c_name').value  = c ? c.name : '';
-  document.getElementById('c_color').value = c ? c.color : '#4A90D9';
-  document.getElementById('c_icon').value  = c ? c.icon : 'store';
-  updateColorPreview();
-  // Select icon
-  document.querySelectorAll('.icon-opt').forEach(function(b){ b.classList.remove('selected'); });
-  var sel = document.querySelector('.icon-opt[data-key="' + (c?c.icon:'store') + '"]');
-  if (sel) sel.classList.add('selected');
+  document.getElementById('c_color').value = color;
+  document.getElementById('colorPreview').style.background = color;
+  document.getElementById('c_icon').value  = icon;
   document.getElementById('modalError').style.display = 'none';
+  renderSwatches(color);
+  renderIcons(icon);
   document.getElementById('catModal').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('c_name').focus(); }, 100);
 }
 
 function closeModal() { document.getElementById('catModal').style.display = 'none'; }
-
-function updateColorPreview() {
-  var color = document.getElementById('c_color').value;
-  document.getElementById('colorPreview').style.background = color;
-}
-
-function setColor(color) {
-  document.getElementById('c_color').value = color;
-  updateColorPreview();
-}
-
-function selectIcon(key, btn) {
-  document.querySelectorAll('.icon-opt').forEach(function(b){ b.classList.remove('selected'); });
-  btn.classList.add('selected');
-  document.getElementById('c_icon').value = key;
-}
 
 async function saveCategory() {
   var id    = document.getElementById('c_id').value;
@@ -212,13 +243,10 @@ async function saveCategory() {
 
   btn.textContent = 'Guardando...'; btn.disabled = true;
 
-  var url    = id ? '/api/admin/categories/' + id : '/api/admin/categories';
-  var method = id ? 'PUT' : 'POST';
-
-  var res = await fetch(url, {
-    method: method,
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
-    body: JSON.stringify({ name: name, color: color, icon: icon })
+  var res = await fetch(id ? '/api/admin/categories/'+id : '/api/admin/categories', {
+    method: id ? 'PUT' : 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken() },
+    body: JSON.stringify({ name, color, icon })
   }).then(function(r){ return r.json(); });
 
   if (res.success) {
@@ -226,27 +254,27 @@ async function saveCategory() {
     closeModal();
     loadCats();
   } else {
-    errEl.textContent = res.message || 'Error';
+    errEl.textContent = res.message || 'Error al guardar';
     errEl.style.display = 'block';
   }
   btn.textContent = 'Guardar'; btn.disabled = false;
 }
 
 async function toggleActive(id, current) {
-  var res = await fetch('/api/admin/categories/' + id, {
+  var res = await fetch('/api/admin/categories/'+id, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken() },
     body: JSON.stringify({ is_active: current ? 0 : 1 })
   }).then(function(r){ return r.json(); });
   if (res.success) { APP.toast(current ? 'Categoría desactivada' : 'Categoría activada'); loadCats(); }
   else APP.toast(res.message||'Error','error');
 }
 
-async function deletecat(id, name) {
+async function deleteCat(id, name) {
   if (!confirm('¿Eliminar la categoría "' + name + '"?')) return;
-  var res = await fetch('/api/admin/categories/' + id, {
+  var res = await fetch('/api/admin/categories/'+id, {
     method: 'DELETE',
-    headers: { 'Authorization': 'Bearer ' + getToken() }
+    headers: { 'Authorization':'Bearer '+getToken() }
   }).then(function(r){ return r.json(); });
   if (res.success) { APP.toast('Categoría eliminada'); loadCats(); }
   else APP.toast(res.message||'Error','error');
@@ -258,7 +286,6 @@ function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=documen
 
 loadCats();
 </script>
-<script>var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();</script>
 <script src="/assets/js/pwa.js"></script>
 </body>
 </html>
