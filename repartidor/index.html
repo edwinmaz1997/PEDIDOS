@@ -175,6 +175,17 @@ if (!localStorage.getItem('nuevaexpress_token') || user.role !== 'repartidor') w
 document.getElementById('sidebarUser').textContent = user.name || 'Repartidor';
 function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
 
+// Forzar vinculación OneSignal con el uid del repartidor
+if (user.id) {
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(function(OneSignal) {
+    OneSignal.login(String(user.id));
+    OneSignal.User.addTag('role', 'repartidor');
+    OneSignal.User.addTag('name', user.name || '');
+    console.log('OneSignal login repartidor uid=' + user.id);
+  });
+}
+
 var allDeliveries = [];
 var filtered = [];
 var page = 1;
