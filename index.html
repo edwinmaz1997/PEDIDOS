@@ -238,7 +238,7 @@ function renderCard(b) {
     <article class="biz-card" onclick="openBusiness(${b.id})">
       <div class="card-photo" style="background-image:url('${escHtml(photo)}')">
         <span class="card-badge" style="background:${escHtml(b.category_color || '#888')}">${escHtml(b.category_name || '')}</span>
-        ${b.accepts_delivery ? '<span class="card-delivery">🛵 Delivery</span>' : ''}
+        ${b.business_type === 'delivery' ? '<span class="card-delivery" style="background:#FF8C42">🛵 Solo Delivery</span>' : b.accepts_delivery ? '<span class="card-delivery">🛵 Delivery</span>' : ''}
       </div>
       <div class="card-body">
         <h3>${escHtml(b.name)}</h3>

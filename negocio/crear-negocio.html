@@ -62,16 +62,21 @@
     <div id="panel1">
       <div class="form-card">
         <h3>Tipo de negocio</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
-          <div id="type_pedidos" onclick="setBusinessType('pedidos')" style="border:2px solid var(--accent);border-radius:12px;padding:20px;cursor:pointer;text-align:center;background:#f0f7ff">
-            <div style="font-size:2rem;margin-bottom:8px">🛒</div>
-            <div style="font-weight:700;font-size:.95rem">Pedidos</div>
-            <div style="font-size:.78rem;color:var(--muted);margin-top:4px">Restaurantes, tiendas, farmacias — con productos y carrito</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+          <div id="type_pedidos" onclick="setBusinessType('pedidos')" style="border:2px solid var(--accent);border-radius:12px;padding:16px;cursor:pointer;text-align:center;background:#f0f7ff">
+            <div style="font-size:1.8rem;margin-bottom:6px">🛒</div>
+            <div style="font-weight:700;font-size:.88rem">Pedidos</div>
+            <div style="font-size:.72rem;color:var(--muted);margin-top:3px">Pickup o delivery</div>
           </div>
-          <div id="type_servicios" onclick="setBusinessType('servicios')" style="border:2px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;text-align:center;background:white">
-            <div style="font-size:2rem;margin-bottom:8px">🔧</div>
-            <div style="font-weight:700;font-size:.95rem">Servicios</div>
-            <div style="font-size:.78rem;color:var(--muted);margin-top:4px">Mecánicos, plomeros, electricistas — perfil de contacto</div>
+          <div id="type_servicios" onclick="setBusinessType('servicios')" style="border:2px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;text-align:center;background:white">
+            <div style="font-size:1.8rem;margin-bottom:6px">🔧</div>
+            <div style="font-weight:700;font-size:.88rem">Servicios</div>
+            <div style="font-size:.72rem;color:var(--muted);margin-top:3px">Perfil de contacto</div>
+          </div>
+          <div id="type_delivery" onclick="setBusinessType('delivery')" style="border:2px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;text-align:center;background:white">
+            <div style="font-size:1.8rem;margin-bottom:6px">🛵</div>
+            <div style="font-weight:700;font-size:.88rem">Solo Delivery</div>
+            <div style="font-size:.72rem;color:var(--muted);margin-top:3px">Sin local físico</div>
           </div>
         </div>
         <h3>Información del negocio</h3>
@@ -162,14 +167,18 @@ var selectedBusinessType = 'pedidos';
 
 function setBusinessType(type) {
   selectedBusinessType = type;
-  var pedidos  = document.getElementById('type_pedidos');
-  var servicios = document.getElementById('type_servicios');
-  pedidos.style.border   = type === 'pedidos'  ? '2px solid var(--accent)' : '2px solid var(--border)';
-  pedidos.style.background = type === 'pedidos' ? '#f0f7ff' : 'white';
-  servicios.style.border = type === 'servicios' ? '2px solid var(--accent)' : '2px solid var(--border)';
-  servicios.style.background = type === 'servicios' ? '#f0f7ff' : 'white';
-  // Ocultar delivery si es servicios
-  document.getElementById('deliveryOption').style.display = type === 'pedidos' ? 'block' : 'none';
+  ['pedidos','servicios','delivery'].forEach(function(t) {
+    var el = document.getElementById('type_' + t);
+    if (!el) return;
+    el.style.border     = t === type ? '2px solid var(--accent)' : '2px solid var(--border)';
+    el.style.background = t === type ? '#f0f7ff' : 'white';
+  });
+  // delivery siempre tiene accepts_delivery=1, ocultar opción manual
+  document.getElementById('deliveryOption').style.display = type === 'servicios' ? 'none' : 'block';
+  if (type === 'delivery') {
+    document.getElementById('f_delivery').checked = true;
+    document.getElementById('deliveryOption').style.display = 'none';
+  }
 }
 
 async function init() {
@@ -223,7 +232,7 @@ async function create() {
     business_type: selectedBusinessType,
     description:   document.getElementById('f_description').value,
     what_we_offer: document.getElementById('f_what_we_offer').value,
-    accepts_delivery: selectedBusinessType === 'pedidos' && document.getElementById('f_delivery').checked ? 1 : 0,
+    accepts_delivery: selectedBusinessType === 'servicios' ? 0 : 1,
     phone:    document.getElementById('f_phone').value,
     whatsapp: document.getElementById('f_whatsapp').value,
     email:    document.getElementById('f_email').value,

@@ -382,3 +382,6 @@ CREATE TABLE IF NOT EXISTS business_services (
     FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,
     INDEX idx_business (business_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Agregar tipo delivery al ENUM de business_type
+ALTER TABLE businesses MODIFY COLUMN business_type ENUM('pedidos','servicios','delivery') DEFAULT 'pedidos';

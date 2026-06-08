@@ -197,6 +197,12 @@ function renderBizInfo() {
     document.getElementById('deliveryBtn').title = 'Este negocio no ofrece delivery';
     document.getElementById('deliveryBtn').style.opacity = '.4';
   }
+  // Solo delivery — ocultar opción pickup
+  if (business.business_type === 'delivery') {
+    var pickupBtn = document.querySelector('.delivery-btn[onclick*="pickup"]');
+    if (pickupBtn) pickupBtn.style.display = 'none';
+    document.getElementById('deliveryBtn').click();
+  }
 }
 
 function renderProducts() {

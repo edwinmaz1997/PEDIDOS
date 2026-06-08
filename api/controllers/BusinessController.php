@@ -161,7 +161,7 @@ class BusinessController {
             $ownerId = (int)$body['owner_user_id'];
         }
 
-        $businessType = in_array($body['business_type'] ?? '', ['pedidos','servicios']) ? $body['business_type'] : 'pedidos';
+        $businessType = in_array($body['business_type'] ?? '', ['pedidos','servicios','delivery']) ? $body['business_type'] : 'pedidos';
 
         $stmt = $this->db->prepare("
             INSERT INTO businesses
