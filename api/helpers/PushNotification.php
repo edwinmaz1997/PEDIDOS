@@ -72,8 +72,10 @@ class PushNotification {
             CURLOPT_SSL_VERIFYPEER => false,
         ]);
         $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error    = curl_error($ch);
         curl_close($ch);
-        error_log('OneSignal push to many: ' . ($error ?: $response));
+        error_log('OneSignal sendToMany — ids: ' . implode(',', $ids));
+        error_log('OneSignal sendToMany — HTTP ' . $httpCode . ' — ' . ($error ?: $response));
     }
 }

@@ -307,6 +307,7 @@ class OrderController {
         $stmt = $this->db->prepare("SELECT id FROM users WHERE role = 'repartidor' AND is_active = 1");
         $stmt->execute();
         $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        error_log('notifyRepartidores — encontrados: ' . count($ids) . ' — ids: ' . implode(',', $ids));
         if (empty($ids)) return;
         PushNotification::sendToMany($ids, $title, $message, '/repartidor/index.html');
     }
