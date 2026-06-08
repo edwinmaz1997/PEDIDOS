@@ -151,6 +151,21 @@ class OrderController {
         // Notify business
         $this->notify($business['user_id'], 'new_order', '🛒 Nuevo pedido', "Tienes un nuevo pedido #{$orderNumber}", '/negocio/index.html');
 
+        // Notify all active repartidores if delivery order
+        if ($deliveryType === 'delivery') {
+            $rStmt = $this->db->prepare("SELECT id FROM users WHERE role = 'repartidor' AND is_active = 1");
+            $rStmt->execute();
+            $repartidorIds = $rStmt->fetchAll(PDO::FETCH_COLUMN);
+            if (!empty($repartidorIds)) {
+                PushNotification::sendToMany(
+                    $repartidorIds,
+                    '🛵 Nuevo pedido disponible',
+                    "Hay un nuevo pedido de delivery en {$business['name']}. ¡Tómalo antes que otro!",
+                    '/repartidor/index.html'
+                );
+            }
+        }
+
         Response::success([
             'order_id'     => $orderId,
             'order_number' => $orderNumber,
