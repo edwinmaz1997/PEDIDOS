@@ -91,6 +91,22 @@ class DeliveryController {
         // Reset order status back to aceptado
         $this->db->prepare("UPDATE orders SET status = 'aceptado' WHERE id = ?")->execute([$d['order_id']]);
 
+        // Notify all active repartidores — pedido vuelve a estar disponible
+        $rStmt = $this->db->prepare("SELECT id FROM users WHERE role = 'repartidor' AND is_active = 1");
+        $rStmt->execute();
+        $repartidorIds = $rStmt->fetchAll(PDO::FETCH_COLUMN);
+        if (!empty($repartidorIds)) {
+            $oStmt = $this->db->prepare("SELECT order_number FROM orders WHERE id = ?");
+            $oStmt->execute([$d['order_id']]);
+            $orderNumber = $oStmt->fetchColumn() ?: '—';
+            PushNotification::sendToMany(
+                $repartidorIds,
+                '🔄 Pedido liberado — disponible de nuevo',
+                "El pedido #{$orderNumber} fue liberado y está disponible para tomar.",
+                '/repartidor/index.html'
+            );
+        }
+
         Response::success(null, 'Entrega liberada — disponible para otros repartidores');
     }
 
@@ -115,15 +131,32 @@ class DeliveryController {
 
         $this->db->prepare("UPDATE deliveries SET status = ? $extra WHERE id = ?")->execute([$dbStatus, $id]);
 
-        // Update order status
+        // Update order status + notify client
         $orderStatus = $dbStatus === 'entregado' ? 'entregado' : 'en_camino';
-        $stmt = $this->db->prepare("SELECT order_id FROM deliveries WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT o.id, o.client_id, o.order_number FROM deliveries d JOIN orders o ON o.id = d.order_id WHERE d.id = ?");
         $stmt->execute([$id]);
         $row = $stmt->fetch();
         if ($row) {
-            $this->db->prepare("UPDATE orders SET status = ? WHERE id = ?")->execute([$orderStatus, $row['order_id']]);
+            $this->db->prepare("UPDATE orders SET status = ? WHERE id = ?")->execute([$orderStatus, $row['id']]);
+
+            // Notify client on picked up or delivered
+            if ($dbStatus === 'recogido') {
+                $this->pushToUser((int)$row['client_id'], '🛵 Tu pedido fue recogido',
+                    "Tu pedido #{$row['order_number']} ya está en camino. ¡Pronto llegará!",
+                    '/cliente/pedido-detalle.html?id=' . $row['id']);
+            } elseif ($dbStatus === 'entregado') {
+                $this->pushToUser((int)$row['client_id'], '✅ Pedido entregado',
+                    "Tu pedido #{$row['order_number']} fue entregado. ¡Buen provecho!",
+                    '/cliente/pedido-detalle.html?id=' . $row['id']);
+            }
         }
 
         Response::success(null, 'Estado actualizado');
+    }
+
+    private function pushToUser(int $userId, string $title, string $message, string $url = '/'): void {
+        $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)")
+                 ->execute([$userId, 'order_update', $title, $message, json_encode(['url' => $url])]);
+        PushNotification::send($userId, $title, $message, $url);
     }
 }

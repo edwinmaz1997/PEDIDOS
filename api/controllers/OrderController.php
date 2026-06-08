@@ -151,20 +151,7 @@ class OrderController {
         // Notify business
         $this->notify($business['user_id'], 'new_order', '🛒 Nuevo pedido', "Tienes un nuevo pedido #{$orderNumber}", '/negocio/index.html');
 
-        // Notify all active repartidores if delivery order
-        if ($deliveryType === 'delivery') {
-            $rStmt = $this->db->prepare("SELECT id FROM users WHERE role = 'repartidor' AND is_active = 1");
-            $rStmt->execute();
-            $repartidorIds = $rStmt->fetchAll(PDO::FETCH_COLUMN);
-            if (!empty($repartidorIds)) {
-                PushNotification::sendToMany(
-                    $repartidorIds,
-                    '🛵 Nuevo pedido disponible',
-                    "Hay un nuevo pedido de delivery en {$business['name']}. ¡Tómalo antes que otro!",
-                    '/repartidor/index.html'
-                );
-            }
-        }
+
 
         Response::success([
             'order_id'     => $orderId,
@@ -197,9 +184,11 @@ class OrderController {
 
         $this->logStatus($id, $newStatus, $response, $user['id']);
 
-        // If accepted and delivery type, create delivery record
+        // If accepted and delivery type, create delivery record + notify repartidores
         if ($newStatus === 'aceptado' && $order['delivery_type'] === 'delivery') {
             $this->db->prepare("INSERT INTO deliveries (order_id) VALUES (?)")->execute([$id]);
+            $this->notifyRepartidores("🛵 Pedido disponible para tomar",
+                "Nuevo delivery #{$order['order_number']} — ¡Tómalo antes que otro!");
         }
 
         // Notify client
@@ -300,5 +289,13 @@ class OrderController {
                  ->execute([$userId, $type, $title, $message, $data]);
         // Send real push via OneSignal
         PushNotification::send($userId, $title, $message, $url);
+    }
+
+    private function notifyRepartidores(string $title, string $message): void {
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE role = 'repartidor' AND is_active = 1");
+        $stmt->execute();
+        $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        if (empty($ids)) return;
+        PushNotification::sendToMany($ids, $title, $message, '/repartidor/index.html');
     }
 }
