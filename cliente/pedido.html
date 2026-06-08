@@ -87,12 +87,9 @@
       <div class="order-section">
         <h3>Tu pedido</h3>
 
-        <!-- Toggle Paquete / Pedido — solo visible en negocios tipo delivery -->
-        <div id="orderTypeToggle" style="display:none;margin-bottom:14px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <button id="typeOrderBtn" class="delivery-btn active" onclick="setOrderType('pedido',this)">🛒 Pedido</button>
-            <button id="typePackageBtn" class="delivery-btn" onclick="setOrderType('paquete',this)">📦 Envío de paquete</button>
-          </div>
+        <!-- Indicador de modo — no interactivo, viene fijo desde el directorio -->
+        <div id="orderTypeBadge" style="display:none;margin-bottom:14px">
+          <div id="orderTypeBadgeInner" style="padding:8px 14px;border-radius:20px;font-size:.85rem;font-weight:600;display:inline-flex;align-items:center;gap:6px"></div>
         </div>
 
         <!-- Formulario de envío de paquete -->
@@ -221,12 +218,9 @@ async function init() {
     renderBizInfo();
     renderProducts();
 
-    // Para negocios tipo delivery, activar modo según URL después de renderizar
+    // Para negocios tipo delivery, aplicar modo fijo según URL
     if (business.business_type === 'delivery') {
-      var typeBtn = urlOrderType === 'paquete'
-        ? document.getElementById('typePackageBtn')
-        : document.getElementById('typeOrderBtn');
-      if (typeBtn) setOrderType(urlOrderType, typeBtn);
+      applyOrderType(urlOrderType);
     }
 
     // Load delivery zones (only ones this business covers)
@@ -268,12 +262,11 @@ function renderBizInfo() {
     document.getElementById('deliveryBtn').title = 'Este negocio no ofrece delivery';
     document.getElementById('deliveryBtn').style.opacity = '.4';
   }
-  // Solo delivery — ocultar opción pickup y mostrar toggle paquete
+  // Solo delivery — ocultar opción pickup
   if (business.business_type === 'delivery') {
     var pickupBtn = document.querySelector('.delivery-btn[onclick*="pickup"]');
     if (pickupBtn) pickupBtn.style.display = 'none';
     document.getElementById('deliveryBtn').click();
-    document.getElementById('orderTypeToggle').style.display = 'block';
   }
 }
 
@@ -413,37 +406,51 @@ function loadSavedAddress() {
   }).catch(function(){});
 }
 
-// ── Order Type (pedido / paquete) ─────────────────────────
+// ── Order Type (pedido / paquete) — fijo desde URL ────────
 var orderType = 'pedido';
 
-function setOrderType(type, btn) {
+function applyOrderType(type) {
   orderType = type;
-  document.querySelectorAll('#orderTypeToggle .delivery-btn').forEach(function(b){ b.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
 
   var packageForm     = document.getElementById('packageForm');
   var productsSection = document.getElementById('productsSection');
   var deliveryToggle  = document.getElementById('deliveryToggle');
   var deliveryWrap    = document.getElementById('deliveryAddressWrap');
+  var badge           = document.getElementById('orderTypeBadge');
+  var badgeInner      = document.getElementById('orderTypeBadgeInner');
 
   if (type === 'paquete') {
+    // Mostrar solo formulario de paquete
     packageForm.style.display     = 'block';
-    productsSection.style.display = 'none';   // ocultar productos
+    productsSection.style.display = 'none';
     deliveryToggle.style.display  = 'none';
     deliveryWrap.style.display    = 'none';
     deliveryType = 'delivery';
+    // Badge
+    badgeInner.style.background = '#fff3e0';
+    badgeInner.style.color      = '#FF8C42';
+    badgeInner.textContent      = '📦 Envío de paquete';
+    badge.style.display = 'block';
     loadPickupSavedAddress();
-    updateCart();
   } else {
+    // Mostrar solo pedido normal
     packageForm.style.display     = 'none';
-    productsSection.style.display = 'block';  // mostrar productos
+    productsSection.style.display = 'block';
     deliveryToggle.style.display  = 'flex';
     deliveryWrap.style.display    = 'block';
     deliveryType = 'delivery';
+    // Badge
+    badgeInner.style.background = '#e3f2fd';
+    badgeInner.style.color      = 'var(--accent)';
+    badgeInner.textContent      = '🛒 Pedido';
+    badge.style.display = 'block';
     loadSavedAddress();
-    updateCart();
   }
+  updateCart();
 }
+
+// Mantener compatibilidad con onclick si existe
+function setOrderType(type, btn) { applyOrderType(type); }
 
 function loadPickupSavedAddress() {
   fetch(API + '/auth/me', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } })
