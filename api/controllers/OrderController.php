@@ -186,16 +186,28 @@ class OrderController {
 
         // If accepted and delivery type, create delivery record + notify repartidores
         if ($newStatus === 'aceptado' && $order['delivery_type'] === 'delivery') {
-            $this->db->prepare("INSERT INTO deliveries (order_id) VALUES (?)")->execute([$id]);
-            $this->notifyRepartidores("🛵 Pedido disponible para tomar",
-                "Nuevo delivery #{$order['order_number']} — ¡Tómalo antes que otro!");
+            try {
+                $this->db->prepare("INSERT INTO deliveries (order_id) VALUES (?)")->execute([$id]);
+            } catch (\Exception $e) {
+                error_log("deliveries insert error order $id: " . $e->getMessage());
+            }
+            try {
+                $this->notifyRepartidores("🛵 Pedido disponible para tomar",
+                    "Nuevo delivery #{$order['order_number']} — ¡Tómalo antes que otro!");
+            } catch (\Exception $e) {
+                error_log("notifyRepartidores error: " . $e->getMessage());
+            }
         }
 
         // Notify client
-        $msg = $action === 'aceptar'
-            ? "Tu pedido #{$order['order_number']} fue aceptado. Tiempo estimado: {$estTime} min."
-            : "Tu pedido #{$order['order_number']} fue rechazado. {$response}";
-        $this->notify($order['client_id'], 'order_update', '📦 Actualización de pedido', $msg, '/cliente/pedido-detalle.html?id='.$id);
+        try {
+            $msg = $action === 'aceptar'
+                ? "Tu pedido #{$order['order_number']} fue aceptado. Tiempo estimado: {$estTime} min."
+                : "Tu pedido #{$order['order_number']} fue rechazado. {$response}";
+            $this->notify($order['client_id'], 'order_update', '📦 Actualización de pedido', $msg, '/cliente/pedido-detalle.html?id='.$id);
+        } catch (\Exception $e) {
+            error_log("notify client error: " . $e->getMessage());
+        }
 
         Response::success(null, 'Respuesta enviada');
     }
