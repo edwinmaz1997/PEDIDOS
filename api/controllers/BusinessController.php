@@ -136,7 +136,7 @@ class BusinessController {
             JOIN business_categories bc ON b.category_id = bc.id
             WHERE b.category_id = ? AND b.is_active = 1
             ORDER BY b.rating DESC
-            LIMIT 30
+            LIMIT 100
         ");
         $stmt->execute([$categoryId]);
         $businesses = $stmt->fetchAll();

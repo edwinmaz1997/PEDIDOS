@@ -56,6 +56,9 @@
 <!-- BUSINESSES CAROUSEL BY CATEGORY -->
 <div id="businessSections"></div>
 
+<!-- CATEGORY FILTER RESULTS -->
+<section class="hidden" id="categoryResults" style="padding:24px 0"></section>
+
 <!-- SEARCH RESULTS -->
 <section class="search-results hidden" id="searchResults">
   <div class="container">
@@ -135,15 +138,43 @@ function renderCategories() {
 // ─── Filter by category ───────────────────────────────────
 async function filterCategory(id, btn) {
   document.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   activeCategory = id;
   document.getElementById('searchResults').classList.add('hidden');
-  document.getElementById('businessSections').classList.remove('hidden');
-  if (id) {
-    const sec = document.getElementById(`cat-section-${id}`);
-    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } else {
+
+  if (!id) {
+    // Todos — mostrar secciones normales
+    document.getElementById('businessSections').classList.remove('hidden');
+    document.getElementById('categoryResults').classList.add('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  // Filtrar por categoría — fetch dedicado
+  document.getElementById('businessSections').classList.add('hidden');
+  const catResults = document.getElementById('categoryResults');
+  catResults.classList.remove('hidden');
+  catResults.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+
+  try {
+    const res  = await fetch(`${API}/businesses/by-category/${id}`);
+    const data = await res.json();
+    const businesses = Array.isArray(data.data) ? data.data : (data.data?.businesses || []);
+
+    if (!businesses.length) {
+      catResults.innerHTML = '<div class="empty-state"><p>No hay negocios en esta categoría aún.</p></div>';
+      return;
+    }
+
+    catResults.innerHTML = `
+      <div class="container">
+        <div style="margin-bottom:16px;font-size:.9rem;color:var(--muted)">${businesses.length} negocio${businesses.length!==1?'s':''} encontrado${businesses.length!==1?'s':''}</div>
+        <div class="businesses-grid">
+          ${businesses.map(b => renderCard(b)).join('')}
+        </div>
+      </div>`;
+  } catch(e) {
+    catResults.innerHTML = '<div class="empty-state"><p>Error cargando negocios.</p></div>';
   }
 }
 
