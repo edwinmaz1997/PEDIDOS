@@ -173,14 +173,16 @@ function setBusinessType(type) {
 }
 
 async function init() {
-  // If already has business, redirect to profile
-  const me = await APP.fetch('/auth/me');
-  const res = await APP.get('/businesses?limit=50');
-  const all = res?.data?.businesses || [];
-  if (all.find(b => b.user_id == me?.data?.id)) {
-    window.location.href = 'perfil.html';
-    return;
-  }
+  // Si ya tiene negocio, redirigir al panel
+  try {
+    const res = await fetch('/api/businesses/mine', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+    const data = await res.json();
+    if (data.success && data.data) {
+      window.location.href = 'index.html';
+      return;
+    }
+  } catch(e) {}
+
   const cats = await APP.get('/categories');
   const sel = document.getElementById('f_category');
   (cats.data||[]).forEach(c => {
