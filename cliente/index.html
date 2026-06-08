@@ -172,7 +172,7 @@ function renderOrder(o) {
       ${o.business_response ? `<div class="order-response"><strong>Respuesta del negocio:</strong>${esc(o.business_response)}${o.estimated_time ? ` — ⏱ ~${o.estimated_time} min` : ''}</div>` : ''}
       <div class="order-actions">
         <a href="pedido-detalle.html?id=${o.id}" class="btn-ghost" style="font-size:.85rem;padding:7px 14px">💬 Ver detalle y chat</a>
-        ${o.status === 'entregado' ? `<a href="/index.html" class="btn-ghost" style="font-size:.85rem;padding:7px 14px">🔁 Pedir de nuevo</a>` : ''}
+        ${o.status === 'entregado' ? `<button class="btn-ghost" style="font-size:.85rem;padding:7px 14px" onclick="reorder(${o.business_id},${JSON.stringify(o.items||[]).replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_type||'pickup').replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_address||'').replace(/"/g,'&quot;')})">🔁 Pedir de nuevo</button>` : ''}
       </div>
     </div>
   `;
@@ -180,6 +180,11 @@ function renderOrder(o) {
 
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
+
+function reorder(businessId, items, deliveryType, deliveryAddress) {
+  localStorage.setItem('nuevaexpress_reorder', JSON.stringify({ items, deliveryType, deliveryAddress }));
+  window.location.href = '/cliente/pedido.html?business=' + businessId + '&reorder=1';
+}
 
 loadOrders();
 // Poll every 30s for status updates

@@ -262,7 +262,7 @@ function renderProductModal(searchQ, catId) {
   var html = filtered.map(function(p){
     var qty = cart[p.id]?.qty || 0;
     var inCart = qty > 0;
-    return '<div id="pp-'+p.id+'" style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:'+(inCart?'#f0f7ff':'white')+';transition:.15s">' +
+    return '<div id="pp-'+p.id+'" data-pid="'+p.id+'" data-price="'+(p.price||0)+'" data-name="'+esc(p.name)+'" style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:'+(inCart?'#f0f7ff':'white')+';transition:.15s">' +
       '<div style="flex:1;min-width:0">' +
         (p.category_name?'<div style="font-size:.7rem;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em">'+(p.category_icon||'🏷️')+' '+esc(p.category_name)+'</div>':'') +
         '<div style="font-weight:600;font-size:.92rem">'+esc(p.name)+'</div>' +
@@ -475,6 +475,80 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 
 init();
 document.getElementById('customItems').addEventListener('input', updateCart);
+
+// ── Reorder: pre-fill cart if coming from "Pedir de nuevo" ──
+(function applyReorder() {
+  var raw = localStorage.getItem('nuevaexpress_reorder');
+  if (!raw || !params.get('reorder')) return;
+  localStorage.removeItem('nuevaexpress_reorder');
+  var data;
+  try { data = JSON.parse(raw); } catch(e) { return; }
+
+  // Wait for init() to finish loading products before pre-filling
+  var attempts = 0;
+  var interval = setInterval(function() {
+    attempts++;
+    if (attempts > 40) { clearInterval(interval); return; } // timeout 4s
+
+    // Check products are loaded (business object exists)
+    if (!business) return;
+    clearInterval(interval);
+
+    // Pre-fill delivery type
+    if (data.deliveryType === 'delivery') {
+      var deliveryBtn = document.querySelector('[onclick*="setDelivery(\'delivery\')"]') ||
+                        document.getElementById('deliveryBtn');
+      if (deliveryBtn) deliveryBtn.click();
+
+      // Pre-fill delivery address
+      if (data.deliveryAddress) {
+        setTimeout(function() {
+          var addrInput = document.getElementById('deliveryAddress');
+          if (addrInput) {
+            addrInput.value = data.deliveryAddress;
+            // Uncheck "usar dirección guardada" if checked
+            var savedCheck = document.getElementById('useSavedAddress');
+            if (savedCheck) savedCheck.checked = false;
+            addrInput.closest('.form-group')?.style && (addrInput.closest('.form-group').style.display = 'block');
+          }
+        }, 300);
+      }
+    }
+
+    // Pre-fill cart items
+    if (data.items && data.items.length) {
+      data.items.forEach(function(item) {
+        if (!item.product_id) return; // skip custom items
+        var id = item.product_id;
+        var qty = item.quantity || 1;
+        // Find product in DOM to get price/name
+        var prodEl = document.querySelector('[data-pid="' + id + '"]');
+        if (prodEl) {
+          // product rendered — add to cart directly
+          var price = parseFloat(prodEl.dataset.price) || 0;
+          var name  = prodEl.dataset.name || item.product_name || '';
+          cart[id] = { name: name, price: price, qty: qty };
+          // Update qty display
+          var qEl = document.getElementById('qty-' + id);
+          if (qEl) qEl.textContent = qty;
+          var ppEl = document.getElementById('pp-' + id);
+          if (ppEl) { ppEl.style.borderColor = 'var(--blue)'; ppEl.style.background = '#f0f7ff'; }
+        } else {
+          // Product not in DOM yet or no data-pid — add with available info
+          cart[id] = { name: item.product_name || 'Producto', price: item.unit_price || 0, qty: qty };
+        }
+      });
+      updateCart();
+
+      // Show a toast
+      var toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+      toast.textContent = '🔁 Carrito listo con tu pedido anterior';
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.remove(); }, 3500);
+    }
+  }, 100);
+})();
 </script>
 <script src="/assets/js/pwa.js"></script>
 
