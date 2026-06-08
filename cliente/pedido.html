@@ -502,52 +502,7 @@ function getGPSForField(fieldId, statusId) {
 // ── Obtener ubicación GPS con Nominatim ──────────────────
 function getGPSLocation() {
   getGPSForField('deliveryAddress', 'gpsStatus');
-  // también actualizar preview del mapa
   setTimeout(function(){ previewDeliveryMap(); }, 3500);
-}
-  var btn    = document.getElementById("gpsBtn");
-  var status = document.getElementById("gpsStatus");
-  btn.textContent = "⏳"; btn.disabled = true;
-  status.textContent = "Obteniendo tu ubicación...";
-  status.style.display = "block";
-  navigator.geolocation.getCurrentPosition(
-    async function(pos) {
-      var lat = pos.coords.latitude;
-      var lng = pos.coords.longitude;
-      status.textContent = "Buscando dirección...";
-      try {
-        var res  = await fetch("https://nominatim.openstreetmap.org/reverse?format=json\&lat=" + lat + "\&lon=" + lng + "\&addressdetails=1", { headers: { "Accept-Language": "es", "User-Agent": "NuevaExpress/1.0" } });
-        var data = await res.json();
-        var addr = data.display_name || (lat.toFixed(6) + ", " + lng.toFixed(6));
-        // Simplificar la dirección — quitar país y detalles innecesarios
-        var parts = addr.split(",");
-        var short = parts.slice(0, Math.min(4, parts.length)).join(",").trim();
-        document.getElementById("deliveryAddress").value = short;
-        // Guardar link de maps
-        var mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
-        document.getElementById("deliveryMapLink").href = mapsUrl;
-        document.getElementById("deliveryMapPreview").style.display = "block";
-        status.textContent = "✅ Ubicación obtenida";
-        setTimeout(function(){ status.style.display = "none"; }, 3000);
-      } catch(e) {
-        // Si Nominatim falla, usar coordenadas directas
-        document.getElementById("deliveryAddress").value = lat.toFixed(6) + ", " + lng.toFixed(6);
-        var mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
-        document.getElementById("deliveryMapLink").href = mapsUrl;
-        document.getElementById("deliveryMapPreview").style.display = "block";
-        status.textContent = "✅ Coordenadas obtenidas";
-        setTimeout(function(){ status.style.display = "none"; }, 3000);
-      }
-      btn.textContent = "📍"; btn.disabled = false;
-    },
-    function(err) {
-      var msgs = { 1: "Permiso denegado. Activa la ubicación en tu navegador.", 2: "No se pudo obtener la ubicación.", 3: "Tiempo de espera agotado." };
-      status.textContent = "❌ " + (msgs[err.code] || "Error de ubicación");
-      setTimeout(function(){ status.style.display = "none"; }, 4000);
-      btn.textContent = "📍"; btn.disabled = false;
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-  );
 }
 
 function previewDeliveryMap() {
