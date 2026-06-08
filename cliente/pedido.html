@@ -266,13 +266,11 @@ function renderBizInfo() {
     if (pickupBtn) pickupBtn.style.display = 'none';
     document.getElementById('deliveryBtn').click();
     document.getElementById('orderTypeToggle').style.display = 'block';
-    // Activar modo paquete si viene en la URL
-    if (urlOrderType === 'paquete') {
-      setTimeout(function() {
-        var paqueteBtn = document.getElementById('typePackageBtn');
-        if (paqueteBtn) paqueteBtn.click();
-      }, 100);
-    }
+    // Activar modo según URL
+    var typeBtn = urlOrderType === 'paquete'
+      ? document.getElementById('typePackageBtn')
+      : document.getElementById('typeOrderBtn');
+    if (typeBtn) setOrderType(urlOrderType, typeBtn);
   }
 }
 
@@ -417,26 +415,28 @@ var orderType = 'pedido';
 function setOrderType(type, btn) {
   orderType = type;
   document.querySelectorAll('#orderTypeToggle .delivery-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  var packageForm   = document.getElementById('packageForm');
-  var deliveryToggle = document.getElementById('deliveryToggle');
-  var deliveryWrap  = document.getElementById('deliveryAddressWrap');
-  var cartSection   = document.getElementById('cartItems').closest? null : null;
+  if (btn) btn.classList.add('active');
+
+  var packageForm     = document.getElementById('packageForm');
+  var productsSection = document.getElementById('productsSection');
+  var deliveryToggle  = document.getElementById('deliveryToggle');
+  var deliveryWrap    = document.getElementById('deliveryAddressWrap');
 
   if (type === 'paquete') {
-    packageForm.style.display = 'block';
-    deliveryToggle.style.display = 'none';
-    deliveryWrap.style.display = 'none';
-    // Forzar delivery
+    packageForm.style.display     = 'block';
+    productsSection.style.display = 'none';   // ocultar productos
+    deliveryToggle.style.display  = 'none';
+    deliveryWrap.style.display    = 'none';
     deliveryType = 'delivery';
-    // Habilitar submit si hay datos
-    updateCart();
     loadPickupSavedAddress();
+    updateCart();
   } else {
-    packageForm.style.display = 'none';
-    deliveryToggle.style.display = 'flex';
-    deliveryType = 'delivery'; // ya es delivery only
-    deliveryWrap.style.display = 'block';
+    packageForm.style.display     = 'none';
+    productsSection.style.display = 'block';  // mostrar productos
+    deliveryToggle.style.display  = 'flex';
+    deliveryWrap.style.display    = 'block';
+    deliveryType = 'delivery';
+    loadSavedAddress();
     updateCart();
   }
 }
