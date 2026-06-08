@@ -50,9 +50,14 @@ class OrderController {
 
         foreach ($orders as &$order) {
             $order['items'] = $this->getItems($order['id']);
-            // service_fee es ingreso interno — cliente y repartidor no lo ven
-            if (in_array($user['role'], ['cliente', 'repartidor'])) {
-                $order['total']       = (float)$order['subtotal'] + (float)$order['delivery_fee'];
+            // client_total = lo que paga el cliente (sin service_fee)
+            $order['client_total'] = (float)$order['subtotal'] + (float)$order['delivery_fee'];
+            if ($user['role'] === 'negocio') {
+                // negocio ve: total que pagó el cliente, y su ingreso neto (subtotal - service_fee)
+                $order['total']      = $order['client_total'];
+                $order['net_income'] = (float)$order['subtotal'] - (float)$order['service_fee'];
+            } elseif (in_array($user['role'], ['cliente', 'repartidor'])) {
+                $order['total']       = $order['client_total'];
                 $order['service_fee'] = null;
             }
         }
@@ -69,9 +74,12 @@ class OrderController {
         $order['items']      = $this->getItems($id);
         $order['status_log'] = $this->getStatusLog($id);
 
-        // service_fee es ingreso interno — cliente y repartidor no lo ven
-        if (in_array($user['role'], ['cliente', 'repartidor'])) {
-            $order['total']       = (float)$order['subtotal'] + (float)$order['delivery_fee'];
+        $order['client_total'] = (float)$order['subtotal'] + (float)$order['delivery_fee'];
+        if ($user['role'] === 'negocio') {
+            $order['total']      = $order['client_total'];
+            $order['net_income'] = (float)$order['subtotal'] - (float)$order['service_fee'];
+        } elseif (in_array($user['role'], ['cliente', 'repartidor'])) {
+            $order['total']       = $order['client_total'];
             $order['service_fee'] = null;
         }
 

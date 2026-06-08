@@ -229,8 +229,13 @@ function renderOrder(o) {
       </div>
       ${items?`<div class="order-items-list">${items}</div>`:''}
       ${o.notes?`<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);font-size:.85rem;margin-top:8px">📝 ${esc(o.notes)}</div>`:''}
-      <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
-        <span>Total</span><span style="color:var(--accent)">Q${parseFloat(o.total).toFixed(2)}</span>
+      <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:4px">
+          <span>Total cobrado al cliente</span><span>Q${parseFloat(o.total).toFixed(2)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-weight:700">
+          <span>Tu ingreso neto</span><span style="color:var(--success)">Q${parseFloat(o.net_income||((o.subtotal||0)-(o.service_fee||3))).toFixed(2)}</span>
+        </div>
       </div>
       <div style="margin-top:8px"><a href="pedido-detalle.html?id=${o.id}" class="btn-ghost" style="font-size:.82rem;padding:6px 14px">💬 Chat y detalle</a></div>
       ${canRespond ? `
