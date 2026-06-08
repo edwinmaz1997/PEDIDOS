@@ -84,9 +84,9 @@
             <div id="itemsList"></div>
             <div style="margin-top:12px">
               <div class="fee-row"><span>Subtotal</span><span id="subtotalVal">—</span></div>
-              <div class="fee-row"><span>Tarifa de servicio</span><span id="serviceFeeVal">—</span></div>
               <div class="fee-row" id="deliveryFeeRow" style="display:none"><span>Delivery</span><span id="deliveryFeeVal">—</span></div>
-              <div class="total-final"><span>Total</span><span id="totalVal" style="color:var(--blue)">—</span></div>
+              <div class="total-final"><span>Total cobrado al cliente</span><span id="totalVal" style="color:var(--blue)">—</span></div>
+              <div class="fee-row" style="margin-top:6px"><span style="color:var(--success);font-weight:600">Tu ingreso neto</span><span id="netIncomeVal" style="color:var(--success);font-weight:700">—</span></div>
             </div>
           </div>
 
@@ -295,12 +295,15 @@ function renderItems() {
     document.getElementById('itemsList').innerHTML += '<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);margin-top:8px;font-size:.85rem"><strong>Nota:</strong> ' + esc(order.notes) + '</div>';
   }
 
-  document.getElementById('subtotalVal').textContent  = 'Q'+parseFloat(order.subtotal||0).toFixed(2);
-  document.getElementById('serviceFeeVal').textContent = 'Q'+parseFloat(order.service_fee||0).toFixed(2);
-  document.getElementById('totalVal').textContent     = 'Q'+parseFloat(order.total||0).toFixed(2);
-  if (parseFloat(order.delivery_fee)>0) {
+  var svc = parseFloat(order.service_fee||0);
+  var del = parseFloat(order.delivery_fee||0);
+  var sub = parseFloat(order.subtotal||0);
+  document.getElementById('subtotalVal').textContent  = 'Q'+sub.toFixed(2);
+  document.getElementById('totalVal').textContent     = 'Q'+(sub+del).toFixed(2);
+  document.getElementById('netIncomeVal').textContent = 'Q'+(sub-svc).toFixed(2);
+  if (del > 0) {
     document.getElementById('deliveryFeeRow').style.display='flex';
-    document.getElementById('deliveryFeeVal').textContent='Q'+parseFloat(order.delivery_fee).toFixed(2);
+    document.getElementById('deliveryFeeVal').textContent='Q'+del.toFixed(2);
   }
 }
 
