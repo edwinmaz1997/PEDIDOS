@@ -97,13 +97,14 @@ class OrderMessageController {
         $serviceFee  = (float)$order['service_fee'];
         $deliveryFee = (float)$order['delivery_fee'];
         $total       = $subtotal + $serviceFee + $deliveryFee;
+        $clientTotal = $subtotal + $deliveryFee; // lo que ve el cliente
 
         $this->db->prepare("UPDATE orders SET subtotal = ?, total = ? WHERE id = ?")
                  ->execute([$subtotal, $total, $orderId]);
 
-        // Notify client
+        // Notify client con total sin service_fee
         $this->notify($order['client_id'], 'total_updated', '💰 Total actualizado',
-            "El negocio actualizó el total de tu pedido #{$order['order_number']} a Q" . number_format($total, 2), '/cliente/pedido-detalle.html?id='.$orderId);
+            "El negocio actualizó el total de tu pedido #{$order['order_number']} a Q" . number_format($clientTotal, 2), '/cliente/pedido-detalle.html?id='.$orderId);
 
         // Send system message
         // Build itemized message
@@ -123,11 +124,10 @@ class OrderMessageController {
                 }
             }
         }
-        $msg .= "Tarifa servicio: Q" . number_format($serviceFee, 2) . "
-";
+        // service_fee omitido del mensaje visible (ingreso interno NuevaExpress)
         if ($deliveryFee > 0) $msg .= "Delivery: Q" . number_format($deliveryFee, 2) . "
 ";
-        $msg .= "✅ *Total: Q" . number_format($total, 2) . "*";
+        $msg .= "✅ *Total: Q" . number_format($clientTotal, 2) . "*";
 
         $this->db->prepare("INSERT INTO order_messages (order_id, sender_id, sender_role, message) VALUES (?,?,?,?)")
                  ->execute([$orderId, $user['id'], $user['role'], $msg]);
@@ -136,7 +136,7 @@ class OrderMessageController {
             'subtotal'    => $subtotal,
             'service_fee' => $serviceFee,
             'delivery_fee'=> $deliveryFee,
-            'total'       => $total
+            'total'       => $clientTotal
         ], 'Total actualizado');
     }
 

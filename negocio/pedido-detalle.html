@@ -222,7 +222,7 @@ function renderLineEditor() {
   var svc = parseFloat(order.service_fee||0);
   var del = parseFloat(order.delivery_fee||0);
   var sub = editableLines.reduce(function(s,l){ return s + (l.price * l.qty); }, 0);
-  var tot = sub + svc + del;
+  var tot = sub + del; // total visible = subtotal + delivery (sin service_fee)
 
   document.getElementById('lineEditor').innerHTML = editableLines.map(function(l, i) {
     return '<div style="display:grid;grid-template-columns:1fr 60px 90px auto;gap:6px;margin-bottom:8px;align-items:center">' +
@@ -237,7 +237,6 @@ function renderLineEditor() {
     editableLines.map(function(l){
       return l.name ? '<div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:2px"><span>'+esc(l.name)+' ×'+l.qty+'</span><span>Q'+(l.price*l.qty).toFixed(2)+'</span></div>' : '';
     }).join('') +
-    '<div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:2px"><span>Tarifa de servicio</span><span>Q'+svc.toFixed(2)+'</span></div>' +
     (del>0?'<div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:2px"><span>Delivery</span><span>Q'+del.toFixed(2)+'</span></div>':'') +
     '<div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--border);padding-top:6px;margin-top:6px"><span>Total</span><span style="color:var(--blue)">Q'+tot.toFixed(2)+'</span></div>';
 }
