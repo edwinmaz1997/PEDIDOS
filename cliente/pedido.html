@@ -86,7 +86,68 @@
     <div class="cart-summary">
       <div class="order-section">
         <h3>Tu pedido</h3>
-        <div class="delivery-toggle">
+
+        <!-- Toggle Paquete / Pedido — solo visible en negocios tipo delivery -->
+        <div id="orderTypeToggle" style="display:none;margin-bottom:14px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button id="typeOrderBtn" class="delivery-btn active" onclick="setOrderType('pedido',this)">🛒 Pedido</button>
+            <button id="typePackageBtn" class="delivery-btn" onclick="setOrderType('paquete',this)">📦 Envío de paquete</button>
+          </div>
+        </div>
+
+        <!-- Formulario de envío de paquete -->
+        <div id="packageForm" style="display:none;margin-bottom:12px">
+          <!-- Dirección de recogida -->
+          <div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px">
+            <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">📍 Dirección de recogida</div>
+            <div id="pickupSavedOption" style="display:none;margin-bottom:8px">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem">
+                <input type="radio" name="pickupMode" value="saved" id="pickupModeSaved" onchange="setPickupMode('saved')" style="width:16px;height:16px">
+                <span>🏠 Mi dirección registrada: <span id="pickupSavedText" style="color:var(--accent);font-weight:600"></span></span>
+              </label>
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem;margin-bottom:6px">
+              <input type="radio" name="pickupMode" value="gps" id="pickupModeGps" onchange="setPickupMode('gps')" style="width:16px;height:16px">
+              <span>📍 Usar mi ubicación actual</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem;margin-bottom:8px">
+              <input type="radio" name="pickupMode" value="manual" id="pickupModeManual" onchange="setPickupMode('manual')" checked style="width:16px;height:16px">
+              <span>✏️ Escribir dirección</span>
+            </label>
+            <div id="pickupManualWrap">
+              <div style="display:flex;gap:8px">
+                <input type="text" id="pickupAddress" placeholder="Dirección de recogida" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+                <button onclick="getGPSForField('pickupAddress','pickupGpsStatus')" title="Obtener ubicación" style="padding:9px 12px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer">📍</button>
+              </div>
+              <div id="pickupGpsStatus" style="display:none;font-size:.75rem;color:var(--muted);margin-top:4px"></div>
+            </div>
+          </div>
+
+          <!-- Dirección de entrega -->
+          <div style="background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px">
+            <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">🏁 Dirección de entrega</div>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="dropoffAddress" placeholder="Dirección donde se entrega el paquete" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+              <button onclick="getGPSForField('dropoffAddress','dropoffGpsStatus')" title="Obtener ubicación" style="padding:9px 12px;background:#43a047;color:white;border:none;border-radius:var(--radius-sm);cursor:pointer">📍</button>
+            </div>
+            <div id="dropoffGpsStatus" style="display:none;font-size:.75rem;color:var(--muted);margin-top:4px"></div>
+          </div>
+
+          <!-- Datos del destinatario -->
+          <div style="background:#f3e5f5;border:1.5px solid #ce93d8;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px">
+            <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">👤 Datos del destinatario</div>
+            <input type="text" id="recipientName" placeholder="Nombre de quien recibe" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;margin-bottom:8px;box-sizing:border-box">
+            <input type="tel" id="recipientPhone" placeholder="Teléfono del destinatario" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+          </div>
+
+          <!-- Descripción del paquete -->
+          <div class="form-group">
+            <label style="font-size:.85rem;font-weight:600">📝 ¿Qué es el paquete? <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+            <input type="text" id="packageDesc" placeholder="Ej: Documentos, ropa, comida..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+          </div>
+        </div>
+
+        <div class="delivery-toggle" id="deliveryToggle">
           <button class="delivery-btn active" onclick="setDelivery('pickup',this)">🏃 Recoger</button>
           <button class="delivery-btn" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
         </div>
@@ -198,11 +259,12 @@ function renderBizInfo() {
     document.getElementById('deliveryBtn').title = 'Este negocio no ofrece delivery';
     document.getElementById('deliveryBtn').style.opacity = '.4';
   }
-  // Solo delivery — ocultar opción pickup
+  // Solo delivery — ocultar opción pickup y mostrar toggle paquete
   if (business.business_type === 'delivery') {
     var pickupBtn = document.querySelector('.delivery-btn[onclick*="pickup"]');
     if (pickupBtn) pickupBtn.style.display = 'none';
     document.getElementById('deliveryBtn').click();
+    document.getElementById('orderTypeToggle').style.display = 'block';
   }
 }
 
@@ -341,9 +403,108 @@ function loadSavedAddress() {
   }).catch(function(){});
 }
 
+// ── Order Type (pedido / paquete) ─────────────────────────
+var orderType = 'pedido';
+
+function setOrderType(type, btn) {
+  orderType = type;
+  document.querySelectorAll('#orderTypeToggle .delivery-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var packageForm   = document.getElementById('packageForm');
+  var deliveryToggle = document.getElementById('deliveryToggle');
+  var deliveryWrap  = document.getElementById('deliveryAddressWrap');
+  var cartSection   = document.getElementById('cartItems').closest? null : null;
+
+  if (type === 'paquete') {
+    packageForm.style.display = 'block';
+    deliveryToggle.style.display = 'none';
+    deliveryWrap.style.display = 'none';
+    // Forzar delivery
+    deliveryType = 'delivery';
+    // Habilitar submit si hay datos
+    updateCart();
+    loadPickupSavedAddress();
+  } else {
+    packageForm.style.display = 'none';
+    deliveryToggle.style.display = 'flex';
+    deliveryType = 'delivery'; // ya es delivery only
+    deliveryWrap.style.display = 'block';
+    updateCart();
+  }
+}
+
+function loadPickupSavedAddress() {
+  var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+  if (!user.id) return;
+  fetch(API + '/users/' + user.id, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      var u = data.data || {};
+      if (u.address || u.google_maps_url) {
+        var savedText = u.address || u.google_maps_url;
+        document.getElementById('pickupSavedText').textContent = savedText.substring(0, 40) + (savedText.length > 40 ? '...' : '');
+        document.getElementById('pickupSavedOption').style.display = 'block';
+        window._pickupSavedAddress  = u.address || '';
+        window._pickupSavedMapsUrl  = u.google_maps_url || '';
+      }
+    }).catch(function(){});
+}
+
+function setPickupMode(mode) {
+  var manualWrap = document.getElementById('pickupManualWrap');
+  if (mode === 'saved') {
+    manualWrap.style.display = 'none';
+    document.getElementById('pickupAddress').value = window._pickupSavedAddress || window._pickupSavedMapsUrl || '';
+  } else if (mode === 'gps') {
+    manualWrap.style.display = 'block';
+    getGPSForField('pickupAddress', 'pickupGpsStatus');
+  } else {
+    manualWrap.style.display = 'block';
+    document.getElementById('pickupAddress').value = '';
+    document.getElementById('pickupAddress').focus();
+  }
+}
+
+// GPS genérico para cualquier campo
+function getGPSForField(fieldId, statusId) {
+  if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización'); return; }
+  var statusEl = document.getElementById(statusId);
+  statusEl.textContent = '⏳ Obteniendo ubicación...';
+  statusEl.style.display = 'block';
+  navigator.geolocation.getCurrentPosition(
+    async function(pos) {
+      var lat = pos.coords.latitude;
+      var lng = pos.coords.longitude;
+      statusEl.textContent = 'Buscando dirección...';
+      try {
+        var res  = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&addressdetails=1', { headers: { 'Accept-Language': 'es', 'User-Agent': 'NuevaExpress/1.0' } });
+        var data = await res.json();
+        var addr = data.display_name || (lat.toFixed(6) + ', ' + lng.toFixed(6));
+        var parts = addr.split(',');
+        var short = parts.slice(0, Math.min(4, parts.length)).join(',').trim();
+        document.getElementById(fieldId).value = short;
+        statusEl.textContent = '✅ Ubicación obtenida';
+      } catch(e) {
+        document.getElementById(fieldId).value = lat.toFixed(6) + ', ' + lng.toFixed(6);
+        statusEl.textContent = '✅ Coordenadas obtenidas';
+      }
+      setTimeout(function(){ statusEl.style.display = 'none'; }, 3000);
+    },
+    function(err) {
+      var msgs = { 1: 'Permiso denegado.', 2: 'No se pudo obtener ubicación.', 3: 'Tiempo agotado.' };
+      statusEl.textContent = '❌ ' + (msgs[err.code] || 'Error');
+      setTimeout(function(){ statusEl.style.display = 'none'; }, 4000);
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+}
+
 // ── Obtener ubicación GPS con Nominatim ──────────────────
 function getGPSLocation() {
-  if (!navigator.geolocation) { alert("Tu navegador no soporta geolocalización"); return; }
+  getGPSForField('deliveryAddress', 'gpsStatus');
+  // también actualizar preview del mapa
+  setTimeout(function(){ previewDeliveryMap(); }, 3500);
+}
   var btn    = document.getElementById("gpsBtn");
   var status = document.getElementById("gpsStatus");
   btn.textContent = "⏳"; btn.disabled = true;
@@ -477,12 +638,60 @@ function updateCart() {
     ${deliveryFee > 0 ? `<div class="fee-row"><span>Delivery</span><span>Q${deliveryFee.toFixed(2)}</span></div>` : ''}
   `;
   totalEl.textContent = `Q${total.toFixed(2)}`;
-  submitBtn.disabled = lines.length === 0;
+  submitBtn.disabled = orderType === 'paquete' ? false : lines.length === 0;
+  if (orderType === 'paquete') submitBtn.textContent = '📦 Solicitar envío';
+  else submitBtn.textContent = 'Enviar Pedido';
 }
 
 async function submitOrder() {
   const notes = document.getElementById('notes').value.trim();
-  var useSaved = document.getElementById('useSavedAddress')?.checked;
+
+  // ── Flujo paquete ──────────────────────────────────────
+  if (orderType === 'paquete') {
+    var pickup   = document.getElementById('pickupAddress').value.trim();
+    var dropoff  = document.getElementById('dropoffAddress').value.trim();
+    var recName  = document.getElementById('recipientName').value.trim();
+    var recPhone = document.getElementById('recipientPhone').value.trim();
+    var pkgDesc  = document.getElementById('packageDesc').value.trim();
+
+    if (!pickup)   { alert('Ingresa la dirección de recogida'); return; }
+    if (!dropoff)  { alert('Ingresa la dirección de entrega'); return; }
+    if (!recName)  { alert('Ingresa el nombre del destinatario'); return; }
+    if (!recPhone) { alert('Ingresa el teléfono del destinatario'); return; }
+
+    var packageNotes = '📦 ENVÍO DE PAQUETE\n' +
+      '📍 Recogida: ' + pickup + '\n' +
+      '🏁 Entrega: ' + dropoff + '\n' +
+      '👤 Destinatario: ' + recName + '\n' +
+      '📞 Teléfono: ' + recPhone +
+      (pkgDesc ? '\n📝 Paquete: ' + pkgDesc : '') +
+      (notes ? '\n💬 Nota: ' + notes : '');
+
+    var packageItem = [{ name: pkgDesc || 'Envío de paquete', quantity: 1 }];
+
+    const btn = document.getElementById('submitBtn');
+    btn.textContent = 'Enviando...'; btn.disabled = true;
+    try {
+      const res = await fetch(`${API}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
+        body: JSON.stringify({ business_id: businessId, delivery_type: 'delivery', delivery_address: dropoff, notes: packageNotes, items: packageItem })
+      });
+      const data = await res.json();
+      if (!data.success) { alert(data.message || 'Error al enviar'); return; }
+      document.getElementById('mainContent').innerHTML = `
+        <div class="success-screen">
+          <div class="success-icon">✅</div>
+          <h2 style="margin-bottom:8px">¡Envío solicitado!</h2>
+          <p style="color:var(--muted);margin-bottom:8px">Tu solicitud <strong>${data.data.order_number}</strong> fue enviada.</p>
+          <p style="color:var(--muted);margin-bottom:24px">Total: <strong>Q${parseFloat(data.data.total).toFixed(2)}</strong></p>
+          <a href="index.html" class="btn-primary" style="display:inline-flex">Ver mis pedidos</a>
+        </div>`;
+    } catch(e) { alert('Error de conexión'); btn.textContent = 'Enviar'; btn.disabled = false; }
+    return;
+  }
+
+  // ── Flujo normal ───────────────────────────────────────
   var deliveryAddress = '';
   if (deliveryType === 'delivery') {
     if (useSaved) {
