@@ -280,22 +280,17 @@ async function init() {
     opt.value = c.id; opt.textContent = c.name;
     sel.appendChild(opt);
   });
-  // Load business
-  const res = await APP.get('/businesses?limit=1');
-  // Get own business via admin endpoint or search
-  const me = await APP.fetch('/auth/me');
-  if (!me?.success) return;
-  // Try fetching businesses for this user
-  const bizRes = await APP.fetch('/businesses?limit=50');
-  const all = bizRes?.data?.businesses || [];
-  biz = all.find(b => b.user_id == me.data.id) || all[0];
+  // Cargar negocio del usuario autenticado
+  const bizRes = await fetch('/api/businesses/mine', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+  const bizData = await bizRes.json();
+  biz = bizData.success ? bizData.data : null;
   if (!biz) {
     document.getElementById('loadingState').innerHTML = `
       <div style="text-align:center;padding:40px">
         <div style="font-size:2.5rem;margin-bottom:16px">🏪</div>
         <h3>Aún no tienes un negocio registrado</h3>
         <p style="color:var(--muted);margin:10px 0 20px">Crea tu negocio para aparecer en el directorio</p>
-        <button class="btn-primary" onclick="showCreateForm()">+ Crear mi negocio</button>
+        <a href="crear-negocio.html" class="btn-primary">+ Crear mi negocio</a>
       </div>`;
     return;
   }
