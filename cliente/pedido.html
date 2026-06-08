@@ -103,11 +103,15 @@
           </div>
           <!-- Manual address input -->
           <div id="manualAddressWrap">
-            <input type="text" id="deliveryAddress" placeholder="Dirección o link de Google Maps" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;margin-bottom:6px" oninput="previewDeliveryMap()">
+            <div style="display:flex;gap:8px;margin-bottom:6px">
+              <input type="text" id="deliveryAddress" placeholder="Dirección o link de Google Maps" style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif" oninput="previewDeliveryMap()">
+              <button id="gpsBtn" onclick="getGPSLocation()" title="Obtener mi ubicación" style="padding:10px 14px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:1rem;flex-shrink:0;transition:var(--transition)">📍</button>
+            </div>
+            <div id="gpsStatus" style="display:none;font-size:.78rem;color:var(--muted);margin-bottom:4px"></div>
             <div id="deliveryMapPreview" style="display:none;margin-bottom:6px">
               <a id="deliveryMapLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.82rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver en Google Maps</a>
             </div>
-            <div style="font-size:.75rem;color:var(--muted)">Escribe tu dirección o pega un link de Google Maps</div>
+            <div style="font-size:.75rem;color:var(--muted)">Escribe tu dirección o toca 📍 para usar tu ubicación actual</div>
           </div>
           <div id="zoneSelectWrap" style="display:none">
             <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:4px">Zona de entrega</label>
@@ -335,6 +339,54 @@ function loadSavedAddress() {
       window._savedMapsUrl   = u.google_maps_url || '';
     }
   }).catch(function(){});
+}
+
+// ── Obtener ubicación GPS con Nominatim ──────────────────
+function getGPSLocation() {
+  if (!navigator.geolocation) { alert("Tu navegador no soporta geolocalización"); return; }
+  var btn    = document.getElementById("gpsBtn");
+  var status = document.getElementById("gpsStatus");
+  btn.textContent = "⏳"; btn.disabled = true;
+  status.textContent = "Obteniendo tu ubicación...";
+  status.style.display = "block";
+  navigator.geolocation.getCurrentPosition(
+    async function(pos) {
+      var lat = pos.coords.latitude;
+      var lng = pos.coords.longitude;
+      status.textContent = "Buscando dirección...";
+      try {
+        var res  = await fetch("https://nominatim.openstreetmap.org/reverse?format=json\&lat=" + lat + "\&lon=" + lng + "\&addressdetails=1", { headers: { "Accept-Language": "es", "User-Agent": "NuevaExpress/1.0" } });
+        var data = await res.json();
+        var addr = data.display_name || (lat.toFixed(6) + ", " + lng.toFixed(6));
+        // Simplificar la dirección — quitar país y detalles innecesarios
+        var parts = addr.split(",");
+        var short = parts.slice(0, Math.min(4, parts.length)).join(",").trim();
+        document.getElementById("deliveryAddress").value = short;
+        // Guardar link de maps
+        var mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
+        document.getElementById("deliveryMapLink").href = mapsUrl;
+        document.getElementById("deliveryMapPreview").style.display = "block";
+        status.textContent = "✅ Ubicación obtenida";
+        setTimeout(function(){ status.style.display = "none"; }, 3000);
+      } catch(e) {
+        // Si Nominatim falla, usar coordenadas directas
+        document.getElementById("deliveryAddress").value = lat.toFixed(6) + ", " + lng.toFixed(6);
+        var mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
+        document.getElementById("deliveryMapLink").href = mapsUrl;
+        document.getElementById("deliveryMapPreview").style.display = "block";
+        status.textContent = "✅ Coordenadas obtenidas";
+        setTimeout(function(){ status.style.display = "none"; }, 3000);
+      }
+      btn.textContent = "📍"; btn.disabled = false;
+    },
+    function(err) {
+      var msgs = { 1: "Permiso denegado. Activa la ubicación en tu navegador.", 2: "No se pudo obtener la ubicación.", 3: "Tiempo de espera agotado." };
+      status.textContent = "❌ " + (msgs[err.code] || "Error de ubicación");
+      setTimeout(function(){ status.style.display = "none"; }, 4000);
+      btn.textContent = "📍"; btn.disabled = false;
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
 }
 
 function previewDeliveryMap() {
