@@ -98,6 +98,13 @@
         <h3>Información básica</h3>
         <div class="two-col">
           <div class="form-group"><label>Nombre *</label><input type="text" id="f_name" placeholder="Nombre del negocio"></div>
+          <div class="form-group">
+            <label>Tipo de negocio</label>
+            <select id="f_business_type" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.95rem">
+              <option value="pedidos">🛒 Pedidos — productos y carrito</option>
+              <option value="servicios">🔧 Servicios — perfil de contacto</option>
+            </select>
+          </div>
           <div class="form-group"><label>Categoría *</label><select id="f_category"></select></div>
         </div>
         <div class="form-group"><label>Descripción</label><textarea id="f_description" rows="3"></textarea></div>
@@ -221,6 +228,7 @@ async function init() {
 function fillForm() {
   var f = function(id) { return document.getElementById(id); };
   f('f_name').value        = biz.name || '';
+  f('f_business_type').value = biz.business_type || 'pedidos';
   f('f_category').value    = biz.category_id || '';
   f('f_description').value = biz.description || '';
   f('f_what_we_offer').value = biz.what_we_offer || '';
@@ -337,6 +345,7 @@ async function saveChanges() {
 
   var payload = {
     name:            document.getElementById('f_name').value.trim(),
+    business_type:   document.getElementById('f_business_type').value,
     category_id:     document.getElementById('f_category').value,
     description:     document.getElementById('f_description').value,
     what_we_offer:   document.getElementById('f_what_we_offer').value,
