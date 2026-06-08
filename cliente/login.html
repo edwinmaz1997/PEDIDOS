@@ -33,9 +33,6 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
 .divider { text-align: center; color: var(--muted); font-size: .8rem; margin: 16px 0; position: relative; }
 .divider::before { content:''; position:absolute; left:0; top:50%; width:40%; height:1px; background:var(--border); }
 .divider::after  { content:''; position:absolute; right:0; top:50%; width:40%; height:1px; background:var(--border); }
-.role-toggle { display: flex; gap: 8px; margin-bottom: 24px; }
-.role-btn { flex: 1; padding: 9px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: white; cursor: pointer; font-family: 'DM Sans',sans-serif; font-size: .85rem; font-weight: 500; transition: var(--transition); }
-.role-btn.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
 .error-msg { background: #fdf0f0; border: 1px solid #f5c2c2; color: var(--danger); padding: 10px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 16px; display: none; }
 </style>
 </head>
@@ -52,12 +49,6 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
     <div class="auth-subtitle">Tu directorio de negocios local</div>
     <h2>Bienvenido de vuelta</h2>
     <p class="auth-subtitle" style="margin-bottom:20px">Ingresa a tu cuenta para continuar</p>
-
-    <div class="role-toggle">
-      <button class="role-btn active" onclick="setRole('cliente', this)">👤 Cliente</button>
-      <button class="role-btn" onclick="setRole('negocio', this)">🏪 Negocio</button>
-      <button class="role-btn" onclick="setRole('repartidor', this)">🛵 Repartidor</button>
-    </div>
 
     <div class="error-msg" id="errorMsg"></div>
 
@@ -88,13 +79,6 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
 
 <script>
 const API = '/api';
-let selectedRole = 'cliente';
-
-function setRole(role, btn) {
-  selectedRole = role;
-  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
 
 async function doLogin() {
   const email    = document.getElementById('email').value.trim();
