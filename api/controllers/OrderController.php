@@ -18,8 +18,8 @@ class OrderController {
         $limit = min(50, max(1, (int)($_GET['limit'] ?? 15)));
         $offset = ($page - 1) * $limit;
 
-        // Para reportes del negocio — traer todos sin paginación
-        $fetchAll = isset($_GET['all']) && $_GET['all'] === '1' && in_array($user['role'], ['negocio', 'admin']);
+        // Para reportes — traer todos sin paginación
+        $fetchAll = isset($_GET['all']) && $_GET['all'] === '1';
         $status = Security::sanitize($_GET['status'] ?? '');
 
         $sql    = "SELECT o.*, b.name as business_name, b.logo as business_logo,

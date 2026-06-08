@@ -157,7 +157,7 @@ async function init() {
   var period = document.getElementById('periodFilter').value;
 
   // Load orders
-  var res = await fetch('/api/orders', { headers:{ Authorization:'Bearer '+getToken() } }).then(function(r){ return r.json(); });
+  var res = await fetch('/api/orders?all=1', { headers:{ Authorization:'Bearer '+getToken() } }).then(function(r){ return r.json(); });
   var allOrders = res.data?.orders || [];
   var orders = filterByPeriod(allOrders, period);
 
@@ -282,14 +282,22 @@ async function init() {
     document.getElementById('monthlyHistory').innerHTML = html3;
   }
 
-  // ── Recent activity ─────────────────────────────────────────
+  // ── Recent activity con paginación ──────────────────────────
   var statusColors = {pendiente:'#f39c12',aceptado:'#27ae60',en_preparacion:'#8e44ad',listo:'#2980b9',en_camino:'#16a085',entregado:'#27ae60',cancelado:'#e74c3c'};
   var statusLabels = {pendiente:'⏳ Pendiente',aceptado:'✅ Aceptado',en_preparacion:'👨‍🍳 En preparación',listo:'📦 Listo',en_camino:'🛵 En camino',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
-  var recent = allOrders.slice(0,15);
-  if(!recent.length){
-    document.getElementById('recentActivity').innerHTML = '<div class="empty-state"><p>Sin actividad.</p></div>';
-  } else {
-    var html4 = recent.map(function(o){
+
+  var activityPage = 1;
+  var activityPerPage = 10;
+
+  function renderActivity() {
+    if (!allOrders.length) {
+      document.getElementById('recentActivity').innerHTML = '<div class="empty-state"><p>Sin actividad.</p></div>';
+      return;
+    }
+    var totalPages = Math.ceil(allOrders.length / activityPerPage);
+    var pageData = allOrders.slice((activityPage-1)*activityPerPage, activityPage*activityPerPage);
+
+    var html4 = pageData.map(function(o){
       var color = statusColors[o.status]||'#95a5a6';
       var total = parseFloat(o.subtotal||0)+parseFloat(o.delivery_fee||0);
       return '<div class="timeline-row">' +
@@ -305,8 +313,36 @@ async function init() {
         '</div>' +
       '</div>';
     }).join('');
-    document.getElementById('recentActivity').innerHTML = html4;
+
+    // Paginación
+    var pag = '';
+    if (totalPages > 1) {
+      pag += '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap">';
+      pag += '<button onclick="goActivityPage('+(activityPage-1)+')" '+(activityPage===1?'disabled':'')+' style="padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-family:DM Sans,sans-serif">‹</button>';
+      for (var p = 1; p <= totalPages; p++) {
+        if (p===1||p===totalPages||(p>=activityPage-2&&p<=activityPage+2)) {
+          pag += '<button onclick="goActivityPage('+p+')" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;background:'+(p===activityPage?'var(--charcoal)':'white')+';color:'+(p===activityPage?'white':'inherit')+';cursor:pointer;font-family:DM Sans,sans-serif">'+p+'</button>';
+        } else if (p===activityPage-3||p===activityPage+3) {
+          pag += '<span style="color:var(--muted)">…</span>';
+        }
+      }
+      pag += '<button onclick="goActivityPage('+(activityPage+1)+')" '+(activityPage===totalPages?'disabled':'')+' style="padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-family:DM Sans,sans-serif">›</button>';
+      pag += '<span style="font-size:.8rem;color:var(--muted)">'+allOrders.length+' actividades</span>';
+      pag += '</div>';
+    }
+
+    document.getElementById('recentActivity').innerHTML = html4 + pag;
   }
+
+  window.goActivityPage = function(p) {
+    var totalPages = Math.ceil(allOrders.length / activityPerPage);
+    if (p < 1 || p > totalPages) return;
+    activityPage = p;
+    renderActivity();
+    document.getElementById('recentActivity').scrollIntoView({behavior:'smooth', block:'start'});
+  };
+
+  renderActivity();
 }
 
 function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
