@@ -92,13 +92,39 @@ var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
 if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'negocio') window.location.href = '/cliente/login.html';
 document.getElementById('sidebarUser').textContent = user.name || 'Mi Negocio';
 
-// Adaptar sidebar según tipo de negocio
+// Validar negocio y adaptar sidebar
 (async function() {
   try {
-    const res = await fetch(API + '/businesses/mine', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+    const res  = await fetch(API + '/businesses/mine', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
     const data = await res.json();
+
+    if (!data.success || !data.data) {
+      // No tiene negocio — redirigir a crear
+      window.location.href = '/negocio/crear-negocio.html';
+      return;
+    }
+
     const biz = data.data;
-    if (biz && biz.business_type === 'servicios') {
+
+    if (!biz.is_active) {
+      // Negocio pendiente de aprobación — mostrar pantalla de espera
+      document.querySelector('.main-content').innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px">
+          <div style="font-size:3rem;margin-bottom:16px">⏳</div>
+          <h2 style="margin-bottom:8px">Tu negocio está en revisión</h2>
+          <p style="color:var(--muted);max-width:400px;margin-bottom:24px">
+            Hemos recibido tu solicitud para <strong>${biz.name}</strong>. 
+            El equipo de NuevaExpress la revisará pronto y recibirás una notificación cuando sea aprobada.
+          </p>
+          <div style="background:var(--off-white);border-radius:12px;padding:16px 24px;font-size:.85rem;color:var(--muted)">
+            ¿Tienes dudas? Contáctanos por WhatsApp
+          </div>
+        </div>`;
+      return;
+    }
+
+    // Negocio activo — adaptar sidebar según tipo
+    if (biz.business_type === 'servicios') {
       document.getElementById('navProductos').style.display = 'none';
       document.getElementById('navServicios').style.display = 'block';
       document.getElementById('navZonas').style.display = 'none';

@@ -239,7 +239,7 @@ async function doVerify() {
     const token   = rData.data.token;
     const userStr = encodeURIComponent(JSON.stringify(rData.data.user));
     setTimeout(() => {
-      if (role === 'negocio')         window.location.href = '/negocio/index.html#tk=' + token + '&us=' + userStr;
+      if (role === 'negocio')         window.location.href = '/negocio/crear-negocio.html#tk=' + token + '&us=' + userStr;
       else if (role === 'repartidor') window.location.href = '/repartidor/index.html#tk=' + token + '&us=' + userStr;
       else                            window.location.href = '/cliente/index.html#tk=' + token + '&us=' + userStr;
     }, 2000);
