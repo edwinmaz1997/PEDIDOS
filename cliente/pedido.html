@@ -221,6 +221,14 @@ async function init() {
     renderBizInfo();
     renderProducts();
 
+    // Para negocios tipo delivery, activar modo según URL después de renderizar
+    if (business.business_type === 'delivery') {
+      var typeBtn = urlOrderType === 'paquete'
+        ? document.getElementById('typePackageBtn')
+        : document.getElementById('typeOrderBtn');
+      if (typeBtn) setOrderType(urlOrderType, typeBtn);
+    }
+
     // Load delivery zones (only ones this business covers)
     if (business.accepts_delivery) {
       var zRes = await fetch('/api/businesses/' + businessId + '/zones').then(function(r){ return r.json(); });
@@ -266,17 +274,13 @@ function renderBizInfo() {
     if (pickupBtn) pickupBtn.style.display = 'none';
     document.getElementById('deliveryBtn').click();
     document.getElementById('orderTypeToggle').style.display = 'block';
-    // Activar modo según URL
-    var typeBtn = urlOrderType === 'paquete'
-      ? document.getElementById('typePackageBtn')
-      : document.getElementById('typeOrderBtn');
-    if (typeBtn) setOrderType(urlOrderType, typeBtn);
   }
 }
 
 function renderProducts() {
   const section = document.getElementById('productsSection');
-  section.style.display = 'block';
+  // No mostrar si estamos en modo paquete
+  if (orderType !== 'paquete') section.style.display = 'block';
   const products = business.products || [];
   if (!products.length) {
     document.getElementById('productsList').innerHTML = '<p style="color:var(--muted);font-size:.9rem">Este negocio no tiene productos. Usa el campo personalizado.</p>';
@@ -442,9 +446,7 @@ function setOrderType(type, btn) {
 }
 
 function loadPickupSavedAddress() {
-  var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
-  if (!user.id) return;
-  fetch(API + '/users/' + user.id, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } })
+  fetch(API + '/auth/me', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } })
     .then(function(r){ return r.json(); })
     .then(function(data) {
       var u = data.data || {};
