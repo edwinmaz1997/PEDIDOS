@@ -304,7 +304,7 @@ class OrderController {
     }
 
     private function notifyRepartidores(string $title, string $message): void {
-        $stmt = $this->db->prepare("SELECT id FROM users WHERE role = 'repartidor' AND is_active = 1");
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE role_id = 4 AND is_active = 1");
         $stmt->execute();
         $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
         error_log('notifyRepartidores — encontrados: ' . count($ids) . ' — ids: ' . implode(',', $ids));

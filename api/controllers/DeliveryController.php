@@ -92,7 +92,7 @@ class DeliveryController {
         $this->db->prepare("UPDATE orders SET status = 'aceptado' WHERE id = ?")->execute([$d['order_id']]);
 
         // Notify all active repartidores — pedido vuelve a estar disponible
-        $rStmt = $this->db->prepare("SELECT id FROM users WHERE role = 'repartidor' AND is_active = 1");
+        $rStmt = $this->db->prepare("SELECT id FROM users WHERE role_id = 4 AND is_active = 1");
         $rStmt->execute();
         $repartidorIds = $rStmt->fetchAll(PDO::FETCH_COLUMN);
         if (!empty($repartidorIds)) {
