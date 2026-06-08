@@ -50,6 +50,11 @@ class OrderController {
 
         foreach ($orders as &$order) {
             $order['items'] = $this->getItems($order['id']);
+            // service_fee es ingreso interno — cliente y repartidor no lo ven
+            if (in_array($user['role'], ['cliente', 'repartidor'])) {
+                $order['total']       = (float)$order['subtotal'] + (float)$order['delivery_fee'];
+                $order['service_fee'] = null;
+            }
         }
 
         Response::success(['orders' => $orders]);
@@ -63,6 +68,12 @@ class OrderController {
 
         $order['items']      = $this->getItems($id);
         $order['status_log'] = $this->getStatusLog($id);
+
+        // service_fee es ingreso interno — cliente y repartidor no lo ven
+        if (in_array($user['role'], ['cliente', 'repartidor'])) {
+            $order['total']       = (float)$order['subtotal'] + (float)$order['delivery_fee'];
+            $order['service_fee'] = null;
+        }
 
         Response::success($order);
     }
@@ -157,9 +168,8 @@ class OrderController {
             'order_id'     => $orderId,
             'order_number' => $orderNumber,
             'subtotal'     => $subtotal,
-            'service_fee'  => $serviceFee,
             'delivery_fee' => $deliveryFee,
-            'total'        => $total,
+            'total'        => $subtotal + $deliveryFee, // service_fee es ingreso interno, no visible al cliente
         ], 'Pedido creado exitosamente', 201);
     }
 
