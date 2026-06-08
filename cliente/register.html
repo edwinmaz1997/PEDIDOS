@@ -235,11 +235,13 @@ async function doVerify() {
     document.getElementById('line2').className = 'step-line done';
     document.getElementById('dot3').className = 'step-dot done';
 
-    const role = rData.data.user.role;
+    const role    = rData.data.user.role;
+    const token   = rData.data.token;
+    const userStr = encodeURIComponent(JSON.stringify(rData.data.user));
     setTimeout(() => {
-      if (role === 'negocio') window.location.href = '/negocio/index.html';
-      else if (role === 'repartidor') window.location.href = '/repartidor/index.html';
-      else window.location.href = '/cliente/index.html';
+      if (role === 'negocio')         window.location.href = '/negocio/index.html#tk=' + token + '&us=' + userStr;
+      else if (role === 'repartidor') window.location.href = '/repartidor/index.html#tk=' + token + '&us=' + userStr;
+      else                            window.location.href = '/cliente/index.html#tk=' + token + '&us=' + userStr;
     }, 2000);
 
   } catch(e) { showError('errorMsg2', 'Error de conexión. Intenta de nuevo.'); }
