@@ -350,9 +350,20 @@ async function openBusiness(id) {
               </div>
             </div>
           ` : ''}
+          ${b.business_type === 'delivery' ? `
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px">
+              <a href="cliente/pedido.html?business=${b.id}&type=pedido" class="btn-order" style="text-align:center;text-decoration:none;background:var(--accent)">
+                🛒 Hacer Pedido
+              </a>
+              <a href="cliente/pedido.html?business=${b.id}&type=paquete" class="btn-order" style="text-align:center;text-decoration:none;background:#FF8C42">
+                📦 Enviar Paquete
+              </a>
+            </div>
+          ` : `
           <a href="cliente/pedido.html?business=${b.id}" class="btn-order">
             🛒 Hacer un Pedido
           </a>
+          `}
         `}
       </div>
     `;

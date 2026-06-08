@@ -202,6 +202,7 @@ if (!localStorage.getItem('nuevaexpress_token')) window.location.href = '/client
 const params     = new URLSearchParams(window.location.search);
 const businessId = parseInt(params.get('business')) || 0;
 if (!businessId) window.location.href = '/index.html';
+const urlOrderType = params.get('type') || 'pedido'; // 'pedido' o 'paquete'
 
 let business    = null;
 let cart        = {}; // product_id -> { name, price, qty }
@@ -265,6 +266,13 @@ function renderBizInfo() {
     if (pickupBtn) pickupBtn.style.display = 'none';
     document.getElementById('deliveryBtn').click();
     document.getElementById('orderTypeToggle').style.display = 'block';
+    // Activar modo paquete si viene en la URL
+    if (urlOrderType === 'paquete') {
+      setTimeout(function() {
+        var paqueteBtn = document.getElementById('typePackageBtn');
+        if (paqueteBtn) paqueteBtn.click();
+      }, 100);
+    }
   }
 }
 
