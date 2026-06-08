@@ -72,9 +72,53 @@ class PasswordResetController {
     }
 
     private function sendResetEmail(string $to, string $name, string $url): void {
-        $subject = 'Restablecer contraseña — NuevaExpress';
-        $body    = "Hola {$name},\n\nRecibiste este correo porque solicitaste restablecer tu contraseña en NuevaExpress.\n\nHaz clic en el siguiente enlace (válido por 1 hora):\n{$url}\n\nSi no solicitaste este cambio, ignora este correo.\n\nEquipo NuevaExpress\nhttps://nuevaexpress.com";
-        $headers = "From: NuevaExpress <noreply@nuevaexpress.com>\r\nReply-To: noreply@nuevaexpress.com\r\nX-Mailer: PHP/" . phpversion();
-        @mail($to, $subject, $body, $headers);
+        $html = <<<HTML
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 0">
+    <tr><td align="center">
+      <table width="480" cellpadding="0" cellspacing="0" style="background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)">
+        <tr><td style="background:linear-gradient(135deg,#1a1a2e,#4A90D9);padding:32px;text-align:center">
+          <div style="font-size:1.6rem;font-weight:800;color:white">Nueva<span style="color:#90cdf4">Express</span></div>
+          <div style="color:rgba(255,255,255,.7);font-size:.85rem;margin-top:4px">Tu plataforma de delivery local</div>
+        </td></tr>
+        <tr><td style="padding:40px 32px;text-align:center">
+          <p style="font-size:1.05rem;color:#333;margin:0 0 8px">Hola, <strong>{$name}</strong> 👋</p>
+          <p style="color:#666;font-size:.95rem;margin:0 0 32px">Recibiste este correo porque solicitaste restablecer tu contraseña.</p>
+          <a href="{$url}" style="display:inline-block;background:#4A90D9;color:white;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:700;font-size:1rem">Restablecer contraseña</a>
+          <p style="color:#999;font-size:.82rem;margin:24px 0 0">Este enlace es válido por <strong>1 hora</strong>.<br>Si no solicitaste esto, ignora este correo.</p>
+        </td></tr>
+        <tr><td style="background:#f9f9f9;padding:20px 32px;text-align:center;border-top:1px solid #eee">
+          <p style="color:#bbb;font-size:.78rem;margin:0">© 2026 NuevaExpress — Nueva Concepción, Escuintla</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>
+HTML;
+        try {
+            require_once __DIR__ . '/../libs/PHPMailer/PHPMailer.php';
+            require_once __DIR__ . '/../libs/PHPMailer/SMTP.php';
+            require_once __DIR__ . '/../libs/PHPMailer/Exception.php';
+            $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host       = 'mail.nuevaexpress.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'verificacion@nuevaexpress.com';
+            $mail->Password   = 'Verificacion2026.';
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = 465;
+            $mail->CharSet    = 'UTF-8';
+            $mail->setFrom('verificacion@nuevaexpress.com', 'NuevaExpress');
+            $mail->addAddress($to, $name);
+            $mail->isHTML(true);
+            $mail->Subject = 'Restablecer contraseña — NuevaExpress';
+            $mail->Body    = $html;
+            $mail->AltBody = "Hola {$name}, usa este enlace para restablecer tu contraseña (válido 1 hora): {$url}";
+            $mail->send();
+        } catch (\Exception $e) {
+            error_log('PasswordReset mail error: ' . $e->getMessage());
+        }
     }
 }
