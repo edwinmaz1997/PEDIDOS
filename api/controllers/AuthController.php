@@ -12,6 +12,61 @@ class AuthController {
     }
 
     // --------------------------------------------------------
+    // POST /api/auth/send-code  — envía código de verificación al correo
+    // --------------------------------------------------------
+    public function sendCode(array $body): void {
+        $email = trim($body['email'] ?? '');
+        $name  = trim($body['name'] ?? 'Usuario');
+
+        if (!Security::validateEmail($email)) Response::error('Email inválido', 400);
+
+        // Check no está ya registrado
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        if ($stmt->fetch()) Response::error('El email ya está registrado', 409);
+
+        // Generar código 6 dígitos
+        $code      = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $expiresAt = date('Y-m-d H:i:s', time() + 900); // 15 minutos
+
+        // Borrar códigos anteriores para este email
+        $this->db->prepare("DELETE FROM email_verifications WHERE email = ?")->execute([$email]);
+
+        // Insertar nuevo código
+        $this->db->prepare("INSERT INTO email_verifications (email, code, expires_at) VALUES (?,?,?)")
+                 ->execute([$email, $code, $expiresAt]);
+
+        // Enviar correo
+        $sent = Mailer::sendVerificationCode($email, $name, $code);
+        if (!$sent) Response::error('No se pudo enviar el correo. Verifica tu email e intenta de nuevo.', 500);
+
+        Response::success(null, 'Código enviado a tu correo');
+    }
+
+    // --------------------------------------------------------
+    // POST /api/auth/verify-code  — verifica el código
+    // --------------------------------------------------------
+    public function verifyCode(array $body): void {
+        $email = trim($body['email'] ?? '');
+        $code  = trim($body['code'] ?? '');
+
+        if (!$email || !$code) Response::error('Email y código requeridos', 400);
+
+        $stmt = $this->db->prepare("SELECT * FROM email_verifications WHERE email = ? AND used = 0 ORDER BY created_at DESC LIMIT 1");
+        $stmt->execute([$email]);
+        $row = $stmt->fetch();
+
+        if (!$row) Response::error('Código no encontrado. Solicita uno nuevo.', 400);
+        if (strtotime($row['expires_at']) < time()) Response::error('El código ha expirado. Solicita uno nuevo.', 400);
+        if ($row['code'] !== $code) Response::error('Código incorrecto', 400);
+
+        // Marcar como usado
+        $this->db->prepare("UPDATE email_verifications SET used = 1 WHERE id = ?")->execute([$row['id']]);
+
+        Response::success(null, 'Correo verificado correctamente');
+    }
+
+    // --------------------------------------------------------
     // POST /api/auth/register
     // --------------------------------------------------------
     public function register(array $body): void {
@@ -36,6 +91,11 @@ class AuthController {
         if ($phone && !Security::validatePhone($phone)) $errors['phone'] = 'Número de teléfono inválido';
         if (!in_array($role, ['cliente', 'negocio', 'repartidor'])) $errors['role'] = 'Rol inválido';
         if ($errors) Response::error('Datos inválidos', 422, $errors);
+
+        // Validar que el email fue verificado
+        $vStmt = $this->db->prepare("SELECT id FROM email_verifications WHERE email = ? AND used = 1 ORDER BY created_at DESC LIMIT 1");
+        $vStmt->execute([$email]);
+        if (!$vStmt->fetch()) Response::error('Debes verificar tu correo electrónico antes de registrarte', 403);
 
         // Check email unique
         $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");

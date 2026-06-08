@@ -18,6 +18,7 @@ require_once __DIR__ . '/controllers/AdminNotificationController.php';
 require_once __DIR__ . '/controllers/PhotoController.php';
 require_once __DIR__ . '/controllers/OrderMessageController.php';
 require_once __DIR__ . '/helpers/PushNotification.php';
+require_once __DIR__ . '/helpers/Mailer.php';
 require_once __DIR__ . '/controllers/ProductCategoryController.php';
 require_once __DIR__ . '/controllers/DeliveryZoneController.php';
 require_once __DIR__ . '/controllers/CategoryController.php';
@@ -85,6 +86,8 @@ try {
                 case 'login':              $ctrl->login($body);         break;
                 case 'register':           $ctrl->register($body);      break;
                 case 'logout':             $ctrl->logout();              break;
+                case 'send-code':          $ctrl->sendCode($body);      break;
+                case 'verify-code':        $ctrl->verifyCode($body);    break;
                 case 'me':                 $ctrl->me();                  break;
                 case 'forgot-password':    $pwCtrl->forgot($body);      break;
                 case 'reset-password':     $pwCtrl->reset($body);       break;

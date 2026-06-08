@@ -20,14 +20,24 @@
 body { background: var(--bg); display: flex; flex-direction: column; min-height: 100vh; }
 .auth-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px; }
 .auth-card { background: white; border-radius: 20px; padding: 40px; width: 100%; max-width: 460px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
-.auth-logo { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 24px; }
-.auth-logo span { color: var(--accent); }
 .error-msg { background: #fdf0f0; border: 1px solid #f5c2c2; color: var(--danger); padding: 10px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 16px; display: none; }
+.success-msg { background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 16px; display: none; }
 .role-toggle { display: flex; gap: 8px; margin-bottom: 24px; }
 .role-btn { flex: 1; padding: 9px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: white; cursor: pointer; font-family: 'DM Sans',sans-serif; font-size: .8rem; font-weight: 500; transition: var(--transition); }
 .role-btn.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .pw-rules { font-size: .78rem; color: var(--muted); margin-top: 6px; }
+/* Paso verificación */
+.code-inputs { display: flex; gap: 10px; justify-content: center; margin: 24px 0; }
+.code-inputs input { width: 48px; height: 56px; text-align: center; font-size: 1.6rem; font-weight: 700; border: 2px solid var(--border); border-radius: 10px; font-family: monospace; transition: border-color .2s; }
+.code-inputs input:focus { outline: none; border-color: var(--accent); }
+.step-indicator { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+.step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700; }
+.step-dot.active { background: var(--accent); color: white; }
+.step-dot.done { background: var(--success); color: white; }
+.step-dot.pending { background: var(--border); color: var(--muted); }
+.step-line { flex: 1; height: 2px; background: var(--border); }
+.step-line.done { background: var(--success); }
 </style>
 </head>
 <body>
@@ -35,90 +45,251 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
 
 <div class="auth-wrap">
   <div class="auth-card">
-    <div class="auth-logo"><div class="logo" style="justify-content:center"><img src="../assets/img/logo.jpg" alt="NuevaExpress" style="height:48px;border-radius:10px"><span class="logo-text" style="font-size:1.2rem">Nueva<span>Express</span></span></div></div>
-    <h2 style="margin-bottom:4px">Crear cuenta</h2>
-    <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px">Únete gratis a NuevaExpress</p>
-
-    <div class="role-toggle">
-      <button class="role-btn active" onclick="setRole('cliente', this)">👤 Cliente</button>
-      <button class="role-btn" onclick="setRole('negocio', this)">🏪 Negocio</button>
-      <button class="role-btn" onclick="setRole('repartidor', this)">🛵 Repartidor</button>
+    <div style="text-align:center;margin-bottom:20px">
+      <div class="logo" style="justify-content:center"><img src="../assets/img/logo.jpg" alt="NuevaExpress" style="height:48px;border-radius:10px"><span class="logo-text" style="font-size:1.2rem">Nueva<span>Express</span></span></div>
     </div>
 
-    <div class="error-msg" id="errorMsg"></div>
-
-    <div class="two-col">
-      <div class="form-group"><label>Nombre completo</label><input type="text" id="name" placeholder="Tu nombre"></div>
-      <div class="form-group"><label>Teléfono</label><input type="tel" id="phone" placeholder="+502 5555 5555"></div>
-    <div class="form-group">
-      <label>Mi dirección de casa</label>
-      <input type="text" id="address" placeholder="Colonia, calle, número...">
+    <!-- Indicador de pasos -->
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot1">1</div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot pending" id="dot2">2</div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot pending" id="dot3">3</div>
     </div>
-    <div class="form-group">
-      <label>Link de Google Maps de mi casa <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
-      <input type="url" id="maps_url" placeholder="https://maps.app.goo.gl/..." oninput="previewMaps()">
-      <div id="mapsPreview" style="display:none;margin-top:6px">
-        <a id="mapsLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.78rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver mi ubicación</a>
+
+    <!-- PASO 1: Datos de registro -->
+    <div id="step1">
+      <h2 style="margin-bottom:4px">Crear cuenta</h2>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px">Únete gratis a NuevaExpress</p>
+
+      <div class="role-toggle">
+        <button class="role-btn active" onclick="setRole('cliente', this)">👤 Cliente</button>
+        <button class="role-btn" onclick="setRole('negocio', this)">🏪 Negocio</button>
+        <button class="role-btn" onclick="setRole('repartidor', this)">🛵 Repartidor</button>
       </div>
-    </div>
-    </div>
-    <div class="form-group"><label>Correo electrónico</label><input type="email" id="email" placeholder="tucorreo@ejemplo.com"></div>
-    <div class="form-group">
-      <label>Contraseña</label>
-      <input type="password" id="password" placeholder="Mínimo 8 caracteres">
-      <div class="pw-rules">Debe contener al menos 8 caracteres, una mayúscula y un número.</div>
-    </div>
-    <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="password2" placeholder="Repite la contraseña"></div>
 
-    <button class="btn-primary" style="width:100%;justify-content:center;padding:14px" onclick="doRegister()" id="regBtn">
-      Crear cuenta
-    </button>
-    <p style="text-align:center;margin-top:20px;font-size:.9rem;color:var(--muted)">
-      ¿Ya tienes cuenta? <a href="login.html" style="color:var(--accent);font-weight:600">Inicia sesión</a>
-    </p>
+      <div class="error-msg" id="errorMsg1"></div>
+
+      <div class="two-col">
+        <div class="form-group"><label>Nombre completo</label><input type="text" id="name" placeholder="Tu nombre"></div>
+        <div class="form-group"><label>Teléfono</label><input type="tel" id="phone" placeholder="+502 5555 5555"></div>
+      </div>
+      <div class="form-group">
+        <label>Mi dirección de casa</label>
+        <input type="text" id="address" placeholder="Colonia, calle, número...">
+      </div>
+      <div class="form-group">
+        <label>Link de Google Maps <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <input type="url" id="maps_url" placeholder="https://maps.app.goo.gl/..." oninput="previewMaps()">
+        <div id="mapsPreview" style="display:none;margin-top:6px">
+          <a id="mapsLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.78rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver mi ubicación</a>
+        </div>
+      </div>
+      <div class="form-group"><label>Correo electrónico</label><input type="email" id="email" placeholder="tucorreo@ejemplo.com"></div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="password" placeholder="Mínimo 8 caracteres">
+        <div class="pw-rules">Debe contener al menos 8 caracteres, una mayúscula y un número.</div>
+      </div>
+      <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="password2" placeholder="Repite la contraseña"></div>
+
+      <button class="btn-primary" style="width:100%;justify-content:center;padding:14px" onclick="goToVerify()" id="step1Btn">
+        Continuar →
+      </button>
+      <p style="text-align:center;margin-top:20px;font-size:.9rem;color:var(--muted)">
+        ¿Ya tienes cuenta? <a href="login.html" style="color:var(--accent);font-weight:600">Inicia sesión</a>
+      </p>
+    </div>
+
+    <!-- PASO 2: Verificación de correo -->
+    <div id="step2" style="display:none">
+      <h2 style="margin-bottom:4px">Verifica tu correo</h2>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:4px">Enviamos un código de 6 dígitos a:</p>
+      <p style="font-weight:700;color:var(--accent);margin-bottom:20px" id="emailDisplay"></p>
+
+      <div class="error-msg" id="errorMsg2"></div>
+      <div class="success-msg" id="successMsg2"></div>
+
+      <div class="code-inputs">
+        <input type="number" maxlength="1" id="c1" oninput="moveNext(this,'c2')" onkeydown="movePrev(event,'c1')">
+        <input type="number" maxlength="1" id="c2" oninput="moveNext(this,'c3')" onkeydown="movePrev(event,'c1')">
+        <input type="number" maxlength="1" id="c3" oninput="moveNext(this,'c4')" onkeydown="movePrev(event,'c2')">
+        <input type="number" maxlength="1" id="c4" oninput="moveNext(this,'c5')" onkeydown="movePrev(event,'c3')">
+        <input type="number" maxlength="1" id="c5" oninput="moveNext(this,'c6')" onkeydown="movePrev(event,'c4')">
+        <input type="number" maxlength="1" id="c6" oninput="moveNext(this,null)" onkeydown="movePrev(event,'c5')">
+      </div>
+
+      <button class="btn-primary" style="width:100%;justify-content:center;padding:14px" onclick="doVerify()" id="verifyBtn">
+        Verificar código
+      </button>
+      <p style="text-align:center;margin-top:16px;font-size:.88rem;color:var(--muted)">
+        ¿No llegó el correo? <a href="#" onclick="resendCode()" style="color:var(--accent);font-weight:600" id="resendLink">Reenviar código</a>
+      </p>
+      <p style="text-align:center;margin-top:8px;font-size:.85rem">
+        <a href="#" onclick="backToStep1()" style="color:var(--muted)">← Cambiar datos</a>
+      </p>
+    </div>
+
+    <!-- PASO 3: Cuenta creada -->
+    <div id="step3" style="display:none;text-align:center">
+      <div style="font-size:4rem;margin-bottom:16px">🎉</div>
+      <h2 style="margin-bottom:8px">¡Cuenta creada!</h2>
+      <p style="color:var(--muted);margin-bottom:32px">Bienvenido a NuevaExpress. Redirigiendo...</p>
+      <div class="spinner" style="margin:0 auto"></div>
+    </div>
   </div>
 </div>
 
 <script>
 const API = '/api';
 let selectedRole = 'cliente';
-function setRole(r, btn) { selectedRole = r; document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+let formData = {};
 
-async function doRegister() {
+function setRole(r, btn) {
+  selectedRole = r;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function previewMaps() {
+  const val = document.getElementById('maps_url').value.trim();
+  const preview = document.getElementById('mapsPreview');
+  const link = document.getElementById('mapsLink');
+  if (val.startsWith('http')) { preview.style.display = 'block'; link.href = val; }
+  else { preview.style.display = 'none'; }
+}
+
+async function goToVerify() {
   const name = document.getElementById('name').value.trim();
   const phone = document.getElementById('phone').value.trim();
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const password2 = document.getElementById('password2').value;
-  const btn = document.getElementById('regBtn');
+  const btn = document.getElementById('step1Btn');
 
-  if (!name || !email || !password) { showError('Completa todos los campos obligatorios'); return; }
-  if (password !== password2) { showError('Las contraseñas no coinciden'); return; }
-  if (password.length < 8) { showError('La contraseña debe tener al menos 8 caracteres'); return; }
+  if (!name || !email || !password) { showError('errorMsg1', 'Completa todos los campos obligatorios'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('errorMsg1', 'Ingresa un email válido'); return; }
+  if (password !== password2) { showError('errorMsg1', 'Las contraseñas no coinciden'); return; }
+  if (password.length < 8) { showError('errorMsg1', 'La contraseña debe tener al menos 8 caracteres'); return; }
+  if (!/[A-Z]/.test(password)) { showError('errorMsg1', 'La contraseña debe tener al menos una mayúscula'); return; }
+  if (!/[0-9]/.test(password)) { showError('errorMsg1', 'La contraseña debe contener al menos un número'); return; }
 
-  btn.textContent = 'Creando cuenta...'; btn.disabled = true;
+  // Guardar datos del formulario
+  formData = { name, phone, email, password, role: selectedRole, address: document.getElementById('address').value.trim(), google_maps_url: document.getElementById('maps_url').value.trim() };
+
+  btn.textContent = 'Enviando código...'; btn.disabled = true;
   try {
-    const res = await fetch(`${API}/auth/register`, {
+    const res = await fetch(`${API}/auth/send-code`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        name, phone, email, password, role: selectedRole,
-        address: document.getElementById('address').value.trim(),
-        google_maps_url: document.getElementById('maps_url').value.trim()
-      })
+      body: JSON.stringify({ email, name })
     });
     const data = await res.json();
-    if (!data.success) { showError(data.message || 'Error al crear cuenta'); return; }
-    localStorage.setItem('nuevaexpress_token', data.data.token);
-    localStorage.setItem('nuevaexpress_user', JSON.stringify(data.data.user));
-    const role = data.data.user.role;
-    if (role === 'negocio') window.location.href = '/negocio/index.html';
-    else if (role === 'repartidor') window.location.href = '/repartidor/index.html';
-    else window.location.href = '/cliente/index.html';
-  } catch(e) { showError('Error de conexión. Intenta de nuevo.'); }
-  finally { btn.textContent = 'Crear cuenta'; btn.disabled = false; }
+    if (!data.success) { showError('errorMsg1', data.message || 'Error enviando código'); return; }
+
+    // Ir al paso 2
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    document.getElementById('emailDisplay').textContent = email;
+    document.getElementById('dot1').className = 'step-dot done';
+    document.getElementById('line1').className = 'step-line done';
+    document.getElementById('dot2').className = 'step-dot active';
+    document.getElementById('c1').focus();
+  } catch(e) { showError('errorMsg1', 'Error de conexión. Intenta de nuevo.'); }
+  finally { btn.textContent = 'Continuar →'; btn.disabled = false; }
 }
-function showError(msg) { const el = document.getElementById('errorMsg'); el.textContent = msg; el.style.display = 'block'; }
-document.addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+
+async function doVerify() {
+  const code = ['c1','c2','c3','c4','c5','c6'].map(id => document.getElementById(id).value).join('');
+  const btn = document.getElementById('verifyBtn');
+
+  if (code.length !== 6 || !/^\d{6}$/.test(code)) { showError('errorMsg2', 'Ingresa el código completo de 6 dígitos'); return; }
+
+  btn.textContent = 'Verificando...'; btn.disabled = true;
+  document.getElementById('errorMsg2').style.display = 'none';
+
+  try {
+    // Verificar código
+    const vRes = await fetch(`${API}/auth/verify-code`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: formData.email, code })
+    });
+    const vData = await vRes.json();
+    if (!vData.success) { showError('errorMsg2', vData.message || 'Código incorrecto'); return; }
+
+    // Crear cuenta
+    const rRes = await fetch(`${API}/auth/register`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    const rData = await rRes.json();
+    if (!rData.success) { showError('errorMsg2', rData.message || 'Error al crear cuenta'); return; }
+
+    // Éxito
+    localStorage.setItem('nuevaexpress_token', rData.data.token);
+    localStorage.setItem('nuevaexpress_user', JSON.stringify(rData.data.user));
+
+    document.getElementById('step2').style.display = 'none';
+    document.getElementById('step3').style.display = 'block';
+    document.getElementById('dot2').className = 'step-dot done';
+    document.getElementById('line2').className = 'step-line done';
+    document.getElementById('dot3').className = 'step-dot done';
+
+    const role = rData.data.user.role;
+    setTimeout(() => {
+      if (role === 'negocio') window.location.href = '/negocio/index.html';
+      else if (role === 'repartidor') window.location.href = '/repartidor/index.html';
+      else window.location.href = '/cliente/index.html';
+    }, 2000);
+
+  } catch(e) { showError('errorMsg2', 'Error de conexión. Intenta de nuevo.'); }
+  finally { btn.textContent = 'Verificar código'; btn.disabled = false; }
+}
+
+async function resendCode() {
+  const link = document.getElementById('resendLink');
+  link.style.pointerEvents = 'none'; link.textContent = 'Enviando...';
+  try {
+    const res = await fetch(`${API}/auth/send-code`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: formData.email, name: formData.name })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('successMsg2').textContent = '✅ Código reenviado. Revisa tu correo.';
+      document.getElementById('successMsg2').style.display = 'block';
+      setTimeout(() => { document.getElementById('successMsg2').style.display = 'none'; }, 4000);
+    }
+  } finally {
+    setTimeout(() => { link.style.pointerEvents = ''; link.textContent = 'Reenviar código'; }, 30000);
+  }
+}
+
+function backToStep1() {
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = 'block';
+  document.getElementById('dot1').className = 'step-dot active';
+  document.getElementById('line1').className = 'step-line';
+  document.getElementById('dot2').className = 'step-dot pending';
+}
+
+// Navegación entre inputs del código
+function moveNext(el, nextId) {
+  el.value = el.value.slice(-1); // solo 1 dígito
+  if (el.value && nextId) document.getElementById(nextId).focus();
+  // Auto-verificar cuando completa los 6
+  const code = ['c1','c2','c3','c4','c5','c6'].map(id => document.getElementById(id).value).join('');
+  if (code.length === 6 && /^\d{6}$/.test(code)) doVerify();
+}
+
+function movePrev(e, prevId) {
+  if (e.key === 'Backspace' && !e.target.value) document.getElementById(prevId)?.focus();
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+}
 </script>
 <script src="/assets/js/pwa.js"></script>
 </body>
