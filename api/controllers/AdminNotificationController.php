@@ -104,24 +104,30 @@ class NotificationController {
             Response::error('Confirmación inválida', 400);
         }
 
-        // Tablas a limpiar en orden (FK desactivadas temporalmente)
-        $this->db->exec("SET FOREIGN_KEY_CHECKS = 0");
+        try {
+            $this->db->exec("SET FOREIGN_KEY_CHECKS = 0");
 
-        $tables = [
-            'order_status_log',
-            'order_messages',
-            'order_items',
-            'deliveries',
-            'notifications',
-            'email_verifications',
-            'orders',
-        ];
+            $tables = [
+                'order_status_log',
+                'order_messages',
+                'order_items',
+                'deliveries',
+                'notifications',
+                'email_verifications',
+                'orders',
+            ];
 
-        foreach ($tables as $table) {
-            $this->db->exec("TRUNCATE TABLE {$table}");
+            foreach ($tables as $table) {
+                $this->db->exec("DELETE FROM `{$table}`");
+                $this->db->exec("ALTER TABLE `{$table}` AUTO_INCREMENT = 1");
+            }
+
+            $this->db->exec("SET FOREIGN_KEY_CHECKS = 1");
+        } catch (\Exception $e) {
+            $this->db->exec("SET FOREIGN_KEY_CHECKS = 1");
+            error_log("Reset error: " . $e->getMessage());
+            Response::error('Error al limpiar: ' . $e->getMessage(), 500);
         }
-
-        $this->db->exec("SET FOREIGN_KEY_CHECKS = 1");
 
         error_log("[RESET] Admin user {$user['id']} ({$user['name']}) ejecutó reset de datos de prueba");
 
