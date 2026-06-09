@@ -149,10 +149,6 @@
 
     <!-- Destinatario bloque legacy (oculto) -->
     <div id="dRecipientBlock" style="display:none"></div>
-
-    <!-- Products -->\n    <div style="margin-bottom:16px">
-      <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">🛍️ Productos del pedido</div>
-      <div id="dItems" style="background:var(--off-white);border-radius:var(--radius-sm);padding:12px"></div>
     </div>
 
     <!-- Total to collect -->
@@ -161,21 +157,7 @@
       <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:700" id="dTotalCollect">—</div>
       <div style="font-size:.78rem;opacity:.7;margin-top:4px" id="dTotalBreakdown">—</div>
     </div>
-
-    <!-- Order details -->
-    <div style="background:var(--off-white);border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.9rem"><span style="color:var(--muted)">Subtotal productos</span><span style="font-weight:600" id="dSubtotal">—</span></div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:.9rem"><span style="color:var(--muted)">Tarifa de delivery</span><span style="font-weight:600;color:var(--blue)" id="dDeliveryFee">—</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:.9rem"><span style="color:var(--muted)">Tipo</span><span id="dType">—</span></div>
     </div>
-
-    <!-- Client contact -->
-    <div id="dClientContact" style="display:none;margin-bottom:16px">
-      <a id="dCallClient" href="#" class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;text-decoration:none;background:#25d366">
-        📞 Llamar al cliente
-      </a>
-    </div>
-
     <!-- Notes -->
     <div id="dNotesWrap" style="display:none;background:#fff8e1;border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;font-size:.85rem">
       <strong>📝 Notas:</strong> <span id="dNotes"></span>
@@ -492,7 +474,6 @@ function openDetail(id) {
     '</div>';
   }).join('') + (d.notes ? '<div style="margin-top:8px;font-size:.8rem;color:var(--muted)">📝 '+esc(d.notes)+'</div>' : '')
   : '<div style="font-size:.85rem;color:var(--muted)">Sin detalle de productos</div>';
-  document.getElementById('dItems').innerHTML = itemsHtml;
 
   // Amounts
   var subtotal    = parseFloat(d.subtotal||0);
@@ -501,18 +482,11 @@ function openDetail(id) {
 
   document.getElementById('dTotalCollect').textContent  = 'Q' + totalCollect.toFixed(2);
   document.getElementById('dTotalBreakdown').textContent = 'Q' + subtotal.toFixed(2) + ' productos + Q' + deliveryFee.toFixed(2) + ' delivery';
-  document.getElementById('dSubtotal').textContent      = 'Q' + subtotal.toFixed(2);
-  document.getElementById('dDeliveryFee').textContent   = 'Q' + deliveryFee.toFixed(2);
-  document.getElementById('dType').textContent          = d.delivery_type === 'delivery' ? '🛵 Delivery' : '🏃 Recoger';
 
   // Client phone — only show if repartidor has claimed this delivery
   var isClaimed = d.repartidor_id != null && String(d.repartidor_id) === String(user.id);
   if (d.client_phone && isClaimed) {
-    document.getElementById('dCallClient').href = 'tel:' + d.client_phone;
-    document.getElementById('dCallClient').innerHTML = '📞 Llamar a ' + esc(d.client_name||'cliente') + ' — ' + esc(d.client_phone);
-    document.getElementById('dClientContact').style.display = 'block';
   } else {
-    document.getElementById('dClientContact').style.display = 'none';
   }
 
   // Notes
