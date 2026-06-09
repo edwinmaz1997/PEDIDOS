@@ -220,20 +220,21 @@ function downloadOrders() {
     var items = (o.items||[]).map(function(i){ return i.product_name + ' x' + i.quantity; }).join(', ');
     var subtotal = parseFloat(o.subtotal||0);
     var delivery = parseFloat(o.delivery_fee||0);
+    var total    = subtotal + delivery;
     rows.push([
       o.order_number,
-      '"' + (o.client_name||'') + '"',
+      '"' + (o.client_name||'').replace(/"/g,'""') + '"',
       o.client_phone||'',
       o.delivery_type==='delivery'?'Delivery':'Recoger',
-      '"' + items + '"',
-      subtotal.toFixed(2),
-      delivery.toFixed(2),
-      (subtotal+delivery).toFixed(2),
+      '"' + items.replace(/"/g,'""') + '"',
+      'Q' + subtotal.toFixed(2),
+      'Q' + delivery.toFixed(2),
+      'Q' + total.toFixed(2),
       o.created_at||''
     ]);
   });
-  var csv = rows.map(function(r){ return r.join(','); }).join('\n');
-  var today = new Date().toISOString().substring(0,10);
+  var csv = '\uFEFF' + rows.map(function(r){ return r.join(','); }).join('\n');
+  var today = localDate(new Date());
   var a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
   a.download = 'entregados_' + today + '.csv';
