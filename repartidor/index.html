@@ -540,6 +540,8 @@ function showConfirm(icon, title, msg, onOk) {
   document.getElementById('confirmIcon').textContent  = icon;
   document.getElementById('confirmTitle').textContent = title;
   document.getElementById('confirmMsg').textContent   = msg;
+  document.getElementById('confirmReasonWrap').style.display = 'none';
+  document.getElementById('confirmReason').value = '';
   document.getElementById('confirmOk').onclick = function() { closeConfirm(); onOk(); };
   document.getElementById('confirmModal').style.display = 'flex';
 }
@@ -548,19 +550,48 @@ function closeConfirm() {
 }
 
 async function releaseDelivery(id) {
-  showConfirm('⚠️', '¿Liberar este pedido?', 
-    'El pedido quedará disponible para que otro repartidor lo tome. Esta acción no se puede deshacer.',
-    async function() {
-  try {
-    var res = await fetch('/api/deliveries/'+id+'/release', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
-      body: JSON.stringify({})
-    }).then(function(r){ return r.json(); });
-    if (res.success) { APP.toast('Pedido liberado'); document.getElementById('detailModal').style.display='none'; document.body.style.overflow=''; init(); }
-    else APP.toast(res.message||'Error','error');
-  } catch(e) { APP.toast('Error de conexión','error'); }
-  });
+  // Mostrar modal con campo de motivo
+  document.getElementById('confirmIcon').textContent  = '⚠️';
+  document.getElementById('confirmTitle').textContent = '¿Liberar este pedido?';
+  document.getElementById('confirmMsg').textContent   = 'El pedido quedará disponible para otro repartidor. Escribe el motivo:';
+  document.getElementById('confirmReason').value      = '';
+  document.getElementById('confirmReasonWrap').style.display = 'block';
+  document.getElementById('confirmModal').style.display = 'flex';
+
+  document.getElementById('confirmOk').onclick = async function() {
+    var motivo = document.getElementById('confirmReason').value.trim();
+    if (!motivo) { document.getElementById('confirmReason').style.borderColor = 'var(--danger)'; return; }
+    document.getElementById('confirmReason').style.borderColor = '';
+    closeConfirm();
+    try {
+      // Liberar entrega
+      var res = await fetch('/api/deliveries/'+id+'/release', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
+        body: JSON.stringify({ reason: motivo })
+      }).then(function(r){ return r.json(); });
+
+      if (res.success) {
+        // Enviar mensaje al chat
+        var orderId = res.data?.order_id || allDeliveries.find(function(d){ return d.id==id; })?.order_id;
+        if (orderId) {
+          var meRes  = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+          var meData = await meRes.json();
+          var rData  = meData.data || JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+          var msg = '🔄 ' + (rData.name||'El repartidor') + ' ha liberado la entrega.\n📝 Motivo: ' + motivo;
+          await fetch('/api/orders/'+orderId+'/messages', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
+            body: JSON.stringify({ message: msg })
+          });
+        }
+        APP.toast('Pedido liberado');
+        document.getElementById('detailModal').style.display='none';
+        document.body.style.overflow='';
+        init();
+      } else APP.toast(res.message||'Error','error');
+    } catch(e) { APP.toast('Error de conexión','error'); }
+  };
 }
 
 async function claimDelivery(id) {
@@ -641,11 +672,15 @@ init();
 setInterval(init, 30000);
 </script>
 <!-- Confirm Modal -->
-<div id="confirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:16px">
+<div id="confirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:16px">
   <div style="background:white;border-radius:20px;padding:28px;max-width:340px;width:100%;text-align:center">
     <div style="font-size:2.5rem;margin-bottom:12px" id="confirmIcon">⚠️</div>
     <h3 style="font-size:1.1rem;margin-bottom:8px" id="confirmTitle">¿Está seguro?</h3>
-    <p style="font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:24px" id="confirmMsg"></p>
+    <p style="font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:16px" id="confirmMsg"></p>
+    <div id="confirmReasonWrap" style="display:none;margin-bottom:16px;text-align:left">
+      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Motivo *</label>
+      <textarea id="confirmReason" rows="3" placeholder="Escribe el motivo..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box;resize:none"></textarea>
+    </div>
     <div style="display:flex;gap:10px">
       <button id="confirmCancel" onclick="closeConfirm()" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--border);background:white;font-weight:600;cursor:pointer;font-size:.9rem">Cancelar</button>
       <button id="confirmOk" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--danger);color:white;font-weight:600;cursor:pointer;font-size:.9rem">Confirmar</button>

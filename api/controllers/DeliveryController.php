@@ -94,14 +94,29 @@ class DeliveryController {
         // Reset order status back to aceptado
         $this->db->prepare("UPDATE orders SET status = 'aceptado' WHERE id = ?")->execute([$d['order_id']]);
 
-        // Notify all active repartidores — pedido vuelve a estar disponible
+        // Obtener datos del pedido para notificaciones
+        $oStmt = $this->db->prepare("SELECT o.*, b.user_id as biz_user_id, b.name as biz_name FROM orders o JOIN businesses b ON b.id = o.business_id WHERE o.id = ?");
+        $oStmt->execute([$d['order_id']]);
+        $order = $oStmt->fetch();
+        $orderNumber = $order['order_number'] ?? '—';
+
+        // Notificar al cliente
+        if ($order) {
+            $this->pushToUser((int)$order['client_id'], '🔄 Pedido sin repartidor',
+                "Tu pedido #{$orderNumber} quedó sin repartidor. Estamos buscando uno nuevo.",
+                '/cliente/pedido-detalle.html?id=' . $d['order_id']);
+
+            // Notificar al negocio
+            $this->pushToUser((int)$order['biz_user_id'], '🔄 Repartidor liberó pedido',
+                "El repartidor liberó el pedido #{$orderNumber}. Se está buscando uno nuevo.",
+                '/negocio/pedido-detalle.html?id=' . $d['order_id']);
+        }
+
+        // Notify all active repartidores
         $rStmt = $this->db->prepare("SELECT id FROM users WHERE role_id = 4 AND is_active = 1");
         $rStmt->execute();
         $repartidorIds = $rStmt->fetchAll(PDO::FETCH_COLUMN);
         if (!empty($repartidorIds)) {
-            $oStmt = $this->db->prepare("SELECT order_number FROM orders WHERE id = ?");
-            $oStmt->execute([$d['order_id']]);
-            $orderNumber = $oStmt->fetchColumn() ?: '—';
             PushNotification::sendToMany(
                 $repartidorIds,
                 '🔄 Pedido liberado — disponible de nuevo',
@@ -110,7 +125,7 @@ class DeliveryController {
             );
         }
 
-        Response::success(null, 'Entrega liberada — disponible para otros repartidores');
+        Response::success(['order_id' => $d['order_id']], 'Entrega liberada — disponible para otros repartidores');
     }
 
     // PUT /api/deliveries/{id}/status
