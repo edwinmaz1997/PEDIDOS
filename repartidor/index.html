@@ -225,10 +225,16 @@ async function init() {
     document.getElementById('sActive').textContent    = (data.mine||[]).filter(function(d){
       return d.status !== 'entregado';
     }).length;
-    document.getElementById('sDone').textContent      = (data.mine||[]).filter(function(d){
-      var fecha = (d.delivered_at || d.updated_at || d.created_at || '').substring(0,10);
-      var hoy   = new Date().toISOString().substring(0,10);
-      return d.status === 'entregado' && fecha === hoy;
+    var hoy = new Date();
+    var hoyStr = hoy.getFullYear() + '-' + String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0');
+    document.getElementById('sDone').textContent = (data.mine||[]).filter(function(d){
+      if (d.status !== 'entregado') return false;
+      var fechaRaw = d.delivered_at || d.updated_at || d.created_at || '';
+      if (!fechaRaw) return false;
+      // Convertir a fecha local
+      var fechaLocal = new Date(fechaRaw.replace(' ', 'T'));
+      var fechaStr = fechaLocal.getFullYear() + '-' + String(fechaLocal.getMonth()+1).padStart(2,'0') + '-' + String(fechaLocal.getDate()).padStart(2,'0');
+      return fechaStr === hoyStr;
     }).length;
 
     applyFilters();
