@@ -223,13 +223,12 @@ async function init() {
     // Stats
     document.getElementById('sAvailable').textContent = (data.available||[]).length;
     document.getElementById('sActive').textContent    = (data.mine||[]).filter(function(d){
-      return d.order_status !== 'entregado' && d.order_status !== 'cancelado' && d.status !== 'entregado';
+      return d.status !== 'entregado';
     }).length;
     document.getElementById('sDone').textContent      = (data.mine||[]).filter(function(d){
-      var isEntregado = d.order_status === 'entregado' || d.status === 'entregado';
-      var fecha = (d.updated_at || d.created_at || '').substring(0,10);
+      var fecha = (d.delivered_at || d.updated_at || d.created_at || '').substring(0,10);
       var hoy   = new Date().toISOString().substring(0,10);
-      return isEntregado && fecha === hoy;
+      return d.status === 'entregado' && fecha === hoy;
     }).length;
 
     applyFilters();
@@ -260,7 +259,9 @@ function applyFilters() {
 
   filtered = allDeliveries.filter(function(d) {
     var mQ = !q || (d.order_number||'').toLowerCase().includes(q) || (d.business_name||'').toLowerCase().includes(q) || (d.client_name||'').toLowerCase().includes(q);
-    var mS = !status || d.status === status || d.order_status === status;
+    var statusMap = { 'en_camino': 'asignado' };
+    var mappedStatus = statusMap[status] || status;
+    var mS = !status || d.status === mappedStatus;
     var dDate = (d.created_at||'').substring(0,10);
     var mP = true;
     if (periodo === 'hoy')   mP = dDate === today;
@@ -330,8 +331,8 @@ function renderCard(d) {
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
       '<button onclick="openDetail('+d.id+')" class="btn-primary" style="padding:8px 16px;font-size:.85rem">Ver detalles</button>' +
       (!isMine && d.status === 'listo' ? '<button onclick="claimDelivery('+d.id+')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">Tomar entrega</button>' : '') +
-      (isMine && d.status === 'listo' ? '<button onclick="updateStatus('+d.id+',\'en_camino\')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">🛵 Salir</button>' : '') +
-      (isMine && d.status === 'en_camino' ? '<button onclick="updateStatus('+d.id+',\'entregado\')" class="btn-primary" style="padding:8px 16px;font-size:.85rem;background:var(--green)">✔ Entregado</button>' : '') +
+      (isMine && (d.status === 'asignado') ? '<button onclick="updateStatus('+d.id+',\'recogido\')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">📬 Marcar recogido</button>' : '') +
+      (isMine && d.status === 'recogido' ? '<button onclick="updateStatus('+d.id+',\'entregado\')" class="btn-primary" style="padding:8px 16px;font-size:.85rem;background:var(--green)">✔ Entregado</button>' : '') +
     '</div>' +
   '</div>';
 }
