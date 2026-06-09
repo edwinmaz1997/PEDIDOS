@@ -101,8 +101,8 @@
       <button onclick="closeDetail()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted)">✕</button>
     </div>
 
-    <!-- Route with maps -->
-    <div class="route-wrap">
+    <!-- Route with maps — pedidos normales -->
+    <div class="route-wrap" id="dRouteWrap">
       <div class="route-line"></div>
       <div class="route-point" id="dPickupBlock">
         <div class="route-dot pickup"></div>
@@ -124,22 +124,32 @@
       </div>
     </div>
 
-    <!-- Destinatario del paquete — solo para envíos de paquete -->
-    <div id="dRecipientBlock" style="display:none;background:#f3e5f5;border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
-      <div style="font-weight:700;font-size:.85rem;margin-bottom:8px">👤 Destinatario</div>
-      <div style="font-size:.9rem;margin-bottom:6px" id="dRecipientName">—</div>
-      <a id="dRecipientCall" href="#" class="btn-primary" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;text-decoration:none;font-size:.85rem;background:#25d366">
-        📞 Llamar al destinatario
-      </a>
+    <!-- Fichas de paquete — solo para envíos de paquete -->
+    <div id="dPackageBlocks" style="display:none">
+      <!-- Ficha 1: Envío de -->
+      <div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:14px;margin-bottom:10px">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:8px">📍 Envío de:</div>
+        <div style="font-size:.9rem;margin-bottom:8px" id="dPkgPickupAddr">—</div>
+        <a id="dPkgPickupMaps" href="#" target="_blank" class="map-btn" style="display:none">🗺️ Ver en Google Maps</a>
+      </div>
+      <!-- Ficha 2: Destinatario -->
+      <div style="background:#f3e5f5;border:1.5px solid #ce93d8;border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:8px">👤 Destinatario:</div>
+        <div style="font-size:.9rem;margin-bottom:4px" id="dRecipientName">—</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:8px" id="dPkgDropoffAddr">—</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a id="dPkgDropoffMaps" href="#" target="_blank" class="map-btn" style="display:none">🗺️ Ver en Google Maps</a>
+          <a id="dRecipientCall" href="#" class="btn-primary" style="display:none;align-items:center;gap:6px;padding:9px 16px;text-decoration:none;font-size:.85rem;background:#25d366">
+            📞 Llamar al destinatario
+          </a>
+        </div>
+      </div>
     </div>
 
-    <!-- Route button (both points) -->
-    <a href="#" id="dFullRoute" target="_blank" class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;margin-bottom:16px;text-decoration:none">
-      🗺️ Ver ruta completa en Google Maps
-    </a>
+    <!-- Destinatario bloque legacy (oculto) -->
+    <div id="dRecipientBlock" style="display:none"></div>
 
-    <!-- Products -->
-    <div style="margin-bottom:16px">
+    <!-- Products -->\n    <div style="margin-bottom:16px">
       <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">🛍️ Productos del pedido</div>
       <div id="dItems" style="background:var(--off-white);border-radius:var(--radius-sm);padding:12px"></div>
     </div>
@@ -383,46 +393,41 @@ function openDetail(id) {
   }
 
   if (isPackage) {
-    // Modo paquete — mostrar dirección de recogida del cliente
-    pickupBlock.style.display = 'flex';
-    document.getElementById('dPickupLabel').textContent = '📍 Recoger en';
-    document.getElementById('dBizName').textContent = 'Dirección de recogida';
-    document.getElementById('dBizAddr').textContent = pkgPickup || '—';
+    // Modo paquete — mostrar 2 fichas, ocultar route normal
+    document.getElementById('dRouteWrap').style.display = 'none';
+    document.getElementById('dPackageBlocks').style.display = 'block';
+
+    // Ficha 1: Envío de (recogida)
+    document.getElementById('dPkgPickupAddr').textContent = pkgPickup || '—';
     if (pkgPickup) {
       var pu = pkgPickup.startsWith('http') ? pkgPickup : 'https://www.google.com/maps/search/' + encodeURIComponent(pkgPickup);
-      document.getElementById('dBizMaps').href = pu;
-      document.getElementById('dBizMaps').style.display = 'inline-flex';
+      document.getElementById('dPkgPickupMaps').href = pu;
+      document.getElementById('dPkgPickupMaps').style.display = 'inline-flex';
     }
-    // Destinatario
-    document.getElementById('dRecipientBlock').style.display = 'block';
-    document.getElementById('dRecipientName').textContent = pkgRecipientName + (pkgRecipientPhone ? ' — ' + pkgRecipientPhone : '');
+
+    // Ficha 2: Destinatario (entrega)
+    document.getElementById('dRecipientName').textContent = pkgRecipientName || '—';
+    document.getElementById('dPkgDropoffAddr').textContent = pkgDropoff || '—';
+    if (pkgDropoff) {
+      var du = pkgDropoff.startsWith('http') ? pkgDropoff : 'https://www.google.com/maps/search/' + encodeURIComponent(pkgDropoff);
+      document.getElementById('dPkgDropoffMaps').href = du;
+      document.getElementById('dPkgDropoffMaps').style.display = 'inline-flex';
+    }
     if (pkgRecipientPhone) {
       document.getElementById('dRecipientCall').href = 'tel:' + pkgRecipientPhone.replace(/\s/g,'');
       document.getElementById('dRecipientCall').style.display = 'inline-flex';
-    } else {
-      document.getElementById('dRecipientCall').style.display = 'none';
     }
-    // Dropoff viene de pkgDropoff
-    var delAddr = pkgDropoff || d.delivery_address || '';
-    document.getElementById('dClientName').textContent = 'Dirección de entrega';
-    document.getElementById('dDeliveryAddr').textContent = delAddr || 'Sin dirección';
-    if (delAddr) {
-      var du = delAddr.startsWith('http') ? delAddr : 'https://www.google.com/maps/search/' + encodeURIComponent(delAddr);
-      document.getElementById('dDeliveryMaps').href = du;
-      document.getElementById('dDeliveryMaps').style.display = 'inline-flex';
-    }
-    // Ruta completa
-    if (pkgPickup && pkgDropoff) {
-      var routeUrl = 'https://www.google.com/maps/dir/' + encodeURIComponent(pkgPickup) + '/' + encodeURIComponent(pkgDropoff);
-      document.getElementById('dFullRoute').href = routeUrl;
-      document.getElementById('dFullRoute').style.display = 'flex';
-    }
+
   } else if (d.business_type === 'delivery') {
+    document.getElementById('dRouteWrap').style.display = 'block';
+    document.getElementById('dPackageBlocks').style.display = 'none';
     pickupBlock.style.display = 'none';
     document.getElementById('dRecipientBlock').style.display = 'none';
     document.getElementById('dBizName').textContent = '—';
     document.getElementById('dBizAddr').textContent = '—';
   } else {
+    document.getElementById('dRouteWrap').style.display = 'block';
+    document.getElementById('dPackageBlocks').style.display = 'none';
     document.getElementById('dRecipientBlock').style.display = 'none';
     pickupBlock.style.display = 'flex';
     document.getElementById('dPickupLabel').textContent = '📦 Recoger en negocio';
@@ -508,8 +513,23 @@ function openDetail(id) {
 
   // Notes
   if (d.notes) {
-    document.getElementById('dNotes').textContent = d.notes;
-    document.getElementById('dNotesWrap').style.display = 'block';
+    var visibleNotes = d.notes;
+    if (isPackage) {
+      // Quitar líneas del sistema del paquete — solo mostrar descripción y nota del cliente
+      visibleNotes = d.notes.split('\n').filter(function(line) {
+        return !line.startsWith('📦 ENVÍO DE PAQUETE') &&
+               !line.startsWith('📍 Recogida:') &&
+               !line.startsWith('🏁 Entrega:') &&
+               !line.startsWith('👤 Destinatario:') &&
+               !line.startsWith('📞 Teléfono:');
+      }).join('\n').trim();
+    }
+    if (visibleNotes) {
+      document.getElementById('dNotes').textContent = visibleNotes;
+      document.getElementById('dNotesWrap').style.display = 'block';
+    } else {
+      document.getElementById('dNotesWrap').style.display = 'none';
+    }
   } else {
     document.getElementById('dNotesWrap').style.display = 'none';
   }
