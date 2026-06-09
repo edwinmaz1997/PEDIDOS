@@ -129,24 +129,21 @@
       <!-- Ficha 1: Envío de -->
       <div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:14px;margin-bottom:10px">
         <div style="font-weight:700;font-size:.85rem;margin-bottom:8px">📍 Envío de:</div>
-        <div style="font-size:.9rem;font-weight:600;margin-bottom:4px" id="dPkgSenderName">—</div>
-        <div style="font-size:.82rem;color:var(--muted);margin-bottom:8px" id="dPkgPickupAddr">—</div>
-        <a id="dPkgPickupMaps" href="#" target="_blank" class="map-btn" style="display:none">🗺️ Ver ubicación</a>
+        <div style="font-size:.9rem;font-weight:600;margin-bottom:6px" id="dPkgSenderName">—</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a id="dPkgSenderCall" href="#" class="btn-primary" style="display:none;align-items:center;gap:6px;padding:9px 16px;text-decoration:none;font-size:.85rem;background:#25d366">📞 Llamar</a>
+          <a id="dPkgPickupMaps" href="#" target="_blank" class="map-btn" style="display:none">🗺️ Ver ubicación</a>
+        </div>
       </div>
-      <!-- Ficha 2: Destino -->
-      <div style="background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:var(--radius-sm);padding:14px;margin-bottom:10px">
-        <div style="font-weight:700;font-size:.85rem;margin-bottom:8px">🏠 Destino:</div>
-        <div style="font-size:.9rem;margin-bottom:8px" id="dPkgDropoffAddr">—</div>
-        <a id="dPkgDropoffMaps" href="#" target="_blank" class="map-btn" style="display:none">🗺️ Ver ubicación</a>
-      </div>
-      <!-- Ficha 3: Destinatario -->
+      <!-- Ficha 2: Destinatario -->
       <div style="background:#f3e5f5;border:1.5px solid #ce93d8;border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
         <div style="font-weight:700;font-size:.85rem;margin-bottom:8px">👤 Destinatario:</div>
-        <div style="font-size:.9rem;font-weight:600;margin-bottom:4px" id="dRecipientName">—</div>
-        <div style="font-size:.82rem;color:var(--muted);margin-bottom:8px" id="dRecipientPhone">—</div>
-        <a id="dRecipientCall" href="#" class="btn-primary" style="display:none;align-items:center;gap:6px;padding:9px 16px;text-decoration:none;font-size:.85rem;background:#25d366">
-          📞 Llamar al destinatario
-        </a>
+        <div style="font-size:.9rem;font-weight:600;margin-bottom:2px" id="dRecipientName">—</div>
+        <div style="font-size:.82rem;color:var(--muted);margin-bottom:6px" id="dRecipientPhone">—</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a id="dRecipientCall" href="#" class="btn-primary" style="display:none;align-items:center;gap:6px;padding:9px 16px;text-decoration:none;font-size:.85rem;background:#25d366">📞 Llamar</a>
+          <a id="dPkgDropoffMaps" href="#" target="_blank" class="map-btn" style="display:none">🗺️ Ver ubicación</a>
+        </div>
       </div>
     </div>
 
@@ -397,33 +394,32 @@ function openDetail(id) {
   }
 
   if (isPackage) {
-    // Modo paquete — mostrar 3 fichas, ocultar route normal
     document.getElementById('dRouteWrap').style.display = 'none';
     document.getElementById('dPackageBlocks').style.display = 'block';
 
-    // Ficha 1: Envío de (remitente = cliente)
+    // Ficha 1: Envío de — nombre del cliente + llamar + ubicación recogida
     document.getElementById('dPkgSenderName').textContent = d.client_name || '—';
-    document.getElementById('dPkgPickupAddr').textContent = pkgPickup || '—';
+    if (d.client_phone) {
+      document.getElementById('dPkgSenderCall').href = 'tel:' + d.client_phone.replace(/\s/g,'');
+      document.getElementById('dPkgSenderCall').style.display = 'inline-flex';
+    }
     if (pkgPickup) {
       var pu = pkgPickup.startsWith('http') ? pkgPickup : 'https://www.google.com/maps/search/' + encodeURIComponent(pkgPickup);
       document.getElementById('dPkgPickupMaps').href = pu;
       document.getElementById('dPkgPickupMaps').style.display = 'inline-flex';
     }
 
-    // Ficha 2: Destino
-    document.getElementById('dPkgDropoffAddr').textContent = pkgDropoff || '—';
-    if (pkgDropoff) {
-      var du = pkgDropoff.startsWith('http') ? pkgDropoff : 'https://www.google.com/maps/search/' + encodeURIComponent(pkgDropoff);
-      document.getElementById('dPkgDropoffMaps').href = du;
-      document.getElementById('dPkgDropoffMaps').style.display = 'inline-flex';
-    }
-
-    // Ficha 3: Destinatario
+    // Ficha 2: Destinatario — nombre + teléfono + ubicación entrega
     document.getElementById('dRecipientName').textContent  = pkgRecipientName  || '—';
     document.getElementById('dRecipientPhone').textContent = pkgRecipientPhone || '—';
     if (pkgRecipientPhone) {
       document.getElementById('dRecipientCall').href = 'tel:' + pkgRecipientPhone.replace(/\s/g,'');
       document.getElementById('dRecipientCall').style.display = 'inline-flex';
+    }
+    if (pkgDropoff) {
+      var du = pkgDropoff.startsWith('http') ? pkgDropoff : 'https://www.google.com/maps/search/' + encodeURIComponent(pkgDropoff);
+      document.getElementById('dPkgDropoffMaps').href = du;
+      document.getElementById('dPkgDropoffMaps').style.display = 'inline-flex';
     }
 
   } else if (d.business_type === 'delivery') {
