@@ -155,7 +155,7 @@ async function doReset() {
   var btn = document.getElementById('resetBtn');
   btn.textContent = 'Limpiando...'; btn.disabled = true;
   try {
-    var res = await fetch('/api/admin/reset-data', {
+    var res = await fetch('/api/reset-data.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
       body: JSON.stringify({ confirm: 'CONFIRMAR_RESET' })
