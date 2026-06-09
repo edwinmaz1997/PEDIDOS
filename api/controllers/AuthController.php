@@ -15,6 +15,11 @@ class AuthController {
     // POST /api/auth/send-code  — envía código de verificación al correo
     // --------------------------------------------------------
     public function sendCode(array $body): void {
+        $ip    = Security::getClientIp();
+        if (!Security::checkRateLimit($ip, 'send-code', 5, 3600)) {
+            Response::error('Demasiados intentos. Espera un momento e intenta de nuevo.', 429);
+        }
+
         $email = trim($body['email'] ?? '');
         $name  = trim($body['name'] ?? 'Usuario');
 

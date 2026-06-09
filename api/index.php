@@ -325,10 +325,11 @@ try {
 
         // ── TEST PUSH ─────────────────────────────────────────
         case 'test-push':
+            AuthMiddleware::requireRole(['admin']);
             $uid = isset($_GET['uid']) ? (int)$_GET['uid'] : 0;
             if (!$uid) Response::error('Falta uid', 400);
             PushNotification::send($uid, '🔔 Test NuevaExpress', 'Push funcionando correctamente para uid=' . $uid, '/');
-            Response::success(['uid' => $uid, 'onesignal_app_id' => '36b01031-83d9-4f66-bad8-3c32478f9fb2'], 'Push enviado');
+            Response::success(['uid' => $uid], 'Push enviado');
             break;
 
         default:
