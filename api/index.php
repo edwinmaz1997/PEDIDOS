@@ -79,7 +79,26 @@ $body = Security::sanitize($body);
 try {
     switch ($resource) {
 
-        // ── AUTH ─────────────────────────────────────────────
+        // ── RESET DATA (admin only) ───────────────────────────
+        case 'reset-data':
+            $rUser = AuthMiddleware::requireRole('admin');
+            if ($method !== 'POST') Response::error('Método no permitido', 405);
+            if (($body['confirm'] ?? '') !== 'CONFIRMAR_RESET') Response::error('Confirmación inválida', 400);
+            $rDb = Database::connect();
+            $rDb->exec("SET FOREIGN_KEY_CHECKS = 0");
+            $rTables = ['order_status_log','order_messages','order_items','deliveries','notifications','email_verifications','orders'];
+            $rCleaned = [];
+            foreach ($rTables as $rT) {
+                if ($rDb->query("SHOW TABLES LIKE '{$rT}'")->fetch()) {
+                    $rDb->exec("DELETE FROM `{$rT}`");
+                    try { $rDb->exec("ALTER TABLE `{$rT}` AUTO_INCREMENT = 1"); } catch(Exception $e) {}
+                    $rCleaned[] = $rT;
+                }
+            }
+            $rDb->exec("SET FOREIGN_KEY_CHECKS = 1");
+            error_log("[RESET] Admin {$rUser['id']} limpió datos de prueba: " . implode(',', $rCleaned));
+            Response::success(['cleaned' => $rCleaned], 'Base de datos limpiada correctamente.');
+            break;
         case 'auth':
             $ctrl   = new AuthController();
             $pwCtrl = new PasswordResetController();
