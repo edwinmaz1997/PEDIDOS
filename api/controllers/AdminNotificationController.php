@@ -117,16 +117,29 @@ class NotificationController {
                 'orders',
             ];
 
+            $cleaned = [];
+            $skipped = [];
+
             foreach ($tables as $table) {
+                // Verificar que la tabla existe antes de borrar
+                $check = $this->db->query("SHOW TABLES LIKE '{$table}'")->fetch();
+                if (!$check) { $skipped[] = $table; continue; }
                 $this->db->exec("DELETE FROM `{$table}`");
-                $this->db->exec("ALTER TABLE `{$table}` AUTO_INCREMENT = 1");
+                try { $this->db->exec("ALTER TABLE `{$table}` AUTO_INCREMENT = 1"); } catch(\Exception $e) {}
+                $cleaned[] = $table;
             }
 
             $this->db->exec("SET FOREIGN_KEY_CHECKS = 1");
+
+            Response::success([
+                'cleaned' => $cleaned,
+                'skipped' => $skipped
+            ], 'Base de datos limpiada. Usuarios, negocios y categorías conservados.');
+
         } catch (\Exception $e) {
             $this->db->exec("SET FOREIGN_KEY_CHECKS = 1");
             error_log("Reset error: " . $e->getMessage());
-            Response::error('Error al limpiar: ' . $e->getMessage(), 500);
+            Response::error('Error: ' . $e->getMessage(), 500);
         }
 
         error_log("[RESET] Admin user {$user['id']} ({$user['name']}) ejecutó reset de datos de prueba");
