@@ -457,8 +457,14 @@ function openDetail(id) {
   document.getElementById('detailModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
 
-  // Iniciar chat
-  startChatPoll(d.order_id);
+  // Chat — solo si el repartidor ya tomó el pedido
+  var chatSection = document.getElementById('rChatMessages').closest('div[style*="border-top"]');
+  if (d.status === 'disponible') {
+    chatSection.style.display = 'none';
+  } else {
+    chatSection.style.display = 'block';
+    startChatPoll(d.order_id);
+  }
 }
 
 var rChatPoll = null;
