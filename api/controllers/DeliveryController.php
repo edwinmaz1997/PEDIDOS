@@ -144,12 +144,12 @@ class DeliveryController {
 
             // Notify client on picked up or delivered
             if ($dbStatus === 'recogido') {
-                $this->pushToUser((int)$row['client_id'], '🛵 Tu pedido fue recogido',
-                    "Tu pedido #{$row['order_number']} ya está en camino. ¡Pronto llegará!",
+                $this->pushToUser((int)$row['client_id'], '🛵 Tu pedido está en camino',
+                    "Tu pedido #{$row['order_number']} fue recogido y ya va en camino. ¡Pronto llegará!",
                     '/cliente/pedido-detalle.html?id=' . $row['id']);
             } elseif ($dbStatus === 'entregado') {
                 $this->pushToUser((int)$row['client_id'], '✅ Pedido entregado',
-                    "Tu pedido #{$row['order_number']} fue entregado. ¡Buen provecho!",
+                    "Tu pedido #{$row['order_number']} fue entregado. ¡Gracias por elegirnos, esperamos verte pronto!",
                     '/cliente/pedido-detalle.html?id=' . $row['id']);
             }
         }

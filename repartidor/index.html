@@ -579,8 +579,8 @@ async function claimDelivery(id) {
           var meRes = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + getToken() } });
           var meData = await meRes.json();
           var rData = meData.data || JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
-          var msg = '🛵 ' + (rData.name||'Repartidor') + ' ha tomado tu pedido.' +
-            (rData.phone ? '\n📞 Teléfono: ' + rData.phone : '');
+          var msg = '🛵 Tu pedido ha sido asignado a ' + (rData.name||'un repartidor') + '.' +
+            (rData.phone ? '\n📞 Puedes contactarlo al: ' + rData.phone : '') + '\n\nEn breve saldrá a recoger tu pedido.';
           await fetch('/api/orders/'+orderId+'/messages', {
             method: 'POST',
             headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
