@@ -73,7 +73,32 @@ class DeliveryController {
         $this->db->prepare("UPDATE deliveries SET repartidor_id = ?, status = 'asignado', assigned_at = NOW() WHERE id = ?")
                  ->execute([$user['id'], $id]);
 
-        Response::success(null, 'Entrega tomada');
+        // Obtener datos del pedido y repartidor
+        $oStmt = $this->db->prepare("SELECT o.*, b.user_id as biz_user_id FROM orders o JOIN businesses b ON b.id = o.business_id WHERE o.id = ?");
+        $oStmt->execute([$delivery['order_id']]);
+        $order = $oStmt->fetch();
+
+        if ($order) {
+            $rName  = $user['name'] ?? 'El repartidor';
+            $rPhone = $user['phone'] ?? null;
+            $phoneStr = $rPhone ? " — 📞 {$rPhone}" : '';
+
+            // Notificar al cliente
+            $this->pushToUser((int)$order['client_id'],
+                '🛵 Repartidor asignado',
+                "Tu pedido #{$order['order_number']} fue asignado a {$rName}{$phoneStr}.",
+                '/cliente/pedido-detalle.html?id=' . $delivery['order_id']
+            );
+
+            // Notificar al negocio
+            $this->pushToUser((int)$order['biz_user_id'],
+                '🛵 Repartidor tomó el pedido',
+                "{$rName} tomó el pedido #{$order['order_number']}.",
+                '/negocio/pedido-detalle.html?id=' . $delivery['order_id']
+            );
+        }
+
+        Response::success(['order_id' => $delivery['order_id']], 'Entrega tomada');
     }
 
     // POST /api/deliveries/{id}/release — repartidor releases delivery back to available
