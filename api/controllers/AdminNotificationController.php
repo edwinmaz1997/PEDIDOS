@@ -93,4 +93,39 @@ class NotificationController {
         $this->db->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?")->execute([$user['id']]);
         Response::success(null, 'Todas marcadas como leídas');
     }
+
+    // POST /api/admin/reset-data — eliminar datos de prueba
+    public function resetData(array $body): void {
+        $user = AuthMiddleware::requireRole('admin');
+
+        // Confirmación doble obligatoria
+        $confirm = $body['confirm'] ?? '';
+        if ($confirm !== 'CONFIRMAR_RESET') {
+            Response::error('Confirmación inválida', 400);
+        }
+
+        // Tablas a limpiar en orden (respetar FK)
+        $tables = [
+            'order_status_log',
+            'order_messages',
+            'order_items',
+            'deliveries',
+            'notifications',
+            'email_verifications',
+            'orders',
+        ];
+
+        foreach ($tables as $table) {
+            $this->db->exec("DELETE FROM {$table}");
+        }
+
+        // Reset auto_increment
+        foreach ($tables as $table) {
+            $this->db->exec("ALTER TABLE {$table} AUTO_INCREMENT = 1");
+        }
+
+        error_log("[RESET] Admin user {$user['id']} ({$user['name']}) ejecutó reset de datos de prueba");
+
+        Response::success(null, 'Base de datos limpiada. Usuarios, negocios y categorías conservados.');
+    }
 }

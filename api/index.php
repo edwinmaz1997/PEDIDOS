@@ -264,6 +264,9 @@ try {
             $adminOrderId = isset($parts[2]) && is_numeric($parts[2]) ? (int)$parts[2] : null;
             if ($action === 'orders' && $adminOrderId && $method === 'DELETE') { $ctrl->deleteOrder($adminOrderId); break; }
 
+            // POST /api/admin/reset-data — limpiar datos de prueba
+            if ($action === 'reset-data' && $method === 'POST') { $ctrl->resetData($body); break; }
+
             switch ($action) {
                 case 'dashboard':  $ctrl->dashboard();  break;
                 case 'users':      $ctrl->users();       break;
