@@ -198,9 +198,14 @@ async function loadEntregadosHoy(tabBtn) {
   try {
     var res = await fetch(API + '/orders?status=entregado', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
     var data = await res.json();
-    var today = new Date().toISOString().substring(0,10);
+    var now = new Date();
+    var today = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
     allOrders = (data.data?.orders || []).filter(function(o){
-      return o.updated_at && o.updated_at.substring(0,10) === today;
+      var fecha = o.updated_at || o.created_at || '';
+      if (!fecha) return false;
+      var d = new Date(fecha.replace(' ','T'));
+      var ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      return ds === today;
     });
     filteredOrders = allOrders.slice();
     if (document.getElementById('searchQ')) document.getElementById('searchQ').value = '';
@@ -326,11 +331,13 @@ async function advanceStatus(orderId, status) {
 }
 
 function updateStats(orders) {
-  const today = new Date().toDateString();
-  document.getElementById('statToday').textContent = orders.filter(o => new Date(o.created_at).toDateString()===today).length;
+  var _now = new Date();
+  var _hoy = _now.getFullYear() + '-' + String(_now.getMonth()+1).padStart(2,'0') + '-' + String(_now.getDate()).padStart(2,'0');
+  function _isToday(s) { if(!s)return false; var d=new Date((s||'').replace(' ','T')); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')===_hoy; }
+  document.getElementById('statToday').textContent = orders.filter(o => _isToday(o.created_at)).length;
   document.getElementById('statPending').textContent = orders.filter(o=>o.status==='pendiente').length;
   document.getElementById('statPrep').textContent = orders.filter(o=>o.status==='en_preparacion').length;
-  document.getElementById('statDone').textContent = orders.filter(o=>o.status==='entregado'&&new Date(o.created_at).toDateString()===today).length;
+  document.getElementById('statDone').textContent = orders.filter(o=>o.status==='entregado' && _isToday(o.updated_at||o.created_at)).length;
   const pending = orders.filter(o=>o.status==='pendiente').length;
   document.getElementById('pendingCount').textContent = pending || '';
   document.getElementById('pendingCount').style.display = pending ? '' : 'none';

@@ -446,6 +446,9 @@ async function loadSaldo() {
 
 // ── Init ─────────────────────────────────────────────────────
 // ── VENTAS POR DÍA ────────────────────────────────────────────
+function localDate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
 function setDateRange(range) {
   var today = new Date();
   var from = new Date(today);
@@ -456,8 +459,8 @@ function setDateRange(range) {
   } else if (range === 'month') {
     from.setDate(1);
   }
-  document.getElementById('dateFrom').value = from.toISOString().substring(0,10);
-  document.getElementById('dateTo').value = today.toISOString().substring(0,10);
+  document.getElementById('dateFrom').value = localDate(from);
+  document.getElementById('dateTo').value   = localDate(today);
   loadDiario();
 }
 
@@ -623,7 +626,7 @@ async function init() {
   });
 
   // Set default date range to today
-  var today = new Date().toISOString().substring(0,10);
+  var today = localDate(new Date());
   document.getElementById('dateFrom').value = today;
   document.getElementById('dateTo').value = today;
 
