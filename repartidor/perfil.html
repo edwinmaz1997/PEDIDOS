@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NuevaExpress">
+<link rel="apple-touch-icon" href="/assets/img/logo.jpg">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Perfil — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px" id="sidebarUser">Repartidor</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">🛵 Entregas</a></li>
+      <li><a href="perfil.html" class="active">👤 Mi Perfil</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>👤 Mi Perfil</h1>
+      <p>Mantén tu información actualizada para que los clientes puedan contactarte</p>
+    </div>
+
+    <div style="max-width:520px">
+      <!-- Info card -->
+      <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px;margin-bottom:20px">
+        <h3 style="margin-bottom:16px">Información personal</h3>
+
+        <div id="successMsg" style="display:none;background:#f0fdf4;border:1px solid #86efac;color:#166534;padding:10px 14px;border-radius:var(--radius-sm);font-size:.9rem;margin-bottom:16px"></div>
+        <div id="errorMsg" style="display:none;background:#fdf0f0;border:1px solid #f5c2c2;color:var(--danger);padding:10px 14px;border-radius:var(--radius-sm);font-size:.9rem;margin-bottom:16px"></div>
+
+        <div class="form-group">
+          <label>Nombre completo *</label>
+          <input type="text" id="f_name" placeholder="Tu nombre completo">
+        </div>
+        <div class="form-group">
+          <label>Teléfono * <span style="font-weight:400;color:var(--muted)">(los clientes lo verán al tomar su pedido)</span></label>
+          <input type="tel" id="f_phone" placeholder="+502 5555 5555">
+        </div>
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" id="f_email" disabled style="background:var(--off-white);color:var(--muted)">
+          <div style="font-size:.75rem;color:var(--muted);margin-top:4px">El correo no se puede cambiar</div>
+        </div>
+
+        <button class="btn-primary" onclick="saveProfile()" id="saveBtn" style="width:100%;justify-content:center;padding:13px;margin-top:4px">
+          Guardar cambios
+        </button>
+      </div>
+
+      <!-- Change password -->
+      <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px">
+        <h3 style="margin-bottom:16px">Cambiar contraseña</h3>
+
+        <div id="pwSuccess" style="display:none;background:#f0fdf4;border:1px solid #86efac;color:#166534;padding:10px 14px;border-radius:var(--radius-sm);font-size:.9rem;margin-bottom:16px"></div>
+        <div id="pwError" style="display:none;background:#fdf0f0;border:1px solid #f5c2c2;color:var(--danger);padding:10px 14px;border-radius:var(--radius-sm);font-size:.9rem;margin-bottom:16px"></div>
+
+        <div class="form-group">
+          <label>Contraseña actual</label>
+          <input type="password" id="f_current_pw" placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <label>Nueva contraseña</label>
+          <input type="password" id="f_new_pw" placeholder="Mínimo 8 caracteres">
+        </div>
+        <div class="form-group">
+          <label>Confirmar nueva contraseña</label>
+          <input type="password" id="f_confirm_pw" placeholder="Repite la contraseña">
+        </div>
+
+        <button class="btn-ghost" onclick="changePassword()" id="pwBtn" style="width:100%;justify-content:center;padding:13px">
+          Cambiar contraseña
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+(function(){
+  var h = window.location.hash;
+  if (h && h.indexOf('tk=') !== -1) {
+    var p = h.substring(1).split('&'), tk='', us='';
+    p.forEach(function(x){ if(x.indexOf('tk=')===0)tk=x.substring(3); if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3)); });
+    if(tk){ localStorage.setItem('nuevaexpress_token',tk); if(us)localStorage.setItem('nuevaexpress_user',us); history.replaceState(null,'',window.location.pathname); }
+  }
+})();
+
+var user = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if (!localStorage.getItem('nuevaexpress_token') || user.role !== 'repartidor') window.location.href = '/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name || 'Repartidor';
+
+const API = '/api';
+function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
+
+async function init() {
+  const res  = await fetch(API + '/user/profile', { headers: { Authorization: 'Bearer ' + getToken() } });
+  const data = await res.json();
+  if (!data.success) return;
+  var u = data.data;
+  document.getElementById('f_name').value  = u.name || '';
+  document.getElementById('f_phone').value = u.phone || '';
+  document.getElementById('f_email').value = u.email || '';
+}
+
+async function saveProfile() {
+  var name  = document.getElementById('f_name').value.trim();
+  var phone = document.getElementById('f_phone').value.trim();
+  var btn   = document.getElementById('saveBtn');
+  var succ  = document.getElementById('successMsg');
+  var err   = document.getElementById('errorMsg');
+
+  succ.style.display = 'none'; err.style.display = 'none';
+  if (!name)  { err.textContent = 'El nombre es requerido'; err.style.display = 'block'; return; }
+  if (!phone) { err.textContent = 'El teléfono es requerido — los clientes lo verán al tomar su pedido'; err.style.display = 'block'; return; }
+
+  btn.textContent = 'Guardando...'; btn.disabled = true;
+  try {
+    const res  = await fetch(API + '/user/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() },
+      body: JSON.stringify({ name, phone })
+    });
+    const data = await res.json();
+    if (data.success) {
+      succ.textContent = '✅ Perfil actualizado correctamente';
+      succ.style.display = 'block';
+      // Actualizar localStorage con nuevos datos
+      var stored = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+      stored.name  = name;
+      stored.phone = phone;
+      localStorage.setItem('nuevaexpress_user', JSON.stringify(stored));
+      document.getElementById('sidebarUser').textContent = name;
+    } else {
+      err.textContent = data.message || 'Error al guardar';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = 'Error de conexión';
+    err.style.display = 'block';
+  }
+  btn.textContent = 'Guardar cambios'; btn.disabled = false;
+}
+
+async function changePassword() {
+  var current = document.getElementById('f_current_pw').value;
+  var newPw   = document.getElementById('f_new_pw').value;
+  var confirm = document.getElementById('f_confirm_pw').value;
+  var btn     = document.getElementById('pwBtn');
+  var succ    = document.getElementById('pwSuccess');
+  var err     = document.getElementById('pwError');
+
+  succ.style.display = 'none'; err.style.display = 'none';
+  if (!current || !newPw) { err.textContent = 'Completa todos los campos'; err.style.display = 'block'; return; }
+  if (newPw !== confirm)  { err.textContent = 'Las contraseñas no coinciden'; err.style.display = 'block'; return; }
+  if (newPw.length < 8)   { err.textContent = 'Mínimo 8 caracteres'; err.style.display = 'block'; return; }
+
+  btn.textContent = 'Cambiando...'; btn.disabled = true;
+  try {
+    const res  = await fetch(API + '/user/password', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() },
+      body: JSON.stringify({ current_password: current, new_password: newPw, confirm_password: confirm })
+    });
+    const data = await res.json();
+    if (data.success) {
+      succ.textContent = '✅ Contraseña actualizada';
+      succ.style.display = 'block';
+      document.getElementById('f_current_pw').value = '';
+      document.getElementById('f_new_pw').value = '';
+      document.getElementById('f_confirm_pw').value = '';
+    } else {
+      err.textContent = data.message || 'Error al cambiar contraseña';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.textContent = 'Error de conexión';
+    err.style.display = 'block';
+  }
+  btn.textContent = 'Cambiar contraseña'; btn.disabled = false;
+}
+
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+init();
+</script>
+<script src="/assets/js/pwa.js"></script>
+</body>
+</html>

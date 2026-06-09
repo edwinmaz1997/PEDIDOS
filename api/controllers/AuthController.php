@@ -119,7 +119,7 @@ class AuthController {
 
         Response::success([
             'token' => $token,
-            'user'  => ['id' => $userId, 'name' => $name, 'email' => $email, 'role' => $role]
+            'user'  => ['id' => $userId, 'name' => $name, 'email' => $email, 'role' => $role, 'phone' => $phone ?: null]
         ], 'Registro exitoso', 201);
     }
 

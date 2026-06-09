@@ -50,6 +50,7 @@
     </div>
     <ul class="sidebar-nav">
       <li><a href="index.html" class="active">🛵 Entregas</a></li>
+      <li><a href="perfil.html">👤 Mi Perfil</a></li>
       <li><a href="#" onclick="requestNotificationPermission()">🔔 Activar notificaciones</a></li>
       <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
     </ul>
@@ -553,17 +554,21 @@ async function claimDelivery(id) {
     }).then(function(r){ return r.json(); });
     if (res.success) {
       APP.toast('¡Entrega tomada!');
-      // Enviar mensaje automático con datos del repartidor
-      var rUser = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+      // Obtener datos frescos del repartidor para el mensaje
       var orderId = res.data?.order_id || allDeliveries.find(function(d){ return d.id==id; })?.order_id;
       if (orderId) {
-        var msg = '🛵 ' + (rUser.name||'Repartidor') + ' ha tomado tu pedido.' +
-          (rUser.phone ? '\n📞 Teléfono: ' + rUser.phone : '');
-        await fetch('/api/orders/'+orderId+'/messages', {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
-          body: JSON.stringify({ message: msg })
-        });
+        try {
+          var meRes = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+          var meData = await meRes.json();
+          var rData = meData.data || JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+          var msg = '🛵 ' + (rData.name||'Repartidor') + ' ha tomado tu pedido.' +
+            (rData.phone ? '\n📞 Teléfono: ' + rData.phone : '');
+          await fetch('/api/orders/'+orderId+'/messages', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
+            body: JSON.stringify({ message: msg })
+          });
+        } catch(e) {}
       }
       document.getElementById('detailModal').style.display='none';
       document.body.style.overflow='';
