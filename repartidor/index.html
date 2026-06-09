@@ -104,10 +104,10 @@
     <!-- Route with maps -->
     <div class="route-wrap">
       <div class="route-line"></div>
-      <div class="route-point">
+      <div class="route-point" id="dPickupBlock">
         <div class="route-dot pickup"></div>
         <div class="route-info">
-          <div class="route-label">📦 Recoger en negocio</div>
+          <div class="route-label" id="dPickupLabel">📦 Recoger en negocio</div>
           <div class="route-name" id="dBizName">—</div>
           <div class="route-addr" id="dBizAddr">—</div>
           <a href="#" id="dBizMaps" target="_blank" class="map-btn">🗺️ Ver en Google Maps</a>
@@ -122,6 +122,15 @@
           <a href="#" id="dDeliveryMaps" target="_blank" class="map-btn">🗺️ Ver en Google Maps</a>
         </div>
       </div>
+    </div>
+
+    <!-- Destinatario del paquete — solo para envíos de paquete -->
+    <div id="dRecipientBlock" style="display:none;background:#f3e5f5;border-radius:var(--radius-sm);padding:14px;margin-bottom:16px">
+      <div style="font-weight:700;font-size:.85rem;margin-bottom:8px">👤 Destinatario</div>
+      <div style="font-size:.9rem;margin-bottom:6px" id="dRecipientName">—</div>
+      <a id="dRecipientCall" href="#" class="btn-primary" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;text-decoration:none;font-size:.85rem;background:#25d366">
+        📞 Llamar al destinatario
+      </a>
     </div>
 
     <!-- Route button (both points) -->
@@ -356,22 +365,77 @@ function openDetail(id) {
 
   // Business (pickup) — ocultar para negocios tipo delivery
   var bizAddr = d.pickup_address || d.business_name || '';
-  var pickupBlock = document.getElementById('dBizName').closest('.route-point');
-  if (d.business_type === 'delivery') {
+  var pickupBlock = document.getElementById('dPickupBlock');
+
+  // Detectar si es envío de paquete parseando las notas
+  var notes = d.notes || '';
+  var isPackage = notes.indexOf('📦 ENVÍO DE PAQUETE') !== -1;
+  var pkgPickup = '', pkgDropoff = '', pkgRecipientName = '', pkgRecipientPhone = '';
+
+  if (isPackage) {
+    var lines = notes.split('\n');
+    lines.forEach(function(line) {
+      if (line.startsWith('📍 Recogida:'))    pkgPickup        = line.replace('📍 Recogida:', '').trim();
+      if (line.startsWith('🏁 Entrega:'))     pkgDropoff       = line.replace('🏁 Entrega:', '').trim();
+      if (line.startsWith('👤 Destinatario:')) pkgRecipientName = line.replace('👤 Destinatario:', '').trim();
+      if (line.startsWith('📞 Teléfono:'))    pkgRecipientPhone = line.replace('📞 Teléfono:', '').trim();
+    });
+  }
+
+  if (isPackage) {
+    // Modo paquete — mostrar dirección de recogida del cliente
+    pickupBlock.style.display = 'flex';
+    document.getElementById('dPickupLabel').textContent = '📍 Recoger en';
+    document.getElementById('dBizName').textContent = 'Dirección de recogida';
+    document.getElementById('dBizAddr').textContent = pkgPickup || '—';
+    if (pkgPickup) {
+      var pu = pkgPickup.startsWith('http') ? pkgPickup : 'https://www.google.com/maps/search/' + encodeURIComponent(pkgPickup);
+      document.getElementById('dBizMaps').href = pu;
+      document.getElementById('dBizMaps').style.display = 'inline-flex';
+    }
+    // Destinatario
+    document.getElementById('dRecipientBlock').style.display = 'block';
+    document.getElementById('dRecipientName').textContent = pkgRecipientName + (pkgRecipientPhone ? ' — ' + pkgRecipientPhone : '');
+    if (pkgRecipientPhone) {
+      document.getElementById('dRecipientCall').href = 'tel:' + pkgRecipientPhone.replace(/\s/g,'');
+      document.getElementById('dRecipientCall').style.display = 'inline-flex';
+    } else {
+      document.getElementById('dRecipientCall').style.display = 'none';
+    }
+    // Dropoff viene de pkgDropoff
+    var delAddr = pkgDropoff || d.delivery_address || '';
+    document.getElementById('dClientName').textContent = 'Dirección de entrega';
+    document.getElementById('dDeliveryAddr').textContent = delAddr || 'Sin dirección';
+    if (delAddr) {
+      var du = delAddr.startsWith('http') ? delAddr : 'https://www.google.com/maps/search/' + encodeURIComponent(delAddr);
+      document.getElementById('dDeliveryMaps').href = du;
+      document.getElementById('dDeliveryMaps').style.display = 'inline-flex';
+    }
+    // Ruta completa
+    if (pkgPickup && pkgDropoff) {
+      var routeUrl = 'https://www.google.com/maps/dir/' + encodeURIComponent(pkgPickup) + '/' + encodeURIComponent(pkgDropoff);
+      document.getElementById('dFullRoute').href = routeUrl;
+      document.getElementById('dFullRoute').style.display = 'flex';
+    }
+  } else if (d.business_type === 'delivery') {
     pickupBlock.style.display = 'none';
+    document.getElementById('dRecipientBlock').style.display = 'none';
     document.getElementById('dBizName').textContent = '—';
     document.getElementById('dBizAddr').textContent = '—';
   } else {
+    document.getElementById('dRecipientBlock').style.display = 'none';
     pickupBlock.style.display = 'flex';
+    document.getElementById('dPickupLabel').textContent = '📦 Recoger en negocio';
     document.getElementById('dBizName').textContent = d.business_name || '—';
     document.getElementById('dBizAddr').textContent = bizAddr;
     var bizMapsUrl = d.business_maps_url || ('https://www.google.com/maps/search/' + encodeURIComponent(bizAddr));
     document.getElementById('dBizMaps').href = bizMapsUrl;
   }
 
-  // Client (dropoff)
-  document.getElementById('dClientName').textContent = d.client_name || 'Cliente';
-  var delAddr = d.delivery_address || '';
+  // Client (dropoff) — solo para pedidos normales
+  if (!isPackage) {
+    document.getElementById('dClientName').textContent = d.client_name || 'Cliente';
+    var delAddr = d.delivery_address || '';
   document.getElementById('dDeliveryAddr').textContent = delAddr || 'Sin dirección';
   if (delAddr) {
     var isUrl = delAddr.startsWith('http');
@@ -408,6 +472,7 @@ function openDetail(id) {
   } else {
     document.getElementById('dFullRoute').style.display = 'none';
   }
+  } // end !isPackage
 
   // Products
   var items = d.items || [];
