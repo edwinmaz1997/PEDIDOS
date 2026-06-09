@@ -78,7 +78,7 @@
     <div style="display:flex;gap:10px;margin:12px 0;flex-wrap:wrap">
       <input type="text" id="searchQ" placeholder="🔍 Buscar por #pedido, cliente..." oninput="applySearch()" style="flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none">
       <span id="orderCount" style="font-size:.82rem;color:var(--muted);align-self:center"></span>
-      <button id="downloadBtn" onclick="downloadCSV()" style="display:none;align-items:center;gap:6px;padding:9px 16px;background:var(--success);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600">📥 Descargar CSV</button>
+      <button id="downloadBtn" onclick="downloadOrders()" style="display:none;align-items:center;gap:6px;padding:9px 16px;background:var(--success);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600">📥 Descargar CSV</button>
     </div>
     <div id="ordersContainer"><div class="loading-state"><div class="spinner"></div></div></div>
     <div class="pagination" id="pagination"></div>
