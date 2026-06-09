@@ -66,7 +66,7 @@ class OrderMessageController {
         if (strlen($message) > 1000) Response::error('Mensaje muy largo (máx 1000 caracteres)', 400);
 
         $role = $user['role'];
-        if (!in_array($role, ['cliente','negocio','admin'])) Response::forbidden();
+        if (!in_array($role, ['cliente','negocio','admin','repartidor'])) Response::forbidden();
 
         $this->db->prepare("INSERT INTO order_messages (order_id, sender_id, sender_role, message) VALUES (?,?,?,?)")
                  ->execute([$orderId, $user['id'], $role, $message]);
@@ -175,6 +175,15 @@ class OrderMessageController {
             $biz = $this->db->prepare("SELECT id FROM businesses WHERE user_id = ? AND id = ?");
             $biz->execute([$user['id'], $order['business_id']]);
             if ($biz->fetch()) return $order;
+        }
+        if ($user['role'] === 'repartidor') {
+            $del = $this->db->prepare("SELECT id FROM deliveries WHERE order_id = ? AND repartidor_id = ?");
+            $del->execute([$orderId, $user['id']]);
+            if ($del->fetch()) return $order;
+            // También puede ver si el pedido está disponible (aún no tomado)
+            $avail = $this->db->prepare("SELECT id FROM deliveries WHERE order_id = ? AND status = 'disponible'");
+            $avail->execute([$orderId]);
+            if ($avail->fetch()) return $order;
         }
         Response::forbidden();
     }

@@ -162,6 +162,18 @@
 
     <!-- Actions -->
     <div id="dActions" style="display:flex;flex-direction:column;gap:8px"></div>
+
+    <!-- Chat -->
+    <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+      <div style="font-weight:700;font-size:.9rem;margin-bottom:10px">💬 Chat del pedido</div>
+      <div id="rChatMessages" style="background:var(--off-white);border-radius:var(--radius-sm);padding:12px;min-height:120px;max-height:280px;overflow-y:auto;margin-bottom:10px;display:flex;flex-direction:column;gap:8px">
+        <div class="chat-empty" style="color:var(--muted);font-size:.85rem;text-align:center;margin:auto">Sin mensajes aún</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <textarea id="rChatInput" rows="2" placeholder="Escribe un mensaje..." style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:none" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendRepartidorMessage();}"></textarea>
+        <button onclick="sendRepartidorMessage()" style="padding:10px 16px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:1.1rem">➤</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -329,13 +341,20 @@ function openDetail(id) {
   badge.textContent = slabel[d.status] || d.status;
   badge.className = 'badge ' + (sbadge[d.status]||'');
 
-  // Business (pickup)
-  document.getElementById('dBizName').textContent = d.business_name || '—';
+  // Business (pickup) — ocultar para negocios tipo delivery
   var bizAddr = d.pickup_address || d.business_name || '';
-  document.getElementById('dBizAddr').textContent = bizAddr;
-  // Use saved Google Maps URL if available, otherwise search by address
-  var bizMapsUrl = d.business_maps_url || ('https://www.google.com/maps/search/' + encodeURIComponent(bizAddr));
-  document.getElementById('dBizMaps').href = bizMapsUrl;
+  var pickupBlock = document.getElementById('dBizName').closest('.route-point');
+  if (d.business_type === 'delivery') {
+    pickupBlock.style.display = 'none';
+    document.getElementById('dBizName').textContent = '—';
+    document.getElementById('dBizAddr').textContent = '—';
+  } else {
+    pickupBlock.style.display = 'flex';
+    document.getElementById('dBizName').textContent = d.business_name || '—';
+    document.getElementById('dBizAddr').textContent = bizAddr;
+    var bizMapsUrl = d.business_maps_url || ('https://www.google.com/maps/search/' + encodeURIComponent(bizAddr));
+    document.getElementById('dBizMaps').href = bizMapsUrl;
+  }
 
   // Client (dropoff)
   document.getElementById('dClientName').textContent = d.client_name || 'Cliente';
@@ -436,12 +455,65 @@ function openDetail(id) {
 
   document.getElementById('detailModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+
+  // Iniciar chat
+  startChatPoll(d.order_id);
 }
+
+var rChatPoll = null;
+var rChatOrderId = null;
 
 function closeDetail(e) {
   if (e && e.target !== document.getElementById('detailModal')) return;
   document.getElementById('detailModal').style.display = 'none';
   document.body.style.overflow = '';
+  if (rChatPoll) { clearInterval(rChatPoll); rChatPoll = null; }
+}
+
+function startChatPoll(orderId) {
+  rChatOrderId = orderId;
+  loadRepartidorChat();
+  if (rChatPoll) clearInterval(rChatPoll);
+  rChatPoll = setInterval(loadRepartidorChat, 3000);
+}
+
+async function loadRepartidorChat() {
+  if (!rChatOrderId) return;
+  try {
+    var res = await fetch('/api/orders/'+rChatOrderId+'/messages', {
+      headers: { 'Authorization': 'Bearer ' + getToken() }
+    }).then(function(r){ return r.json(); });
+    var msgs = (res.data && res.data.messages) ? res.data.messages : [];
+    var container = document.getElementById('rChatMessages');
+    if (!container) return;
+    var rUser = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+    container.innerHTML = msgs.length ? msgs.map(function(m) {
+      var mine = m.sender_id == rUser.id;
+      var isSystem = m.sender_role === 'system';
+      var cls = isSystem ? 'chat-msg system' : (mine ? 'chat-msg mine' : 'chat-msg');
+      return '<div class="'+cls+'">' +
+        (!mine && !isSystem ? '<div class="chat-sender">'+esc(m.sender_name||m.sender_role)+'</div>' : '') +
+        '<div class="chat-bubble">'+esc(m.message).replace(/\n/g,'<br>')+'</div>' +
+        '<div class="chat-time">'+formatDate(m.created_at)+'</div>' +
+      '</div>';
+    }).join('') : '<div class="chat-empty" style="color:var(--muted);font-size:.85rem;text-align:center;margin:auto">Sin mensajes aún</div>';
+    container.scrollTop = container.scrollHeight;
+  } catch(e) {}
+}
+
+async function sendRepartidorMessage() {
+  var input = document.getElementById('rChatInput');
+  var msg   = input.value.trim();
+  if (!msg || !rChatOrderId) return;
+  input.value = '';
+  try {
+    await fetch('/api/orders/'+rChatOrderId+'/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({ message: msg })
+    });
+    loadRepartidorChat();
+  } catch(e) { APP.toast('Error al enviar','error'); }
 }
 
 // ── Actions ───────────────────────────────────────────────────
@@ -479,7 +551,24 @@ async function claimDelivery(id) {
       headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
       body: JSON.stringify({})
     }).then(function(r){ return r.json(); });
-    if (res.success) { APP.toast('¡Entrega tomada!'); document.getElementById('detailModal').style.display='none'; document.body.style.overflow=''; init(); }
+    if (res.success) {
+      APP.toast('¡Entrega tomada!');
+      // Enviar mensaje automático con datos del repartidor
+      var rUser = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+      var orderId = res.data?.order_id || allDeliveries.find(function(d){ return d.id==id; })?.order_id;
+      if (orderId) {
+        var msg = '🛵 ' + (rUser.name||'Repartidor') + ' ha tomado tu pedido.' +
+          (rUser.phone ? '\n📞 Teléfono: ' + rUser.phone : '');
+        await fetch('/api/orders/'+orderId+'/messages', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
+          body: JSON.stringify({ message: msg })
+        });
+      }
+      document.getElementById('detailModal').style.display='none';
+      document.body.style.overflow='';
+      init();
+    }
     else APP.toast(res.message||'Error al tomar entrega','error');
   } catch(e) { APP.toast('Error de conexión','error'); }
 }
