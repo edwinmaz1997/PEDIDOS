@@ -71,19 +71,21 @@ class OrderMessageController {
         $this->db->prepare("INSERT INTO order_messages (order_id, sender_id, sender_role, message) VALUES (?,?,?,?)")
                  ->execute([$orderId, $user['id'], $role, $message]);
 
-        // Notify the other party
+        // Notify the other party según rol
         if ($role === 'cliente') {
-            // Notify business
+            // Cliente → notificar negocio
             $bizStmt = $this->db->prepare("SELECT user_id FROM businesses WHERE id = ?");
             $bizStmt->execute([$order['business_id']]);
             $biz = $bizStmt->fetch();
             if ($biz) {
                 $this->notify($biz['user_id'], 'new_message', '💬 Nuevo mensaje', "El cliente envió un mensaje en el pedido #{$order['order_number']}", '/negocio/pedido-detalle.html?id='.$orderId);
             }
-        } else {
-            // Notify client
+        } elseif ($role === 'negocio') {
+            // Negocio → notificar cliente
             $this->notify($order['client_id'], 'new_message', '💬 Respuesta del negocio', "El negocio respondió en tu pedido #{$order['order_number']}", '/cliente/pedido-detalle.html?id='.$orderId);
         }
+        // repartidor y admin — no generan push de chat
+        // sus acciones ya generan notificaciones propias (tomó, liberó, recogió, entregó)
 
         Response::success(['id' => $this->db->lastInsertId()], 'Mensaje enviado', 201);
     }
