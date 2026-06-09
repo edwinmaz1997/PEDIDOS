@@ -222,9 +222,14 @@ async function init() {
 
     // Stats
     document.getElementById('sAvailable').textContent = (data.available||[]).length;
-    document.getElementById('sActive').textContent    = (data.mine||[]).filter(function(d){ return d.status !== 'entregado' && d.status !== 'cancelado'; }).length;
+    document.getElementById('sActive').textContent    = (data.mine||[]).filter(function(d){
+      return d.order_status !== 'entregado' && d.order_status !== 'cancelado' && d.status !== 'entregado';
+    }).length;
     document.getElementById('sDone').textContent      = (data.mine||[]).filter(function(d){
-      return d.status === 'entregado' && d.updated_at && d.updated_at.substring(0,10) === new Date().toISOString().substring(0,10);
+      var isEntregado = d.order_status === 'entregado' || d.status === 'entregado';
+      var fecha = (d.updated_at || d.created_at || '').substring(0,10);
+      var hoy   = new Date().toISOString().substring(0,10);
+      return isEntregado && fecha === hoy;
     }).length;
 
     applyFilters();
@@ -255,7 +260,7 @@ function applyFilters() {
 
   filtered = allDeliveries.filter(function(d) {
     var mQ = !q || (d.order_number||'').toLowerCase().includes(q) || (d.business_name||'').toLowerCase().includes(q) || (d.client_name||'').toLowerCase().includes(q);
-    var mS = !status || d.status === status;
+    var mS = !status || d.status === status || d.order_status === status;
     var dDate = (d.created_at||'').substring(0,10);
     var mP = true;
     if (periodo === 'hoy')   mP = dDate === today;
