@@ -664,6 +664,7 @@ async function submitOrder() {
   }
 
   // ── Flujo normal ───────────────────────────────────────
+  var useSaved = document.getElementById('useSavedAddress')?.checked;
   var deliveryAddress = '';
   if (deliveryType === 'delivery') {
     if (useSaved) {
