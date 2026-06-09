@@ -214,6 +214,10 @@ async function loadEntregadosHoy(tabBtn) {
   } catch(e) { document.getElementById('ordersContainer').innerHTML = '<div class="empty-state"><p>Error cargando pedidos.</p></div>'; }
 }
 
+function localDate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
 function downloadOrders() {
   var rows = [['#Pedido','Cliente','Teléfono','Tipo','Productos','Subtotal','Delivery','Total','Fecha']];
   filteredOrders.forEach(function(o){
@@ -233,6 +237,12 @@ function downloadOrders() {
       o.created_at||''
     ]);
   });
+  // Fila de totales
+  var totalSubtotal = filteredOrders.reduce(function(s,o){ return s + parseFloat(o.subtotal||0); }, 0);
+  var totalDelivery = filteredOrders.reduce(function(s,o){ return s + parseFloat(o.delivery_fee||0); }, 0);
+  var totalGeneral  = totalSubtotal + totalDelivery;
+  rows.push(['','','','','TOTAL','Q'+totalSubtotal.toFixed(2),'Q'+totalDelivery.toFixed(2),'Q'+totalGeneral.toFixed(2),'']);
+
   var csv = '\uFEFF' + rows.map(function(r){ return r.join(','); }).join('\n');
   var today = localDate(new Date());
   var a = document.createElement('a');
