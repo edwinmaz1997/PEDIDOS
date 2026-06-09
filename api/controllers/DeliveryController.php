@@ -21,6 +21,7 @@ class DeliveryController {
             JOIN businesses b ON o.business_id = b.id
             JOIN users u ON o.client_id = u.id
             WHERE (d.status = 'disponible' OR d.repartidor_id = ?)
+            AND o.status NOT IN ('entregado', 'cancelado')
             ORDER BY d.id DESC
         ");
         $stmt->execute([$user['id']]);

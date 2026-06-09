@@ -245,6 +245,11 @@ class OrderController {
         $validStatuses = ['en_preparacion', 'listo', 'en_camino', 'entregado', 'cancelado'];
         if (!in_array($status, $validStatuses)) Response::error('Estado inválido', 400);
 
+        // Solo el repartidor puede marcar entregado en pedidos delivery
+        if ($status === 'entregado' && $order['delivery_type'] === 'delivery' && $user['role'] === 'negocio') {
+            Response::error('En pedidos de delivery, solo el repartidor puede marcar como entregado', 403);
+        }
+
         $this->db->prepare("UPDATE orders SET status = ? WHERE id = ?")->execute([$status, $id]);
         $this->logStatus($id, $status, $body['message'] ?? null, $user['id']);
 

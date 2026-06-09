@@ -152,6 +152,16 @@ var statusLabels = { pendiente:'⏳ Pendiente', aceptado:'✅ Aceptado', en_prep
 var nextStatus   = { aceptado:'en_preparacion', en_preparacion:'listo', listo:'entregado' };
 var nextLabel    = { aceptado:'Iniciar preparación', en_preparacion:'Marcar listo', listo:'Marcar entregado' };
 
+// Para delivery, el negocio no puede marcar entregado — llega hasta listo
+function getNextStatus(currentStatus, deliveryType) {
+  if (currentStatus === 'listo' && deliveryType === 'delivery') return null;
+  return nextStatus[currentStatus] || null;
+}
+function getNextLabel(currentStatus, deliveryType) {
+  if (currentStatus === 'listo' && deliveryType === 'delivery') return null;
+  return nextLabel[currentStatus] || null;
+}
+
 async function init() {
   var res = await fetch('/api/orders/' + orderId, {
     headers: { 'Authorization': 'Bearer ' + getToken() }
@@ -187,8 +197,12 @@ function renderActions() {
   } else {
     btns = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">';
     btns += '<span class="badge ' + getBadge(s) + '" style="font-size:.9rem;padding:6px 14px">' + (statusLabels[s]||s) + '</span>';
-    if (nextStatus[s]) {
-      btns += '<button class="btn-primary" onclick="advanceStatus(\''+nextStatus[s]+'\')" style="padding:9px 18px">' + nextLabel[s] + '</button>';
+    var ns = getNextStatus(s, order.delivery_type);
+    var nl = getNextLabel(s, order.delivery_type);
+    if (ns) {
+      btns += '<button class="btn-primary" onclick="advanceStatus(\''+ns+'\')" style="padding:9px 18px">' + nl + '</button>';
+    } else if (s === 'listo' && order.delivery_type === 'delivery') {
+      btns += '<span style="font-size:.82rem;color:var(--muted);font-style:italic">⏳ Esperando al repartidor</span>';
     }
     if (s !== 'cancelado' && s !== 'entregado') {
       btns += '<button class="status-btn" onclick="advanceStatus(\'cancelado\')" style="background:#fdf0f0;color:var(--danger);border:1px solid #f5c2c2">✕ Cancelar</button>';
