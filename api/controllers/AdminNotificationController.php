@@ -96,7 +96,9 @@ class NotificationController {
 
     // POST /api/admin/reset-data — eliminar datos de prueba
     public function resetData(array $body): void {
+        error_log("resetData called, body: " . json_encode($body));
         $user = AuthMiddleware::requireRole('admin');
+        error_log("resetData user: " . json_encode($user['id']));
 
         // Confirmación doble obligatoria
         $confirm = $body['confirm'] ?? '';
