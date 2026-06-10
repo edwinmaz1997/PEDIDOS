@@ -9,6 +9,7 @@
 <link rel="apple-touch-icon" href="/assets/img/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/main.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -32,14 +33,6 @@
   html { scroll-behavior: smooth; }
   body { font-family: 'DM Sans', sans-serif; color: var(--navy); background: var(--white); line-height: 1.6; }
 
-  .navbar { position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,27,42,.95);backdrop-filter:blur(12px);padding:0 24px;height:60px;display:flex;align-items:center; }
-  .nav-inner { width:100%;max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between; }
-  .logo { display:flex;align-items:center;gap:10px;text-decoration:none; }
-  .logo img { height:36px;border-radius:8px; }
-  .logo-text { font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:white; }
-  .logo-text span { color:#4A90D9; }
-  .nav-back { padding:8px 18px;border:1.5px solid rgba(255,255,255,.25);border-radius:30px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.88rem;font-weight:600;transition:all .2s; }
-  .nav-back:hover { border-color:white;color:white; }
   /* Justify all body text */
   p, li, .who-text p, .benefit-card p, .step p, .service-card p, .section-sub, .hero-sub, .footer-brand p { text-align: justify; }
 
@@ -249,7 +242,7 @@
 <body>
 
 <!-- NAV -->
-<nav class="navbar"><div class="nav-inner"><a href="/" class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress" style="height:38px;border-radius:8px"><span class="logo-text">Nueva<span>Express</span></span></a><a href="/" class="nav-back">← Inicio</a></div></nav>
+<nav class="navbar"><div class="nav-inner"><a href="/" class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress" style="height:38px;border-radius:8px"><span class="logo-text">Nueva<span>Express</span></span></a><a href="/" class="btn-ghost">← Inicio</a></div></nav>
 
 <!-- HERO -->
 <section class="hero">
