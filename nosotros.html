@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sobre Nosotros — NuevaExpress</title>
+<meta name="description" content="NuevaExpress — La plataforma de delivery y servicios de Nueva Concepción. Pedidos, paquetes y servicios locales en minutos.">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
+<link rel="apple-touch-icon" href="/assets/img/logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:    #0D1B2A;
+    --navy2:   #162032;
+    --blue:    #4A90D9;
+    --blue2:   #5BA3EE;
+    --gold:    #F5C518;
+    --gold2:   #FFD54F;
+    --white:   #FFFFFF;
+    --off:     #F7F9FC;
+    --muted:   #8A99AB;
+    --border:  #E2EAF4;
+    --green:   #2DC653;
+    --orange:  #FF8C42;
+    --radius:  16px;
+    --trans:   all .25s ease;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; color: var(--navy); background: var(--white); line-height: 1.6; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(13,27,42,.92); backdrop-filter: blur(12px);
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo img { height: 36px; border-radius: 8px; }
+  .nav-logo span { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: white; }
+  .nav-logo span em { color: var(--blue); font-style: normal; }
+  .nav-cta {
+    background: var(--blue); color: white; padding: 9px 20px; border-radius: 30px;
+    text-decoration: none; font-weight: 600; font-size: .88rem; transition: var(--trans);
+  }
+  .nav-cta:hover { background: var(--blue2); transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(160deg, var(--navy) 0%, var(--navy2) 60%, #1a3a5c 100%);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 120px 24px 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 120%, rgba(74,144,217,.18) 0%, transparent 70%);
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(74,144,217,.15); border: 1px solid rgba(74,144,217,.35);
+    color: var(--blue2); padding: 6px 16px; border-radius: 30px;
+    font-size: .82rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    margin-bottom: 28px; position: relative;
+  }
+  .hero-eyebrow span { width: 6px; height: 6px; background: var(--blue); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
+  .hero h1 {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(2.4rem, 7vw, 4.5rem); color: white; line-height: 1.1;
+    max-width: 800px; margin-bottom: 24px; position: relative;
+  }
+  .hero h1 em { color: var(--gold); font-style: normal; }
+  .hero-sub {
+    color: rgba(255,255,255,.65); font-size: clamp(.95rem, 2.5vw, 1.15rem);
+    max-width: 560px; margin-bottom: 44px; position: relative;
+  }
+  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; position: relative; }
+  .btn-primary-hero {
+    background: var(--gold); color: var(--navy); padding: 14px 32px; border-radius: 30px;
+    font-weight: 700; text-decoration: none; font-size: 1rem; transition: var(--trans);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary-hero:hover { background: var(--gold2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,197,24,.3); }
+  .btn-ghost-hero {
+    background: rgba(255,255,255,.08); color: white; padding: 14px 32px; border-radius: 30px;
+    font-weight: 600; text-decoration: none; font-size: 1rem; transition: var(--trans);
+    border: 1px solid rgba(255,255,255,.2);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-ghost-hero:hover { background: rgba(255,255,255,.15); transform: translateY(-2px); }
+  .hero-stats {
+    display: flex; gap: 48px; flex-wrap: wrap; justify-content: center;
+    margin-top: 64px; position: relative;
+    padding-top: 40px; border-top: 1px solid rgba(255,255,255,.08);
+  }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--gold); }
+  .stat-label { color: rgba(255,255,255,.5); font-size: .82rem; margin-top: 2px; }
+
+  /* ── SECTIONS ── */
+  section { padding: 96px 24px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    display: inline-block; background: var(--blue); color: white;
+    padding: 4px 14px; border-radius: 30px; font-size: .75rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.15; margin-bottom: 16px;
+  }
+  .section-sub { color: var(--muted); font-size: 1.05rem; max-width: 560px; }
+
+  /* ── WHO WE ARE ── */
+  .who { background: var(--off); }
+  .who-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; margin-top: 56px; }
+  @media(max-width:768px){ .who-grid { grid-template-columns: 1fr; gap: 40px; } }
+  .who-visual {
+    background: linear-gradient(135deg, var(--navy) 0%, #1a3a5c 100%);
+    border-radius: 24px; padding: 48px 40px; text-align: center; color: white;
+  }
+  .who-visual .big-icon { font-size: 5rem; margin-bottom: 20px; }
+  .who-visual h3 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 10px; }
+  .who-visual p { color: rgba(255,255,255,.6); font-size: .95rem; line-height: 1.7; }
+  .who-text p { color: #445; font-size: 1.05rem; line-height: 1.8; margin-bottom: 20px; }
+  .who-text .highlight { color: var(--blue); font-weight: 600; }
+  .values { display: flex; flex-direction: column; gap: 16px; margin-top: 32px; }
+  .value-item { display: flex; gap: 14px; align-items: flex-start; }
+  .value-icon { width: 40px; height: 40px; background: var(--blue); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .value-text h4 { font-weight: 700; font-size: .95rem; margin-bottom: 2px; }
+  .value-text p { color: var(--muted); font-size: .88rem; }
+
+  /* ── AUDIENCE TABS ── */
+  .audience { background: white; }
+  .tabs { display: flex; gap: 8px; margin: 40px 0 48px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 10px 24px; border-radius: 30px; border: 2px solid var(--border);
+    font-weight: 600; cursor: pointer; transition: var(--trans); font-size: .9rem;
+    background: white; font-family: 'DM Sans', sans-serif;
+  }
+  .tab-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+  .benefit-card {
+    background: var(--off); border-radius: var(--radius); padding: 28px;
+    border: 1px solid var(--border); transition: var(--trans);
+  }
+  .benefit-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.08); border-color: var(--blue); }
+  .benefit-icon { font-size: 2rem; margin-bottom: 14px; }
+  .benefit-card h3 { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+  .benefit-card p { color: var(--muted); font-size: .9rem; line-height: 1.6; }
+
+  /* ── HOW IT WORKS ── */
+  .how { background: var(--navy); }
+  .how .section-title { color: white; }
+  .how .section-sub { color: rgba(255,255,255,.5); }
+  .how .section-label { background: rgba(74,144,217,.2); color: var(--blue2); }
+  .steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; margin-top: 56px; }
+  .step {
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius); padding: 32px 24px; text-align: center;
+    transition: var(--trans);
+  }
+  .step:hover { background: rgba(255,255,255,.09); transform: translateY(-4px); }
+  .step-num {
+    width: 48px; height: 48px; background: var(--gold); color: var(--navy);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem;
+    margin: 0 auto 20px;
+  }
+  .step h3 { color: white; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+  .step p { color: rgba(255,255,255,.5); font-size: .88rem; line-height: 1.6; }
+
+  /* ── SERVICES ── */
+  .services { background: var(--off); }
+  .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
+  @media(max-width:768px){ .services-grid { grid-template-columns: 1fr; } }
+  .service-card {
+    border-radius: var(--radius); padding: 36px 28px; color: white; position: relative; overflow: hidden;
+  }
+  .service-card::before { content: ''; position: absolute; inset: 0; opacity: .12; }
+  .service-card.pedidos { background: linear-gradient(135deg, #4A90D9, #2563EB); }
+  .service-card.paquetes { background: linear-gradient(135deg, #FF8C42, #E63946); }
+  .service-card.servicios { background: linear-gradient(135deg, #2DC653, #059669); }
+  .service-card .s-icon { font-size: 2.8rem; margin-bottom: 20px; }
+  .service-card h3 { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; margin-bottom: 10px; }
+  .service-card p { opacity: .85; font-size: .92rem; line-height: 1.7; margin-bottom: 16px; }
+  .service-tag {
+    display: inline-block; background: rgba(255,255,255,.2);
+    padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 600;
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    background: linear-gradient(135deg, var(--blue) 0%, #2563EB 100%);
+    text-align: center; padding: 96px 24px;
+  }
+  .cta-section h2 { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; color: white; margin-bottom: 16px; }
+  .cta-section p { color: rgba(255,255,255,.75); font-size: 1.05rem; max-width: 480px; margin: 0 auto 40px; }
+  .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .cta-white {
+    background: white; color: var(--blue); padding: 14px 32px; border-radius: 30px;
+    font-weight: 700; text-decoration: none; font-size: 1rem; transition: var(--trans);
+  }
+  .cta-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+  .cta-outline {
+    background: rgba(255,255,255,.12); color: white; padding: 14px 32px; border-radius: 30px;
+    font-weight: 600; text-decoration: none; font-size: 1rem; transition: var(--trans);
+    border: 1px solid rgba(255,255,255,.3);
+  }
+  .cta-outline:hover { background: rgba(255,255,255,.2); transform: translateY(-2px); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy); color: rgba(255,255,255,.5);
+    padding: 64px 24px 32px;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; max-width: 1100px; margin: 0 auto 48px; }
+  @media(max-width:768px){ .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; } }
+  @media(max-width:480px){ .footer-grid { grid-template-columns: 1fr; } }
+  .footer-brand .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .footer-brand .logo img { height: 36px; border-radius: 8px; }
+  .footer-brand .logo span { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: white; }
+  .footer-brand .logo span em { color: var(--blue); font-style: normal; }
+  .footer-brand p { font-size: .88rem; line-height: 1.7; max-width: 260px; }
+  .footer-brand .social { display: flex; gap: 10px; margin-top: 20px; }
+  .footer-brand .social a {
+    width: 36px; height: 36px; background: rgba(255,255,255,.07); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.5); text-decoration: none; transition: var(--trans);
+  }
+  .footer-brand .social a:hover { background: var(--blue); color: white; }
+  .footer-col h4 { color: white; font-weight: 700; font-size: .9rem; margin-bottom: 16px; text-transform: uppercase; letter-spacing: .06em; }
+  .footer-col a { display: block; color: rgba(255,255,255,.45); text-decoration: none; font-size: .88rem; margin-bottom: 10px; transition: var(--trans); }
+  .footer-col a:hover { color: var(--gold); }
+  .footer-bottom { max-width: 1100px; margin: 0 auto; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.07); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .footer-bottom p { font-size: .82rem; }
+  .footer-bottom .made { font-size: .82rem; color: rgba(255,255,255,.3); }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:600px){
+    .hero-stats { gap: 28px; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .tabs { gap: 6px; }
+    .tab-btn { font-size: .82rem; padding: 8px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">
+    <img src="/assets/img/logo.jpg" alt="NuevaExpress">
+    <span>Nueva<em>Express</em></span>
+  </a>
+  <a href="/" class="nav-cta">Ir al directorio →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span></span> Nueva Concepción, Escuintla · Guatemala
+  </div>
+  <h1>Tu pueblo, <em>en tu bolsillo.</em></h1>
+  <p class="hero-sub">
+    NuevaExpress conecta a clientes, negocios locales y repartidores en una sola plataforma. Pedidos, envíos y servicios — rápido, seguro y sin complicaciones.
+  </p>
+  <div class="hero-btns">
+    <a href="/" class="btn-primary-hero">🛵 Hacer un pedido</a>
+    <a href="#como-funciona" class="btn-ghost-hero">¿Cómo funciona?</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Tipos de servicio</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Local</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">Q0</div>
+      <div class="stat-label">Costo de registro</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">24/7</div>
+      <div class="stat-label">Disponible</div>
+    </div>
+  </div>
+</section>
+
+<!-- QUIÉNES SOMOS -->
+<section class="who" id="nosotros">
+  <div class="container">
+    <div>
+      <span class="section-label">Quiénes somos</span>
+      <h2 class="section-title">Nacimos en Nueva Concepción<br>para Nueva Concepción</h2>
+      <p class="section-sub">Una plataforma construida desde adentro, para impulsar la economía local.</p>
+    </div>
+    <div class="who-grid">
+      <div class="who-visual">
+        <div class="big-icon">🏘️</div>
+        <h3>Comunidad primero</h3>
+        <p>Cada pedido que haces apoya directamente a un negocio local de tu comunidad. Tu dinero se queda aquí.</p>
+      </div>
+      <div class="who-text">
+        <p>
+          <span class="highlight">NuevaExpress</span> nació con una misión clara: que los vecinos de Nueva Concepción puedan acceder a los negocios y servicios de su comunidad de forma rápida y sencilla, sin depender de plataformas externas que no conocen nuestra realidad.
+        </p>
+        <p>
+          Somos la primera plataforma de delivery y servicios diseñada específicamente para el municipio. Conectamos a quienes necesitan algo con quienes lo ofrecen — en minutos.
+        </p>
+        <div class="values">
+          <div class="value-item">
+            <div class="value-icon">⚡</div>
+            <div class="value-text">
+              <h4>Rapidez</h4>
+              <p>Pedidos gestionados en tiempo real con notificaciones en cada paso.</p>
+            </div>
+          </div>
+          <div class="value-item">
+            <div class="value-icon">🤝</div>
+            <div class="value-text">
+              <h4>Confianza</h4>
+              <p>Negocios verificados, repartidores identificados, chat directo.</p>
+            </div>
+          </div>
+          <div class="value-item">
+            <div class="value-icon">🌱</div>
+            <div class="value-text">
+              <h4>Crecimiento local</h4>
+              <p>Más ventas para los negocios, más trabajo para los repartidores.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFICIOS POR ROL -->
+<section class="audience" id="beneficios">
+  <div class="container">
+    <span class="section-label">Para todos</span>
+    <h2 class="section-title">Diseñado para cada parte<br>de la comunidad</h2>
+    <p class="section-sub">Selecciona tu perfil y descubre cómo NuevaExpress trabaja para ti.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('clientes', this)">👤 Clientes</button>
+      <button class="tab-btn" onclick="showTab('negocios', this)">🏪 Negocios</button>
+      <button class="tab-btn" onclick="showTab('repartidores', this)">🛵 Repartidores</button>
+    </div>
+
+    <!-- Clientes -->
+    <div class="tab-panel active" id="tab-clientes">
+      <div class="benefit-card">
+        <div class="benefit-icon">📱</div>
+        <h3>Sin app que instalar</h3>
+        <p>Accede desde cualquier navegador en tu celular o computadora. Sin descargas, sin esperas.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🛒</div>
+        <h3>Pedidos en segundos</h3>
+        <p>Elige tu negocio, agrega productos al carrito y confirma. Tu pedido llega en minutos.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">📍</div>
+        <h3>Entrega en tu puerta</h3>
+        <p>Detecta tu ubicación automáticamente o ingresa tu dirección. El repartidor llega a donde estés.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">📦</div>
+        <h3>Envía paquetes</h3>
+        <p>¿Necesitas mandar algo? Programa un envío de paquete con dirección de recogida y entrega.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">💬</div>
+        <h3>Chat con el negocio</h3>
+        <p>Comunícate directamente con el negocio si tienes dudas sobre tu pedido en tiempo real.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🔔</div>
+        <h3>Notificaciones en vivo</h3>
+        <p>Sigue el estado de tu pedido paso a paso: aceptado, en preparación, en camino, entregado.</p>
+      </div>
+    </div>
+
+    <!-- Negocios -->
+    <div class="tab-panel" id="tab-negocios">
+      <div class="benefit-card">
+        <div class="benefit-icon">📈</div>
+        <h3>Más ventas, más alcance</h3>
+        <p>Aparece en el directorio y llega a clientes que aún no te conocen. Tus productos, siempre visibles.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🖥️</div>
+        <h3>Panel de control propio</h3>
+        <p>Gestiona pedidos, productos, categorías y precios desde un dashboard fácil de usar.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">📊</div>
+        <h3>Reportes detallados</h3>
+        <p>Consulta tus ventas diarias, productos más pedidos y clientes frecuentes con un clic.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🛵</div>
+        <h3>Repartidores incluidos</h3>
+        <p>No necesitas tu propio personal de entrega. NuevaExpress gestiona el delivery por ti.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🔧</div>
+        <h3>También para servicios</h3>
+        <p>Si eres mecánico, plomero o electricista, crea tu perfil de servicios y recibe solicitudes de contacto.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">💰</div>
+        <h3>Tarifa transparente</h3>
+        <p>Solo se cobran Q3 por pedido completado. Sin mensualidades, sin sorpresas. Solo pagas cuando vendes.</p>
+      </div>
+    </div>
+
+    <!-- Repartidores -->
+    <div class="tab-panel" id="tab-repartidores">
+      <div class="benefit-card">
+        <div class="benefit-icon">⏰</div>
+        <h3>Tus propios horarios</h3>
+        <p>Trabaja cuando quieras. Toma los pedidos que puedas atender según tu disponibilidad.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🗺️</div>
+        <h3>Rutas claras</h3>
+        <p>Cada pedido incluye la dirección de recogida y entrega con enlace directo a Google Maps.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">💬</div>
+        <h3>Chat con cliente y negocio</h3>
+        <p>Comunícate con todas las partes del pedido desde un solo lugar, sin salir de la app.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">📦</div>
+        <h3>Pedidos y paquetes</h3>
+        <p>Atiende tanto pedidos de negocios como envíos de paquetes entre particulares.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">🔔</div>
+        <h3>Notificaciones inmediatas</h3>
+        <p>Recibe alertas cuando hay un nuevo pedido disponible para tomar antes que otros.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon">📱</div>
+        <h3>Todo desde el celular</h3>
+        <p>Panel optimizado para móvil. Gestiona entregas, historial y tu perfil desde cualquier lugar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section class="how" id="como-funciona">
+  <div class="container">
+    <span class="section-label">Paso a paso</span>
+    <h2 class="section-title">Hacer un pedido es<br>así de sencillo</h2>
+    <p class="section-sub">Sin tutoriales, sin complicaciones. En menos de 2 minutos tienes tu pedido en camino.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Entra al directorio</h3>
+        <p>Busca tu negocio favorito o explora por categoría. Restaurantes, farmacias, tiendas y más.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Elige tus productos</h3>
+        <p>Agrega lo que quieras al carrito. Puedes pedir de varios productos a la vez.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Confirma tu pedido</h3>
+        <p>Ingresa tu dirección o usa tu ubicación GPS. Elige delivery o recoger en el negocio.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Sigue en vivo</h3>
+        <p>El negocio acepta, el repartidor lo recoge y te notificamos en cada estado. Tú solo esperas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICIOS -->
+<section class="services">
+  <div class="container">
+    <span class="section-label">Lo que ofrecemos</span>
+    <h2 class="section-title">Tres formas de usar<br>NuevaExpress</h2>
+    <p class="section-sub">Una sola plataforma, múltiples soluciones para tu día a día.</p>
+    <div class="services-grid">
+      <div class="service-card pedidos">
+        <div class="s-icon">🛒</div>
+        <h3>Pedidos a domicilio</h3>
+        <p>Pide comida, medicamentos, productos de tienda o cualquier cosa que ofrezcan los negocios locales. Llega directo a tu puerta.</p>
+        <span class="service-tag">Delivery · Pickup</span>
+      </div>
+      <div class="service-card paquetes">
+        <div class="s-icon">📦</div>
+        <h3>Envío de paquetes</h3>
+        <p>¿Tienes algo que mandar dentro del municipio? Programa una recolección y entrega con todos los datos del destinatario.</p>
+        <span class="service-tag">Puerta a puerta</span>
+      </div>
+      <div class="service-card servicios">
+        <div class="s-icon">🔧</div>
+        <h3>Servicios locales</h3>
+        <p>Encuentra mecánicos, plomeros, electricistas y más. Consulta sus servicios y contáctalos directamente desde la plataforma.</p>
+        <span class="service-tag">Directorio · Contacto</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>¿Listo para empezar?</h2>
+    <p>Únete a NuevaExpress hoy. Es gratis para clientes y repartidores. Para negocios, solo Q3 por pedido completado.</p>
+    <div class="cta-btns">
+      <a href="/cliente/register.html" class="cta-white">👤 Crear cuenta gratis</a>
+      <a href="/" class="cta-outline">🛵 Ver el directorio</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">
+        <img src="/assets/img/logo.jpg" alt="NuevaExpress">
+        <span>Nueva<em style="color:var(--blue);font-style:normal">Express</em></span>
+      </div>
+      <p>Tu pueblo, en tu bolsillo. La plataforma de delivery y servicios de Nueva Concepción, Escuintla.</p>
+      <div class="social">
+        <a href="https://www.facebook.com/NuevaExpressGT" target="_blank" title="Facebook">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Plataforma</h4>
+      <a href="/">Directorio</a>
+      <a href="/nosotros.html">Sobre nosotros</a>
+      <a href="/terminos.html">Términos y condiciones</a>
+    </div>
+    <div class="footer-col">
+      <h4>Para negocios</h4>
+      <a href="/cliente/register.html?role=negocio">Registra tu negocio</a>
+      <a href="/negocio/index.html">Panel de negocio</a>
+      <a href="/nosotros.html#beneficios">Beneficios</a>
+    </div>
+    <div class="footer-col">
+      <h4>Acceso</h4>
+      <a href="/cliente/login.html">Iniciar sesión</a>
+      <a href="/cliente/register.html">Crear cuenta</a>
+      <a href="/admin/index.html">Administrador</a>
+      <a href="/repartidor/index.html">Panel repartidor</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© <span id="yr"></span> NuevaExpress · Nueva Concepción, Escuintla, Guatemala</p>
+    <span class="made">Hecho con ❤️ para nuestra comunidad</span>
+  </div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
