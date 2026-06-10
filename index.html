@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       '<a href="' + panel + '" class="btn-primary" style="padding:7px 14px;font-size:.82rem">Mi panel</a>';
   }
   await loadCategories();
-  await loadAllSections();
+  await filterCategory(null, document.querySelector('.cat-chip.active'));
 });
 
 // ─── Load Categories ──────────────────────────────────────
@@ -148,9 +148,37 @@ async function filterCategory(id, btn) {
   document.getElementById('searchResults').classList.add('hidden');
 
   if (!id) {
-    // Todos — mostrar secciones normales
+    // Todos — carrusel con todos los negocios
     document.getElementById('businessSections').classList.remove('hidden');
     document.getElementById('categoryResults').classList.add('hidden');
+    document.getElementById('businessSections').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+    try {
+      const res  = await fetch(`${API}/businesses?limit=100`);
+      const data = await res.json();
+      const all  = data.data?.businesses || [];
+      if (!all.length) {
+        document.getElementById('businessSections').innerHTML = '<div class="empty-state"><p>No hay negocios registrados aún.</p></div>';
+        return;
+      }
+      document.getElementById('businessSections').innerHTML = `
+        <section class="biz-section">
+          <div class="container">
+            <div class="section-header">
+              <h2 class="section-title">Todos los negocios</h2>
+              <span style="font-size:.85rem;color:var(--muted)">${all.length} negocio${all.length!==1?'s':''}</span>
+            </div>
+            <div class="carousel-wrapper">
+              <button class="carousel-btn prev" onclick="slideCarousel('all', -1)">‹</button>
+              <div class="carousel-track" id="carousel-all">
+                ${all.map(b => renderCard(b)).join('')}
+              </div>
+              <button class="carousel-btn next" onclick="slideCarousel('all', 1)">›</button>
+            </div>
+          </div>
+        </section>`;
+    } catch(e) {
+      document.getElementById('businessSections').innerHTML = '<div class="empty-state"><p>Error cargando negocios.</p></div>';
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
