@@ -32,22 +32,14 @@
   html { scroll-behavior: smooth; }
   body { font-family: 'DM Sans', sans-serif; color: var(--navy); background: var(--white); line-height: 1.6; }
 
-  /* ── NAV ── */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(13,27,42,.92); backdrop-filter: blur(12px);
-    padding: 14px 24px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-  .nav-logo img { height: 36px; border-radius: 8px; }
-  .nav-logo span { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: white; }
-  .nav-logo span em { color: var(--blue); font-style: normal; }
-  .nav-cta {
-    background: var(--blue); color: white; padding: 9px 20px; border-radius: 30px;
-    text-decoration: none; font-weight: 600; font-size: .88rem; transition: var(--trans);
-  }
-  .nav-cta:hover { background: var(--blue2); transform: translateY(-1px); }
+  .navbar { position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,27,42,.95);backdrop-filter:blur(12px);padding:0 24px;height:60px;display:flex;align-items:center; }
+  .nav-inner { width:100%;max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between; }
+  .logo { display:flex;align-items:center;gap:10px;text-decoration:none; }
+  .logo img { height:36px;border-radius:8px; }
+  .logo-text { font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:white; }
+  .logo-text span { color:#4A90D9; }
+  .btn-ghost { padding:8px 18px;border:1.5px solid rgba(255,255,255,.25);border-radius:30px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.88rem;font-weight:600;transition:all .2s; }
+  .btn-ghost:hover { border-color:white;color:white; }
 
   /* ── HERO ── */
   .hero {
@@ -255,13 +247,7 @@
 <body>
 
 <!-- NAV -->
-<nav>
-  <a href="/" class="nav-logo">
-    <img src="/assets/img/logo.jpg" alt="NuevaExpress">
-    <span>Nueva<em>Express</em></span>
-  </a>
-  <a href="/" class="nav-cta">Ir al directorio →</a>
-</nav>
+<nav class="navbar"><div class="nav-inner"><a href="/" class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress" style="height:38px;border-radius:8px"><span class="logo-text">Nueva<span>Express</span></span></a><a href="/" class="btn-ghost">← Inicio</a></div></nav>
 
 <!-- HERO -->
 <section class="hero">
