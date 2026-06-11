@@ -748,6 +748,40 @@ function handleInstall(){
 }
 if(isStandalone){var ins=document.getElementById("installSection");if(ins)ins.style.display="none";}
 
+
+// ── Instalación PWA ───────────────────────────────────
+var deferredInstallPrompt = null;
+var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+var isAndroid = /android/i.test(navigator.userAgent);
+var isStandalone = window.navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
+
+window.addEventListener("beforeinstallprompt", function(e) {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+});
+
+function handleInstall() {
+  if (isStandalone) {
+    document.getElementById("iosInstallGuide").innerHTML = "<p style=\"font-weight:600;color:var(--success)\">✅ La app ya está instalada en tu dispositivo.</p>";
+    document.getElementById("iosInstallGuide").style.display = "block";
+    return;
+  }
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(function(r) {
+      deferredInstallPrompt = null;
+    });
+    return;
+  }
+  // Siempre mostrar guía según dispositivo
+  document.getElementById("iosInstallGuide").style.display = "block";
+}
+
+if (isStandalone) {
+  var ins = document.getElementById("installSection");
+  if (ins) ins.style.display = "none";
+}
+
 function doLogout(){localStorage.clear();window.location.href='/cliente/login.html';}
 function toggleSidebar(){var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open');}
 
@@ -770,15 +804,30 @@ setInterval(init, 30000);
     </div>
   </div>
 </div>
-<!-- iOS Install Guide -->
-<div id="iosInstallGuide" style="display:none;position:fixed;bottom:80px;left:16px;right:16px;background:#fff8e1;border:1.5px solid #ffe082;border-radius:16px;padding:20px;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,.15)">
-  <div style="font-weight:700;margin-bottom:10px">📱 Instalar en iPhone / iPad</div>
   <ol style="padding-left:18px;line-height:2.2;font-size:.9rem">
     <li>Toca el boton <strong>Compartir</strong> en Safari</li>
     <li>Toca <strong>Agregar a pantalla de inicio</strong></li>
     <li>Toca <strong>Agregar</strong> arriba a la derecha</li>
   </ol>
   <button onclick="document.getElementById('iosInstallGuide').style.display='none'" style="margin-top:8px;background:none;border:none;color:#666;font-size:.82rem;cursor:pointer">Cerrar x</button>
+</div>
+<!-- Install Guide -->
+<div id="iosInstallGuide" style="display:none;position:fixed;bottom:16px;left:16px;right:16px;background:#fff8e1;border:1.5px solid #ffe082;border-radius:16px;padding:20px;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,.2);font-size:.88rem">
+  <div style="font-weight:700;margin-bottom:12px">📱 Cómo instalar NuevaExpress</div>
+  <div style="margin-bottom:10px"><strong>iPhone/iPad (Safari):</strong>
+    <ol style="padding-left:18px;line-height:2.2;margin-top:4px">
+      <li>Toca <strong>Compartir</strong> ⬆️ abajo</li>
+      <li>Toca <strong>"Agregar a pantalla de inicio"</strong></li>
+      <li>Toca <strong>Agregar</strong></li>
+    </ol>
+  </div>
+  <div><strong>Android (Chrome):</strong>
+    <ol style="padding-left:18px;line-height:2.2;margin-top:4px">
+      <li>Toca los <strong>3 puntos</strong> ⋮ arriba</li>
+      <li>Toca <strong>"Instalar aplicación"</strong></li>
+    </ol>
+  </div>
+  <button onclick="document.getElementById('iosInstallGuide').style.display='none'" style="margin-top:10px;background:none;border:1px solid #ccc;border-radius:6px;padding:4px 12px;color:#666;font-size:.8rem;cursor:pointer">Cerrar</button>
 </div>
 </body>
 </html>
