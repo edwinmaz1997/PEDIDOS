@@ -90,6 +90,34 @@
           Cambiar contraseña
         </button>
       </div>
+
+      <!-- App -->
+      <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px;margin-top:20px">
+        <h3 style="margin-bottom:8px">📲 Instalar aplicación</h3>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:14px">Accede más rápido desde tu pantalla de inicio.</p>
+        <button onclick="handleInstall()" class="btn-primary" style="width:100%;justify-content:center;padding:13px;margin-bottom:10px">📲 Instalar NuevaExpress</button>
+        <div id="iosInstallGuide" style="display:none;background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:16px;font-size:.88rem;margin-bottom:10px">
+          <div style="font-weight:700;margin-bottom:10px">Sigue estos pasos:</div>
+          <div style="margin-bottom:10px"><strong>📱 iPhone / iPad (Safari):</strong>
+            <ol style="padding-left:18px;line-height:2.2;margin-top:4px">
+              <li>Toca <strong>Compartir</strong> ⬆️ abajo</li>
+              <li>Toca <strong>"Agregar a pantalla de inicio"</strong></li>
+              <li>Toca <strong>Agregar</strong></li>
+            </ol>
+          </div>
+          <div><strong>🤖 Android (Chrome):</strong>
+            <ol style="padding-left:18px;line-height:2.2;margin-top:4px">
+              <li>Toca los <strong>3 puntos ⋮</strong> arriba</li>
+              <li>Toca <strong>"Instalar aplicación"</strong></li>
+            </ol>
+          </div>
+          <button onclick="document.getElementById('iosInstallGuide').style.display='none'" style="margin-top:8px;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;color:var(--muted);font-size:.8rem;cursor:pointer">Cerrar</button>
+        </div>
+        <div style="border-top:1px solid var(--border);margin:16px 0"></div>
+        <h3 style="margin-bottom:8px">🔔 Notificaciones push</h3>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:14px">Recibe avisos de nuevos pedidos disponibles.</p>
+        <button onclick="requestNotificationPermission()" class="btn-primary" style="width:100%;justify-content:center;padding:13px;background:var(--success)">🔔 Activar notificaciones</button>
+      </div>
     </div>
   </main>
 </div>
@@ -201,6 +229,20 @@ async function changePassword() {
 
 function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
 function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+// ── Instalación PWA ──
+var deferredInstallPrompt = null;
+var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredInstallPrompt = e; });
+function handleInstall() {
+  if (isStandalone) { document.getElementById('iosInstallGuide').innerHTML = '<p style="color:var(--success);font-weight:600">✅ La app ya está instalada.</p>'; document.getElementById('iosInstallGuide').style.display='block'; return; }
+  if (deferredInstallPrompt) { deferredInstallPrompt.prompt(); deferredInstallPrompt.userChoice.then(function(){ deferredInstallPrompt=null; }); return; }
+  document.getElementById('iosInstallGuide').style.display = 'block';
+}
+function requestNotificationPermission() {
+  if (!('Notification' in window)) { alert('Tu navegador no soporta notificaciones'); return; }
+  Notification.requestPermission().then(function(p){ if(p==='granted') alert('✅ Notificaciones activadas'); else alert('Permiso denegado. Actívalo en la configuración del navegador.'); });
+}
 
 init();
 </script>
