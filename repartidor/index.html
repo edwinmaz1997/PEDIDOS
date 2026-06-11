@@ -151,10 +151,14 @@
     <!-- Destinatario bloque legacy (oculto) -->
     <div id="dRecipientBlock" style="display:none"></div>
 
-    <!-- Ruta completa (oculto por default) -->
-    <a href="#" id="dFullRoute" target="_blank" class="btn-primary" style="display:none;align-items:center;justify-content:center;gap:8px;padding:12px;margin-bottom:16px;text-decoration:none">
-      🗺️ Ver ruta en Google Maps
-    </a>
+    <!-- Ruta completa (oculto) -->
+    <div id="dFullRoute" style="display:none"></div>
+
+    <!-- Productos del pedido -->
+    <div id="dItemsWrap" style="margin-bottom:16px;display:none">
+      <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">🛍️ Productos</div>
+      <div id="dItems" style="background:var(--off-white);border-radius:var(--radius-sm);padding:12px;font-size:.88rem"></div>
+    </div>
 
     <!-- Total to collect -->
     <div style="background:linear-gradient(135deg,var(--blue),var(--blue-dark));border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;color:white">
@@ -444,29 +448,18 @@ function openDetail(id) {
     document.getElementById('dDeliveryMaps').style.display = 'none';
   }
 
-  // Full route
-  var pickupForRoute = d.business_maps_url || bizAddr;
-  var destIsUrl = delAddr && delAddr.startsWith('http');
-
-  if (delAddr) {
-    var routeUrl;
-    if (destIsUrl) {
-      // Destination is a Maps URL — open it directly (can't mix with origin in dir/)
-      // Best UX: open the saved Maps link directly
-      routeUrl = delAddr;
-      document.getElementById('dFullRoute').innerHTML = '🗺️ Abrir destino en Google Maps';
-    } else {
-      routeUrl = 'https://www.google.com/maps/dir/' + encodeURIComponent(pickupForRoute) + '/' + encodeURIComponent(delAddr);
-      document.getElementById('dFullRoute').innerHTML = '🗺️ Ver ruta completa en Google Maps';
-    }
-    document.getElementById('dFullRoute').href = routeUrl;
-    document.getElementById('dFullRoute').style.display = 'flex';
-  } else if (d.business_maps_url || bizAddr) {
-    document.getElementById('dFullRoute').href = d.business_maps_url || ('https://www.google.com/maps/search/' + encodeURIComponent(bizAddr));
-    document.getElementById('dFullRoute').innerHTML = '🗺️ Ver ubicación del negocio';
-    document.getElementById('dFullRoute').style.display = 'flex';
+  // Productos del pedido
+  var items = d.items || [];
+  if (items.length) {
+    document.getElementById('dItemsWrap').style.display = 'block';
+    document.getElementById('dItems').innerHTML = items.map(function(i) {
+      return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">' +
+        '<span>' + esc(i.product_name || i.name || 'Producto') + ' ×' + (i.quantity||1) + '</span>' +
+        '<span style="font-weight:600">Q' + parseFloat((i.unit_price||i.price||0) * (i.quantity||1)).toFixed(2) + '</span>' +
+      '</div>';
+    }).join('');
   } else {
-    document.getElementById('dFullRoute').style.display = 'none';
+    document.getElementById('dItemsWrap').style.display = 'none';
   }
   } // end !isPackage
 
