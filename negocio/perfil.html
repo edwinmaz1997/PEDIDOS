@@ -17,8 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.tabs { display:flex; gap:4px; background:var(--off-white); border-radius:var(--radius-sm); padding:4px; margin-bottom:28px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; width:100%; }
-.tabs::-webkit-scrollbar { display:none; }
+.tabs { display:flex; gap:4px; background:var(--off-white); border-radius:var(--radius-sm); padding:4px; margin-bottom:28px; width:fit-content; }
 .tab { padding:8px 20px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:500; transition:var(--transition); }
 .tab.active { background:white; box-shadow:var(--shadow-sm); font-weight:600; }
 .panel { display:none; } .panel.active { display:block; }
@@ -103,7 +102,6 @@
         <button class="tab" onclick="switchTab('ubicacion',this)">📍 Ubicación</button>
         <button class="tab" onclick="switchTab('horarios',this)">🕐 Horarios</button>
         <button class="tab" onclick="switchTab('fotos',this)">📸 Fotos</button>
-        <button class="tab" onclick="switchTab('app',this)">📲 App</button>
       </div>
 
       <!-- Tab: Información -->
@@ -138,9 +136,33 @@
             </div>
           </div>
           <div style="margin-top:20px">
+            <!-- Instalar app -->
+            <div style="background:#f0f7ff;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+              <div>
+                <div style="font-weight:600;font-size:.9rem">📲 Instalar aplicación</div>
+                <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Accede más rápido desde tu pantalla de inicio</div>
+              </div>
+              <button onclick="handleInstall()" class="btn-primary" style="padding:9px 18px;font-size:.85rem;white-space:nowrap">Instalar</button>
+            </div>
+            <div id="iosInstallGuide" style="display:none;background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;font-size:.85rem">
+              <div style="font-weight:700;margin-bottom:8px">Cómo instalar NuevaExpress:</div>
+              <div style="margin-bottom:8px"><strong>📱 iPhone/iPad:</strong><ol style="padding-left:16px;line-height:2;margin-top:2px"><li>Toca <strong>Compartir</strong> ⬆️</li><li>Toca <strong>"Agregar a pantalla de inicio"</strong></li><li>Toca <strong>Agregar</strong></li></ol></div>
+              <div><strong>🤖 Android:</strong><ol style="padding-left:16px;line-height:2;margin-top:2px"><li>Toca los <strong>3 puntos ⋮</strong></li><li>Toca <strong>"Instalar aplicación"</strong></li></ol></div>
+              <button onclick="document.getElementById('iosInstallGuide').style.display='none'" style="margin-top:8px;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);font-size:.78rem;cursor:pointer">Cerrar</button>
+            </div>
+            <!-- Notificaciones -->
             <div style="background:#e3f2fd;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-        <div>
-          
+              <div>
+                <div style="font-weight:600;font-size:.9rem">🔔 Notificaciones push</div>
+                <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Recibe avisos de pedidos y mensajes en tiempo real</div>
+              </div>
+              <button onclick="requestNotificationPermission()" class="btn-primary" style="padding:9px 18px;font-size:.85rem;white-space:nowrap">Activar notificaciones</button>
+            </div>
+            <button class="btn-primary" onclick="saveInfo()">Guardar información</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Tab: Contacto -->
       <div class="panel" id="tab-contacto">
         <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px">
@@ -228,36 +250,6 @@
           <p style="color:var(--muted);font-size:.9rem;margin-bottom:16px">Agrega hasta 10 fotos de tu negocio. Se mostrarán en tu perfil público.</p>
           <div class="photo-grid" id="photoGrid"></div>
           <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="uploadPhotos(this)">
-        </div>
-      </div>
-
-      <!-- Tab: App -->
-      <div class="panel" id="tab-app">
-        <div style="background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px">
-          <h3 style="margin-bottom:8px">📲 Instalar aplicación</h3>
-          <p style="color:var(--muted);font-size:.9rem;margin-bottom:16px">Instala NuevaExpress en tu pantalla de inicio para acceder más rápido.</p>
-          <button onclick="handleInstall()" class="btn-primary" style="width:100%;justify-content:center;padding:13px;margin-bottom:12px">📲 Instalar NuevaExpress</button>
-          <div id="iosInstallGuide" style="display:none;background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:16px;font-size:.88rem">
-            <div style="font-weight:700;margin-bottom:10px">Sigue estos pasos:</div>
-            <div style="margin-bottom:12px"><strong>📱 iPhone / iPad (Safari):</strong>
-              <ol style="padding-left:18px;line-height:2.2;margin-top:4px">
-                <li>Toca <strong>Compartir</strong> ⬆️ abajo</li>
-                <li>Toca <strong>"Agregar a pantalla de inicio"</strong></li>
-                <li>Toca <strong>Agregar</strong></li>
-              </ol>
-            </div>
-            <div><strong>🤖 Android (Chrome):</strong>
-              <ol style="padding-left:18px;line-height:2.2;margin-top:4px">
-                <li>Toca los <strong>3 puntos ⋮</strong> arriba</li>
-                <li>Toca <strong>"Instalar aplicación"</strong></li>
-              </ol>
-            </div>
-            <button onclick="document.getElementById('iosInstallGuide').style.display='none'" style="margin-top:10px;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;color:var(--muted);font-size:.8rem;cursor:pointer">Cerrar</button>
-          </div>
-          <div style="border-top:1px solid var(--border);margin:20px 0"></div>
-          <h3 style="margin-bottom:8px">🔔 Notificaciones push</h3>
-          <p style="color:var(--muted);font-size:.9rem;margin-bottom:16px">Recibe avisos de nuevos pedidos en tiempo real.</p>
-          <button onclick="requestNotificationPermission()" class="btn-primary" style="width:100%;justify-content:center;padding:13px;background:var(--success)">🔔 Activar notificaciones</button>
         </div>
       </div>
 
@@ -529,34 +521,6 @@ init();
 </script>
 
 <script>
-function toggleSidebar() {
-  var sidebar = document.querySelector('.sidebar');
-  var overlay = document.getElementById('sidebarOverlay');
-  if (sidebar) sidebar.classList.toggle('open');
-  if (overlay) overlay.classList.toggle('open');
-}
-</script>
-
-<script src="/assets/js/pwa.js">
-
-
-  if (deferredInstallPrompt) {
-    deferredInstallPrompt.prompt();
-    deferredInstallPrompt.userChoice.then(function(r) {
-      deferredInstallPrompt = null;
-    });
-    return;
-  }
-  // Siempre mostrar guía según dispositivo
-  document.getElementById("iosInstallGuide").style.display = "block";
-}
-
-if (isStandalone) {
-  var ins = document.getElementById("installSection");
-  if (ins) ins.style.display = "none";
-}
-
-
 // ── Instalación PWA ──
 var deferredInstallPrompt = null;
 var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
@@ -567,6 +531,14 @@ function handleInstall() {
   document.getElementById('iosInstallGuide').style.display = 'block';
 }
 
+function toggleSidebar() {
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  if (sidebar) sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('open');
+}
 </script>
+
+<script src="/assets/js/pwa.js"></script>
 </body>
 </html>
