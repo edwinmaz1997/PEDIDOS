@@ -33,7 +33,7 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-content">
-    <h1>Encuentra negocios<br><span class="accent">cerca de ti</span></h1>
+    <h1>Encuentra negocios<br><span class="accent" id="typedText"></span><span id="typedCursor" style="color:var(--gold);animation:blink .7s infinite">|</span></h1>
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Busca restaurantes, ceviches, farmacias..." autocomplete="off">
       <button onclick="doSearch()" class="btn-search">
@@ -446,7 +446,28 @@ function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 </script>
-<script>var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();</script>
+<script>
+var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();
+(function(){
+  var phrases=["cerca de ti","en tu bolsillo","a tu puerta","en minutos"];
+  var el=document.getElementById("typedText");
+  var pi=0,ci=0,deleting=false;
+  if(!el)return;
+  function type(){
+    var phrase=phrases[pi];
+    if(!deleting){
+      el.textContent=phrase.slice(0,++ci);
+      if(ci===phrase.length){deleting=true;setTimeout(type,1800);return;}
+      setTimeout(type,80);
+    } else {
+      el.textContent=phrase.slice(0,--ci);
+      if(ci===0){deleting=false;pi=(pi+1)%phrases.length;setTimeout(type,400);return;}
+      setTimeout(type,45);
+    }
+  }
+  setTimeout(type,600);
+})();
+</script>
 <script src="/assets/js/pwa.js"></script>
 </body>
 </html>

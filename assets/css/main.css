@@ -280,6 +280,7 @@ img { max-width: 100%; display: block; }
   animation: spin .7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 .empty-state { text-align: center; padding: 60px 24px; color: var(--muted); }
 .hidden { display: none !important; }
 
