@@ -95,6 +95,22 @@
         </div>
       </div>
 
+      <!-- 📲 Instalar y 🔔 Notificaciones -->
+      <div style="background:#f0f7ff;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div><div style="font-weight:600;font-size:.9rem">📲 Instalar aplicación</div><div style="font-size:.78rem;color:var(--muted);margin-top:2px">Accede más rápido desde tu pantalla de inicio</div></div>
+        <button onclick="handleInstall()" class="btn-primary" style="padding:9px 18px;font-size:.85rem;white-space:nowrap">Instalar</button>
+      </div>
+      <div id="iosInstallGuide" style="display:none;background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;font-size:.85rem">
+        <div style="font-weight:700;margin-bottom:8px">Cómo instalar NuevaExpress:</div>
+        <div style="margin-bottom:8px"><strong>📱 iPhone/iPad:</strong><ol style="padding-left:16px;line-height:2;margin-top:2px"><li>Toca <strong>Compartir</strong> ⬆️</li><li>Toca <strong>"Agregar a pantalla de inicio"</strong></li><li>Toca <strong>Agregar</strong></li></ol></div>
+        <div><strong>🤖 Android:</strong><ol style="padding-left:16px;line-height:2;margin-top:2px"><li>Toca los <strong>3 puntos ⋮</strong></li><li>Toca <strong>"Instalar aplicación"</strong></li></ol></div>
+        <button onclick="document.getElementById('iosInstallGuide').style.display='none'" style="margin-top:8px;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);font-size:.78rem;cursor:pointer">Cerrar</button>
+      </div>
+      <div style="background:#e3f2fd;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div><div style="font-weight:600;font-size:.9rem">🔔 Notificaciones push</div><div style="font-size:.78rem;color:var(--muted);margin-top:2px">Recibe avisos de pedidos en tiempo real</div></div>
+        <button onclick="requestNotificationPermission()" class="btn-primary" style="padding:9px 18px;font-size:.85rem;white-space:nowrap">Activar notificaciones</button>
+      </div>
+
       <!-- Tabs -->
       <div class="tabs">
         <button class="tab active" onclick="switchTab('info',this)">📝 Información</button>
@@ -136,22 +152,6 @@
             </div>
           </div>
           <div style="margin-top:20px">
-            <!-- Instalar app -->
-            <div style="background:#f0f7ff;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-              <div><div style="font-weight:600;font-size:.9rem">📲 Instalar aplicación</div><div style="font-size:.78rem;color:var(--muted);margin-top:2px">Accede más rápido desde tu pantalla de inicio</div></div>
-              <button onclick="handleInstall()" class="btn-primary" style="padding:9px 18px;font-size:.85rem;white-space:nowrap">Instalar</button>
-            </div>
-            <div id="iosInstallGuide" style="display:none;background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;font-size:.85rem">
-              <div style="font-weight:700;margin-bottom:8px">Cómo instalar NuevaExpress:</div>
-              <div style="margin-bottom:8px"><strong>📱 iPhone/iPad:</strong><ol style="padding-left:16px;line-height:2;margin-top:2px"><li>Toca <strong>Compartir</strong> ⬆️</li><li>Toca <strong>"Agregar a pantalla de inicio"</strong></li><li>Toca <strong>Agregar</strong></li></ol></div>
-              <div><strong>🤖 Android:</strong><ol style="padding-left:16px;line-height:2;margin-top:2px"><li>Toca los <strong>3 puntos ⋮</strong></li><li>Toca <strong>"Instalar aplicación"</strong></li></ol></div>
-              <button onclick="document.getElementById('iosInstallGuide').style.display='none'" style="margin-top:8px;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);font-size:.78rem;cursor:pointer">Cerrar</button>
-            </div>
-            <!-- Notificaciones -->
-            <div style="background:#e3f2fd;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-              <div><div style="font-weight:600;font-size:.9rem">🔔 Notificaciones push</div><div style="font-size:.78rem;color:var(--muted);margin-top:2px">Recibe avisos de pedidos en tiempo real</div></div>
-              <button onclick="requestNotificationPermission()" class="btn-primary" style="padding:9px 18px;font-size:.85rem;white-space:nowrap">Activar notificaciones</button>
-            </div>
             <button class="btn-primary" onclick="saveInfo()">Guardar información</button>
           </div>
         </div>
