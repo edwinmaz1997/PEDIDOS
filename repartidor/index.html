@@ -453,9 +453,11 @@ function openDetail(id) {
   if (items.length) {
     document.getElementById('dItemsWrap').style.display = 'block';
     document.getElementById('dItems').innerHTML = items.map(function(i) {
+      var qty   = parseInt(i.quantity) || 1;
+      var price = parseFloat(i.unit_price) || 0;
       return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">' +
-        '<span>' + esc(i.product_name || i.name || 'Producto') + ' ×' + (i.quantity||1) + '</span>' +
-        '<span style="font-weight:600">Q' + parseFloat((i.unit_price||i.price||0) * (i.quantity||1)).toFixed(2) + '</span>' +
+        '<span>' + esc(i.product_name || 'Producto') + ' ×' + qty + '</span>' +
+        (price > 0 ? '<span style="font-weight:600">Q' + (price * qty).toFixed(2) + '</span>' : '<span style="color:var(--muted);font-size:.8rem">Sin precio</span>') +
       '</div>';
     }).join('');
   } else {
