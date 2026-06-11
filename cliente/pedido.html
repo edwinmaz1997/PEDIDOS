@@ -677,7 +677,7 @@ async function submitOrder() {
 
   const items = [];
   Object.entries(cart).forEach(([id, item]) => {
-    if (item.qty > 0) items.push({ product_id: parseInt(id), name: item.name, quantity: item.qty });
+    if (item.qty > 0) items.push({ product_id: parseInt(id), name: item.name, price: item.price || 0, quantity: item.qty });
   });
   document.querySelectorAll('.custom-input').forEach((inp, i) => {
     if (inp.value.trim()) items.push({ name: inp.value.trim(), quantity: 1 });

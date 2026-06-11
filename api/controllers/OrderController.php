@@ -136,6 +136,12 @@ class OrderController {
                     $subtotal   += $unitPrice * $quantity;
                 }
             }
+
+            // Fallback: usar precio enviado desde el frontend
+            if ($unitPrice === null && isset($item['price']) && $item['price'] > 0) {
+                $unitPrice = (float)$item['price'];
+                $subtotal += $unitPrice * $quantity;
+            }
             $orderItems[] = [
                 'product_id'   => $productId,
                 'product_name' => $productName ?: 'Producto personalizado',
