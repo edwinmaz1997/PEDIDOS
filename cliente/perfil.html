@@ -14,15 +14,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mi Perfil — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.profile-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:28px;margin-bottom:20px}
-.profile-card h3{font-size:1rem;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
-.avatar{width:72px;height:72px;border-radius:50%;background:var(--charcoal);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:white;font-family:'Syne',sans-serif;font-weight:700;flex-shrink:0}
-.profile-header{display:flex;gap:16px;align-items:center;margin-bottom:28px;background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px}
-.pw-rules li{font-size:.8rem;color:var(--muted);margin-bottom:3px;list-style:none}
-.pw-rules li.ok{color:var(--success)}
+.profile-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:24px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.profile-tabs::-webkit-scrollbar { display:none; }
+.profile-tab { padding:12px 18px; border:none; background:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:500; color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-2px; white-space:nowrap; transition:var(--transition); }
+.profile-tab.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:700; }
+.profile-panel { display:none; }
+.profile-panel.active { display:block; }
+.stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+.stat-box { background:white; border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; text-align:center; }
+.stat-box .num { font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:800; color:var(--accent); }
+.stat-box .lbl { font-size:.72rem; color:var(--muted); margin-top:2px; }
+.install-guide { display:none; background:#fff8e1; border:1.5px solid #ffe082; border-radius:var(--radius-sm); padding:16px; margin-bottom:12px; font-size:.88rem; }
+.install-guide ol { padding-left:18px; line-height:2.2; margin-top:6px; }
 </style>
 </head>
 <body>
@@ -32,232 +38,241 @@
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
-      <div style="color:rgba(255,255,255,.4);font-size:.8rem;margin-top:4px" id="sidebarUser"></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px" id="sidebarUser"></div>
     </div>
     <ul class="sidebar-nav">
-      <li><a href="index.html">📋 Mis Pedidos</a></li>
+      <li><a href="index.html">🏠 Inicio</a></li>
       <li><a href="perfil.html" class="active">👤 Mi Perfil</a></li>
-      <li><a href="/index.html">🏪 Directorio</a></li>
-      <li><a href="#" onclick="APP.logout()">🚪 Cerrar Sesión</a></li>
+      <li><a href="reportes.html">📊 Mis Reportes</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
     </ul>
   </aside>
 
   <main class="main-content">
-    <div class="page-header"><h1>Mi Perfil</h1><p>Administra tu información personal</p></div>
+    <h1 class="page-title">👤 Mi Perfil</h1>
 
-    <div class="profile-header">
-      <div class="avatar" id="avatarEl">?</div>
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem" id="profileName">—</div>
-        <div style="color:var(--muted);font-size:.85rem" id="profileEmail">—</div>
-        <div style="color:var(--muted);font-size:.8rem;margin-top:4px" id="profileSince">—</div>
-      </div>
+    <!-- Tabs -->
+    <div class="profile-tabs">
+      <button class="profile-tab active" onclick="showTab('info',this)">📋 Información</button>
+      <button class="profile-tab" onclick="showTab('ubicacion',this)">📍 Ubicación</button>
+      <button class="profile-tab" onclick="showTab('seguridad',this)">🔒 Seguridad</button>
+      <button class="profile-tab" onclick="showTab('app',this)">📲 App</button>
+      <button class="profile-tab" onclick="showTab('estadisticas',this)">📊 Estadísticas</button>
     </div>
 
-    <!-- Datos personales -->
-    <div class="profile-card">
-      <h3>📝 Datos personales</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <!-- Tab: Información -->
+    <div class="profile-panel active" id="panel-info">
+      <div class="profile-card">
+        <h3>Datos personales</h3>
+        <div id="infoMsg" style="display:none;padding:10px 14px;border-radius:var(--radius-sm);font-size:.9rem;margin-bottom:14px"></div>
         <div class="form-group"><label>Nombre completo</label><input type="text" id="f_name" placeholder="Tu nombre"></div>
         <div class="form-group"><label>Teléfono</label><input type="tel" id="f_phone" placeholder="+502 5555 5555"></div>
         <div class="form-group">
-          <label>Mi dirección de casa</label>
+          <label>Correo electrónico</label>
+          <input type="email" id="f_email" disabled style="background:var(--off-white);color:var(--muted);cursor:not-allowed">
+          <div style="font-size:.75rem;color:var(--muted);margin-top:4px">El correo no se puede cambiar</div>
+        </div>
+        <button class="btn-primary" onclick="saveProfile()" id="saveProfileBtn">Guardar cambios</button>
+      </div>
+    </div>
+
+    <!-- Tab: Ubicación -->
+    <div class="profile-panel" id="panel-ubicacion">
+      <div class="profile-card">
+        <h3>Mi dirección</h3>
+        <div id="ubicMsg" style="display:none;padding:10px 14px;border-radius:var(--radius-sm);font-size:.9rem;margin-bottom:14px"></div>
+        <div class="form-group">
+          <label>Dirección de casa</label>
           <input type="text" id="f_address" placeholder="Colonia, calle, número...">
         </div>
         <div class="form-group">
-          <label>Link Google Maps de mi casa <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+          <label>Link Google Maps <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
           <input type="url" id="f_maps_url" placeholder="https://maps.app.goo.gl/..." oninput="previewMapsUrl()">
           <div id="mapsPreview" style="display:none;margin-top:6px">
             <a id="mapsPreviewLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.78rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver mi ubicación</a>
           </div>
         </div>
+        <button class="btn-primary" onclick="saveLocation()" id="saveLocBtn">Guardar ubicación</button>
       </div>
-      <div class="form-group">
-        <label>Correo electrónico</label>
-        <input type="email" id="f_email" disabled style="background:var(--off-white);color:var(--muted);cursor:not-allowed">
-        <div style="font-size:.78rem;color:var(--muted);margin-top:4px">El correo no se puede cambiar.</div>
+    </div>
+
+    <!-- Tab: Seguridad -->
+    <div class="profile-panel" id="panel-seguridad">
+      <div class="profile-card">
+        <h3>Cambiar contraseña</h3>
+        <div id="pwMsg" style="display:none;padding:10px 14px;border-radius:var(--radius-sm);font-size:.9rem;margin-bottom:14px"></div>
+        <div class="form-group"><label>Contraseña actual</label><input type="password" id="current_pw" placeholder="••••••••"></div>
+        <div class="form-group"><label>Nueva contraseña</label><input type="password" id="new_pw" placeholder="Mínimo 8 caracteres"></div>
+        <div class="form-group"><label>Confirmar nueva contraseña</label><input type="password" id="confirm_pw" placeholder="Repite la contraseña"></div>
+        <button class="btn-primary" onclick="changePassword()" id="changePwBtn">Cambiar contraseña</button>
       </div>
-      <div style="background:#e3f2fd;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-        <div>
-              </div>
+    </div>
+
+    <!-- Tab: App -->
+    <div class="profile-panel" id="panel-app">
+      <div class="profile-card">
+        <h3>📲 Instalar aplicación</h3>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:16px">Instala NuevaExpress en tu pantalla de inicio para acceder más rápido sin abrir el navegador.</p>
+        <button onclick="handleInstall()" class="btn-primary" style="width:100%;justify-content:center;padding:13px;margin-bottom:12px">📲 Instalar NuevaExpress</button>
+        <div class="install-guide" id="iosInstallGuide">
+          <div style="font-weight:700;margin-bottom:10px">Sigue estos pasos:</div>
+          <div style="margin-bottom:12px">
+            <strong>📱 iPhone / iPad (Safari):</strong>
+            <ol><li>Toca <strong>Compartir</strong> ⬆️ en la barra inferior</li><li>Toca <strong>"Agregar a pantalla de inicio"</strong></li><li>Toca <strong>Agregar</strong></li></ol>
+          </div>
+          <div>
+            <strong>🤖 Android (Chrome):</strong>
+            <ol><li>Toca los <strong>3 puntos ⋮</strong> arriba a la derecha</li><li>Toca <strong>"Instalar aplicación"</strong> o <strong>"Añadir a pantalla de inicio"</strong></li></ol>
+          </div>
+          <button onclick="document.getElementById('iosInstallGuide').style.display='none'" style="margin-top:10px;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 12px;color:var(--muted);font-size:.8rem;cursor:pointer">Cerrar</button>
+        </div>
+
+        <div style="border-top:1px solid var(--border);margin:20px 0"></div>
+
+        <h3>🔔 Notificaciones push</h3>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:16px">Recibe avisos cuando tu pedido es aceptado, está en camino o fue entregado.</p>
+        <button onclick="requestNotificationPermission()" class="btn-primary" style="width:100%;justify-content:center;padding:13px;background:var(--success)">🔔 Activar notificaciones</button>
+      </div>
+    </div>
+
+    <!-- Tab: Estadísticas -->
+    <div class="profile-panel" id="panel-estadisticas">
+      <div class="profile-card">
+        <h3>📊 Mis estadísticas</h3>
+        <div class="stat-row">
+          <div class="stat-box"><div class="num" id="statTotal">—</div><div class="lbl">Pedidos totales</div></div>
+          <div class="stat-box"><div class="num" id="statDone">—</div><div class="lbl">Entregados</div></div>
+          <div class="stat-box"><div class="num" id="statPending">—</div><div class="lbl">En proceso</div></div>
+        </div>
+        <div id="statsDetail"></div>
+      </div>
+    </div>
   </main>
 </div>
 
 <script src="../assets/js/app.js"></script>
 <script>
-  // Recover token from URL hash if localStorage is empty
-  (function() {
-    var hash = window.location.hash;
-    if (hash && hash.indexOf('tk=') !== -1) {
-      var parts = hash.substring(1).split('&');
-      var tk = '', us = '';
-      parts.forEach(function(p) {
-        if (p.indexOf('tk=') === 0) tk = p.substring(3);
-        if (p.indexOf('us=') === 0) us = decodeURIComponent(p.substring(3));
-      });
-      if (tk) {
-        localStorage.setItem('nuevaexpress_token', tk);
-        if (us) localStorage.setItem('nuevaexpress_user', us);
-        // Clean URL
-        history.replaceState(null, '', window.location.pathname);
-      }
-    }
-  })();
+(function(){
+  var h=window.location.hash;
+  if(h&&h.indexOf('tk=')!==-1){var p=h.substring(1).split('&'),tk='',us='';p.forEach(function(x){if(x.indexOf('tk=')===0)tk=x.substring(3);if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}
+})();
 
-var adminUser  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
-if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'cliente') { window.location.href = '/cliente/login.html'; }
-const user = APP.user();
-document.getElementById('sidebarUser').textContent = user.name || '';
+var user = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if(!localStorage.getItem('nuevaexpress_token')||user.role==='repartidor'||user.role==='admin') window.location.href='/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name||'';
 
-function checkRules() {
-  const pw = document.getElementById('new_pw').value;
-  const set = (id, ok) => { document.getElementById(id).className = ok ? 'ok' : ''; };
-  set('rule-len',   pw.length >= 8);
-  set('rule-upper', /[A-Z]/.test(pw));
-  set('rule-num',   /[0-9]/.test(pw));
+function showTab(id, btn) {
+  document.querySelectorAll('.profile-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.profile-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='estadisticas') loadStats();
+}
+
+function showMsg(id, msg, ok) {
+  var el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.background = ok ? '#f0fdf4' : '#fdf0f0';
+  el.style.border = ok ? '1px solid #86efac' : '1px solid #f5c2c2';
+  el.style.color = ok ? '#166534' : 'var(--danger)';
+  el.style.display = 'block';
+  setTimeout(function(){ el.style.display='none'; }, 4000);
 }
 
 async function init() {
-  const res = await APP.get('/user/profile');
-  if (!res?.success) return;
-  const u = res.data;
-  document.getElementById('avatarEl').textContent     = (u.name||'?')[0].toUpperCase();
-  document.getElementById('profileName').textContent  = u.name || '—';
-  document.getElementById('profileEmail').textContent = u.email || '—';
-  document.getElementById('profileSince').textContent = 'Miembro desde ' + new Date(u.created_at).toLocaleDateString('es-GT', {year:'numeric',month:'long'});
-  document.getElementById('f_name').value    = u.name || '';
-  document.getElementById('f_phone').value   = u.phone || '';
-  document.getElementById('f_address').value = u.address || '';
-  document.getElementById('f_maps_url').value = u.google_maps_url || '';
-  if (u.google_maps_url) {
-    var mp = document.getElementById('mapsPreview');
-    var ml = document.getElementById('mapsPreviewLink');
-    if (mp) mp.style.display = 'block';
-    if (ml) ml.href = u.google_maps_url;
+  var res = await APP.fetch('/user/profile');
+  if(!res||!res.success) return;
+  var u = res.data;
+  document.getElementById('f_name').value     = u.name||'';
+  document.getElementById('f_phone').value    = u.phone||'';
+  document.getElementById('f_email').value    = u.email||'';
+  document.getElementById('f_address').value  = u.address||'';
+  document.getElementById('f_maps_url').value = u.google_maps_url||'';
+  if(u.google_maps_url) {
+    document.getElementById('mapsPreviewLink').href = u.google_maps_url;
+    document.getElementById('mapsPreview').style.display='block';
   }
-  document.getElementById('f_email').value = u.email || '';
+}
 
-  // Load order stats
-  const orders = await APP.get('/orders');
-  const all = orders?.data?.orders || [];
-  document.getElementById('statTotal').textContent   = all.length;
-  document.getElementById('statDone').textContent    = all.filter(o=>o.status==='entregado').length;
-  document.getElementById('statPending').textContent = all.filter(o=>['pendiente','aceptado','en_preparacion','listo','en_camino'].includes(o.status)).length;
+function previewMapsUrl() {
+  var val = document.getElementById('f_maps_url').value.trim();
+  if(val.startsWith('http')){ document.getElementById('mapsPreviewLink').href=val; document.getElementById('mapsPreview').style.display='block'; }
+  else document.getElementById('mapsPreview').style.display='none';
 }
 
 async function saveProfile() {
-  const btn = document.getElementById('saveProfileBtn');
-  btn.textContent = 'Guardando...'; btn.disabled = true;
-  const res = await APP.put('/user/profile', {
+  var btn = document.getElementById('saveProfileBtn');
+  btn.textContent='Guardando...'; btn.disabled=true;
+  var res = await APP.put('/user/profile', {
     name:  document.getElementById('f_name').value.trim(),
-    phone:          document.getElementById('f_phone').value.trim(),
-    address:        document.getElementById('f_address').value.trim(),
-    google_maps_url: document.getElementById('f_maps_url').value.trim(),
+    phone: document.getElementById('f_phone').value.trim()
   });
-  if (res?.success) {
-    APP.toast('Perfil actualizado');
-    // Update stored user
-    const stored = APP.user();
+  if(res&&res.success) {
+    var stored = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
     stored.name = document.getElementById('f_name').value.trim();
     localStorage.setItem('nuevaexpress_user', JSON.stringify(stored));
-    document.getElementById('profileName').textContent = stored.name;
-    document.getElementById('avatarEl').textContent    = (stored.name||'?')[0].toUpperCase();
     document.getElementById('sidebarUser').textContent = stored.name;
-  } else APP.toast(res?.message || 'Error', 'error');
-  btn.textContent = 'Guardar cambios'; btn.disabled = false;
+    showMsg('infoMsg','✅ Perfil actualizado', true);
+  } else {
+    showMsg('infoMsg', res?.message||'Error al guardar', false);
+  }
+  btn.textContent='Guardar cambios'; btn.disabled=false;
+}
+
+async function saveLocation() {
+  var btn = document.getElementById('saveLocBtn');
+  btn.textContent='Guardando...'; btn.disabled=true;
+  var res = await APP.put('/user/profile', {
+    address:        document.getElementById('f_address').value.trim(),
+    google_maps_url: document.getElementById('f_maps_url').value.trim()
+  });
+  if(res&&res.success) showMsg('ubicMsg','✅ Ubicación guardada', true);
+  else showMsg('ubicMsg', res?.message||'Error al guardar', false);
+  btn.textContent='Guardar ubicación'; btn.disabled=false;
 }
 
 async function changePassword() {
-  const current = document.getElementById('current_pw').value;
-  const newPw   = document.getElementById('new_pw').value;
-  const confirm = document.getElementById('confirm_pw').value;
-  const btn     = document.getElementById('changePwBtn');
-  if (newPw !== confirm) { APP.toast('Las contraseñas no coinciden', 'error'); return; }
-  btn.textContent = 'Actualizando...'; btn.disabled = true;
-  const res = await APP.put('/user/password', { current_password: current, new_password: newPw, confirm_password: confirm });
-  if (res?.success) {
-    APP.toast('Contraseña actualizada');
-    document.getElementById('current_pw').value = '';
-    document.getElementById('new_pw').value = '';
-    document.getElementById('confirm_pw').value = '';
-  } else APP.toast(res?.message || 'Error', 'error');
-  btn.textContent = 'Actualizar contraseña'; btn.disabled = false;
+  var cur = document.getElementById('current_pw').value;
+  var nw  = document.getElementById('new_pw').value;
+  var cnf = document.getElementById('confirm_pw').value;
+  if(!cur||!nw) return showMsg('pwMsg','Completa todos los campos', false);
+  if(nw!==cnf)  return showMsg('pwMsg','Las contraseñas no coinciden', false);
+  if(nw.length<8) return showMsg('pwMsg','Mínimo 8 caracteres', false);
+  var btn=document.getElementById('changePwBtn'); btn.textContent='Cambiando...'; btn.disabled=true;
+  var res = await APP.put('/user/password', { current_password:cur, new_password:nw, confirm_password:cnf });
+  if(res&&res.success) {
+    showMsg('pwMsg','✅ Contraseña actualizada', true);
+    document.getElementById('current_pw').value='';
+    document.getElementById('new_pw').value='';
+    document.getElementById('confirm_pw').value='';
+  } else showMsg('pwMsg', res?.message||'Error', false);
+  btn.textContent='Cambiar contraseña'; btn.disabled=false;
 }
+
+async function loadStats() {
+  var res = await APP.get('/orders?all=1');
+  var all = res?.data?.orders||[];
+  document.getElementById('statTotal').textContent   = all.length;
+  document.getElementById('statDone').textContent    = all.filter(function(o){return o.status==='entregado';}).length;
+  document.getElementById('statPending').textContent = all.filter(function(o){return ['pendiente','aceptado','en_preparacion','listo','en_camino'].includes(o.status);}).length;
+}
+
+// ── Instalación PWA ──
+var deferredInstallPrompt = null;
+var isStandalone = window.navigator.standalone===true || window.matchMedia('(display-mode: standalone)').matches;
+window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredInstallPrompt=e; });
+
+function handleInstall() {
+  if(isStandalone){ document.getElementById('iosInstallGuide').innerHTML='<p style="color:var(--success);font-weight:600">✅ La app ya está instalada.</p>'; document.getElementById('iosInstallGuide').style.display='block'; return; }
+  if(deferredInstallPrompt){ deferredInstallPrompt.prompt(); deferredInstallPrompt.userChoice.then(function(){ deferredInstallPrompt=null; }); return; }
+  document.getElementById('iosInstallGuide').style.display='block';
+}
+
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
 
 init();
 </script>
-
-<script>
-function toggleSidebar() {
-  var sidebar = document.querySelector('.sidebar');
-  var overlay = document.getElementById('sidebarOverlay');
-  if (sidebar) sidebar.classList.toggle('open');
-  if (overlay) overlay.classList.toggle('open');
-}
-</script>
-
-<script src="/assets/js/pwa.js">
-function previewMapsUrl() {
-  var val = document.getElementById('f_maps_url')?.value?.trim();
-  var mp  = document.getElementById('mapsPreview');
-  var ml  = document.getElementById('mapsPreviewLink');
-  if (!mp || !ml) return;
-  if (val && val.startsWith('http')) {
-    ml.href = val;
-    mp.style.display = 'block';
-  } else {
-    mp.style.display = 'none';
-  }
-}
-
-var deferredInstallPrompt=null;
-var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
-var isStandalone=window.navigator.standalone===true||window.matchMedia("(display-mode: standalone)").matches;
-window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferredInstallPrompt=e;});
-function handleInstall(){
-  if(isStandalone){alert("La app ya esta instalada");return;}
-  if(isIOS){document.getElementById("iosInstallGuide").style.display="block";return;}
-  if(deferredInstallPrompt){
-    deferredInstallPrompt.prompt();
-    deferredInstallPrompt.userChoice.then(function(r){if(r.outcome==="accepted")alert("App instalada!");deferredInstallPrompt=null;});
-  } else { alert("Toca el menu del navegador > Instalar o Agregar a pantalla de inicio"); }
-}
-if(isStandalone){var ins=document.getElementById("installSection");if(ins)ins.style.display="none";}
-
-
-// ── Instalación PWA ───────────────────────────────────
-var deferredInstallPrompt = null;
-var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-var isAndroid = /android/i.test(navigator.userAgent);
-var isStandalone = window.navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
-
-window.addEventListener("beforeinstallprompt", function(e) {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-});
-
-function handleInstall() {
-  if (isStandalone) {
-    document.getElementById("iosInstallGuide").innerHTML = "<p style=\"font-weight:600;color:var(--success)\">✅ La app ya está instalada en tu dispositivo.</p>";
-    document.getElementById("iosInstallGuide").style.display = "block";
-    return;
-  }
-  if (deferredInstallPrompt) {
-    deferredInstallPrompt.prompt();
-    deferredInstallPrompt.userChoice.then(function(r) {
-      deferredInstallPrompt = null;
-    });
-    return;
-  }
-  // Siempre mostrar guía según dispositivo
-  document.getElementById("iosInstallGuide").style.display = "block";
-}
-
-if (isStandalone) {
-  var ins = document.getElementById("installSection");
-  if (ins) ins.style.display = "none";
-}
-
-</script>
+<script src="/assets/js/pwa.js"></script>
 </body>
 </html>
