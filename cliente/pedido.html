@@ -179,7 +179,7 @@
             <div id="zonePrice" style="font-size:.82rem;color:var(--blue);margin-top:4px;font-weight:600"></div>
           </div>
         </div>
-        <div id="cartItems"><p style="color:var(--muted);font-size:.9rem">Agrega productos a tu pedido</p></div>
+        <div id="cartItems"></div>
         <hr class="cart-divider">
         <div id="feesBreakdown"></div>
         <hr class="cart-divider">
@@ -696,7 +696,7 @@ function updateCart() {
     if (inp.value.trim()) lines.push(`<div class="cart-item"><span>${esc(inp.value.trim())}</span><span></span></div>`);
   });
 
-  if (!lines.length) { cartEl.innerHTML = '<p style="color:var(--muted);font-size:.9rem">Agrega productos a tu pedido</p>'; }
+  if (!lines.length) { cartEl.innerHTML = orderType === 'paquete' ? '' : '<p style="color:var(--muted);font-size:.9rem">Agrega productos a tu pedido</p>'; }
   else { cartEl.innerHTML = lines.join(''); }
 
   const deliveryFee = deliveryType === 'delivery' && business?.accepts_delivery ? parseFloat(business.delivery_fee || 15) : 0;
