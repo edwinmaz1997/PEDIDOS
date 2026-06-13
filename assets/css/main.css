@@ -656,8 +656,7 @@ img { max-width: 100%; display: block; }
 .btn-filter.active { background: var(--blue); color: white; border-color: var(--blue); }
 
 /* ── Password toggle ── */
-.pw-wrap { display:flex; align-items:center; border:1.5px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; background:white; }
-.pw-wrap:focus-within { border-color:var(--accent); }
-.pw-wrap input { flex:1; border:none !important; outline:none !important; box-shadow:none !important; border-radius:0 !important; padding:11px 12px; }
-.pw-toggle { background:none; border:none; border-left:1px solid var(--border); cursor:pointer; color:var(--muted); font-size:1rem; padding:0 12px; height:100%; min-height:42px; line-height:1; transition:.15s; flex-shrink:0; }
-.pw-toggle:hover { background:var(--off-white); color:var(--accent); }
+.pw-wrap { position:relative; display:flex; align-items:center; }
+.pw-wrap input { flex:1; padding-right:44px !important; }
+.pw-toggle { position:absolute; right:0; top:0; bottom:0; width:42px; background:none; border:none; cursor:pointer; color:var(--muted); font-size:1rem; display:flex; align-items:center; justify-content:center; transition:.15s; border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+.pw-toggle:hover { color:var(--accent); background:rgba(0,0,0,.04); }
