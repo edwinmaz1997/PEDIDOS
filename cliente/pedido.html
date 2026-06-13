@@ -289,33 +289,30 @@ function checkBusinessHours() {
     ? JSON.parse(business.opening_hours || '{}')
     : (business.opening_hours || {});
 
-  if (isBusinessOpen(hours)) return; // Abierto — todo normal
+  console.log('[Horario]', hours, '→ abierto:', isBusinessOpen(hours));
 
-  // Cerrado — mostrar banner y bloquear el botón de enviar pedido
-  var container = document.getElementById('productsContainer') || document.querySelector('.products-section') || document.querySelector('main');
+  if (isBusinessOpen(hours)) return;
+
+  window._bizClosed = true;
+
+  // Banner arriba del contenido principal
+  var main = document.querySelector('.order-layout') || document.querySelector('main') || document.querySelector('.main-content');
   var banner = document.createElement('div');
   banner.id = 'closedBanner';
-  banner.style.cssText = 'background:#fff0f0;border:2px solid #f5c2c2;border-radius:var(--radius-sm);padding:18px 20px;margin-bottom:16px;text-align:center';
+  banner.style.cssText = 'background:#fff0f0;border:2px solid #f5c2c2;border-radius:12px;padding:18px 20px;margin-bottom:16px;text-align:center;grid-column:1/-1';
   banner.innerHTML = '<div style="font-size:1.5rem;margin-bottom:6px">🔒</div>' +
     '<div style="font-weight:700;font-size:1rem;color:#c0392b;margin-bottom:4px">Negocio cerrado</div>' +
     '<div style="font-size:.88rem;color:var(--muted)">Este negocio no está atendiendo en este momento.<br>Consulta sus horarios e intenta más tarde.</div>';
+  if (main) main.insertBefore(banner, main.firstChild);
 
-  // Insertar el banner antes de los productos
-  var productsWrap = document.getElementById('productsWrap') || document.querySelector('.products-wrap');
-  if (productsWrap) productsWrap.insertBefore(banner, productsWrap.firstChild);
-  else document.querySelector('main').insertBefore(banner, document.querySelector('main').firstChild);
-
-  // Deshabilitar botón de enviar pedido
-  var submitBtn = document.getElementById('submitOrderBtn') || document.querySelector('[onclick*="submitOrder"]');
+  // Deshabilitar el botón correcto
+  var submitBtn = document.getElementById('submitBtn');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.style.opacity = '.5';
+    submitBtn.style.opacity = '.45';
     submitBtn.style.cursor = 'not-allowed';
-    submitBtn.title = 'El negocio está cerrado';
+    submitBtn.textContent = '🔒 Negocio cerrado';
   }
-
-  // Interceptar submitOrder para mostrar mensaje
-  window._bizClosed = true;
 }
 
 function renderBizInfo() {
