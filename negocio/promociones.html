@@ -146,7 +146,7 @@ async function init() {
     APP.get('/promotions/mine'),
     APP.get('/products?business_id=' + biz.id)
   ]);
-  allProducts = prods?.data || [];
+  allProducts = (prods?.data || []).filter(function(p){ return p.is_available == 1; });
   renderPromos(promos?.data || []);
 }
 
