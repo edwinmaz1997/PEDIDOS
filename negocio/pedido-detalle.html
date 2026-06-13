@@ -465,6 +465,26 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 </script>
-<script src="/assets/js/pwa.js"></script>
+<script src="/assets/js/pwa.js">
+// Adaptar sidebar según tipo de negocio
+(async function(){
+  try {
+    var res = await fetch('/api/businesses/mine', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+    var data = await res.json();
+    var biz = data.data;
+    if (!biz) return;
+    if (biz.business_type === 'servicios') {
+      var np = document.getElementById('navProductos'); if(np) np.style.display='none';
+      var ns = document.getElementById('navServicios'); if(ns) ns.style.display='block';
+      var nz = document.getElementById('navZonas');    if(nz) nz.style.display='none';
+    } else {
+      var np = document.getElementById('navProductos'); if(np) np.style.display='block';
+      var ns = document.getElementById('navServicios'); if(ns) ns.style.display='none';
+      var nz = document.getElementById('navZonas');    if(nz) nz.style.display='block';
+    }
+  } catch(e){}
+})();
+
+</script>
 </body>
 </html>
