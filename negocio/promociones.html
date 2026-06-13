@@ -26,7 +26,7 @@
 .badge-inactive { background:#fee2e2; color:#991b1b; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; }
 .badge-scheduled { background:#fef3c7; color:#92400e; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; }
 .dates { font-size:.78rem; color:var(--muted); }
-.item-selector { border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; margin-bottom:12px; max-height:260px; overflow-y:auto; }
+.item-selector { border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; margin-bottom:4px; max-height:320px; overflow-y:auto; scroll-behavior:smooth; }
 .item-option { display:flex; align-items:center; gap:12px; padding:10px 14px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .15s; }
 .item-option:last-child { border-bottom:none; }
 .item-option:hover { background:var(--off-white); }
@@ -104,9 +104,16 @@
 
     <div class="form-group">
       <label>Productos en promoción * <span style="font-weight:400;color:var(--muted)">(selecciona y asigna precio promo)</span></label>
+      <!-- Buscador y categorías -->
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <input type="text" id="promoSearch" placeholder="🔍 Buscar producto..." oninput="filterPromoProducts()"
+          style="flex:1;min-width:160px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem">
+      </div>
+      <div id="promoCatFilter" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:8px"></div>
       <div class="item-selector" id="productSelector">
         <div style="padding:20px;text-align:center;color:var(--muted)">Cargando productos...</div>
       </div>
+      <div id="promoSelectedCount" style="font-size:.78rem;color:var(--muted);margin-top:6px;text-align:right"></div>
     </div>
 
     <div id="modalMsg" style="display:none;padding:10px 14px;border-radius:var(--radius-sm);font-size:.88rem;margin-bottom:14px"></div>
@@ -184,6 +191,12 @@ function renderPromos(promos) {
   }).join('');
 }
 
+function updateSelectedCount() {
+  var count = allProducts.filter(function(p){ return document.getElementById('opt-'+p.id)?.classList.contains('selected'); }).length;
+  var el = document.getElementById('promoSelectedCount');
+  if (el) el.textContent = count ? count + ' producto' + (count>1?'s':'') + ' seleccionado' + (count>1?'s':'') : '';
+}
+
 function openModal() {
   editingId = null;
   document.getElementById('modalTitle').textContent = 'Nueva promoción';
@@ -192,6 +205,9 @@ function openModal() {
   document.getElementById('p_start').value = new Date().toISOString().substring(0,10);
   document.getElementById('p_end').value = '';
   document.getElementById('modalMsg').style.display = 'none';
+  if (document.getElementById('promoSearch')) document.getElementById('promoSearch').value = '';
+  activePromocat = null;
+  renderPromoCatFilter();
   renderProductSelector([]);
   document.getElementById('promoModal').style.display = 'block';
   document.body.style.overflow = 'hidden';
@@ -202,24 +218,79 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
-function renderProductSelector(selected) {
+var activePromocat = null;
+
+function renderPromoCatFilter() {
+  var cats = [...new Set(allProducts.map(function(p){ return p.category_name; }).filter(Boolean))];
+  var el = document.getElementById('promoCatFilter');
+  if (!el) return;
+  if (!cats.length) { el.style.display = 'none'; return; }
+  el.innerHTML = '<button onclick="setPromoCat(null,this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--blue);background:var(--blue);color:white;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif" id="promoCatAll">Todos</button>' +
+    cats.map(function(cat) {
+      return '<button onclick="setPromoCat(\''+cat+'\',this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;color:var(--ink);font-size:.78rem;font-weight:500;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+cat+'</button>';
+    }).join('');
+}
+
+function setPromoCat(cat, btn) {
+  activePromocat = cat;
+  document.querySelectorAll('#promoCatFilter button').forEach(function(b){
+    b.style.background = 'white'; b.style.color = 'var(--ink)'; b.style.borderColor = 'var(--border)';
+  });
+  btn.style.background = 'var(--blue)'; btn.style.color = 'white'; btn.style.borderColor = 'var(--blue)';
+  filterPromoProducts();
+}
+
+function filterPromoProducts() {
+  var q   = (document.getElementById('promoSearch')?.value || '').toLowerCase().trim();
+  var filtered = allProducts.filter(function(p) {
+    var matchCat  = !activePromocat || p.category_name === activePromocat;
+    var matchText = !q || p.name.toLowerCase().includes(q) || (p.category_name||'').toLowerCase().includes(q);
+    return matchCat && matchText;
+  });
+  renderProductSelector([], filtered);
+}
+
+function renderProductSelector(selected, filtered) {
+  var products = filtered !== undefined ? filtered : allProducts;
   var sel = document.getElementById('productSelector');
-  if (!allProducts.length) { sel.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted)">No tienes productos. Agrégalos primero en la sección de Productos.</div>'; return; }
-  sel.innerHTML = allProducts.map(function(p) {
-    var isSelected = selected.find(function(s){ return s.product_id == p.id; });
-    var promoVal = isSelected ? isSelected.promo_price : '';
-    return '<div class="item-option' + (isSelected?' selected':'') + '" id="opt-'+p.id+'" onclick="toggleProduct('+p.id+','+p.price+')">' +
-      '<input type="checkbox" ' + (isSelected?'checked':'') + ' onclick="event.stopPropagation();toggleProduct('+p.id+','+p.price+')">' +
-      '<div class="item-info">' +
-        '<div class="item-name">' + APP.esc(p.name) + '</div>' +
-        '<div class="item-price">Precio normal: Q' + parseFloat(p.price).toFixed(2) + '</div>' +
-      '</div>' +
-      '<div class="promo-input">' +
-        '<label>Precio promo</label>' +
-        '<input type="number" id="promo-price-'+p.id+'" value="' + promoVal + '" min="0" step="0.01" placeholder="Q0.00" onclick="event.stopPropagation()">' +
-      '</div>' +
-    '</div>';
+  if (!allProducts.length) {
+    sel.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted)">No tienes productos. Agrégalos primero en la sección de Productos.</div>';
+    return;
+  }
+  if (!products.length) {
+    sel.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted)">No hay productos que coincidan.</div>';
+    return;
+  }
+
+  // Agrupar por categoría
+  var groups = {};
+  products.forEach(function(p) {
+    var cat = p.category_name || 'Sin categoría';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(p);
+  });
+
+  sel.innerHTML = Object.keys(groups).map(function(cat) {
+    return '<div style="padding:8px 14px;background:var(--off-white);font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">' + cat + '</div>' +
+      groups[cat].map(function(p) {
+        var isSelected = document.getElementById('opt-'+p.id)?.classList.contains('selected') ||
+                         (selected && selected.find && selected.find(function(s){ return s.product_id == p.id; }));
+        var promoVal = isSelected && document.getElementById('promo-price-'+p.id) ? document.getElementById('promo-price-'+p.id).value : '';
+        return '<div class="item-option' + (isSelected?' selected':'') + '" id="opt-'+p.id+'" onclick="toggleProduct('+p.id+','+p.price+')">' +
+          '<input type="checkbox" ' + (isSelected?'checked':'') + ' onclick="event.stopPropagation();toggleProduct('+p.id+','+p.price+')">' +
+          '<div class="item-info">' +
+            '<div class="item-name">' + APP.esc(p.name) + '</div>' +
+            '<div class="item-price">Precio normal: Q' + parseFloat(p.price).toFixed(2) + '</div>' +
+          '</div>' +
+          '<div class="promo-input">' +
+            '<label>Precio promo</label>' +
+            '<input type="number" id="promo-price-'+p.id+'" value="' + promoVal + '" min="0" step="0.01" placeholder="Q0.00" onclick="event.stopPropagation()" oninput="updateSelectedCount()">' +
+          '</div>' +
+        '</div>';
+      }).join('');
   }).join('');
+
+  updateSelectedCount();
 }
 
 function toggleProduct(id, normalPrice) {
@@ -232,6 +303,7 @@ function toggleProduct(id, normalPrice) {
     var inp = document.getElementById('promo-price-'+id);
     if (!inp.value) inp.value = normalPrice;
   }
+  updateSelectedCount();
 }
 
 function getSelectedItems() {
