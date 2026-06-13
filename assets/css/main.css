@@ -149,13 +149,13 @@ img { max-width: 100%; display: block; }
 }
 .categories-track::-webkit-scrollbar { display:none; }
 .cat-chip {
-  display:flex; align-items:center; gap:8px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
   padding:10px 20px; border-radius:50px;
   border:1.5px solid var(--border); background:white;
   font-size:.9rem; font-weight:500; cursor:pointer;
   white-space:nowrap; transition:var(--transition);
   font-family:'DM Sans',sans-serif; color:var(--ink);
-  flex-shrink:0;
+  flex-shrink:0; text-align:center;
 }
 .cat-chip:hover { border-color:var(--blue); color:var(--blue); background:#f0f7ff; }
 .cat-chip.active { background:var(--blue); color:white; border-color:var(--blue); }
