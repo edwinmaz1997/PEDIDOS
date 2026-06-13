@@ -123,11 +123,17 @@
           <!-- Dirección de entrega -->
           <div style="background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px">
             <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">🏁 Dirección de entrega</div>
-            <div style="display:flex;gap:8px">
-              <input type="text" id="dropoffAddress" placeholder="Dirección donde se entrega el paquete" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
-              <button onclick="getGPSForField('dropoffAddress','dropoffGpsStatus')" title="Obtener ubicación" style="padding:9px 12px;background:#43a047;color:white;border:none;border-radius:var(--radius-sm);cursor:pointer">📍</button>
+            <input type="text" id="dropoffAddress" placeholder="Escribe la dirección o pega un link de Google Maps" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box;margin-bottom:8px" oninput="previewDropoffMap()">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <a href="https://www.google.com/maps" target="_blank" onclick="openMapsForDropoff(event)"
+                style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1a73e8;color:white;border-radius:var(--radius-sm);text-decoration:none;font-size:.82rem;font-weight:600">
+                🗺️ Seleccionar en Google Maps
+              </a>
+              <div style="font-size:.75rem;color:var(--muted);align-self:center">Copia el link y pégalo arriba</div>
             </div>
-            <div id="dropoffGpsStatus" style="display:none;font-size:.75rem;color:var(--muted);margin-top:4px"></div>
+            <div id="dropoffPreview" style="display:none;margin-top:8px">
+              <a id="dropoffPreviewLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.78rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver dirección en Maps</a>
+            </div>
           </div>
 
           <!-- Datos del destinatario -->
@@ -584,6 +590,27 @@ function setPickupMode(mode) {
 }
 
 // GPS genérico para cualquier campo
+function openMapsForDropoff(e) {
+  // Abrir Google Maps en nueva pestaña — el usuario copia el link y lo pega
+  // No prevenimos el link, solo mostramos una ayuda
+  setTimeout(function() {
+    var inp = document.getElementById('dropoffAddress');
+    if (inp) inp.placeholder = 'Pega aquí el link copiado de Google Maps...';
+  }, 500);
+}
+
+function previewDropoffMap() {
+  var val = document.getElementById('dropoffAddress').value.trim();
+  var preview = document.getElementById('dropoffPreview');
+  var link = document.getElementById('dropoffPreviewLink');
+  if (val.startsWith('http')) {
+    link.href = val;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
 function getGPSForField(fieldId, statusId) {
   if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización'); return; }
   var statusEl = document.getElementById(statusId);
