@@ -5,43 +5,48 @@ class PromotionController {
 
     // GET /api/promotions — cliente ve promociones vigentes
     public function index(): void {
-        $user = AuthMiddleware::authenticate();
-        $today = date('Y-m-d');
-        $stmt = $this->db->prepare("
-            SELECT p.*, b.name as business_name, b.logo as business_logo
-            FROM promotions p
-            JOIN businesses b ON b.id = p.business_id
-            WHERE p.is_active = 1
-            AND p.starts_at <= ? AND p.ends_at >= ?
-            AND b.is_active = 1
-            ORDER BY p.created_at DESC
-        ");
-        $stmt->execute([$today, $today]);
-        $promos = $stmt->fetchAll();
-
-        foreach ($promos as &$promo) {
-            $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ?");
-            $iStmt->execute([$promo['id']]);
-            $promo['items'] = $iStmt->fetchAll();
+        AuthMiddleware::authenticate();
+        try {
+            $today = date('Y-m-d');
+            $stmt = $this->db->prepare("
+                SELECT p.*, b.name as business_name, b.logo as business_logo
+                FROM promotions p
+                JOIN businesses b ON b.id = p.business_id
+                WHERE p.is_active = 1 AND p.starts_at <= ? AND p.ends_at >= ? AND b.is_active = 1
+                ORDER BY p.created_at DESC
+            ");
+            $stmt->execute([$today, $today]);
+            $promos = $stmt->fetchAll();
+            foreach ($promos as &$promo) {
+                $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ?");
+                $iStmt->execute([$promo['id']]);
+                $promo['items'] = $iStmt->fetchAll();
+            }
+            Response::success($promos);
+        } catch (\Exception $e) {
+            error_log("promotions index: " . $e->getMessage());
+            Response::success([]);
         }
-        Response::success($promos);
     }
 
     // GET /api/promotions/mine — negocio ve sus promociones
     public function mine(): void {
         $user = AuthMiddleware::requireRole('negocio');
-        $biz  = $this->getBiz($user['id']);
-        $stmt = $this->db->prepare("
-            SELECT * FROM promotions WHERE business_id = ? ORDER BY created_at DESC
-        ");
-        $stmt->execute([$biz['id']]);
-        $promos = $stmt->fetchAll();
-        foreach ($promos as &$promo) {
-            $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ?");
-            $iStmt->execute([$promo['id']]);
-            $promo['items'] = $iStmt->fetchAll();
+        try {
+            $biz  = $this->getBiz($user['id']);
+            $stmt = $this->db->prepare("SELECT * FROM promotions WHERE business_id = ? ORDER BY created_at DESC");
+            $stmt->execute([$biz['id']]);
+            $promos = $stmt->fetchAll();
+            foreach ($promos as &$promo) {
+                $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ?");
+                $iStmt->execute([$promo['id']]);
+                $promo['items'] = $iStmt->fetchAll();
+            }
+            Response::success($promos);
+        } catch (\Exception $e) {
+            error_log("promotions/mine: " . $e->getMessage());
+            Response::error('Ejecuta las migraciones SQL primero. Tablas de promociones no encontradas.', 500);
         }
-        Response::success($promos);
     }
 
     // POST /api/promotions — crear promoción
@@ -55,7 +60,7 @@ class PromotionController {
         $items = $body['items'] ?? [];
 
         if (!$title || !$desc || !$start || !$end) Response::error('Faltan campos requeridos', 400);
-        if (empty($items)) Response::error('Agrega al menos un producto a la promoción', 400);
+        if (empty($items)) Response::error('Agrega al menos un producto', 400);
         if ($end < $start) Response::error('La fecha fin debe ser mayor a la de inicio', 400);
 
         $this->db->prepare("INSERT INTO promotions (business_id, title, description, starts_at, ends_at) VALUES (?,?,?,?,?)")
@@ -64,34 +69,26 @@ class PromotionController {
 
         foreach ($items as $item) {
             $this->db->prepare("INSERT INTO promotion_items (promotion_id, product_id, product_name, original_price, promo_price) VALUES (?,?,?,?,?)")
-                     ->execute([
-                         $promoId,
-                         $item['product_id'] ?? null,
-                         $item['product_name'],
-                         $item['original_price'],
-                         $item['promo_price'],
-                     ]);
+                     ->execute([$promoId, $item['product_id'] ?? null, $item['product_name'], $item['original_price'], $item['promo_price']]);
         }
 
-        // Notificar a todos los clientes
         $this->notifyClients($biz['name'], $title, $desc, $promoId);
-
         $this->db->prepare("UPDATE promotions SET notified_at = NOW() WHERE id = ?")->execute([$promoId]);
         Response::success(['id' => $promoId], 'Promoción creada y clientes notificados');
     }
 
-    // PUT /api/promotions/{id} — editar
+    // PUT /api/promotions/{id}
     public function update(int $id, array $body): void {
-        $user = AuthMiddleware::requireRole('negocio');
-        $biz  = $this->getBiz($user['id']);
+        $user  = AuthMiddleware::requireRole('negocio');
+        $biz   = $this->getBiz($user['id']);
         $promo = $this->getPromo($id, $biz['id']);
 
         $this->db->prepare("UPDATE promotions SET title=?, description=?, starts_at=?, ends_at=?, is_active=? WHERE id=?")
                  ->execute([
-                     $body['title'] ?? $promo['title'],
+                     $body['title']       ?? $promo['title'],
                      $body['description'] ?? $promo['description'],
-                     $body['starts_at'] ?? $promo['starts_at'],
-                     $body['ends_at'] ?? $promo['ends_at'],
+                     $body['starts_at']   ?? $promo['starts_at'],
+                     $body['ends_at']     ?? $promo['ends_at'],
                      isset($body['is_active']) ? (int)$body['is_active'] : $promo['is_active'],
                      $id
                  ]);
@@ -115,7 +112,6 @@ class PromotionController {
         Response::success(null, 'Promoción eliminada');
     }
 
-    // ── Helpers ─────────────────────────────────────────────
     private function getBiz(int $userId): array {
         $stmt = $this->db->prepare("SELECT * FROM businesses WHERE user_id = ? LIMIT 1");
         $stmt->execute([$userId]);
@@ -140,12 +136,10 @@ class PromotionController {
 
         $notifTitle = "🏷️ Promoción de {$bizName}";
         $notifMsg   = "{$title}: {$desc}";
-        PushNotification::sendToMany($clientIds, $notifTitle, $notifMsg, '/cliente/index.html?tab=promociones');
+        PushNotification::sendToMany($clientIds, $notifTitle, $notifMsg, '/cliente/promociones.html');
 
-        // Guardar notificación en DB para cada cliente (solo primeros 200 para no sobrecargar)
-        $batch = array_slice($clientIds, 0, 200);
         $insertStmt = $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)");
-        foreach ($batch as $clientId) {
+        foreach (array_slice($clientIds, 0, 200) as $clientId) {
             $insertStmt->execute([$clientId, 'promotion', $notifTitle, $notifMsg, json_encode(['promotion_id' => $promoId])]);
         }
     }

@@ -128,11 +128,16 @@ var allProducts = [];
 var editingId = null;
 
 async function init() {
+  // Primero obtener el negocio del usuario
+  const bizRes = await APP.get('/businesses/mine');
+  const biz = bizRes?.data;
+  if (!biz) { document.getElementById('promoList').innerHTML = '<div class="empty-state"><p>No se encontró tu negocio.</p></div>'; return; }
+
   const [promos, prods] = await Promise.all([
     APP.get('/promotions/mine'),
-    APP.get('/products')
+    APP.get('/products?business_id=' + biz.id)
   ]);
-  allProducts = prods?.data?.products || prods?.data || [];
+  allProducts = prods?.data || [];
   renderPromos(promos?.data || []);
 }
 
