@@ -461,39 +461,24 @@ function scrollCats(dir) {
   if (track) track.scrollBy({ left: dir * 200, behavior: 'smooth' });
 }
 
-// Auto-scroll — duplica los chips si caben todos en pantalla
-var _catTimer = null, _catDir = 1;
+var _catTimer = null;
 function initCatCarousel() {
   var t = document.getElementById('categoriesTrack');
   if (!t) return;
-
-  // Si caben todos en pantalla, duplicar para crear efecto infinito
-  if (t.scrollWidth <= t.clientWidth + 10) {
-    var chips = Array.from(t.children);
-    chips.forEach(function(chip) {
-      var clone = chip.cloneNode(true);
-      clone.setAttribute('aria-hidden', 'true');
-      clone.onclick = chip.onclick;
-      t.appendChild(clone);
-    });
-  }
+  clearInterval(_catTimer);
 
   function step() {
     var max = t.scrollWidth - t.clientWidth;
     if (max <= 0) return;
-    if (t.scrollLeft >= max - 1) {
-      // Volver al inicio suavemente
-      t.scrollLeft = 0;
-    } else {
-      t.scrollLeft += 1;
-    }
+    if (t.scrollLeft >= max - 1) t.scrollLeft = 0;
+    else t.scrollLeft += 1;
   }
 
-  _catTimer = setInterval(step, 18);
+  _catTimer = setInterval(step, 20);
   t.addEventListener('mouseenter', function(){ clearInterval(_catTimer); });
-  t.addEventListener('mouseleave', function(){ _catTimer = setInterval(step, 18); });
+  t.addEventListener('mouseleave', function(){ _catTimer = setInterval(step, 20); });
   t.addEventListener('touchstart', function(){ clearInterval(_catTimer); }, {passive:true});
-  t.addEventListener('touchend', function(){ setTimeout(function(){ _catTimer = setInterval(step, 18); }, 2500); }, {passive:true});
+  t.addEventListener('touchend', function(){ setTimeout(function(){ _catTimer = setInterval(step, 20); }, 2500); }, {passive:true});
 }
 setTimeout(initCatCarousel, 1500);
 (function(){
