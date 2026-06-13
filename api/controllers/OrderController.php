@@ -132,8 +132,10 @@ class OrderController {
                 $product = $pStmt->fetch();
                 if ($product) {
                     $productName = $product['name'];
-                    $unitPrice   = (float)$product['price'];
-                    $subtotal   += $unitPrice * $quantity;
+                    // Si el cliente envía un precio diferente (ej. precio promo), usar ese
+                    $frontendPrice = isset($item['price']) && (float)$item['price'] > 0 ? (float)$item['price'] : null;
+                    $unitPrice = $frontendPrice ?? (float)$product['price'];
+                    $subtotal += $unitPrice * $quantity;
                 }
             }
 
