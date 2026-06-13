@@ -153,9 +153,9 @@
           <div id="savedAddressOption" style="display:none;background:#f0f7ff;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;border:1.5px solid #90caf9">
             <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
               <input type="checkbox" id="useSavedAddress" style="width:18px;height:18px;margin-top:2px;flex-shrink:0" onchange="toggleAddressMode()">
-              <div>
+              <div style="min-width:0;flex:1">
                 <div style="font-weight:600;font-size:.9rem">🏠 Usar mi dirección registrada</div>
-                <div id="savedAddressText" style="font-size:.82rem;color:var(--muted);margin-top:2px"></div>
+                <div id="savedAddressText" style="font-size:.82rem;color:var(--muted);margin-top:2px;word-break:break-all;overflow-wrap:anywhere;white-space:normal"></div>
               </div>
             </label>
           </div>
@@ -495,8 +495,12 @@ function loadSavedAddress() {
       var opt = document.getElementById('savedAddressOption');
       var txt = document.getElementById('savedAddressText');
       opt.style.display = 'block';
-      txt.textContent = u.address || 'Link de Google Maps guardado';
-      // Store for use when ordering
+      // Mostrar dirección o texto corto del maps URL
+      if (u.address) {
+        txt.textContent = u.address;
+      } else if (u.google_maps_url) {
+        txt.textContent = '📍 Ubicación guardada en Google Maps';
+      }
       window._savedAddress   = u.address || '';
       window._savedMapsUrl   = u.google_maps_url || '';
     }
