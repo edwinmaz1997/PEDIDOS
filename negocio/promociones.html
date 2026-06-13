@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promociones — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.promo-card { background:white; border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:16px; }
+.promo-card .promo-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+.promo-card h3 { font-size:1rem; font-weight:700; margin:0; }
+.promo-card .desc { font-size:.88rem; color:var(--muted); margin-bottom:12px; line-height:1.6; }
+.promo-items { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+.promo-item-row { display:flex; justify-content:space-between; align-items:center; background:var(--off-white); border-radius:8px; padding:8px 12px; font-size:.88rem; }
+.promo-item-row .prices { display:flex; gap:10px; align-items:center; }
+.original { text-decoration:line-through; color:var(--muted); font-size:.82rem; }
+.promo-price { font-weight:700; color:var(--success); }
+.badge-active { background:#d1fae5; color:#065f46; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; }
+.badge-inactive { background:#fee2e2; color:#991b1b; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; }
+.badge-scheduled { background:#fef3c7; color:#92400e; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; }
+.dates { font-size:.78rem; color:var(--muted); }
+.item-selector { border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; margin-bottom:12px; max-height:260px; overflow-y:auto; }
+.item-option { display:flex; align-items:center; gap:12px; padding:10px 14px; border-bottom:1px solid var(--border); cursor:pointer; transition:background .15s; }
+.item-option:last-child { border-bottom:none; }
+.item-option:hover { background:var(--off-white); }
+.item-option.selected { background:#f0f7ff; border-left:3px solid var(--blue); }
+.item-option input[type=checkbox] { width:18px; height:18px; flex-shrink:0; }
+.item-option .item-info { flex:1; }
+.item-option .item-name { font-size:.9rem; font-weight:600; }
+.item-option .item-price { font-size:.8rem; color:var(--muted); }
+.item-option .promo-input { display:none; flex-direction:column; gap:4px; }
+.item-option.selected .promo-input { display:flex; }
+.promo-input label { font-size:.75rem; color:var(--muted); }
+.promo-input input { width:100px; padding:5px 8px; border:1.5px solid var(--border); border-radius:6px; font-size:.85rem; }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px" id="sidebarUser"></div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📋 Pedidos</a></li>
+      <li><a href="productos.html">🛍️ Productos</a></li>
+      <li><a href="promociones.html" class="active">🏷️ Promociones</a></li>
+      <li><a href="reportes.html">📊 Reportes</a></li>
+      <li><a href="perfil.html">⚙️ Mi negocio</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px">
+      <div>
+        <h1>🏷️ Promociones</h1>
+        <p style="color:var(--muted);margin:0;font-size:.9rem">Crea ofertas y notifica a todos tus clientes automáticamente</p>
+      </div>
+      <button class="btn-primary" onclick="openModal()">+ Nueva promoción</button>
+    </div>
+
+    <div id="promoList"><div class="loading-state"><div class="spinner"></div></div></div>
+  </main>
+</div>
+
+<!-- Modal crear/editar -->
+<div id="promoModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;overflow-y:auto;padding:20px">
+  <div style="background:white;border-radius:var(--radius);max-width:560px;margin:0 auto;padding:28px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 id="modalTitle" style="margin:0">Nueva promoción</h2>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label>Título de la promoción *</label>
+      <input type="text" id="p_title" placeholder="Ej: Combo de alitas en oferta">
+    </div>
+    <div class="form-group">
+      <label>Descripción * <span style="font-weight:400;color:var(--muted)">(esto le llegará a los clientes)</span></label>
+      <textarea id="p_desc" rows="3" placeholder="Hoy tu combo de alitas a Q125, precio normal Q150..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label>Fecha inicio *</label>
+        <input type="date" id="p_start">
+      </div>
+      <div class="form-group">
+        <label>Fecha fin *</label>
+        <input type="date" id="p_end">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Productos en promoción * <span style="font-weight:400;color:var(--muted)">(selecciona y asigna precio promo)</span></label>
+      <div class="item-selector" id="productSelector">
+        <div style="padding:20px;text-align:center;color:var(--muted)">Cargando productos...</div>
+      </div>
+    </div>
+
+    <div id="modalMsg" style="display:none;padding:10px 14px;border-radius:var(--radius-sm);font-size:.88rem;margin-bottom:14px"></div>
+
+    <div style="display:flex;gap:10px">
+      <button onclick="closeModal()" style="flex:1;padding:12px;border:1.5px solid var(--border);background:white;border-radius:var(--radius-sm);cursor:pointer;font-weight:600">Cancelar</button>
+      <button onclick="savePromo()" id="savePromoBtn" class="btn-primary" style="flex:1;justify-content:center;padding:12px">Publicar y notificar 🔔</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+(function(){var h=window.location.hash;if(h&&h.indexOf('tk=')!==-1){var p=h.substring(1).split('&'),tk='',us='';p.forEach(function(x){if(x.indexOf('tk=')===0)tk=x.substring(3);if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}})();
+
+var user = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if(!localStorage.getItem('nuevaexpress_token')||user.role!=='negocio') window.location.href='/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name||'';
+
+var allProducts = [];
+var editingId = null;
+
+async function init() {
+  const [promos, prods] = await Promise.all([
+    APP.get('/promotions/mine'),
+    APP.get('/products')
+  ]);
+  allProducts = prods?.data?.products || prods?.data || [];
+  renderPromos(promos?.data || []);
+}
+
+function renderPromos(promos) {
+  var container = document.getElementById('promoList');
+  if (!promos.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏷️</div><p>Aún no tienes promociones.<br>Crea una y notifica a tus clientes.</p></div>';
+    return;
+  }
+  var today = new Date().toISOString().substring(0,10);
+  container.innerHTML = promos.map(function(p) {
+    var status = !p.is_active ? 'inactive' : (p.starts_at > today ? 'scheduled' : (p.ends_at < today ? 'inactive' : 'active'));
+    var statusLabel = status==='active' ? '✅ Vigente' : status==='scheduled' ? '⏳ Programada' : '❌ Inactiva';
+    var statusClass = 'badge-' + status;
+    return '<div class="promo-card">' +
+      '<div class="promo-header">' +
+        '<div>' +
+          '<h3>' + APP.esc(p.title) + '</h3>' +
+          '<div class="dates">📅 ' + p.starts_at + ' → ' + p.ends_at + '</div>' +
+        '</div>' +
+        '<span class="' + statusClass + '">' + statusLabel + '</span>' +
+      '</div>' +
+      '<p class="desc">' + APP.esc(p.description) + '</p>' +
+      '<div class="promo-items">' +
+        (p.items||[]).map(function(i){
+          var saving = (parseFloat(i.original_price) - parseFloat(i.promo_price)).toFixed(2);
+          return '<div class="promo-item-row">' +
+            '<span>' + APP.esc(i.product_name) + '</span>' +
+            '<div class="prices">' +
+              '<span class="original">Q' + parseFloat(i.original_price).toFixed(2) + '</span>' +
+              '<span class="promo-price">Q' + parseFloat(i.promo_price).toFixed(2) + '</span>' +
+              '<span style="font-size:.75rem;color:var(--success)">-Q' + saving + '</span>' +
+            '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+        '<button onclick="toggleActive(' + p.id + ',' + (p.is_active?0:1) + ')" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">' + (p.is_active ? 'Desactivar' : 'Activar') + '</button>' +
+        '<button onclick="deletePromo(' + p.id + ')" style="padding:7px 14px;font-size:.82rem;background:none;border:1.5px solid var(--danger);color:var(--danger);border-radius:var(--radius-sm);cursor:pointer">Eliminar</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function openModal() {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'Nueva promoción';
+  document.getElementById('p_title').value = '';
+  document.getElementById('p_desc').value = '';
+  document.getElementById('p_start').value = new Date().toISOString().substring(0,10);
+  document.getElementById('p_end').value = '';
+  document.getElementById('modalMsg').style.display = 'none';
+  renderProductSelector([]);
+  document.getElementById('promoModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('promoModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function renderProductSelector(selected) {
+  var sel = document.getElementById('productSelector');
+  if (!allProducts.length) { sel.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted)">No tienes productos. Agrégalos primero en la sección de Productos.</div>'; return; }
+  sel.innerHTML = allProducts.map(function(p) {
+    var isSelected = selected.find(function(s){ return s.product_id == p.id; });
+    var promoVal = isSelected ? isSelected.promo_price : '';
+    return '<div class="item-option' + (isSelected?' selected':'') + '" id="opt-'+p.id+'" onclick="toggleProduct('+p.id+','+p.price+')">' +
+      '<input type="checkbox" ' + (isSelected?'checked':'') + ' onclick="event.stopPropagation();toggleProduct('+p.id+','+p.price+')">' +
+      '<div class="item-info">' +
+        '<div class="item-name">' + APP.esc(p.name) + '</div>' +
+        '<div class="item-price">Precio normal: Q' + parseFloat(p.price).toFixed(2) + '</div>' +
+      '</div>' +
+      '<div class="promo-input">' +
+        '<label>Precio promo</label>' +
+        '<input type="number" id="promo-price-'+p.id+'" value="' + promoVal + '" min="0" step="0.01" placeholder="Q0.00" onclick="event.stopPropagation()">' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function toggleProduct(id, normalPrice) {
+  var opt = document.getElementById('opt-'+id);
+  var cb  = opt.querySelector('input[type=checkbox]');
+  var isNowSelected = !opt.classList.contains('selected');
+  opt.classList.toggle('selected', isNowSelected);
+  cb.checked = isNowSelected;
+  if (isNowSelected) {
+    var inp = document.getElementById('promo-price-'+id);
+    if (!inp.value) inp.value = normalPrice;
+  }
+}
+
+function getSelectedItems() {
+  return allProducts.filter(function(p){
+    return document.getElementById('opt-'+p.id)?.classList.contains('selected');
+  }).map(function(p){
+    var promoPrice = parseFloat(document.getElementById('promo-price-'+p.id)?.value||0);
+    return { product_id: p.id, product_name: p.name, original_price: parseFloat(p.price), promo_price: promoPrice };
+  });
+}
+
+async function savePromo() {
+  var title = document.getElementById('p_title').value.trim();
+  var desc  = document.getElementById('p_desc').value.trim();
+  var start = document.getElementById('p_start').value;
+  var end   = document.getElementById('p_end').value;
+  var items = getSelectedItems();
+  var msg   = document.getElementById('modalMsg');
+
+  function showErr(t){ msg.textContent=t; msg.style.background='#fdf0f0'; msg.style.border='1px solid #f5c2c2'; msg.style.color='var(--danger)'; msg.style.display='block'; }
+
+  if (!title) return showErr('El título es requerido');
+  if (!desc)  return showErr('La descripción es requerida');
+  if (!start || !end) return showErr('Las fechas son requeridas');
+  if (end < start) return showErr('La fecha fin debe ser después de la de inicio');
+  if (!items.length) return showErr('Selecciona al menos un producto');
+  if (items.some(function(i){ return i.promo_price <= 0; })) return showErr('Todos los productos necesitan un precio de promoción mayor a 0');
+
+  var btn = document.getElementById('savePromoBtn');
+  btn.textContent = 'Publicando...'; btn.disabled = true;
+
+  var res = await APP.post('/promotions', { title, description: desc, starts_at: start, ends_at: end, items });
+  if (res?.success) {
+    closeModal();
+    APP.toast('¡Promoción publicada! Clientes notificados 🔔');
+    init();
+  } else {
+    showErr(res?.message || 'Error al guardar');
+  }
+  btn.textContent = 'Publicar y notificar 🔔'; btn.disabled = false;
+}
+
+async function toggleActive(id, val) {
+  var res = await APP.put('/promotions/'+id, { is_active: val });
+  if (res?.success) { APP.toast(val ? 'Promoción activada' : 'Promoción desactivada'); init(); }
+  else APP.toast(res?.message||'Error', 'error');
+}
+
+async function deletePromo(id) {
+  if (!confirm('¿Eliminar esta promoción? No se puede deshacer.')) return;
+  var res = await APP.del('/promotions/'+id);
+  if (res?.success) { APP.toast('Promoción eliminada'); init(); }
+  else APP.toast(res?.message||'Error', 'error');
+}
+
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+init();
+</script>
+<script src="/assets/js/pwa.js"></script>
+</body>
+</html>

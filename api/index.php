@@ -79,7 +79,19 @@ $body = Security::sanitize($body);
 try {
     switch ($resource) {
 
-        // ── RESET DATA (admin only) ───────────────────────────
+        // ── PROMOTIONS ────────────────────────────────────────
+        case 'promotions':
+            require_once ROOT . '/controllers/PromotionController.php';
+            $pc = new PromotionController();
+            $promoId = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
+            $subAction = $parts[1] ?? null;
+            if ($subAction === 'mine' && $method === 'GET')                  { $pc->mine(); break; }
+            if (!$promoId && $method === 'GET')                              { $pc->index(); break; }
+            if (!$promoId && $method === 'POST')                             { $pc->store($body); break; }
+            if ($promoId  && $method === 'PUT')                              { $pc->update($promoId, $body); break; }
+            if ($promoId  && $method === 'DELETE')                           { $pc->destroy($promoId); break; }
+            Response::notFound();
+            break;
         case 'reset-data':
             $rUser = AuthMiddleware::requireRole('admin');
             if ($method !== 'POST') Response::error('Método no permitido', 405);

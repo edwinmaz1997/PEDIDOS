@@ -385,3 +385,33 @@ CREATE TABLE IF NOT EXISTS business_services (
 
 -- Agregar tipo delivery al ENUM de business_type
 ALTER TABLE businesses MODIFY COLUMN business_type ENUM('pedidos','servicios','delivery') DEFAULT 'pedidos';
+
+-- ------------------------------------------------------------
+-- PROMOTIONS
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS promotions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    business_id INT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    description TEXT NOT NULL,
+    discount_type ENUM('percentage','fixed') DEFAULT 'fixed',
+    starts_at DATE NOT NULL,
+    ends_at DATE NOT NULL,
+    is_active TINYINT(1) DEFAULT 1,
+    notified_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,
+    INDEX idx_business (business_id),
+    INDEX idx_dates (starts_at, ends_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS promotion_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    promotion_id INT NOT NULL,
+    product_id INT,
+    product_name VARCHAR(150) NOT NULL,
+    original_price DECIMAL(10,2) NOT NULL,
+    promo_price DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (promotion_id) REFERENCES promotions(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products_services(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

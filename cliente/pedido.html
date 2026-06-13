@@ -197,16 +197,34 @@ const API = '/api';
 if (!localStorage.getItem('nuevaexpress_token')) window.location.href = '/cliente/login.html';
 
 const params     = new URLSearchParams(window.location.search);
-const businessId = parseInt(params.get('business')) || 0;
+const businessId = parseInt(params.get('business') || params.get('business_id')) || 0;
 if (!businessId) window.location.href = '/index.html';
-const urlOrderType = params.get('type') || 'pedido'; // 'pedido' o 'paquete'
+const urlOrderType = params.get('type') || 'pedido';
+const fromPromo    = params.get('from_promo') === '1';
 
 let business    = null;
-let cart        = {}; // product_id -> { name, price, qty }
+let cart        = {};
 let customItems = [];
 let deliveryType = 'pickup';
 
 const SERVICE_FEE = 3;
+
+// Cargar carrito desde promoción si aplica
+if (fromPromo) {
+  try {
+    var promoCartRaw = sessionStorage.getItem('promo_cart');
+    if (promoCartRaw) {
+      var promoCart = JSON.parse(promoCartRaw);
+      if (promoCart.business_id == businessId) {
+        promoCart.items.forEach(function(i) {
+          if (i.id) cart[i.id] = { name: i.name, price: parseFloat(i.price), qty: parseInt(i.qty)||1 };
+          else customItems.push({ name: i.name, price: parseFloat(i.price), qty: parseInt(i.qty)||1 });
+        });
+      }
+      sessionStorage.removeItem('promo_cart');
+    }
+  } catch(e) {}
+}
 
 // ── Load Business ──────────────────────────────────────────
 async function init() {

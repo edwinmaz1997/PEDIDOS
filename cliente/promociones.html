@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promociones — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.promo-card { background:white; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:16px; }
+.promo-banner { background:linear-gradient(135deg,#F5C518,#FF8C42); padding:20px; color:#1a1a1a; }
+.promo-banner h2 { font-family:'Syne',sans-serif; font-size:1.15rem; font-weight:800; margin-bottom:4px; }
+.promo-banner .biz { font-size:.82rem; opacity:.75; margin-bottom:8px; }
+.promo-banner .desc { font-size:.9rem; line-height:1.6; }
+.promo-body { padding:16px; }
+.promo-items { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+.promo-item-row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--off-white); border-radius:8px; }
+.item-left { display:flex; align-items:center; gap:10px; }
+.item-check { width:20px; height:20px; border-radius:4px; border:2px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.15s; flex-shrink:0; }
+.item-check.checked { background:var(--blue); border-color:var(--blue); color:white; }
+.item-name { font-size:.9rem; font-weight:600; }
+.item-prices { display:flex; gap:8px; align-items:center; }
+.original { text-decoration:line-through; color:var(--muted); font-size:.82rem; }
+.promo-price { font-weight:700; color:var(--success); font-size:.95rem; }
+.saving { background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:20px; font-size:.72rem; font-weight:700; }
+.dates { font-size:.75rem; color:var(--muted); margin-bottom:12px; }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px" id="sidebarUser"></div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">🏠 Inicio</a></li>
+      <li><a href="promociones.html" class="active">🏷️ Promociones</a></li>
+      <li><a href="pedidos.html">📋 Mis pedidos</a></li>
+      <li><a href="perfil.html">👤 Mi Perfil</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header" style="margin-bottom:24px">
+      <h1>🏷️ Promociones vigentes</h1>
+      <p style="color:var(--muted);margin:0;font-size:.9rem">Ofertas activas de los negocios de Nueva Concepción</p>
+    </div>
+    <div id="promoList"><div class="loading-state"><div class="spinner"></div></div></div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+(function(){var h=window.location.hash;if(h&&h.indexOf('tk=')!==-1){var p=h.substring(1).split('&'),tk='',us='';p.forEach(function(x){if(x.indexOf('tk=')===0)tk=x.substring(3);if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}})();
+
+var user = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if(!localStorage.getItem('nuevaexpress_token')) window.location.href='/cliente/login.html';
+document.getElementById('sidebarUser').textContent = user.name||'';
+
+var selectedItems = {};
+
+async function init() {
+  var res = await APP.get('/promotions');
+  var promos = res?.data || [];
+  var container = document.getElementById('promoList');
+
+  if (!promos.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏷️</div><p>No hay promociones vigentes en este momento.<br>¡Vuelve pronto!</p></div>';
+    return;
+  }
+
+  container.innerHTML = promos.map(function(p) {
+    selectedItems[p.id] = {};
+    return '<div class="promo-card">' +
+      '<div class="promo-banner">' +
+        '<div class="biz">🏪 ' + APP.esc(p.business_name) + '</div>' +
+        '<h2>' + APP.esc(p.title) + '</h2>' +
+        '<div class="desc">' + APP.esc(p.description) + '</div>' +
+      '</div>' +
+      '<div class="promo-body">' +
+        '<div class="dates">📅 Válida del ' + p.starts_at + ' al ' + p.ends_at + '</div>' +
+        '<div class="promo-items" id="items-'+p.id+'">' +
+          (p.items||[]).map(function(item) {
+            var saving = (parseFloat(item.original_price) - parseFloat(item.promo_price)).toFixed(2);
+            return '<div class="promo-item-row">' +
+              '<div class="item-left">' +
+                '<div class="item-check" id="chk-'+p.id+'-'+item.id+'" onclick="toggleItem(\''+p.id+'\','+JSON.stringify(item).replace(/'/g,"\\'")+')">✓</div>' +
+                '<div class="item-name">' + APP.esc(item.product_name) + '</div>' +
+              '</div>' +
+              '<div class="item-prices">' +
+                '<span class="original">Q' + parseFloat(item.original_price).toFixed(2) + '</span>' +
+                '<span class="promo-price">Q' + parseFloat(item.promo_price).toFixed(2) + '</span>' +
+                '<span class="saving">-Q' + saving + '</span>' +
+              '</div>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<button onclick="pedirPromo(' + p.id + ',' + p.business_id + ')" class="btn-primary" style="width:100%;justify-content:center;padding:13px">🛒 Pedir con estos productos</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // Marcar todos los items como seleccionados por default
+  promos.forEach(function(p) {
+    (p.items||[]).forEach(function(item) {
+      selectedItems[p.id][item.id] = item;
+      var chk = document.getElementById('chk-'+p.id+'-'+item.id);
+      if (chk) chk.classList.add('checked');
+    });
+  });
+}
+
+function toggleItem(promoId, item) {
+  var chk = document.getElementById('chk-'+promoId+'-'+item.id);
+  if (selectedItems[promoId][item.id]) {
+    delete selectedItems[promoId][item.id];
+    if (chk) chk.classList.remove('checked');
+  } else {
+    selectedItems[promoId][item.id] = item;
+    if (chk) chk.classList.add('checked');
+  }
+}
+
+function pedirPromo(promoId, businessId) {
+  var items = Object.values(selectedItems[promoId] || {});
+  if (!items.length) { APP.toast('Selecciona al menos un producto', 'error'); return; }
+
+  // Guardar items en sessionStorage y redirigir al pedido
+  var cartItems = items.map(function(i){
+    return { id: i.product_id, name: i.product_name, price: i.promo_price, qty: 1 };
+  });
+  sessionStorage.setItem('promo_cart', JSON.stringify({ business_id: businessId, items: cartItems }));
+  window.location.href = '/cliente/pedido.html?business_id=' + businessId + '&from_promo=1';
+}
+
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+init();
+</script>
+<script src="/assets/js/pwa.js"></script>
+</body>
+</html>
