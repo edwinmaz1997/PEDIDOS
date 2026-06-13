@@ -17,6 +17,7 @@ require_once __DIR__ . '/controllers/DeliveryController.php';
 require_once __DIR__ . '/controllers/AdminNotificationController.php';
 require_once __DIR__ . '/controllers/PhotoController.php';
 require_once __DIR__ . '/controllers/OrderMessageController.php';
+require_once __DIR__ . '/controllers/PromotionController.php';
 require_once __DIR__ . '/helpers/PushNotification.php';
 require_once __DIR__ . '/helpers/Mailer.php';
 require_once __DIR__ . '/controllers/ProductCategoryController.php';
@@ -81,7 +82,6 @@ try {
 
         // ── PROMOTIONS ────────────────────────────────────────
         case 'promotions':
-            require_once ROOT . '/controllers/PromotionController.php';
             $pc = new PromotionController();
             $promoId = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
             $subAction = $parts[1] ?? null;
