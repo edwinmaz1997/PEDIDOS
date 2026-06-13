@@ -173,7 +173,7 @@ function renderOrder(o) {
       ${o.business_response ? `<div class="order-response"><strong>Respuesta del negocio:</strong>${esc(o.business_response)}${o.estimated_time ? ` — ⏱ ~${o.estimated_time} min` : ''}</div>` : ''}
       <div class="order-actions">
         <a href="pedido-detalle.html?id=${o.id}" class="btn-ghost" style="font-size:.85rem;padding:7px 14px">💬 Ver detalle y chat</a>
-        ${o.status === 'entregado' ? `<button class="btn-ghost" style="font-size:.85rem;padding:7px 14px" onclick="reorder(${o.business_id},${JSON.stringify(o.items||[]).replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_type||'pickup').replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_address||'').replace(/"/g,'&quot;')})">🔁 Pedir de nuevo</button>` : ''}
+        ${o.status === 'entregado' && !o.from_promo ? `<button class="btn-ghost" style="font-size:.85rem;padding:7px 14px" onclick="reorder(${o.business_id},${JSON.stringify(o.items||[]).replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_type||'pickup').replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_address||'').replace(/"/g,'&quot;')})">🔁 Pedir de nuevo</button>` : ''}
       </div>
     </div>
   `;

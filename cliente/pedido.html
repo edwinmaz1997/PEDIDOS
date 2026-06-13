@@ -792,7 +792,7 @@ async function submitOrder() {
     const res = await fetch(`${API}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
-      body: JSON.stringify({ business_id: businessId, delivery_type: deliveryType, delivery_address: deliveryAddress, notes, items })
+      body: JSON.stringify({ business_id: businessId, delivery_type: deliveryType, delivery_address: deliveryAddress, notes, items, from_promo: fromPromo ? 1 : 0 })
     });
     const data = await res.json();
     if (!data.success) { alert(data.message || 'Error al enviar pedido'); return; }
