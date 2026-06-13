@@ -337,7 +337,7 @@ try {
 
         // ── TEST PUSH ─────────────────────────────────────────
         case 'test-push':
-            AuthMiddleware::requireRole(['admin']);
+            AuthMiddleware::authenticate();
             $uid = isset($_GET['uid']) ? (int)$_GET['uid'] : 0;
             if (!$uid) Response::error('Falta uid', 400);
             PushNotification::send($uid, '🔔 Test NuevaExpress', 'Push funcionando correctamente para uid=' . $uid, '/');
