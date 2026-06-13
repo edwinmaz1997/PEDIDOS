@@ -51,7 +51,11 @@
 <section class="categories-section">
   <div class="container">
     <h2 class="section-title">Categorías</h2>
-    <div class="categories-track" id="categoriesTrack"></div>
+    <div class="cat-carousel">
+      <button class="cat-arrow left" id="catPrev" onclick="scrollCats(-1)">‹</button>
+      <div class="categories-track" id="categoriesTrack"></div>
+      <button class="cat-arrow right" id="catNext" onclick="scrollCats(1)">›</button>
+    </div>
   </div>
 </section>
 
@@ -448,6 +452,35 @@ function escHtml(str) {
 </script>
 <script>
 var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();
+
+function scrollCats(dir) {
+  var track = document.getElementById('categoriesTrack');
+  if (track) track.scrollBy({ left: dir * 200, behavior: 'smooth' });
+}
+
+// Auto-scroll suave
+var _catTimer = null, _catDir = 1;
+function startCatScroll() {
+  _catTimer = setInterval(function() {
+    var t = document.getElementById('categoriesTrack');
+    if (!t) return;
+    var max = t.scrollWidth - t.clientWidth;
+    if (max <= 0) { clearInterval(_catTimer); return; }
+    if (t.scrollLeft >= max - 1) _catDir = -1;
+    else if (t.scrollLeft <= 1) _catDir = 1;
+    t.scrollLeft += _catDir * 1;
+  }, 18);
+}
+function stopCatScroll() { clearInterval(_catTimer); }
+setTimeout(function() {
+  var t = document.getElementById('categoriesTrack');
+  if (!t) return;
+  startCatScroll();
+  t.addEventListener('mouseenter', stopCatScroll);
+  t.addEventListener('mouseleave', startCatScroll);
+  t.addEventListener('touchstart', stopCatScroll, {passive:true});
+  t.addEventListener('touchend', function(){ setTimeout(startCatScroll, 2500); }, {passive:true});
+}, 1500);
 (function(){
   var phrases=["cerca de ti","en tu bolsillo","a tu puerta","en minutos"];
   var el=document.getElementById("typedText");

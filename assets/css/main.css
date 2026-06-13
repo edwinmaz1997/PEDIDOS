@@ -139,21 +139,29 @@ img { max-width: 100%; display: block; }
 
 /* ── Categories ──────────────────────────────────────────── */
 .categories-section { padding: 32px 0; background: var(--white); border-bottom: 1px solid var(--border); }
+.cat-carousel { position:relative; display:flex; align-items:center; gap:8px; }
+.cat-arrow { flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1.5px solid var(--border); background:white; cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center; transition:var(--transition); color:var(--ink); box-shadow:0 2px 8px rgba(0,0,0,.08); }
+.cat-arrow:hover { background:var(--blue); color:white; border-color:var(--blue); }
 .categories-track {
-  display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px;
-  scrollbar-width: none;
+  display:flex; gap:10px; overflow-x:auto; padding:4px 0 8px;
+  scrollbar-width:none; scroll-behavior:smooth; flex:1;
 }
-.categories-track::-webkit-scrollbar { display: none; }
+.categories-track::-webkit-scrollbar { display:none; }
 .cat-chip {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 20px; border-radius: 50px;
-  border: 1.5px solid var(--border); background: white;
-  font-size: .9rem; font-weight: 500; cursor: pointer;
-  white-space: nowrap; transition: var(--transition);
-  font-family: 'DM Sans', sans-serif; color: var(--ink);
+  display:flex; align-items:center; gap:8px;
+  padding:10px 20px; border-radius:50px;
+  border:1.5px solid var(--border); background:white;
+  font-size:.9rem; font-weight:500; cursor:pointer;
+  white-space:nowrap; transition:var(--transition);
+  font-family:'DM Sans',sans-serif; color:var(--ink);
+  flex-shrink:0;
 }
-.cat-chip:hover { border-color: var(--blue); color: var(--blue); background: #f0f7ff; }
-.cat-chip.active { background: var(--blue); color: white; border-color: var(--blue); }
+.cat-chip:hover { border-color:var(--blue); color:var(--blue); background:#f0f7ff; }
+.cat-chip.active { background:var(--blue); color:white; border-color:var(--blue); }
+@media(max-width:600px){
+  .cat-arrow { width:30px; height:30px; font-size:1rem; }
+  .cat-chip { padding:8px 14px; font-size:.82rem; }
+}
 
 /* ── Business Sections / Carousel ────────────────────────── */
 .biz-section { padding: 48px 0; }
