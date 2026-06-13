@@ -654,3 +654,9 @@ img { max-width: 100%; display: block; }
 .btn-filter { padding: 8px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: white; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500; transition: var(--transition); }
 .btn-filter:hover { background: var(--off-white); }
 .btn-filter.active { background: var(--blue); color: white; border-color: var(--blue); }
+
+/* ── Password toggle ── */
+.pw-wrap { position:relative; }
+.pw-wrap input { width:100%; padding-right:44px; }
+.pw-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--muted); font-size:1.1rem; padding:4px; line-height:1; }
+.pw-toggle:hover { color:var(--accent); }

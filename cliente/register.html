@@ -89,10 +89,10 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
       <div class="form-group"><label>Correo electrónico</label><input type="email" id="email" placeholder="tucorreo@ejemplo.com"></div>
       <div class="form-group">
         <label>Contraseña</label>
-        <input type="password" id="password" placeholder="Mínimo 8 caracteres">
+        <div class="pw-wrap"><input type="password" id="password" placeholder="Mínimo 8 caracteres"><button type="button" class="pw-toggle" onclick="togglePw('password')" tabindex="-1">👁️</button></div>
         <div class="pw-rules">Debe contener al menos 8 caracteres, una mayúscula y un número.</div>
       </div>
-      <div class="form-group"><label>Confirmar contraseña</label><input type="password" id="password2" placeholder="Repite la contraseña"></div>
+      <div class="form-group"><label>Confirmar contraseña</label><div class="pw-wrap"><input type="password" id="password2" placeholder="Repite la contraseña"><button type="button" class="pw-toggle" onclick="togglePw('password2')" tabindex="-1">👁️</button></div></div>
 
       <button class="btn-primary" style="width:100%;justify-content:center;padding:14px" onclick="goToVerify()" id="step1Btn">
         Continuar →
