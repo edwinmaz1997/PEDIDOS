@@ -91,14 +91,14 @@
       <label>Descripción * <span style="font-weight:400;color:var(--muted)">(esto le llegará a los clientes)</span></label>
       <textarea id="p_desc" rows="3" placeholder="Hoy tu combo de alitas a Q125, precio normal Q150..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical"></textarea>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
       <div class="form-group">
         <label>Fecha inicio *</label>
-        <input type="date" id="p_start">
+        <input type="date" id="p_start" style="width:100%;box-sizing:border-box">
       </div>
       <div class="form-group">
         <label>Fecha fin *</label>
-        <input type="date" id="p_end">
+        <input type="date" id="p_end" style="width:100%;box-sizing:border-box">
       </div>
     </div>
 
