@@ -47,8 +47,19 @@ class ProductController {
     }
 
     public function destroy(int $id): void {
-        AuthMiddleware::requireRole(['negocio', 'admin']);
-        $this->db->prepare("UPDATE products_services SET is_available = 0 WHERE id = ?")->execute([$id]);
+        $user = AuthMiddleware::requireRole(['negocio', 'admin']);
+
+        if ($user['role'] === 'negocio') {
+            $biz = $this->db->prepare("SELECT id FROM businesses WHERE user_id = ?");
+            $biz->execute([$user['id']]);
+            $bizRow = $biz->fetch();
+            if (!$bizRow) Response::error('Negocio no encontrado', 404);
+            $check = $this->db->prepare("SELECT id FROM products_services WHERE id = ? AND business_id = ?");
+            $check->execute([$id, $bizRow['id']]);
+            if (!$check->fetch()) Response::notFound('Producto no encontrado');
+        }
+
+        $this->db->prepare("DELETE FROM products_services WHERE id = ?")->execute([$id]);
         Response::success(null, 'Producto eliminado');
     }
 }
