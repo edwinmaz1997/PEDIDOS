@@ -145,6 +145,7 @@ img { max-width: 100%; display: block; }
 .categories-track {
   display:flex; gap:10px; overflow-x:auto; padding:4px 0 8px;
   scrollbar-width:none; scroll-behavior:smooth; flex:1;
+  flex-wrap:nowrap; /* SIEMPRE una sola fila */
 }
 .categories-track::-webkit-scrollbar { display:none; }
 .cat-chip {

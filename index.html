@@ -142,6 +142,9 @@ function renderCategories() {
       </button>
     `).join('')}
   `;
+  // Iniciar carrusel después de renderizar
+  clearInterval(_catTimer);
+  setTimeout(initCatCarousel, 300);
 }
 
 // ─── Filter by category ───────────────────────────────────
@@ -458,29 +461,41 @@ function scrollCats(dir) {
   if (track) track.scrollBy({ left: dir * 200, behavior: 'smooth' });
 }
 
-// Auto-scroll suave
+// Auto-scroll — duplica los chips si caben todos en pantalla
 var _catTimer = null, _catDir = 1;
-function startCatScroll() {
-  _catTimer = setInterval(function() {
-    var t = document.getElementById('categoriesTrack');
-    if (!t) return;
-    var max = t.scrollWidth - t.clientWidth;
-    if (max <= 0) { clearInterval(_catTimer); return; }
-    if (t.scrollLeft >= max - 1) _catDir = -1;
-    else if (t.scrollLeft <= 1) _catDir = 1;
-    t.scrollLeft += _catDir * 1;
-  }, 18);
-}
-function stopCatScroll() { clearInterval(_catTimer); }
-setTimeout(function() {
+function initCatCarousel() {
   var t = document.getElementById('categoriesTrack');
   if (!t) return;
-  startCatScroll();
-  t.addEventListener('mouseenter', stopCatScroll);
-  t.addEventListener('mouseleave', startCatScroll);
-  t.addEventListener('touchstart', stopCatScroll, {passive:true});
-  t.addEventListener('touchend', function(){ setTimeout(startCatScroll, 2500); }, {passive:true});
-}, 1500);
+
+  // Si caben todos en pantalla, duplicar para crear efecto infinito
+  if (t.scrollWidth <= t.clientWidth + 10) {
+    var chips = Array.from(t.children);
+    chips.forEach(function(chip) {
+      var clone = chip.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      clone.onclick = chip.onclick;
+      t.appendChild(clone);
+    });
+  }
+
+  function step() {
+    var max = t.scrollWidth - t.clientWidth;
+    if (max <= 0) return;
+    if (t.scrollLeft >= max - 1) {
+      // Volver al inicio suavemente
+      t.scrollLeft = 0;
+    } else {
+      t.scrollLeft += 1;
+    }
+  }
+
+  _catTimer = setInterval(step, 18);
+  t.addEventListener('mouseenter', function(){ clearInterval(_catTimer); });
+  t.addEventListener('mouseleave', function(){ _catTimer = setInterval(step, 18); });
+  t.addEventListener('touchstart', function(){ clearInterval(_catTimer); }, {passive:true});
+  t.addEventListener('touchend', function(){ setTimeout(function(){ _catTimer = setInterval(step, 18); }, 2500); }, {passive:true});
+}
+setTimeout(initCatCarousel, 1500);
 (function(){
   var phrases=["cerca de ti","en tu bolsillo","a tu puerta","en minutos"];
   var el=document.getElementById("typedText");
