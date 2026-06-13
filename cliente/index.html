@@ -183,7 +183,11 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
 
 function reorder(businessId, items, deliveryType, deliveryAddress) {
-  localStorage.setItem('nuevaexpress_reorder', JSON.stringify({ items, deliveryType, deliveryAddress }));
+  // Normalizar items para incluir unit_price
+  var normalizedItems = (items || []).map(function(i) {
+    return { product_id: i.product_id, product_name: i.product_name, quantity: i.quantity, unit_price: i.unit_price };
+  });
+  localStorage.setItem('nuevaexpress_reorder', JSON.stringify({ items: normalizedItems, deliveryType, deliveryAddress }));
   window.location.href = '/cliente/pedido.html?business=' + businessId + '&reorder=1';
 }
 

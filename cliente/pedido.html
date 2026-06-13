@@ -855,35 +855,44 @@ document.getElementById('customItems').addEventListener('input', updateCart);
 
     // Pre-fill cart items
     if (data.items && data.items.length) {
+      var hasPriceDiff = false;
       data.items.forEach(function(item) {
-        if (!item.product_id) return; // skip custom items
+        if (!item.product_id) return;
         var id = item.product_id;
         var qty = item.quantity || 1;
-        // Find product in DOM to get price/name
         var prodEl = document.querySelector('[data-pid="' + id + '"]');
         if (prodEl) {
-          // product rendered — add to cart directly
-          var price = parseFloat(prodEl.dataset.price) || 0;
-          var name  = prodEl.dataset.name || item.product_name || '';
-          cart[id] = { name: name, price: price, qty: qty };
+          var currentPrice = parseFloat(prodEl.dataset.price) || 0;
+          var prevPrice    = parseFloat(item.unit_price) || 0;
+          // Detectar si el precio cambió (precio promo vs precio actual)
+          if (prevPrice > 0 && currentPrice > 0 && Math.abs(currentPrice - prevPrice) > 0.01) {
+            hasPriceDiff = true;
+          }
+          var name = prodEl.dataset.name || item.product_name || '';
+          cart[id] = { name: name, price: currentPrice, qty: qty };
           // Update qty display
           var qEl = document.getElementById('qty-' + id);
           if (qEl) qEl.textContent = qty;
           var ppEl = document.getElementById('pp-' + id);
           if (ppEl) { ppEl.style.borderColor = 'var(--blue)'; ppEl.style.background = '#f0f7ff'; }
         } else {
-          // Product not in DOM yet or no data-pid — add with available info
           cart[id] = { name: item.product_name || 'Producto', price: item.unit_price || 0, qty: qty };
         }
       });
       updateCart();
 
-      // Show a toast
+      // Toast — con aviso si los precios cambiaron
       var toast = document.createElement('div');
-      toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3)';
-      toast.textContent = '🔁 Carrito listo con tu pedido anterior';
+      toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center';
+      if (hasPriceDiff) {
+        toast.style.background = '#c0392b';
+        toast.innerHTML = '⚠️ Algunos precios han cambiado desde tu pedido anterior.<br><span style="font-size:.82rem;opacity:.85">Los precios mostrados son los actuales del negocio.</span>';
+        setTimeout(function() { toast.remove(); }, 5000);
+      } else {
+        toast.textContent = '🔁 Carrito listo con tu pedido anterior';
+        setTimeout(function() { toast.remove(); }, 3500);
+      }
       document.body.appendChild(toast);
-      setTimeout(function() { toast.remove(); }, 3500);
     }
   }, 100);
 })();
