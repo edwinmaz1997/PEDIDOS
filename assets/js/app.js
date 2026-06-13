@@ -140,3 +140,12 @@ const APP = {
 const style = document.createElement('style');
 style.textContent = `@keyframes slideIn { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:none; } }`;
 document.head.appendChild(style);
+
+// ── Toggle password visibility ──
+function togglePw(id) {
+  var inp = document.getElementById(id);
+  var btn = inp ? inp.parentElement.querySelector('.pw-toggle') : null;
+  if (!inp) return;
+  if (inp.type === 'password') { inp.type = 'text'; if(btn) btn.textContent = '🙈'; }
+  else { inp.type = 'password'; if(btn) btn.textContent = '👁️'; }
+}

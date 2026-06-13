@@ -656,7 +656,8 @@ img { max-width: 100%; display: block; }
 .btn-filter.active { background: var(--blue); color: white; border-color: var(--blue); }
 
 /* ── Password toggle ── */
-.pw-wrap { position:relative; }
-.pw-wrap input { width:100%; padding-right:44px; }
-.pw-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--muted); font-size:1.1rem; padding:4px; line-height:1; }
-.pw-toggle:hover { color:var(--accent); }
+.pw-wrap { display:flex; align-items:center; border:1.5px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; background:white; }
+.pw-wrap:focus-within { border-color:var(--accent); }
+.pw-wrap input { flex:1; border:none !important; outline:none !important; box-shadow:none !important; border-radius:0 !important; padding:11px 12px; }
+.pw-toggle { background:none; border:none; border-left:1px solid var(--border); cursor:pointer; color:var(--muted); font-size:1rem; padding:0 12px; height:100%; min-height:42px; line-height:1; transition:.15s; flex-shrink:0; }
+.pw-toggle:hover { background:var(--off-white); color:var(--accent); }
