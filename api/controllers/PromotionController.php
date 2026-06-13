@@ -129,9 +129,12 @@ class PromotionController {
     }
 
     private function notifyClients(string $bizName, string $title, string $desc, int $promoId): void {
-        $stmt = $this->db->prepare("SELECT id FROM users WHERE role_id = 3 AND is_active = 1");
-        $stmt->execute();
-        $clientIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        // TEMPORAL: solo notificar al usuario de prueba (id=10)
+        $clientIds = [10];
+        // TODO: cambiar a todos los clientes cuando se lance:
+        // $stmt = $this->db->prepare("SELECT id FROM users WHERE role_id = 3 AND is_active = 1");
+        // $stmt->execute();
+        // $clientIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
         if (empty($clientIds)) return;
 
         $notifTitle = "🏷️ Promoción de {$bizName}";
