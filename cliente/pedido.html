@@ -206,6 +206,7 @@ let business    = null;
 let cart        = {};
 let customItems = [];
 let deliveryType = 'pickup';
+let promoOverrides = {}; // precios promocionales por product_id
 
 const SERVICE_FEE = 3;
 
@@ -217,7 +218,12 @@ if (fromPromo) {
       var promoCart = JSON.parse(promoCartRaw);
       if (promoCart.business_id == businessId) {
         promoCart.items.forEach(function(i) {
-          if (i.id) cart[i.id] = { name: i.name, price: parseFloat(i.price), qty: parseInt(i.qty)||1 };
+          if (i.id) {
+            cart[i.id] = { name: i.name, price: parseFloat(i.price), qty: parseInt(i.qty)||1 };
+            // Guardar precio promo para que changeQty no lo sobreescriba
+            if (!promoOverrides) promoOverrides = {};
+            promoOverrides[i.id] = parseFloat(i.price);
+          }
           else customItems.push({ name: i.name, price: parseFloat(i.price), qty: parseInt(i.qty)||1 });
         });
       }
@@ -377,7 +383,9 @@ function filterProdCat(catId, btn) {
 
 function changeQty(id, delta) {
   var pm = productMap[id] || {};
-  if (!cart[id]) cart[id] = { name: pm.name || '', price: pm.price || 0, qty: 0 };
+  // Usar precio promo si existe, si no el precio normal
+  var price = promoOverrides[id] !== undefined ? promoOverrides[id] : (pm.price || 0);
+  if (!cart[id]) cart[id] = { name: pm.name || '', price: price, qty: 0 };
   cart[id].qty = Math.max(0, cart[id].qty + delta);
   if (cart[id].qty === 0) delete cart[id];
   var qEl = document.getElementById('qty-'+id);
