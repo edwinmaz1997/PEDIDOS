@@ -81,7 +81,11 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
       </div>
       <div class="form-group">
         <label>Link de Google Maps <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
-        <input type="url" id="maps_url" placeholder="https://maps.app.goo.gl/..." oninput="previewMaps()">
+        <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">
+          <input type="url" id="maps_url" placeholder="https://maps.app.goo.gl/..." oninput="previewMaps()" style="flex:1;min-width:0">
+          <button type="button" onclick="getLocation()" id="gpsBtn" style="padding:10px 14px;background:var(--blue);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:.85rem;font-weight:600;white-space:nowrap;flex-shrink:0">📍 Obtener ubicación</button>
+        </div>
+        <div id="gpsMsg" style="display:none;font-size:.78rem;margin-top:6px;color:var(--muted)"></div>
         <div id="mapsPreview" style="display:none;margin-top:6px">
           <a id="mapsLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.78rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver mi ubicación</a>
         </div>
@@ -158,6 +162,46 @@ function setRole(r, btn) {
   selectedRole = r;
   document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+}
+
+function getLocation() {
+  var btn = document.getElementById('gpsBtn');
+  var msg = document.getElementById('gpsMsg');
+  if (!navigator.geolocation) {
+    msg.textContent = '⚠️ Tu navegador no soporta geolocalización.';
+    msg.style.color = 'var(--danger)';
+    msg.style.display = 'block';
+    return;
+  }
+  btn.textContent = '⏳ Obteniendo...';
+  btn.disabled = true;
+  msg.style.display = 'none';
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      var lat = pos.coords.latitude.toFixed(6);
+      var lng = pos.coords.longitude.toFixed(6);
+      var url = 'https://www.google.com/maps?q=' + lat + ',' + lng;
+      document.getElementById('maps_url').value = url;
+      previewMaps();
+      msg.textContent = '✅ Ubicación obtenida correctamente.';
+      msg.style.color = 'var(--success)';
+      msg.style.display = 'block';
+      btn.textContent = '📍 Actualizar ubicación';
+      btn.disabled = false;
+    },
+    function(err) {
+      var errMsg = '⚠️ No se pudo obtener la ubicación.';
+      if (err.code === 1) errMsg = '⚠️ Permiso denegado. Permite el acceso a tu ubicación en el navegador.';
+      else if (err.code === 2) errMsg = '⚠️ Ubicación no disponible. Verifica tu GPS.';
+      msg.textContent = errMsg;
+      msg.style.color = 'var(--danger)';
+      msg.style.display = 'block';
+      btn.textContent = '📍 Obtener ubicación';
+      btn.disabled = false;
+    },
+    { timeout: 10000, enableHighAccuracy: true }
+  );
 }
 
 function previewMaps() {
