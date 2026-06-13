@@ -8,6 +8,10 @@ class PromotionController {
         AuthMiddleware::authenticate();
         try {
             $today = date('Y-m-d');
+            // Auto-desactivar vencidas
+            $this->db->prepare("UPDATE promotions SET is_active = 0 WHERE ends_at < ? AND is_active = 1")
+                     ->execute([$today]);
+
             $stmt = $this->db->prepare("
                 SELECT p.*, b.name as business_name, b.logo as business_logo
                 FROM promotions p
@@ -34,6 +38,10 @@ class PromotionController {
         $user = AuthMiddleware::requireRole('negocio');
         try {
             $biz  = $this->getBiz($user['id']);
+            // Auto-desactivar vencidas
+            $this->db->prepare("UPDATE promotions SET is_active = 0 WHERE business_id = ? AND ends_at < CURDATE() AND is_active = 1")
+                     ->execute([$biz['id']]);
+
             $stmt = $this->db->prepare("SELECT * FROM promotions WHERE business_id = ? ORDER BY created_at DESC");
             $stmt->execute([$biz['id']]);
             $promos = $stmt->fetchAll();
