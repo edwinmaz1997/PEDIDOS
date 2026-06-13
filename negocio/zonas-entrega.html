@@ -76,10 +76,8 @@ var bizId=null;
 var selected=new Set();
 
 async function init(){
-  var me=await fetch('/api/auth/me',{headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json());
-  var bizRes=await fetch('/api/businesses?limit=50',{headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json());
-  var all=bizRes.data?.businesses||[];
-  var biz=all.find(function(b){return b.user_id==me.data.id;})||all[0];
+  var bizRes = await fetch('/api/businesses/mine',{headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json());
+  var biz = bizRes.data;
   if(!biz){document.getElementById('zonesContainer').innerHTML='<div class="empty-state"><p>Primero crea tu negocio en <a href="perfil.html" style="color:var(--blue)">Mi Perfil</a>.</p></div>';return;}
   bizId=biz.id;
 
