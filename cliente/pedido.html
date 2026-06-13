@@ -298,14 +298,56 @@ async function init() {
 
 function renderBizInfo() {
   const el = document.getElementById('bizInfo');
+
+  // Construir HTML de horarios
+  var hoursHtml = '';
+  var hours = typeof business.opening_hours === 'string'
+    ? JSON.parse(business.opening_hours || '{}')
+    : (business.opening_hours || {});
+  var dayKeys  = ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'];
+  var dayNames = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  var hasHours = Object.keys(hours).length > 0;
+
+  if (hasHours) {
+    var now     = new Date();
+    var todayKey = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'][now.getDay()];
+    var hToday  = hours[todayKey];
+    var cur     = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    var isOpen  = hToday && !hToday.closed && cur >= hToday.open && cur <= hToday.close;
+    var statusColor = isOpen ? '#2DC653' : '#e74c3c';
+    var statusText  = isOpen ? '● Abierto' : '● Cerrado';
+
+    var rows = dayKeys.map(function(k, i) {
+      var h = hours[k];
+      var isToday = k === todayKey;
+      var val = !h || h.closed ? '<span style="color:var(--muted)">Cerrado</span>' : (h.open + ' – ' + h.close);
+      return '<div style="display:flex;justify-content:space-between;padding:5px 0;' + (isToday ? 'font-weight:700;color:var(--ink)' : 'color:var(--muted)') + ';font-size:.82rem;border-bottom:1px solid var(--border)">' +
+        '<span>' + dayNames[i] + (isToday ? ' (hoy)' : '') + '</span><span>' + val + '</span></div>';
+    }).join('');
+
+    hoursHtml = `
+      <div style="margin-top:10px">
+        <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.nextElementSibling.style.display==='block'?'▲':'▼'"
+          style="background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;cursor:pointer;font-size:.8rem;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif">
+          <span style="color:${statusColor};font-weight:600">${statusText}</span>
+          <span style="color:var(--muted)">· Horarios</span>
+          <span class="arr" style="color:var(--muted);font-size:.7rem">▼</span>
+        </button>
+        <div style="display:none;background:white;border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-top:6px;box-shadow:0 4px 12px rgba(0,0,0,.08)">
+          ${rows}
+        </div>
+      </div>`;
+  }
+
   el.innerHTML = `
     <div style="display:flex;gap:16px;align-items:flex-start">
       ${business.logo ? `<img src="${esc(business.logo)}" style="width:64px;height:64px;border-radius:var(--radius-sm);object-fit:cover">` : `<div style="width:64px;height:64px;border-radius:var(--radius-sm);background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1.8rem">🏪</div>`}
-      <div>
+      <div style="flex:1">
         <h2 style="font-size:1.3rem">${esc(business.name)}</h2>
         <p style="color:var(--muted);font-size:.85rem">${esc(business.category_name || '')}</p>
         ${business.address ? `<p style="color:var(--muted);font-size:.85rem">📍 ${esc(business.address)}</p>` : ''}
         ${business.phone ? `<a href="tel:${esc(business.phone)}" style="color:var(--accent);font-size:.85rem">📞 ${esc(business.phone)}</a>` : ''}
+        ${hoursHtml}
       </div>
     </div>
   `;
