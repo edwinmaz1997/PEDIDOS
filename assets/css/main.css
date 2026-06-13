@@ -140,8 +140,7 @@ img { max-width: 100%; display: block; }
 /* ── Categories ──────────────────────────────────────────── */
 .categories-section { padding: 32px 0; background: var(--white); border-bottom: 1px solid var(--border); }
 .cat-carousel { position:relative; display:flex; align-items:center; gap:8px; }
-.cat-arrow { flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1.5px solid var(--border); background:white; cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center; transition:var(--transition); color:var(--ink); box-shadow:0 2px 8px rgba(0,0,0,.08); }
-.cat-arrow:hover { background:var(--blue); color:white; border-color:var(--blue); }
+.cat-arrow { display:none; }
 .categories-track {
   display:flex; gap:10px; overflow-x:auto; padding:4px 0 8px;
   scrollbar-width:none; scroll-behavior:smooth; flex:1;
