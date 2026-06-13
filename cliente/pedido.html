@@ -242,6 +242,9 @@ async function init() {
     renderBizInfo();
     renderProducts();
 
+    // Verificar horario — bloquear pedido si está cerrado
+    checkBusinessHours();
+
     // Para negocios tipo delivery, aplicar modo fijo según URL
     if (business.business_type === 'delivery') {
       applyOrderType(urlOrderType);
@@ -265,6 +268,54 @@ async function init() {
       }
     }
   } catch(e) { console.error(e); }
+}
+
+function isBusinessOpen(hours) {
+  if (!hours || typeof hours !== 'object') return true; // Sin horario definido = siempre abierto
+  var dayKeys = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  var now = new Date();
+  var dayKey = dayKeys[now.getDay()];
+  var h = hours[dayKey];
+  if (!h || h.closed) return false;
+  var open  = h.open  || '00:00';
+  var close = h.close || '23:59';
+  var cur = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  return cur >= open && cur <= close;
+}
+
+function checkBusinessHours() {
+  if (!business) return;
+  var hours = typeof business.opening_hours === 'string'
+    ? JSON.parse(business.opening_hours || '{}')
+    : (business.opening_hours || {});
+
+  if (isBusinessOpen(hours)) return; // Abierto — todo normal
+
+  // Cerrado — mostrar banner y bloquear el botón de enviar pedido
+  var container = document.getElementById('productsContainer') || document.querySelector('.products-section') || document.querySelector('main');
+  var banner = document.createElement('div');
+  banner.id = 'closedBanner';
+  banner.style.cssText = 'background:#fff0f0;border:2px solid #f5c2c2;border-radius:var(--radius-sm);padding:18px 20px;margin-bottom:16px;text-align:center';
+  banner.innerHTML = '<div style="font-size:1.5rem;margin-bottom:6px">🔒</div>' +
+    '<div style="font-weight:700;font-size:1rem;color:#c0392b;margin-bottom:4px">Negocio cerrado</div>' +
+    '<div style="font-size:.88rem;color:var(--muted)">Este negocio no está atendiendo en este momento.<br>Consulta sus horarios e intenta más tarde.</div>';
+
+  // Insertar el banner antes de los productos
+  var productsWrap = document.getElementById('productsWrap') || document.querySelector('.products-wrap');
+  if (productsWrap) productsWrap.insertBefore(banner, productsWrap.firstChild);
+  else document.querySelector('main').insertBefore(banner, document.querySelector('main').firstChild);
+
+  // Deshabilitar botón de enviar pedido
+  var submitBtn = document.getElementById('submitOrderBtn') || document.querySelector('[onclick*="submitOrder"]');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '.5';
+    submitBtn.style.cursor = 'not-allowed';
+    submitBtn.title = 'El negocio está cerrado';
+  }
+
+  // Interceptar submitOrder para mostrar mensaje
+  window._bizClosed = true;
 }
 
 function renderBizInfo() {
@@ -642,6 +693,10 @@ function updateCart() {
 }
 
 async function submitOrder() {
+  if (window._bizClosed) {
+    alert('Este negocio está cerrado en este momento. Por favor intenta más tarde.');
+    return;
+  }
   const notes = document.getElementById('notes').value.trim();
 
   // ── Flujo paquete ──────────────────────────────────────
