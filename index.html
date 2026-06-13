@@ -464,12 +464,19 @@ function initCatCarousel() {
   var t = document.getElementById('categoriesTrack');
   if (!t) return;
   clearInterval(_catTimer);
+  var resetting = false;
 
   function step() {
+    if (resetting) return;
     var max = t.scrollWidth - t.clientWidth;
     if (max <= 0) return;
-    if (t.scrollLeft >= max - 1) t.scrollLeft = 0;
-    else t.scrollLeft += 1;
+    if (t.scrollLeft >= max - 1) {
+      resetting = true;
+      t.scrollLeft = 0;
+      setTimeout(function(){ resetting = false; }, 800);
+    } else {
+      t.scrollLeft += 1;
+    }
   }
 
   _catTimer = setInterval(step, 20);
