@@ -98,9 +98,9 @@
           <div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px">
             <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">📍 Dirección de recogida</div>
             <div id="pickupSavedOption" style="display:none;margin-bottom:8px">
-              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem">
-                <input type="radio" name="pickupMode" value="saved" id="pickupModeSaved" onchange="setPickupMode('saved')" style="width:16px;height:16px">
-                <span>🏠 Mi dirección registrada: <span id="pickupSavedText" style="color:var(--accent);font-weight:600"></span></span>
+              <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:.85rem">
+                <input type="radio" name="pickupMode" value="saved" id="pickupModeSaved" onchange="setPickupMode('saved')" style="width:16px;height:16px;flex-shrink:0;margin-top:2px">
+                <span style="min-width:0;overflow:hidden">🏠 Mi dirección registrada: <span id="pickupSavedText" style="color:var(--accent);font-weight:600;word-break:break-all;display:block;margin-top:2px"></span></span>
               </label>
             </div>
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.85rem;margin-bottom:6px">
@@ -559,8 +559,8 @@ function loadPickupSavedAddress() {
     .then(function(data) {
       var u = data.data || {};
       if (u.address || u.google_maps_url) {
-        var savedText = u.address || u.google_maps_url;
-        document.getElementById('pickupSavedText').textContent = savedText.substring(0, 40) + (savedText.length > 40 ? '...' : '');
+        var savedText = u.address || '📍 Ubicación guardada en Google Maps';
+        document.getElementById('pickupSavedText').textContent = savedText.length > 45 ? savedText.substring(0, 45) + '...' : savedText;
         document.getElementById('pickupSavedOption').style.display = 'block';
         window._pickupSavedAddress  = u.address || '';
         window._pickupSavedMapsUrl  = u.google_maps_url || '';
