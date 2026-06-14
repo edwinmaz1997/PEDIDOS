@@ -839,8 +839,9 @@ function updateCart() {
   `;
   totalEl.textContent = `Q${total.toFixed(2)}`;
 
-  // Bloquear envío si es delivery y aún no se calculó el costo de envío
+  // Bloquear/ocultar envío si es delivery y aún no se calculó el costo de envío
   var needsDeliveryCalc = orderType !== 'paquete' && deliveryType === 'delivery' && business?.accepts_delivery && window._calculatedDeliveryFee == null;
+  submitBtn.style.display = needsDeliveryCalc ? 'none' : 'block';
   submitBtn.disabled = orderType === 'paquete' ? false : (lines.length === 0 || needsDeliveryCalc);
   if (orderType === 'paquete') submitBtn.textContent = '📦 Solicitar envío';
   else submitBtn.textContent = 'Enviar Pedido';
