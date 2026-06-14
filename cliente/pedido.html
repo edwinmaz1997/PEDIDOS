@@ -168,14 +168,20 @@
           <!-- Manual address input -->
           <div id="manualAddressWrap">
             <div style="display:flex;gap:8px;margin-bottom:6px">
-              <input type="text" id="deliveryAddress" placeholder="Dirección o link de Google Maps" style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif" oninput="previewDeliveryMap()">
+              <input type="text" id="deliveryAddress" placeholder="Dirección o link de Google Maps" style="flex:1;min-width:0;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;box-sizing:border-box" oninput="previewDeliveryMap()">
               <button id="gpsBtn" onclick="getGPSLocation()" title="Obtener mi ubicación" style="padding:10px 14px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:1rem;flex-shrink:0;transition:var(--transition)">📍</button>
+            </div>
+            <div style="margin-bottom:6px">
+              <a href="https://www.google.com/maps" target="_blank" onclick="setTimeout(function(){var i=document.getElementById('deliveryAddress');if(i)i.placeholder='Pega aquí el link copiado de Google Maps...';},500)"
+                style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1a73e8;color:white;border-radius:var(--radius-sm);text-decoration:none;font-size:.82rem;font-weight:600">
+                🗺️ Seleccionar en Google Maps
+              </a>
             </div>
             <div id="gpsStatus" style="display:none;font-size:.78rem;color:var(--muted);margin-bottom:4px"></div>
             <div id="deliveryMapPreview" style="display:none;margin-bottom:6px">
               <a id="deliveryMapLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.82rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver en Google Maps</a>
             </div>
-            <div style="font-size:.75rem;color:var(--muted)">Escribe tu dirección o toca 📍 para usar tu ubicación actual</div>
+            <div style="font-size:.75rem;color:var(--muted)">Escribe tu dirección, toca 📍 para tu ubicación actual, o selecciona en el mapa y pega el link</div>
           </div>
           <div id="zoneSelectWrap" style="display:none">
             <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:4px">Zona de entrega</label>
