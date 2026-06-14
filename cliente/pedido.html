@@ -662,8 +662,12 @@ function previewDeliveryMap() {
   var link    = document.getElementById('deliveryMapLink');
   if (!val) { preview.style.display = 'none'; return; }
 
-  if (val.startsWith('http') && val.includes('google.com/maps')) {
-    // It's a Google Maps URL
+  if (val.startsWith('http') && (val.includes('google.com/maps') || val.includes('maps.app.goo.gl') || val.includes('goo.gl/maps') || val.includes('maps.google.com'))) {
+    // Es un link de Google Maps (incluyendo links cortos)
+    link.href = val;
+    preview.style.display = 'block';
+  } else if (val.startsWith('http')) {
+    // Cualquier otro link — mostrar igual
     link.href = val;
     preview.style.display = 'block';
   } else if (val.length > 5) {
