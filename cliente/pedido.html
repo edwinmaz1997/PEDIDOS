@@ -159,7 +159,7 @@
 
           <!-- Descripción del paquete -->
           <div class="form-group">
-            <label style="font-size:.85rem;font-weight:600">📝 ¿Qué es el paquete? <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+            <label style="font-size:.85rem;font-weight:600">📝 ¿Qué es el paquete?</label>
             <input type="text" id="packageDesc" placeholder="Ej: Documentos, ropa, comida..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
           </div>
         </div>
@@ -1015,6 +1015,7 @@ async function submitOrder() {
 
     if (!pickup)   { alert('Ingresa la dirección de recogida'); return; }
     if (!dropoff)  { alert('Ingresa la dirección de entrega'); return; }
+    if (!pkgDesc)  { alert('Indica qué es el paquete'); return; }
     if (!recName)  { alert('Ingresa el nombre del destinatario'); return; }
     if (!recPhone) { alert('Ingresa el teléfono del destinatario'); return; }
 
