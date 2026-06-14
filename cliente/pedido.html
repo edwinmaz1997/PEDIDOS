@@ -183,12 +183,12 @@
             </div>
             <div style="font-size:.75rem;color:var(--muted)">Escribe tu dirección, toca 📍 para tu ubicación actual, o selecciona en el mapa y pega el link</div>
           </div>
-          <div id="zoneSelectWrap" style="display:none">
-            <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:4px">Zona de entrega</label>
-            <select id="zoneSelect" onchange="onZoneChange()" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;background:white">
-              <option value="">Selecciona tu zona...</option>
-            </select>
-            <div id="zonePrice" style="font-size:.82rem;color:var(--blue);margin-top:4px;font-weight:600"></div>
+          <!-- Calculadora de envío por distancia -->
+          <div id="deliveryCalcWrap" style="margin-top:10px">
+            <button id="calcDeliveryBtn" onclick="calculateDeliveryFee()" class="btn-primary" style="width:100%;justify-content:center;padding:11px;font-size:.9rem">
+              📍 Calcular costo de envío
+            </button>
+            <div id="deliveryCalcResult" style="display:none;margin-top:8px;padding:10px 12px;border-radius:var(--radius-sm);font-size:.85rem"></div>
           </div>
         </div>
         <div id="cartItems"></div>
@@ -286,24 +286,6 @@ async function init() {
     // Para negocios tipo delivery, aplicar modo fijo según URL
     if (business.business_type === 'delivery') {
       applyOrderType(urlOrderType);
-    }
-
-    // Load delivery zones (only ones this business covers)
-    if (business.accepts_delivery) {
-      var zRes = await fetch('/api/businesses/' + businessId + '/zones').then(function(r){ return r.json(); });
-      var zones = (zRes.data || []).filter(function(z){ return z.covered == 1; });
-      var zoneSel = document.getElementById('zoneSelect');
-      var zoneWrap = document.getElementById('zoneSelectWrap');
-      if (zones.length) {
-        zones.forEach(function(z) {
-          var opt = document.createElement('option');
-          opt.value = z.price;
-          opt.dataset.name = z.name;
-          opt.textContent = z.name + ' — Q' + parseFloat(z.price).toFixed(2);
-          zoneSel.appendChild(opt);
-        });
-        zoneWrap.style.display = 'block';
-      }
     }
   } catch(e) { console.error(e); }
 }
@@ -493,6 +475,7 @@ function addCustomRow() {
 function toggleAddressMode() {
   var useSaved = document.getElementById('useSavedAddress').checked;
   document.getElementById('manualAddressWrap').style.display = useSaved ? 'none' : 'block';
+  invalidateDeliveryCalc();
 }
 
 function loadSavedAddress() {
@@ -626,6 +609,8 @@ function getGPSForField(fieldId, statusId) {
     async function(pos) {
       var lat = pos.coords.latitude;
       var lng = pos.coords.longitude;
+      // Guardar coordenadas exactas para cálculo de distancia
+      window._gpsMapsUrlPending = 'https://www.google.com/maps?q=' + lat.toFixed(6) + ',' + lng.toFixed(6);
       statusEl.textContent = 'Buscando dirección...';
       try {
         var res  = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&addressdetails=1', { headers: { 'Accept-Language': 'es', 'User-Agent': 'NuevaExpress/1.0' } });
@@ -653,13 +638,25 @@ function getGPSForField(fieldId, statusId) {
 // ── Obtener ubicación GPS con Nominatim ──────────────────
 function getGPSLocation() {
   getGPSForField('deliveryAddress', 'gpsStatus');
-  setTimeout(function(){ previewDeliveryMap(); }, 3500);
+  // El input dispara oninput->previewDeliveryMap (que limpia _gpsMapsUrl).
+  // Re-validamos después para que el cálculo use las coordenadas exactas del GPS.
+  setTimeout(function(){
+    var preview = document.getElementById('deliveryMapPreview');
+    var link    = document.getElementById('deliveryMapLink');
+    if (window._gpsMapsUrlPending) {
+      window._gpsMapsUrl = window._gpsMapsUrlPending;
+      link.href = window._gpsMapsUrl;
+      preview.style.display = 'block';
+    }
+  }, 3600);
 }
 
 function previewDeliveryMap() {
   var val = document.getElementById('deliveryAddress').value.trim();
   var preview = document.getElementById('deliveryMapPreview');
   var link    = document.getElementById('deliveryMapLink');
+  window._gpsMapsUrl = null; // el usuario editó manualmente, descartar GPS exacto
+  invalidateDeliveryCalc();
   if (!val) { preview.style.display = 'none'; return; }
 
   if (val.startsWith('http') && (val.includes('google.com/maps') || val.includes('maps.app.goo.gl') || val.includes('goo.gl/maps') || val.includes('maps.google.com'))) {
@@ -679,17 +676,107 @@ function previewDeliveryMap() {
   }
 }
 
-function onZoneChange() {
-  var sel = document.getElementById('zoneSelect');
-  var priceEl = document.getElementById('zonePrice');
-  if (sel.value) {
-    var zoneName = sel.options[sel.selectedIndex].dataset.name;
-    priceEl.textContent = '🛵 Entrega a ' + zoneName + ' — Q' + parseFloat(sel.value).toFixed(2);
-    // Update delivery fee
-    if (business) business.delivery_fee = parseFloat(sel.value);
+// ── Cálculo de costo de envío por distancia ────────────────
+function invalidateDeliveryCalc() {
+  window._calculatedDeliveryFee = null;
+  window._calculatedDistanceKm  = null;
+  var result = document.getElementById('deliveryCalcResult');
+  if (result) result.style.display = 'none';
+  var btn = document.getElementById('calcDeliveryBtn');
+  if (btn) { btn.style.display = 'block'; btn.disabled = false; btn.textContent = '📍 Calcular costo de envío'; }
+  updateCart();
+}
+
+function getClientMapsUrlForDelivery() {
+  var useSaved = document.getElementById('useSavedAddress')?.checked;
+  if (useSaved) {
+    if (window._savedMapsUrl) return window._savedMapsUrl;
+    if (window._savedAddress) return 'https://www.google.com/maps/search/' + encodeURIComponent(window._savedAddress);
+    return null;
+  }
+  // Si se obtuvo ubicación GPS exacta, usarla siempre (más precisa que el texto)
+  if (window._gpsMapsUrl) return window._gpsMapsUrl;
+  var val = document.getElementById('deliveryAddress').value.trim();
+  if (!val) return null;
+  if (val.startsWith('http')) return val;
+  return 'https://www.google.com/maps/search/' + encodeURIComponent(val);
+}
+
+async function calculateDeliveryFee() {
+  var btn    = document.getElementById('calcDeliveryBtn');
+  var result = document.getElementById('deliveryCalcResult');
+  var mapsUrl = getClientMapsUrlForDelivery();
+
+  if (!mapsUrl) {
+    result.style.display = 'block';
+    result.style.background = '#fdf0f0';
+    result.style.color = 'var(--danger)';
+    result.innerHTML = '⚠️ Primero indica tu dirección o ubicación de entrega arriba.';
+    return;
+  }
+
+  // Solo funciona bien con links de Google Maps (con coordenadas)
+  if (!mapsUrl.startsWith('http') || !(mapsUrl.includes('google.com/maps') || mapsUrl.includes('maps.app.goo.gl') || mapsUrl.includes('goo.gl/maps') || mapsUrl.includes('maps.google.com'))) {
+    result.style.display = 'block';
+    result.style.background = '#fdf0f0';
+    result.style.color = 'var(--danger)';
+    result.innerHTML = '⚠️ Para calcular el envío necesitamos tu ubicación exacta. Usa 📍 "Obtener mi ubicación" o "Seleccionar en Google Maps" y pega el link aquí.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Calculando...';
+  result.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API}/businesses/${businessId}/calculate-delivery`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
+      body: JSON.stringify({ client_maps_url: mapsUrl })
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      result.style.display = 'block';
+      result.style.background = '#fdf0f0';
+      result.style.color = 'var(--danger)';
+      result.innerHTML = '⚠️ ' + (data.message || 'No se pudo calcular el envío.');
+      btn.disabled = false;
+      btn.textContent = '📍 Calcular costo de envío';
+      return;
+    }
+
+    if (!data.data.in_coverage) {
+      result.style.display = 'block';
+      result.style.background = '#fdf0f0';
+      result.style.color = 'var(--danger)';
+      result.innerHTML = '🚫 Fuera de cobertura — tu ubicación está a ' + data.data.distance_km + ' km del negocio. Por ahora no hacemos entregas a esa distancia.';
+      btn.disabled = false;
+      btn.textContent = '📍 Calcular costo de envío';
+      window._calculatedDeliveryFee = null;
+      window._calculatedDistanceKm  = null;
+      updateCart();
+      return;
+    }
+
+    // Éxito
+    window._calculatedDeliveryFee = data.data.delivery_fee;
+    window._calculatedDistanceKm  = data.data.distance_km;
+
+    result.style.display = 'block';
+    result.style.background = '#e8f5e9';
+    result.style.color = '#2e7d32';
+    result.innerHTML = '✅ Distancia: ' + data.data.distance_km + ' km — Costo de envío: Q' + parseFloat(data.data.delivery_fee).toFixed(2);
+
+    btn.style.display = 'none';
     updateCart();
-  } else {
-    priceEl.textContent = '';
+  } catch (e) {
+    result.style.display = 'block';
+    result.style.background = '#fdf0f0';
+    result.style.color = 'var(--danger)';
+    result.innerHTML = '⚠️ Error al calcular el envío. Intenta de nuevo.';
+    btn.disabled = false;
+    btn.textContent = '📍 Calcular costo de envío';
   }
 }
 
@@ -698,6 +785,7 @@ function setDelivery(type, btn) {
   document.querySelectorAll('.delivery-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('deliveryAddressWrap').style.display = type === 'delivery' ? 'block' : 'none';
+  invalidateDeliveryCalc();
   if (type === 'delivery') loadSavedAddress();
   updateCart();
 }
@@ -740,15 +828,20 @@ function updateCart() {
   if (!lines.length) { cartEl.innerHTML = orderType === 'paquete' ? '' : '<p style="color:var(--muted);font-size:.9rem">Agrega productos a tu pedido</p>'; }
   else { cartEl.innerHTML = lines.join(''); }
 
-  const deliveryFee = deliveryType === 'delivery' && business?.accepts_delivery ? parseFloat(business.delivery_fee || 15) : 0;
+  const deliveryFee = deliveryType === 'delivery' && business?.accepts_delivery
+    ? (window._calculatedDeliveryFee != null ? window._calculatedDeliveryFee : 0)
+    : 0;
   const total = subtotal + deliveryFee;
 
   feeEl.innerHTML = `
     ${subtotal > 0 ? `<div class="fee-row"><span>Subtotal</span><span>Q${subtotal.toFixed(2)}</span></div>` : ''}
-    ${deliveryFee > 0 ? `<div class="fee-row"><span>Delivery</span><span>Q${deliveryFee.toFixed(2)}</span></div>` : ''}
+    ${deliveryFee > 0 ? `<div class="fee-row"><span>Delivery (${window._calculatedDistanceKm != null ? window._calculatedDistanceKm + ' km' : ''})</span><span>Q${deliveryFee.toFixed(2)}</span></div>` : ''}
   `;
   totalEl.textContent = `Q${total.toFixed(2)}`;
-  submitBtn.disabled = orderType === 'paquete' ? false : lines.length === 0;
+
+  // Bloquear envío si es delivery y aún no se calculó el costo de envío
+  var needsDeliveryCalc = orderType !== 'paquete' && deliveryType === 'delivery' && business?.accepts_delivery && window._calculatedDeliveryFee == null;
+  submitBtn.disabled = orderType === 'paquete' ? false : (lines.length === 0 || needsDeliveryCalc);
   if (orderType === 'paquete') submitBtn.textContent = '📦 Solicitar envío';
   else submitBtn.textContent = 'Enviar Pedido';
 }
@@ -756,6 +849,10 @@ function updateCart() {
 async function submitOrder() {
   if (window._bizClosed) {
     alert('Este negocio está cerrado en este momento. Por favor intenta más tarde.');
+    return;
+  }
+  if (orderType !== 'paquete' && deliveryType === 'delivery' && business?.accepts_delivery && window._calculatedDeliveryFee == null) {
+    alert('Primero calcula el costo de envío tocando el botón "📍 Calcular costo de envío".');
     return;
   }
   const notes = document.getElementById('notes').value.trim();
@@ -833,7 +930,7 @@ async function submitOrder() {
     const res = await fetch(`${API}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
-      body: JSON.stringify({ business_id: businessId, delivery_type: deliveryType, delivery_address: deliveryAddress, notes, items, from_promo: fromPromo ? 1 : 0 })
+      body: JSON.stringify({ business_id: businessId, delivery_type: deliveryType, delivery_address: deliveryAddress, notes, items, from_promo: fromPromo ? 1 : 0, delivery_fee: window._calculatedDeliveryFee || null, distance_km: window._calculatedDistanceKm || null })
     });
     const data = await res.json();
     if (!data.success) { alert(data.message || 'Error al enviar pedido'); return; }

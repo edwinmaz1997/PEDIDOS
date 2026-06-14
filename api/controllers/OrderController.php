@@ -115,7 +115,13 @@ class OrderController {
 
         // Calculate fees
         $serviceFee  = SERVICE_FEE;
-        $deliveryFee = ($deliveryType === 'delivery' && $business['accepts_delivery']) ? (float)$business['delivery_fee'] : 0;
+        if ($deliveryType === 'delivery' && $business['accepts_delivery']) {
+            // Usar la tarifa calculada por distancia que envía el frontend
+            $sentFee = isset($body['delivery_fee']) ? (float)$body['delivery_fee'] : null;
+            $deliveryFee = $sentFee !== null && $sentFee > 0 ? $sentFee : (float)$business['delivery_fee'];
+        } else {
+            $deliveryFee = 0;
+        }
 
         // Subtotal from known products
         $subtotal = 0;

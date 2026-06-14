@@ -287,6 +287,65 @@ class BusinessController {
         return $slug;
     }
 
+    /**
+     * POST /api/businesses/{id}/calculate-delivery
+     * Body: { client_maps_url: "https://maps.app.goo.gl/..." }
+     * Calcula la distancia entre el negocio y la dirección del cliente,
+     * y devuelve la tarifa de envío según la tabla de distancias.
+     */
+    public function calculateDelivery(int $businessId, array $body): void {
+        AuthMiddleware::authenticate();
+
+        $clientMapsUrl = trim($body['client_maps_url'] ?? '');
+        if (!$clientMapsUrl) Response::error('Falta la ubicación de entrega', 400);
+
+        $stmt = $this->db->prepare("SELECT id, name, latitude, longitude, google_maps_url, accepts_delivery FROM businesses WHERE id = ? AND is_active = 1");
+        $stmt->execute([$businessId]);
+        $biz = $stmt->fetch();
+        if (!$biz) Response::notFound('Negocio no encontrado');
+        if (!$biz['accepts_delivery']) Response::error('Este negocio no realiza entregas a domicilio', 400);
+
+        // Coordenadas del negocio: usar lat/lng si existen, sino extraer del link
+        $bizCoords = null;
+        if ($biz['latitude'] && $biz['longitude']) {
+            $bizCoords = ['lat' => (float)$biz['latitude'], 'lng' => (float)$biz['longitude']];
+        } elseif ($biz['google_maps_url']) {
+            $bizCoords = GeoHelper::extractCoords($biz['google_maps_url']);
+        }
+        if (!$bizCoords) {
+            Response::error('El negocio no tiene una ubicación válida configurada. Contacta al negocio o al soporte.', 422);
+        }
+
+        // Coordenadas del cliente
+        $clientCoords = GeoHelper::extractCoords($clientMapsUrl);
+        if (!$clientCoords) {
+            Response::error('No se pudo determinar tu ubicación desde el link proporcionado. Verifica que sea un link válido de Google Maps.', 422);
+        }
+
+        $distanceKm = GeoHelper::distanceKm(
+            $bizCoords['lat'], $bizCoords['lng'],
+            $clientCoords['lat'], $clientCoords['lng']
+        );
+
+        $fee = GeoHelper::feeForDistance($distanceKm);
+
+        if ($fee === null) {
+            Response::success([
+                'distance_km'   => round($distanceKm, 2),
+                'delivery_fee'  => null,
+                'in_coverage'   => false,
+                'message'       => 'Tu ubicación está fuera de la zona de cobertura (' . round($distanceKm, 1) . ' km).',
+            ]);
+            return;
+        }
+
+        Response::success([
+            'distance_km'  => round($distanceKm, 2),
+            'delivery_fee' => $fee,
+            'in_coverage'  => true,
+        ]);
+    }
+
     private function findOwned($id, $user) {
         $stmt = $this->db->prepare("SELECT * FROM businesses WHERE id = ?");
         $stmt->execute([$id]);

@@ -6,6 +6,7 @@ require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/helpers/Security.php';
 require_once __DIR__ . '/helpers/Response.php';
+require_once __DIR__ . '/helpers/GeoHelper.php';
 require_once __DIR__ . '/middleware/AuthMiddleware.php';
 require_once __DIR__ . '/controllers/AuthController.php';
 require_once __DIR__ . '/controllers/PasswordResetController.php';
@@ -158,6 +159,14 @@ try {
                 $zoneCtrl = new DeliveryZoneController();
                 if ($method === 'GET')  $zoneCtrl->bizZones($id);
                 elseif ($method === 'POST') $zoneCtrl->bizUpdateZones($id, $body);
+                else Response::notFound();
+                break;
+            }
+
+            // /businesses/{id}/calculate-delivery — calcular tarifa por distancia
+            if ($id && $subAction === 'calculate-delivery') {
+                $ctrl = new BusinessController();
+                if ($method === 'POST') $ctrl->calculateDelivery($id, $body);
                 else Response::notFound();
                 break;
             }
