@@ -297,6 +297,7 @@ class BusinessController {
         AuthMiddleware::authenticate();
 
         $clientMapsUrl = trim($body['client_maps_url'] ?? '');
+        $originMapsUrl = trim($body['origin_maps_url'] ?? '');
         if (!$clientMapsUrl) Response::error('Falta la ubicación de entrega', 400);
 
         $stmt = $this->db->prepare("SELECT id, name, latitude, longitude, google_maps_url, accepts_delivery FROM businesses WHERE id = ? AND is_active = 1");
@@ -305,25 +306,31 @@ class BusinessController {
         if (!$biz) Response::notFound('Negocio no encontrado');
         if (!$biz['accepts_delivery']) Response::error('Este negocio no realiza entregas a domicilio', 400);
 
-        // Coordenadas del negocio: usar lat/lng si existen, sino extraer del link
-        $bizCoords = null;
-        if ($biz['latitude'] && $biz['longitude']) {
-            $bizCoords = ['lat' => (float)$biz['latitude'], 'lng' => (float)$biz['longitude']];
+        // Coordenadas de origen: si se envía origin_maps_url (ej. envío de paquetes,
+        // recogida en una dirección distinta al negocio) se usa esa; sino la del negocio
+        $originCoords = null;
+        if ($originMapsUrl) {
+            $originCoords = GeoHelper::extractCoords($originMapsUrl);
+        } elseif ($biz['latitude'] && $biz['longitude']) {
+            $originCoords = ['lat' => (float)$biz['latitude'], 'lng' => (float)$biz['longitude']];
         } elseif ($biz['google_maps_url']) {
-            $bizCoords = GeoHelper::extractCoords($biz['google_maps_url']);
+            $originCoords = GeoHelper::extractCoords($biz['google_maps_url']);
         }
-        if (!$bizCoords) {
-            Response::error('El negocio no tiene una ubicación válida configurada. Contacta al negocio o al soporte.', 422);
+        if (!$originCoords) {
+            $msg = $originMapsUrl
+                ? 'No se pudo determinar la ubicación de recogida desde el link proporcionado.'
+                : 'El negocio no tiene una ubicación válida configurada. Contacta al negocio o al soporte.';
+            Response::error($msg, 422);
         }
 
-        // Coordenadas del cliente
+        // Coordenadas del destino
         $clientCoords = GeoHelper::extractCoords($clientMapsUrl);
         if (!$clientCoords) {
-            Response::error('No se pudo determinar tu ubicación desde el link proporcionado. Verifica que sea un link válido de Google Maps.', 422);
+            Response::error('No se pudo determinar la ubicación de entrega desde el link proporcionado. Verifica que sea un link válido de Google Maps.', 422);
         }
 
         $distanceKm = GeoHelper::distanceKm(
-            $bizCoords['lat'], $bizCoords['lng'],
+            $originCoords['lat'], $originCoords['lng'],
             $clientCoords['lat'], $clientCoords['lng']
         );
 
