@@ -121,7 +121,12 @@ async function doLogin() {
     if (role === 'admin')           window.location.href = '/admin/index.html#tk=' + token + '&us=' + userStr;
     else if (role === 'negocio')    window.location.href = '/negocio/index.html#tk=' + token + '&us=' + userStr;
     else if (role === 'repartidor') window.location.href = '/repartidor/index.html#tk=' + token + '&us=' + userStr;
-    else                            window.location.href = '/cliente/index.html#tk=' + token + '&us=' + userStr;
+    else {
+      var params = new URLSearchParams(window.location.search);
+      var redirect = params.get('redirect');
+      var dest = redirect === 'promociones' ? '/cliente/promociones.html' : '/cliente/index.html';
+      window.location.href = dest + '#tk=' + token + '&us=' + userStr;
+    }
 
   } catch(e) {
     showError('Error de conexión. Intenta de nuevo.');
