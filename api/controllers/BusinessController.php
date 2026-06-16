@@ -57,6 +57,7 @@ class BusinessController {
         $stmt->execute([$user["id"]]);
         $biz = $stmt->fetch();
         if (!$biz) Response::notFound("No tienes un negocio registrado");
+        $biz['photos'] = $this->getPhotos($biz['id']);
         Response::success($biz);
     }
 

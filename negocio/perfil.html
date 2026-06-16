@@ -487,6 +487,10 @@ async function uploadLogo(input) {
 
 async function loadPhotos() {
   const grid = document.getElementById('photoGrid');
+  grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)"><div class="spinner"></div></div>';
+  // Recargar siempre desde el servidor para mostrar las más recientes
+  const res = await APP.get(`/businesses/${biz.id}`);
+  if (res?.success) biz = { ...biz, ...res.data };
   const photos = biz.photos || [];
   const addBtn = `<div class="photo-add" onclick="document.getElementById('photoInput').click()"><span style="font-size:1.5rem">+</span><span>Agregar foto</span></div>`;
   grid.innerHTML = photos.map(p => `
@@ -523,6 +527,7 @@ function switchTab(name, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'fotos') loadPhotos();
 }
 
 init();
