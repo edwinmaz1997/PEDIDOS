@@ -331,6 +331,7 @@ async function toggleAvailable(id, available) {
 function openModal(productId = null) {
   photoFileToUpload = null;
   const p = productId ? products.find(x => x.id === productId) : null;
+  window.editingProduct = p || null;
   document.getElementById('modalTitle').textContent = p ? 'Editar Producto' : 'Nuevo Producto';
   document.getElementById('p_id').value = productId || '';
   document.getElementById('p_name').value = p?.name || '';
@@ -364,7 +365,7 @@ async function saveProduct() {
   const name = document.getElementById('p_name').value.trim();
   if (!name) { APP.toast('El nombre es requerido', 'error'); return; }
 
-  let photoUrl = null;
+  let photoUrl = editingProduct?.photo || null; // mantener foto existente si no se cambia
   if (photoFileToUpload) {
     APP.toast('Subiendo foto...', 'info');
     const upRes = await APP.upload(photoFileToUpload, 'products');
@@ -378,8 +379,8 @@ async function saveProduct() {
     price: document.getElementById('p_price').value || null,
     is_available: document.getElementById('p_available').checked ? 1 : 0,
     category_id: document.getElementById('p_category').value || null,
+    photo: photoUrl,
   };
-  if (photoUrl) payload.photo = photoUrl;
 
   let res;
   if (id) res = await APP.put(`/products/${id}`, payload);
@@ -415,6 +416,7 @@ function toggleSidebar() {
   if (sidebar) sidebar.classList.toggle('open');
   if (overlay) overlay.classList.toggle('open');
 }
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
 </script>
 
 <script src="/assets/js/pwa.js">
