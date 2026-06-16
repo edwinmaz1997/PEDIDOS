@@ -440,7 +440,7 @@ function closeBulkModal() {
 function downloadTemplate() {
   // Obtener nombres de categorías para incluir en el template
   var catNames = categories.map(function(c){ return c.name; }).join(' / ') || 'Bebidas / Comida / Postres';
-  var csv = 'nombre,descripcion,precio,categoria\n' +
+  var csv = '\uFEFF' + 'nombre,descripcion,precio,categoria\n' +
     '"Ejemplo Producto 1","Descripción del producto",25.00,"' + (categories[0]?.name || 'Sin categoría') + '"\n' +
     '"Ejemplo Producto 2","Otra descripción",15.50,""\n';
   var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
