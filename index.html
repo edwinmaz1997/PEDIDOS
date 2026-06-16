@@ -278,9 +278,10 @@ function renderCard(b) {
   const photo = b.photos?.[0]?.photo_url || b.cover_photo || 'assets/img/placeholder.svg';
   const products = (b.products_preview || []).slice(0,3).map(p => `<span class="tag">${escHtml(p.name)}</span>`).join('');
   return `
-    <article class="biz-card" onclick="openBusiness(${b.id})">
+    <article class="biz-card ${b.is_featured ? 'biz-card-featured' : ''}" onclick="openBusiness(${b.id})">
       <div class="card-photo" style="background-image:url('${escHtml(photo)}')">
         <span class="card-badge" style="background:${escHtml(b.category_color || '#888')}">${escHtml(b.category_name || '')}</span>
+        ${b.is_featured ? '<span style="position:absolute;top:8px;right:8px;background:#f59e0b;color:white;font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:20px">⭐ Destacado</span>' : ''}
         ${b.business_type === 'delivery' ? '<span class="card-delivery" style="background:#FF8C42">🛵 Solo Delivery</span>' : b.accepts_delivery ? '<span class="card-delivery">🛵 Delivery</span>' : ''}
       </div>
       <div class="card-body">

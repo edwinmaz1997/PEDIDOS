@@ -24,7 +24,7 @@ class BusinessController {
             JOIN business_categories bc ON b.category_id = bc.id
             JOIN users u ON b.user_id = u.id
             WHERE b.is_active = 1
-            ORDER BY b.rating DESC, b.created_at DESC
+            ORDER BY b.is_featured DESC, b.sort_order ASC, b.rating DESC, b.created_at DESC
             LIMIT ? OFFSET ?
         ");
         $stmt->execute([$limit, $offset]);
@@ -115,7 +115,7 @@ class BusinessController {
             $params[] = '%' . $zone . '%';
         }
 
-        $sql .= " ORDER BY b.rating DESC LIMIT 50";
+        $sql .= " ORDER BY b.is_featured DESC, b.sort_order ASC, b.rating DESC LIMIT 50";
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $businesses = $stmt->fetchAll();
@@ -135,7 +135,7 @@ class BusinessController {
             FROM businesses b
             JOIN business_categories bc ON b.category_id = bc.id
             WHERE b.category_id = ? AND b.is_active = 1
-            ORDER BY b.rating DESC
+            ORDER BY b.is_featured DESC, b.sort_order ASC, b.rating DESC
             LIMIT 100
         ");
         $stmt->execute([$categoryId]);
@@ -218,7 +218,7 @@ class BusinessController {
 
         $allowed = ['category_id','name','description','what_we_offer','address','city','zone',
                     'phone','whatsapp','email','website','latitude','longitude','google_maps_url',
-                    'opening_hours','accepts_delivery','is_active','logo','cover_photo','is_verified','owner_user_id','business_type'];
+                    'opening_hours','accepts_delivery','is_active','logo','cover_photo','is_verified','owner_user_id','business_type','sort_order','is_featured'];
         $sets = [];
         $params = [];
         foreach ($allowed as $field) {

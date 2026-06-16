@@ -17,9 +17,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.biz-table-row { display:grid; grid-template-columns:56px 1fr auto auto auto; gap:12px; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border); transition:var(--transition); }
+.biz-table-row { display:grid; grid-template-columns:56px 1fr auto auto auto auto; gap:12px; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border); transition:var(--transition); }
 .biz-table-row:hover { background:var(--off-white); }
 .biz-table-row:last-child { border-bottom:none; }
+.biz-featured { background:#fff8e1;border:1.5px solid #ffe082; }
 .biz-avatar { width:48px; height:48px; border-radius:10px; object-fit:cover; background:var(--off-white); display:flex; align-items:center; justify-content:center; font-size:1.3rem; overflow:hidden; flex-shrink:0; }
 .biz-avatar img { width:100%; height:100%; object-fit:cover; }
 .biz-info-name { font-weight:600; font-size:.95rem; }
@@ -188,14 +189,16 @@ function filterTable() {
 function renderTable(list) {
   const container = document.getElementById('bizGrid') || document.getElementById('bizList');
   if (!list.length) { container.innerHTML = '<div class="empty-state"><p>Sin resultados</p></div>'; return; }
-  container.innerHTML = list.map(b => `
-    <div class="biz-table-row">
+  container.innerHTML = list.map((b, idx) => `
+    <div class="biz-table-row ${b.is_featured ? 'biz-featured' : ''}">
       <div class="biz-avatar">
         ${b.logo ? `<img src="${APP.esc(b.logo)}" alt="">` : '🏪'}
       </div>
       <div>
-        <div class="biz-info-name">${APP.esc(b.name)}</div>
-        <div class="biz-info-sub">${APP.esc(b.category_name)} · Dueño: ${APP.esc(b.owner_name)}</div>
+        <div class="biz-info-name">
+          ${b.is_featured ? '<span style="color:#f59e0b;font-size:.75rem;font-weight:700">⭐ DESTACADO · </span>' : ''}${APP.esc(b.name)}
+        </div>
+        <div class="biz-info-sub">${APP.esc(b.category_name)} · ${APP.esc(b.owner_name)}</div>
         ${b.city ? `<div class="biz-info-sub">📍 ${APP.esc(b.city)}${b.zone?', '+APP.esc(b.zone):''}</div>` : ''}
       </div>
       <div>
@@ -204,24 +207,50 @@ function renderTable(list) {
       <div>
         ${b.accepts_delivery ? '<span class="badge badge-delivery">🛵 Sí</span>' : '<span style="color:var(--muted);font-size:.8rem">No</span>'}
       </div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <button onclick="moveUp(${b.id}, ${b.sort_order||0})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem">▲</button>
+        <span style="font-size:.75rem;color:var(--muted);min-width:16px;text-align:center">${b.sort_order||0}</span>
+        <button onclick="moveDown(${b.id}, ${b.sort_order||0})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem">▼</button>
+      </div>
       <div class="action-group">
-        <button class="icon-btn" onclick="editBiz(${b.id})" title="Editar">✏️</button>
-        <button class="icon-btn" onclick="viewBiz(${b.id})" title="Ver en directorio">👁</button>
-        <button class="icon-btn ${b.is_verified?'':'success'}" onclick="toggleVerify(${b.id}, ${b.is_verified})" title="${b.is_verified?'Quitar verificación':'Verificar'}">
-          ${b.is_verified?'⭐':'✓'}
+        <button class="icon-btn" onclick="toggleFeatured(${b.id}, ${b.is_featured})" title="${b.is_featured?'Quitar destacado':'Destacar'}" style="${b.is_featured?'background:#fff8e1;border-color:#ffe082;':''}">
+          ${b.is_featured?'⭐':'☆'}
         </button>
-        <button class="icon-btn ${b.is_active?'danger':''}" onclick="toggleActive(${b.id}, ${b.is_active})" title="${b.is_active?'Desactivar':'Activar'}">
+        <button class="icon-btn" onclick="editBiz(${b.id})" title="Editar">✏️</button>
+        <button class="icon-btn" onclick="viewBiz(${b.id})" title="Ver">👁</button>
+        <button class="icon-btn ${b.is_verified?'':'success'}" onclick="toggleVerify(${b.id}, ${b.is_verified})">
+          ${b.is_verified?'✓':'✓'}
+        </button>
+        <button class="icon-btn ${b.is_active?'danger':''}" onclick="toggleActive(${b.id}, ${b.is_active})">
           ${b.is_active?'⏸':'▶'}
         </button>
-        <button class="icon-btn danger" onclick="deleteBiz(${b.id}, '${b.name.replace(/'/g,'')}')" title="Eliminar">🗑️</button>
+        <button class="icon-btn danger" onclick="deleteBiz(${b.id}, '${b.name.replace(/'/g,'')}')">🗑️</button>
       </div>
     </div>
   `).join('');
 }
-
 async function toggleActive(id, current) {
   const res = await APP.put(`/businesses/${id}`, { is_active: current ? 0 : 1 });
   if (res?.success) { APP.toast(current ? 'Negocio desactivado' : 'Negocio activado'); init(); }
+  else APP.toast('Error', 'error');
+}
+
+async function toggleFeatured(id, current) {
+  const res = await APP.put(`/businesses/${id}`, { is_featured: current ? 0 : 1 });
+  if (res?.success) { APP.toast(current ? 'Destacado removido' : '⭐ Negocio marcado como destacado'); init(); }
+  else APP.toast('Error', 'error');
+}
+
+async function moveUp(id, currentOrder) {
+  const newOrder = Math.max(0, currentOrder - 1);
+  const res = await APP.put(`/businesses/${id}`, { sort_order: newOrder });
+  if (res?.success) init();
+  else APP.toast('Error', 'error');
+}
+
+async function moveDown(id, currentOrder) {
+  const res = await APP.put(`/businesses/${id}`, { sort_order: currentOrder + 1 });
+  if (res?.success) init();
   else APP.toast('Error', 'error');
 }
 

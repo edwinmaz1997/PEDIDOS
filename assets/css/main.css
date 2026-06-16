@@ -193,6 +193,7 @@ img { max-width: 100%; display: block; }
   border: 1px solid var(--border);
 }
 .biz-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+.biz-card-featured { border: 2px solid #f59e0b; box-shadow: 0 4px 16px rgba(245,158,11,.2); }
 .card-photo { height: 180px; background-size: cover; background-position: center; position: relative; background-color: #e8eaf0; }
 .card-badge {
   position: absolute; top: 12px; left: 12px;
