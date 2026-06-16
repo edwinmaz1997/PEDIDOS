@@ -75,7 +75,7 @@ OneSignalDeferred.push(async function(OneSignal) {
 // ── Manual notification subscribe ────────────────────────────
 function requestNotificationPermission() {
   if (!('Notification' in window)) {
-    alert('Tu navegador no soporta notificaciones');
+    alert('Tu navegador no soporta notificaciones push.');
     return;
   }
   if (Notification.permission === 'granted') {
@@ -94,6 +94,9 @@ function requestNotificationPermission() {
     window.OneSignalDeferred.push(function(OneSignal) {
       OneSignal.Notifications.requestPermission();
     });
+    alert('Activando notificaciones... Si no funciona, desactiva tu bloqueador de anuncios para nuevaexpress.com y vuelve a intentarlo.');
+  } else {
+    alert('⚠️ No se pudo cargar el servicio de notificaciones.\n\nSi tienes un bloqueador de anuncios (AdBlock, uBlock, etc.), desactívalo para nuevaexpress.com y recarga la página.');
   }
 }
 
