@@ -17,19 +17,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.biz-table-row { display:grid; grid-template-columns:56px 1fr auto auto auto auto; gap:12px; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border); transition:var(--transition); }
+.biz-table-row { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border); transition:var(--transition); }
 .biz-table-row:hover { background:var(--off-white); }
 .biz-table-row:last-child { border-bottom:none; }
 .biz-featured { background:#fff8e1;border:1.5px solid #ffe082; }
 .biz-avatar { width:48px; height:48px; border-radius:10px; object-fit:cover; background:var(--off-white); display:flex; align-items:center; justify-content:center; font-size:1.3rem; overflow:hidden; flex-shrink:0; }
 .biz-avatar img { width:100%; height:100%; object-fit:cover; }
+.biz-info { flex:1; min-width:160px; }
 .biz-info-name { font-weight:600; font-size:.95rem; }
 .biz-info-sub { font-size:.8rem; color:var(--muted); margin-top:2px; }
-.action-group { display:flex; gap:6px; }
+.biz-badges { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.biz-order-btns { display:flex; gap:4px; align-items:center; }
+.action-group { display:flex; gap:6px; flex-wrap:wrap; }
 .icon-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:6px 10px; cursor:pointer; font-size:.82rem; transition:var(--transition); }
 .icon-btn:hover { background:var(--off-white); }
 .icon-btn.success:hover { background:#d4edda; border-color:var(--success); }
 .icon-btn.danger:hover { background:#fdf0f0; border-color:var(--danger); color:var(--danger); }
+@media(max-width:600px){
+  .biz-table-row { padding:12px; }
+  .action-group { width:100%; }
+}
 .filter-bar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
 .filter-bar input { padding:9px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:.9rem; flex:1; min-width:200px; outline:none; }
 .filter-bar input:focus { border-color:var(--accent); }
@@ -194,20 +201,18 @@ function renderTable(list) {
       <div class="biz-avatar">
         ${b.logo ? `<img src="${APP.esc(b.logo)}" alt="">` : '🏪'}
       </div>
-      <div>
+      <div class="biz-info">
         <div class="biz-info-name">
           ${b.is_featured ? '<span title="Destacado">⭐ </span>' : ''}${APP.esc(b.name)}
         </div>
         <div class="biz-info-sub">${APP.esc(b.category_name)} · ${APP.esc(b.owner_name)}</div>
         ${b.city ? `<div class="biz-info-sub">📍 ${APP.esc(b.city)}${b.zone?', '+APP.esc(b.zone):''}</div>` : ''}
       </div>
-      <div>
+      <div class="biz-badges">
         <span class="badge ${b.is_active?'badge-done':'badge-cancel'}">${b.is_active?'Activo':'Inactivo'}</span>
+        ${b.accepts_delivery ? '<span class="badge badge-delivery">🛵</span>' : ''}
       </div>
-      <div>
-        ${b.accepts_delivery ? '<span class="badge badge-delivery">🛵 Sí</span>' : '<span style="color:var(--muted);font-size:.8rem">No</span>'}
-      </div>
-      <div style="display:flex;gap:4px;align-items:center">
+      <div class="biz-order-btns">
         <button onclick="moveUp(${b.id}, ${b.sort_order||0})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem">▲</button>
         <span style="font-size:.75rem;color:var(--muted);min-width:16px;text-align:center">${b.sort_order||0}</span>
         <button onclick="moveDown(${b.id}, ${b.sort_order||0})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem">▼</button>
