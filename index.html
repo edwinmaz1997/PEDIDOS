@@ -388,18 +388,17 @@ async function openBusiness(id) {
         ` : `
           ${products.length ? `
             <div class="modal-section">
-              <h4>Productos / Servicios</h4>
-              <div class="products-grid">
-                ${products.map(p => `
-                  <div class="product-card">
-                    ${p.photo ? `<img src="${escHtml(p.photo)}" alt="">` : ''}
-                    <div class="product-info">
-                      <span class="product-name">${escHtml(p.name)}</span>
-                      ${p.price ? `<span class="product-price">Q${parseFloat(p.price).toFixed(2)}</span>` : ''}
-                    </div>
-                  </div>
-                `).join('')}
+              <h4>Categorías</h4>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                ${[...new Set(products.filter(p => p.category_name).map(p => JSON.stringify({name:p.category_name,icon:p.category_icon||'🏷️'})))].map(s => {
+                  const c = JSON.parse(s);
+                  return `<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--off-white);border:1px solid var(--border);border-radius:20px;font-size:.82rem;font-weight:500">${escHtml(c.icon)} ${escHtml(c.name)}</span>`;
+                }).join('')}
+                ${products.some(p => !p.category_name) ? `<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--off-white);border:1px solid var(--border);border-radius:20px;font-size:.82rem;font-weight:500">🏷️ Otros</span>` : ''}
               </div>
+              <p style="font-size:.78rem;color:var(--muted);margin-top:8px">
+                ${products.length} producto(s) disponible(s) · Selecciónalos al hacer tu pedido
+              </p>
             </div>
           ` : ''}
           ${b.business_type === 'delivery' ? `
