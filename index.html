@@ -189,6 +189,8 @@ async function filterCategory(id, btn) {
     } catch(e) {
       document.getElementById('businessSections').innerHTML = '<div class="empty-state"><p>Error cargando negocios.</p></div>';
     }
+    // Auto-scroll del carrusel de negocios
+    setTimeout(function(){ startBizCarouselScroll('carousel-all'); }, 600);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
@@ -356,7 +358,7 @@ function startSliderAuto() {
   clearInterval(_sliderTimer);
   var track = document.getElementById('photoSlider');
   if (!track || track.children.length < 2) return;
-  _sliderTimer = setInterval(function(){ sliderNext(null); }, 3000);
+  _sliderTimer = setInterval(function(){ sliderNext(null); }, 1500);
 }
 function stopSliderAuto() { clearInterval(_sliderTimer); }
 
@@ -381,8 +383,8 @@ async function openBusiness(id) {
             ${photos.map(p => `<img src="${escHtml(p.photo_url)}" alt="">`).join('')}
           </div>
           ${photos.length > 1 ? `
-            <button class="slider-arrow left" onclick="sliderPrev(event)">‹</button>
-            <button class="slider-arrow right" onclick="sliderNext(event)">›</button>
+            <button class="slider-arrow left" onclick="sliderPrev(event)" style="display:none">‹</button>
+            <button class="slider-arrow right" onclick="sliderNext(event)" style="display:none">›</button>
             <div class="slider-dots" id="sliderDots">
               ${photos.map((_, i) => `<div class="slider-dot ${i===0?'active':''}" onclick="sliderGo(event,${i})"></div>`).join('')}
             </div>
@@ -513,6 +515,30 @@ function scrollCats(dir) {
 }
 
 var _catTimer = null;
+var _bizScrollTimer = null;
+
+function startBizCarouselScroll(trackId) {
+  clearInterval(_bizScrollTimer);
+  var t = document.getElementById(trackId);
+  if (!t) return;
+  var resetting = false;
+  _bizScrollTimer = setInterval(function() {
+    if (resetting) return;
+    var max = t.scrollWidth - t.clientWidth;
+    if (max <= 0) return;
+    if (t.scrollLeft >= max - 1) {
+      resetting = true;
+      t.scrollLeft = 0;
+      setTimeout(function(){ resetting = false; }, 800);
+    } else {
+      t.scrollLeft += 1;
+    }
+  }, 20);
+  t.addEventListener('mouseenter', function(){ clearInterval(_bizScrollTimer); });
+  t.addEventListener('mouseleave', function(){ startBizCarouselScroll(trackId); });
+  t.addEventListener('touchstart', function(){ clearInterval(_bizScrollTimer); }, {passive:true});
+  t.addEventListener('touchend', function(){ setTimeout(function(){ startBizCarouselScroll(trackId); }, 2500); }, {passive:true});
+}
 function initCatCarousel() {
   var t = document.getElementById('categoriesTrack');
   if (!t) return;
