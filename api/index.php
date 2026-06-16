@@ -325,7 +325,7 @@ try {
         // ── CATEGORIES ───────────────────────────────────────
         case 'categories':
             $db = Database::connect();
-            Response::success($db->query("SELECT * FROM business_categories WHERE is_active=1 ORDER BY name")->fetchAll());
+            Response::success($db->query("SELECT * FROM business_categories WHERE is_active=1 ORDER BY sort_order ASC, name ASC")->fetchAll());
             break;
 
         // ── UPLOAD ───────────────────────────────────────────

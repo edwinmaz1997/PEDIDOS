@@ -9,7 +9,7 @@ class CategoryController {
     // GET /api/categories (public — already in router)
     // GET /api/admin/categories
     public function index() {
-        $stmt = $this->db->query("SELECT *, (SELECT COUNT(*) FROM businesses WHERE category_id=c.id AND is_active=1) as biz_count FROM business_categories c ORDER BY c.sort_order ASC, c.name ASC");
+        $stmt = $this->db->query("SELECT *, (SELECT COUNT(*) FROM businesses WHERE category_id=c.id AND is_active=1) as biz_count FROM business_categories c ORDER BY c.sort_order ASC, c.name ASC /* v2 */");
         Response::success($stmt->fetchAll());
     }
 
