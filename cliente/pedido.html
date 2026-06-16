@@ -991,8 +991,26 @@ function updateCart() {
   // Bloquear/ocultar envío si aún no se calculó el costo
   var needsDeliveryCalc = orderType !== 'paquete' && deliveryType === 'delivery' && business?.accepts_delivery && window._calculatedDeliveryFee == null;
   var needsPkgCalc      = orderType === 'paquete' && window._pkgCalculatedDeliveryFee == null;
+
+  // Validar pedido mínimo para delivery
+  var minOrder = parseFloat(business?.min_order_delivery || 0);
+  var belowMin = orderType !== 'paquete' && deliveryType === 'delivery' && minOrder > 0 && subtotal < minOrder;
+
+  // Mostrar aviso de pedido mínimo si no se alcanza
+  var minNotice = document.getElementById('minOrderNotice');
+  if (!minNotice) {
+    minNotice = document.createElement('div');
+    minNotice.id = 'minOrderNotice';
+    feeEl.parentNode.insertBefore(minNotice, feeEl);
+  }
+  if (belowMin) {
+    minNotice.innerHTML = '<div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:8px;padding:10px 14px;font-size:.85rem;color:#92400e;margin-bottom:8px">⚠️ Pedido mínimo para delivery: <strong>Q' + minOrder.toFixed(2) + '</strong>. Te faltan Q' + (minOrder - subtotal).toFixed(2) + ' para continuar.</div>';
+  } else {
+    minNotice.innerHTML = '';
+  }
+
   submitBtn.style.display = (needsDeliveryCalc || needsPkgCalc) ? 'none' : 'block';
-  submitBtn.disabled = orderType === 'paquete' ? needsPkgCalc : (lines.length === 0 || needsDeliveryCalc);
+  submitBtn.disabled = orderType === 'paquete' ? needsPkgCalc : (lines.length === 0 || needsDeliveryCalc || belowMin);
   if (orderType === 'paquete') submitBtn.textContent = '📦 Solicitar envío';
   else submitBtn.textContent = 'Enviar Pedido';
 }

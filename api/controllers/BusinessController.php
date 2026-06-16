@@ -219,7 +219,7 @@ class BusinessController {
 
         $allowed = ['category_id','name','description','what_we_offer','address','city','zone',
                     'phone','whatsapp','email','website','latitude','longitude','google_maps_url',
-                    'opening_hours','accepts_delivery','is_active','logo','cover_photo','is_verified','owner_user_id','business_type','sort_order','is_featured'];
+                    'opening_hours','accepts_delivery','is_active','logo','cover_photo','is_verified','owner_user_id','business_type','sort_order','is_featured','min_order_delivery'];
         $sets = [];
         $params = [];
         foreach ($allowed as $field) {
