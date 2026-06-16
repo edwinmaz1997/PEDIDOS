@@ -359,9 +359,22 @@ function startSliderAuto() {
   var track = document.getElementById('photoSlider');
   if (!track || track.children.length < 2) return;
   _sliderTotal = track.children.length;
-  _sliderTimer = setInterval(function(){ sliderNext(null); }, 1500);
+  _sliderTimer = setInterval(function(){ sliderNext(null); }, 2000);
 }
 function stopSliderAuto() { clearInterval(_sliderTimer); }
+
+function openLightbox(src) {
+  stopSliderAuto();
+  document.getElementById('lightboxImg').src = src;
+  var lb = document.getElementById('lightbox');
+  lb.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').style.display = 'none';
+  document.body.style.overflow = '';
+  startSliderAuto();
+}
 
 async function openBusiness(id) {
   const modal = document.getElementById('businessModal');
@@ -381,7 +394,7 @@ async function openBusiness(id) {
       <div class="modal-photos">
         ${photos.length ? `
           <div class="photos-scroll" id="photoSlider">
-            ${photos.map(p => `<img src="${escHtml(p.photo_url)}" alt="">`).join('')}
+            ${photos.map((p, i) => `<img src="${escHtml(p.photo_url)}" alt="" style="cursor:zoom-in" onclick="openLightbox('${escHtml(p.photo_url)}')">`).join('')}
           </div>
           ${photos.length > 1 ? `
             <button class="slider-arrow left" onclick="sliderPrev(event)" style="display:none">‹</button>
@@ -587,5 +600,11 @@ setTimeout(initCatCarousel, 1500);
 })();
 </script>
 <script src="/assets/js/pwa.js"></script>
+<!-- Lightbox -->
+<div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center;cursor:zoom-out" onclick="closeLightbox()">
+  <img id="lightboxImg" src="" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5)">
+  <button onclick="closeLightbox()" style="position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;font-size:1.4rem;width:40px;height:40px;border-radius:50%;cursor:pointer">✕</button>
+</div>
+
 </body>
 </html>
