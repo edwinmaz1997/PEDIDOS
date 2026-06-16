@@ -189,8 +189,6 @@ async function filterCategory(id, btn) {
     } catch(e) {
       document.getElementById('businessSections').innerHTML = '<div class="empty-state"><p>Error cargando negocios.</p></div>';
     }
-    // Auto-scroll del carrusel de negocios
-    setTimeout(function(){ startBizCarouselScroll('carousel-all'); }, 600);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
@@ -341,30 +339,26 @@ function goToPromotions() {
 // ── Slider de fotos del modal ─────────────────────────────
 var _sliderIdx = 0;
 var _sliderTimer = null;
+var _sliderTotal = 0;
 
 function sliderGo(e, idx) {
   if (e) e.stopPropagation();
   var track = document.getElementById('photoSlider');
   if (!track) return;
-  var container = track.parentElement;
-  var width = container ? container.offsetWidth : window.innerWidth;
-  var total = track.children.length;
-  _sliderIdx = (idx + total) % total;
-  track.style.transform = 'translateX(-' + (_sliderIdx * width) + 'px)';
-  // Fijar ancho de cada imagen al ancho real del contenedor
-  Array.from(track.children).forEach(function(img){ img.style.minWidth = width + 'px'; img.style.width = width + 'px'; });
+  _sliderTotal = track.children.length;
+  _sliderIdx = ((idx % _sliderTotal) + _sliderTotal) % _sliderTotal;
+  var w = track.offsetWidth;
+  track.scrollTo({ left: _sliderIdx * w, behavior: 'smooth' });
   document.querySelectorAll('.slider-dot').forEach(function(d, i){ d.classList.toggle('active', i === _sliderIdx); });
 }
-function sliderNext(e) { if (e) e.stopPropagation(); var t=document.getElementById('photoSlider'); if(t) sliderGo(null, _sliderIdx+1); }
-function sliderPrev(e) { if (e) e.stopPropagation(); var t=document.getElementById('photoSlider'); if(t) sliderGo(null, _sliderIdx-1); }
+function sliderNext(e) { if (e) e.stopPropagation(); sliderGo(null, _sliderIdx + 1); }
+function sliderPrev(e) { if (e) e.stopPropagation(); sliderGo(null, _sliderIdx - 1); }
 
 function startSliderAuto() {
   clearInterval(_sliderTimer);
   var track = document.getElementById('photoSlider');
   if (!track || track.children.length < 2) return;
-  // Fijar ancho inicial de todas las imágenes
-  var width = track.parentElement ? track.parentElement.offsetWidth : window.innerWidth;
-  Array.from(track.children).forEach(function(img){ img.style.minWidth = width + 'px'; img.style.width = width + 'px'; });
+  _sliderTotal = track.children.length;
   _sliderTimer = setInterval(function(){ sliderNext(null); }, 1500);
 }
 function stopSliderAuto() { clearInterval(_sliderTimer); }
