@@ -363,13 +363,44 @@ function startSliderAuto() {
 }
 function stopSliderAuto() { clearInterval(_sliderTimer); }
 
+var _lightboxPhotos = [];
+var _lightboxCurrent = 0;
+
 function openLightbox(src) {
   stopSliderAuto();
-  document.getElementById('lightboxImg').src = src;
-  var lb = document.getElementById('lightbox');
-  lb.style.display = 'flex';
+  // Recopilar todas las fotos del slider actual
+  var track = document.getElementById('photoSlider');
+  _lightboxPhotos = track ? Array.from(track.children).map(function(img){ return img.src; }) : [src];
+  _lightboxCurrent = _lightboxPhotos.indexOf(src);
+  if (_lightboxCurrent < 0) _lightboxCurrent = 0;
+  showLightboxImage();
+  document.getElementById('lightbox').style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
+
+function showLightboxImage() {
+  document.getElementById('lightboxImg').src = _lightboxPhotos[_lightboxCurrent];
+  var counter = document.getElementById('lightboxCounter');
+  if (_lightboxPhotos.length > 1) {
+    counter.textContent = (_lightboxCurrent + 1) + ' / ' + _lightboxPhotos.length;
+  } else {
+    counter.textContent = '';
+  }
+  // Mostrar/ocultar flechas si solo hay 1 foto
+  var btns = document.querySelectorAll('#lightbox button');
+  // El primer y segundo botón son las flechas (prev/next)
+}
+
+function lightboxPrev() {
+  _lightboxCurrent = ((_lightboxCurrent - 1) + _lightboxPhotos.length) % _lightboxPhotos.length;
+  showLightboxImage();
+}
+
+function lightboxNext() {
+  _lightboxCurrent = (_lightboxCurrent + 1) % _lightboxPhotos.length;
+  showLightboxImage();
+}
+
 function closeLightbox() {
   document.getElementById('lightbox').style.display = 'none';
   document.body.style.overflow = '';
@@ -601,9 +632,12 @@ setTimeout(initCatCarousel, 1500);
 </script>
 <script src="/assets/js/pwa.js"></script>
 <!-- Lightbox -->
-<div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center;cursor:zoom-out" onclick="closeLightbox()">
-  <img id="lightboxImg" src="" style="max-width:95vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5)">
-  <button onclick="closeLightbox()" style="position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;font-size:1.4rem;width:40px;height:40px;border-radius:50%;cursor:pointer">✕</button>
+<div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center" onclick="closeLightbox()">
+  <button onclick="event.stopPropagation();lightboxPrev()" style="position:fixed;left:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:white;font-size:2rem;width:48px;height:48px;border-radius:50%;cursor:pointer;z-index:501">‹</button>
+  <img id="lightboxImg" src="" style="max-width:90vw;max-height:85vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.5);cursor:default" onclick="event.stopPropagation()">
+  <button onclick="event.stopPropagation();lightboxNext()" style="position:fixed;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:white;font-size:2rem;width:48px;height:48px;border-radius:50%;cursor:pointer;z-index:501">›</button>
+  <button onclick="closeLightbox()" style="position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;font-size:1.4rem;width:40px;height:40px;border-radius:50%;cursor:pointer;z-index:501">✕</button>
+  <div id="lightboxCounter" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.7);font-size:.85rem"></div>
 </div>
 
 </body>
