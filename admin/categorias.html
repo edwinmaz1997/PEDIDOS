@@ -193,7 +193,7 @@ function renderCats() {
     grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><p>No hay categorías. Crea la primera.</p></div>';
     return;
   }
-  grid.innerHTML = cats.map(function(c) {
+  grid.innerHTML = cats.map(function(c, idx) {
     var emoji = iconMap[c.icon] || '🏪';
     var color = c.color || '#4A90D9';
     return '<div class="cat-card">' +
@@ -201,6 +201,10 @@ function renderCats() {
       '<div style="flex:1;min-width:0">' +
         '<div class="cat-name">' + esc(c.name) + (!c.is_active ? '<span class="inactive-badge">Inactiva</span>' : '') + '</div>' +
         '<div class="cat-count">' + (c.biz_count||0) + ' negocio' + ((c.biz_count||0)!==1?'s':'') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:4px;align-items:center;margin-right:6px">' +
+        '<button onclick="moveCatUp(' + c.id + ',' + (c.sort_order||0) + ')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem"' + (idx===0?' disabled':'') + '>▲</button>' +
+        '<button onclick="moveCatDown(' + c.id + ',' + (c.sort_order||0) + ')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem"' + (idx===cats.length-1?' disabled':'') + '>▼</button>' +
       '</div>' +
       '<div class="cat-actions">' +
         '<button class="icon-btn" onclick="openModal(' + c.id + ')" title="Editar">✏️</button>' +
@@ -258,6 +262,15 @@ async function saveCategory() {
     errEl.style.display = 'block';
   }
   btn.textContent = 'Guardar'; btn.disabled = false;
+}
+
+async function moveCatUp(id, currentOrder) {
+  await APP.put('/admin/categories/' + id, { sort_order: Math.max(0, currentOrder - 1) });
+  init();
+}
+async function moveCatDown(id, currentOrder) {
+  await APP.put('/admin/categories/' + id, { sort_order: currentOrder + 1 });
+  init();
 }
 
 async function toggleActive(id, current) {
