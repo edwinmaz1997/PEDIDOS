@@ -62,4 +62,40 @@ class ProductController {
         $this->db->prepare("DELETE FROM products_services WHERE id = ?")->execute([$id]);
         Response::success(null, 'Producto eliminado');
     }
+
+    public function bulkImport(array $body): void {
+        $user = AuthMiddleware::requireRole(['negocio', 'admin']);
+        $businessId = (int)($body['business_id'] ?? 0);
+        $rows       = $body['products'] ?? [];
+
+        if (!$businessId) Response::error('business_id requerido', 400);
+        if (empty($rows)) Response::error('No se enviaron productos', 400);
+        if (count($rows) > 500) Response::error('Máximo 500 productos por importación', 400);
+
+        // Cargar categorías del negocio para mapear por nombre
+        $catStmt = $this->db->prepare("SELECT id, name FROM product_categories WHERE business_id = ?");
+        $catStmt->execute([$businessId]);
+        $cats = [];
+        foreach ($catStmt->fetchAll() as $c) {
+            $cats[mb_strtolower(trim($c['name']))] = (int)$c['id'];
+        }
+
+        $stmt = $this->db->prepare("INSERT INTO products_services (business_id, name, description, price, category_id, is_available) VALUES (?,?,?,?,?,1)");
+        $imported = 0;
+        $errors   = [];
+
+        foreach ($rows as $i => $row) {
+            $name = trim($row['name'] ?? '');
+            if (!$name) { $errors[] = 'Fila ' . ($i+2) . ': nombre vacío'; continue; }
+            $desc    = trim($row['description'] ?? '') ?: null;
+            $price   = isset($row['price']) && $row['price'] !== '' ? (float)$row['price'] : null;
+            $catName = mb_strtolower(trim($row['category'] ?? ''));
+            $catId   = ($catName && $catName !== 'sin categoria' && $catName !== 'sin categoría') ? ($cats[$catName] ?? null) : null;
+            $stmt->execute([$businessId, $name, $desc, $price, $catId]);
+            $imported++;
+        }
+
+        Response::success(['imported' => $imported, 'errors' => $errors],
+            $imported . ' producto(s) importado(s)' . (count($errors) ? ' con ' . count($errors) . ' error(es).' : '.'));
+    }
 }

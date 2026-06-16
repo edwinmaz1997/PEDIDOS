@@ -200,11 +200,12 @@ try {
 
         case 'products':
             $ctrl = new ProductController();
-            if ($method === 'GET'    && !$id)    $ctrl->index();
-            elseif ($method === 'GET'    && $id) $ctrl->show($id);
-            elseif ($method === 'POST')          $ctrl->store($body);
-            elseif ($method === 'PUT'    && $id) $ctrl->update($id, $body);
-            elseif ($method === 'DELETE' && $id) $ctrl->destroy($id);
+            if ($method === 'POST'   && $action === 'bulk') $ctrl->bulkImport($body);
+            elseif ($method === 'GET'    && !$id)           $ctrl->index();
+            elseif ($method === 'GET'    && $id)            $ctrl->show($id);
+            elseif ($method === 'POST')                     $ctrl->store($body);
+            elseif ($method === 'PUT'    && $id)            $ctrl->update($id, $body);
+            elseif ($method === 'DELETE' && $id)            $ctrl->destroy($id);
             else Response::notFound();
             break;
 
