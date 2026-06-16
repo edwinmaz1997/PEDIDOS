@@ -236,8 +236,8 @@ img { max-width: 100%; display: block; }
   font-size: 1rem; display: flex; align-items: center; justify-content: center;
 }
 .modal-photos { background:var(--charcoal); min-height:220px; position:relative; overflow:hidden; }
-.photos-scroll { display:flex; transition:transform .5s ease; height:280px; }
-.photos-scroll img { height:280px; width:100%; object-fit:cover; flex-shrink:0; }
+.photos-scroll { display:flex; transition:transform .5s ease; height:280px; will-change:transform; }
+.photos-scroll img { height:280px; min-width:100%; width:100%; object-fit:cover; flex-shrink:0; }
 .modal-cover { height:220px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--charcoal),#0f3460); }
 .slider-arrow { position:absolute; top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);color:white;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;z-index:10;transition:.2s; }
 .slider-arrow:hover { background:rgba(0,0,0,.7); }
