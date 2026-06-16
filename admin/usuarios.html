@@ -88,6 +88,11 @@
         </thead>
         <tbody id="usersBody"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Cargando...</td></tr></tbody>
       </table></div>
+      <!-- Paginación -->
+      <div id="pagination" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 0;margin-top:8px">
+        <div id="pageInfo" style="font-size:.85rem;color:var(--muted)"></div>
+        <div id="pageButtons" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
     </div>
   </main>
 </div>
@@ -116,6 +121,9 @@
 var adminUser  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
 if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'admin') { window.location.href = '/cliente/login.html'; }
 let allUsers = [];
+let currentPage = 1;
+const PAGE_SIZE = 20;
+let currentList = [];
 
 const roleBadge = { admin:'badge-cancel', negocio:'badge-delivery', cliente:'badge-accepted', repartidor:'badge-active' };
 const roleLabel = { admin:'👑 Admin', negocio:'🏪 Negocio', cliente:'👤 Cliente', repartidor:'🛵 Repartidor' };
@@ -124,6 +132,7 @@ async function init() {
   const res = await APP.get('/admin/users');
   allUsers = res?.data || [];
   document.getElementById('totalBadge').textContent = allUsers.length + ' usuarios';
+  currentPage = 1;
   renderTable(allUsers);
 }
 
@@ -137,13 +146,34 @@ function filterTable() {
     const mS = status === '' || u.is_active == status;
     return mQ && mR && mS;
   });
+  currentPage = 1;
   renderTable(filtered);
 }
 
+function goPage(page) {
+  var totalPages = Math.ceil(currentList.length / PAGE_SIZE);
+  if (page < 1 || page > totalPages) return;
+  currentPage = page;
+  renderTable(currentList);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function renderTable(list) {
+  currentList = list;
   const body = document.getElementById('usersBody');
-  if (!list.length) { body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Sin resultados</td></tr>'; return; }
-  body.innerHTML = list.map(u => `
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted)">Sin resultados</td></tr>';
+    document.getElementById('pagination').style.display = 'none';
+    return;
+  }
+
+  const totalPages = Math.ceil(list.length / PAGE_SIZE);
+  currentPage = Math.min(currentPage, totalPages);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const end   = Math.min(start + PAGE_SIZE, list.length);
+  const page  = list.slice(start, end);
+
+  body.innerHTML = page.map(u => `
     <tr>
       <td style="color:var(--muted);font-size:.8rem">#${u.id}</td>
       <td><strong>${APP.esc(u.name)}</strong></td>
@@ -154,16 +184,29 @@ function renderTable(list) {
       <td><span class="badge ${u.is_active?'badge-done':'badge-cancel'}">${u.is_active?'Activo':'Inactivo'}</span></td>
       <td>
         <div style="display:flex;gap:6px">
-          <button onclick="editUser(${u.id})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem" title="Editar">✏️</button>
-          <button onclick="toggleStatus(${u.id}, ${u.is_active})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem" title="${u.is_active?'Desactivar':'Activar'}">
+          <button onclick="editUser(${u.id})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem">✏️</button>
+          <button onclick="toggleStatus(${u.id}, ${u.is_active})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem">
             ${u.is_active ? '⏸' : '▶'}
           </button>
-          <button onclick="deleteUser(${u.id}, '${u.name.replace(/'/g,'')}')" style="background:none;border:1px solid #f5c2c2;color:var(--danger);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem" title="Eliminar">🗑️</button>
+          <button onclick="deleteUser(${u.id}, '${u.name.replace(/'/g,'')}')" style="background:none;border:1px solid #f5c2c2;color:var(--danger);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:.8rem">🗑️</button>
         </div>
       </td>
     </tr>
   `).join('');
+
+  // Info y botones de paginación
+  document.getElementById('pageInfo').textContent = 'Mostrando ' + (start+1) + '–' + end + ' de ' + list.length + ' usuarios';
+  var btns = '';
+  btns += '<button onclick="goPage(' + (currentPage-1) + ')" ' + (currentPage===1?'disabled':'') + ' style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-size:.85rem">‹ Anterior</button>';
+  for (var i = 1; i <= totalPages; i++) {
+    var active = i === currentPage;
+    btns += '<button onclick="goPage(' + i + ')" style="padding:6px 12px;border:1px solid ' + (active?'var(--blue)':'var(--border)') + ';border-radius:6px;background:' + (active?'var(--blue)':'white') + ';color:' + (active?'white':'inherit') + ';cursor:pointer;font-size:.85rem;font-weight:' + (active?'700':'400') + '">' + i + '</button>';
+  }
+  btns += '<button onclick="goPage(' + (currentPage+1) + ')" ' + (currentPage===totalPages?'disabled':'') + ' style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-size:.85rem">Siguiente ›</button>';
+  document.getElementById('pageButtons').innerHTML = btns;
+  document.getElementById('pagination').style.display = totalPages > 1 ? 'flex' : 'none';
 }
+
 
 function editUser(id) {
   window.location.href = 'editar-usuario.html?id=' + id;
