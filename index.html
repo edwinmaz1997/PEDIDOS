@@ -336,6 +336,30 @@ function goToPromotions() {
   }
 }
 
+// ── Slider de fotos del modal ─────────────────────────────
+var _sliderIdx = 0;
+var _sliderTimer = null;
+
+function sliderGo(e, idx) {
+  if (e) e.stopPropagation();
+  var track = document.getElementById('photoSlider');
+  if (!track) return;
+  var total = track.children.length;
+  _sliderIdx = (idx + total) % total;
+  track.style.transform = 'translateX(-' + (_sliderIdx * 100) + '%)';
+  document.querySelectorAll('.slider-dot').forEach(function(d, i){ d.classList.toggle('active', i === _sliderIdx); });
+}
+function sliderNext(e) { if (e) e.stopPropagation(); var t=document.getElementById('photoSlider'); if(t) sliderGo(null, _sliderIdx+1); }
+function sliderPrev(e) { if (e) e.stopPropagation(); var t=document.getElementById('photoSlider'); if(t) sliderGo(null, _sliderIdx-1); }
+
+function startSliderAuto() {
+  clearInterval(_sliderTimer);
+  var track = document.getElementById('photoSlider');
+  if (!track || track.children.length < 2) return;
+  _sliderTimer = setInterval(function(){ sliderNext(null); }, 3000);
+}
+function stopSliderAuto() { clearInterval(_sliderTimer); }
+
 async function openBusiness(id) {
   const modal = document.getElementById('businessModal');
   const content = document.getElementById('modalContent');
@@ -352,7 +376,18 @@ async function openBusiness(id) {
 
     content.innerHTML = `
       <div class="modal-photos">
-        ${photos.length ? `<div class="photos-scroll">${photos.map(p => `<img src="${escHtml(p.photo_url)}" alt="">`).join('')}</div>` : `<div class="modal-cover" style="background:linear-gradient(135deg,#1a1a2e,#16213e)"><span class="modal-logo-text">${escHtml(b.name)}</span></div>`}
+        ${photos.length ? `
+          <div class="photos-scroll" id="photoSlider">
+            ${photos.map(p => `<img src="${escHtml(p.photo_url)}" alt="">`).join('')}
+          </div>
+          ${photos.length > 1 ? `
+            <button class="slider-arrow left" onclick="sliderPrev(event)">‹</button>
+            <button class="slider-arrow right" onclick="sliderNext(event)">›</button>
+            <div class="slider-dots" id="sliderDots">
+              ${photos.map((_, i) => `<div class="slider-dot ${i===0?'active':''}" onclick="sliderGo(event,${i})"></div>`).join('')}
+            </div>
+          ` : ''}
+        ` : `<div class="modal-cover"><span class="modal-logo-text">${escHtml(b.name)}</span></div>`}
       </div>
       <div class="modal-info">
         <div class="modal-header">
@@ -419,6 +454,9 @@ async function openBusiness(id) {
         `}
       </div>
     `;
+    // Iniciar slider auto-play
+    _sliderIdx = 0;
+    setTimeout(function(){ startSliderAuto(); }, 500);
   } catch(e) {
     content.innerHTML = '<div class="empty-state"><p>Error cargando negocio.</p></div>';
   }
@@ -452,6 +490,7 @@ async function openBusiness(id) {
 }
 
 function closeModal() {
+  stopSliderAuto();
   document.getElementById('businessModal').classList.add('hidden');
   document.body.style.overflow = '';
 }
