@@ -122,7 +122,7 @@ var adminUser  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
 if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'admin') { window.location.href = '/cliente/login.html'; }
 let allUsers = [];
 let currentPage = 1;
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 let currentList = [];
 
 const roleBadge = { admin:'badge-cancel', negocio:'badge-delivery', cliente:'badge-accepted', repartidor:'badge-active' };
