@@ -247,16 +247,21 @@ async function toggleFeatured(id, current) {
 }
 
 async function moveUp(id, currentOrder) {
-  const newOrder = Math.max(0, currentOrder - 1);
-  const res = await APP.put(`/businesses/${id}`, { sort_order: newOrder });
-  if (res?.success) init();
-  else APP.toast('Error', 'error');
+  var prev = allBiz.filter(function(b){ return (b.sort_order||0) < currentOrder; });
+  if (!prev.length) return;
+  var target = prev.reduce(function(a,b){ return (a.sort_order||0) > (b.sort_order||0) ? a : b; });
+  await APP.put('/businesses/' + id, { sort_order: target.sort_order||0 });
+  await APP.put('/businesses/' + target.id, { sort_order: currentOrder });
+  init();
 }
 
 async function moveDown(id, currentOrder) {
-  const res = await APP.put(`/businesses/${id}`, { sort_order: currentOrder + 1 });
-  if (res?.success) init();
-  else APP.toast('Error', 'error');
+  var next = allBiz.filter(function(b){ return (b.sort_order||0) > currentOrder; });
+  if (!next.length) return;
+  var target = next.reduce(function(a,b){ return (a.sort_order||0) < (b.sort_order||0) ? a : b; });
+  await APP.put('/businesses/' + id, { sort_order: target.sort_order||0 });
+  await APP.put('/businesses/' + target.id, { sort_order: currentOrder });
+  init();
 }
 
 async function toggleVerify(id, current) {

@@ -188,6 +188,22 @@ async function loadCats() {
     headers: { 'Authorization': 'Bearer ' + getToken() }
   }).then(function(r){ return r.json(); });
   cats = res.data || [];
+
+  // Auto-reindexar si hay sort_order duplicados o todos en 0
+  var orders = cats.map(function(c){ return c.sort_order||0; });
+  var hasDups = orders.length !== new Set(orders).size || orders.every(function(o){ return o === 0; });
+  if (hasDups && cats.length > 1) {
+    for (var i = 0; i < cats.length; i++) {
+      if ((cats[i].sort_order||0) !== i) {
+        await fetch('/api/admin/categories/' + cats[i].id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+          body: JSON.stringify({ sort_order: i })
+        });
+        cats[i].sort_order = i;
+      }
+    }
+  }
   renderCats();
 }
 
@@ -208,6 +224,7 @@ function renderCats() {
       '</div>' +
       '<div style="display:flex;gap:4px;align-items:center;margin-right:6px">' +
         '<button onclick="moveCatUp(' + c.id + ',' + (c.sort_order||0) + ')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem"' + (idx===0?' disabled':'') + '>▲</button>' +
+        '<span style="font-size:.75rem;color:var(--muted);min-width:16px;text-align:center;font-weight:600">' + (idx+1) + '</span>' +
         '<button onclick="moveCatDown(' + c.id + ',' + (c.sort_order||0) + ')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem"' + (idx===cats.length-1?' disabled':'') + '>▼</button>' +
       '</div>' +
       '<div class="cat-actions">' +
@@ -269,11 +286,24 @@ async function saveCategory() {
 }
 
 async function moveCatUp(id, currentOrder) {
-  await APP.put('/admin/categories/' + id, { sort_order: Math.max(0, currentOrder - 1) });
+  // Encontrar la categoría inmediatamente anterior
+  var prev = cats.filter(function(c){ return (c.sort_order||0) < currentOrder; });
+  if (!prev.length) return;
+  var target = prev.reduce(function(a,b){ return (a.sort_order||0) > (b.sort_order||0) ? a : b; });
+  // Intercambiar sort_order
+  await APP.put('/admin/categories/' + id, { sort_order: target.sort_order||0 });
+  await APP.put('/admin/categories/' + target.id, { sort_order: currentOrder });
   init();
 }
+
 async function moveCatDown(id, currentOrder) {
-  await APP.put('/admin/categories/' + id, { sort_order: currentOrder + 1 });
+  // Encontrar la categoría inmediatamente siguiente
+  var next = cats.filter(function(c){ return (c.sort_order||0) > currentOrder; });
+  if (!next.length) return;
+  var target = next.reduce(function(a,b){ return (a.sort_order||0) < (b.sort_order||0) ? a : b; });
+  // Intercambiar sort_order
+  await APP.put('/admin/categories/' + id, { sort_order: target.sort_order||0 });
+  await APP.put('/admin/categories/' + target.id, { sort_order: currentOrder });
   init();
 }
 
