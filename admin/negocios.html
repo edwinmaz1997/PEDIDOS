@@ -196,7 +196,7 @@ function renderTable(list) {
       </div>
       <div>
         <div class="biz-info-name">
-          ${b.is_featured ? '<span style="color:#f59e0b;font-size:.75rem;font-weight:700">⭐ DESTACADO · </span>' : ''}${APP.esc(b.name)}
+          ${b.is_featured ? '<span title="Destacado">⭐ </span>' : ''}${APP.esc(b.name)}
         </div>
         <div class="biz-info-sub">${APP.esc(b.category_name)} · ${APP.esc(b.owner_name)}</div>
         ${b.city ? `<div class="biz-info-sub">📍 ${APP.esc(b.city)}${b.zone?', '+APP.esc(b.zone):''}</div>` : ''}
