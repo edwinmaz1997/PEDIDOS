@@ -441,7 +441,7 @@ function renderProductModal(searchQ, catId) {
       // Fila superior: foto + info + controles
       '<div style="display:flex;align-items:center;gap:12px">' +
         (p.photo
-          ? '<img src="'+esc(p.photo)+'" alt="'+esc(p.name)+'" style="width:72px;height:72px;object-fit:cover;border-radius:10px;flex-shrink:0">'
+          ? '<img src="'+esc(p.photo)+'" alt="'+esc(p.name)+'" style="width:72px;height:72px;object-fit:cover;border-radius:10px;flex-shrink:0;cursor:zoom-in" onclick="openProductPhoto(\''+esc(p.photo)+'\',\''+esc(p.name)+'\')">'
           : '<div style="width:72px;height:72px;border-radius:10px;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0">'+(p.category_icon||'🍽️')+'</div>') +
         '<div style="flex:1;min-width:0">' +
           (p.category_name?'<div style="font-size:.7rem;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em">'+(p.category_icon||'🏷️')+' '+esc(p.category_name)+'</div>':'') +
@@ -1105,6 +1105,18 @@ async function submitOrder() {
 
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+function openProductPhoto(src, name) {
+  document.getElementById('productLightboxImg').src = src;
+  document.getElementById('productLightboxName').textContent = name || '';
+  var lb = document.getElementById('productLightbox');
+  lb.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeProductPhoto() {
+  document.getElementById('productLightbox').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
 init();
 document.getElementById('customItems').addEventListener('input', updateCart);
 
@@ -1213,5 +1225,12 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     </div>
   </div>
 </div>
+<!-- Lightbox producto -->
+<div id="productLightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center;flex-direction:column;gap:12px" onclick="closeProductPhoto()">
+  <img id="productLightboxImg" src="" style="max-width:92vw;max-height:80vh;object-fit:contain;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,.5)">
+  <div id="productLightboxName" style="color:white;font-weight:600;font-size:1rem;text-align:center;padding:0 20px"></div>
+  <button onclick="closeProductPhoto()" style="position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;font-size:1.4rem;width:40px;height:40px;border-radius:50%;cursor:pointer">✕</button>
+</div>
+
 </body>
 </html>
