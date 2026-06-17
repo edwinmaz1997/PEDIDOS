@@ -22,7 +22,10 @@ class Security {
             return array_map([self::class, 'sanitize'], $input);
         }
         if (is_string($input)) {
-            return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            // Solo eliminar tags HTML peligrosos y espacios extremos
+            // NO aplicar htmlspecialchars — eso se hace al mostrar en el frontend
+            // PDO ya previene SQL injection con prepared statements
+            return strip_tags(trim($input));
         }
         return $input;
     }

@@ -13,7 +13,18 @@ class Response {
     }
 
     public static function success($data = null, $message = 'OK', $code = 200) {
-        self::json(['success' => true, 'message' => $message, 'data' => $data], $code);
+        self::json(['success' => true, 'message' => $message, 'data' => self::decode($data)], $code);
+    }
+
+    // Desescapar entidades HTML que pudieron haberse guardado con htmlspecialchars
+    private static function decode($data) {
+        if (is_array($data)) {
+            return array_map([self::class, 'decode'], $data);
+        }
+        if (is_string($data)) {
+            return html_entity_decode($data, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+        return $data;
     }
 
     public static function error($message = 'Error', $code = 400, $errors = null) {
