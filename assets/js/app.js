@@ -9,7 +9,7 @@ const APP = {
 
   // Auth headers
   authHeaders: () => ({
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json; charset=UTF-8',
     'Authorization': `Bearer ${APP.token()}`
   }),
 

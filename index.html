@@ -467,17 +467,14 @@ async function openBusiness(id) {
             <h2>${escHtml(b.name)}</h2>
           </div>
           <div class="modal-actions-top">
-            ${b.business_type === 'servicios' && b.phone ? `<a href="tel:${escHtml(b.phone)}" class="btn-action call">📞 Llamar</a>` : ''}
-            ${b.business_type === 'servicios' && b.whatsapp ? `<a href="https://wa.me/${escHtml(b.whatsapp.replace(/\D/g,''))}" target="_blank" class="btn-action whatsapp">💬 WhatsApp</a>` : ''}
           </div>
         </div>
         ${b.description ? `<p class="modal-desc">${escHtml(b.description)}</p>` : ''}
         ${b.what_we_offer ? `<div class="modal-section"><h4>¿Qué ofrecemos?</h4><p>${escHtml(b.what_we_offer)}</p></div>` : ''}
         <div class="modal-meta">
           ${b.address ? `<div class="meta-item">📍 <span>${escHtml(b.address)}${b.zone ? ', ' + escHtml(b.zone) : ''}</span></div>` : ''}
-          ${b.business_type === 'servicios' && b.phone ? `<div class="meta-item">📞 <a href="tel:${escHtml(b.phone)}">${escHtml(b.phone)}</a></div>` : ''}
           ${b.email ? `<div class="meta-item">✉️ <a href="mailto:${escHtml(b.email)}">${escHtml(b.email)}</a></div>` : ''}
-        ${b.accepts_delivery && b.business_type !== 'servicios' ? `<div class="meta-item">🛵 <span>Delivery disponible</span></div>` : ''}
+          ${b.accepts_delivery && b.business_type !== 'servicios' ? `<div class="meta-item">🛵 <span>Delivery disponible</span></div>` : ''}
         </div>
         ${b.latitude && b.longitude ? `
           <a href="https://www.google.com/maps?q=${b.latitude},${b.longitude}" target="_blank" class="btn-maps">

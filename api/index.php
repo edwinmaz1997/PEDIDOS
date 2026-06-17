@@ -2,6 +2,9 @@
 // ============================================================
 // API Bootstrap — NuevaExpress — PHP 7.4 compatible
 // ============================================================
+header('Content-Type: application/json; charset=UTF-8');
+mb_internal_encoding('UTF-8');
+mb_http_output('UTF-8');
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/helpers/Security.php';
