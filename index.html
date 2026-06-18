@@ -336,6 +336,7 @@ async function doSearch() {
     const data = await res.json();
     const results = data.data || [];
     document.getElementById('businessSections').classList.add('hidden');
+    document.getElementById('categoryResults').classList.add('hidden');
     const sr = document.getElementById('searchResults');
     sr.classList.remove('hidden');
     document.getElementById('searchTitle').textContent = `${results.length} resultado${results.length !== 1 ? 's' : ''} para "${q}"`;
@@ -347,7 +348,14 @@ async function doSearch() {
 
 function showAll() {
   document.getElementById('searchResults').classList.add('hidden');
-  document.getElementById('businessSections').classList.remove('hidden');
+  // Restaurar la vista según la categoría activa (no siempre "Todos")
+  if (activeCategory) {
+    document.getElementById('categoryResults').classList.remove('hidden');
+    document.getElementById('businessSections').classList.add('hidden');
+  } else {
+    document.getElementById('businessSections').classList.remove('hidden');
+    document.getElementById('categoryResults').classList.add('hidden');
+  }
 }
 
 // ─── Business Modal ───────────────────────────────────────
