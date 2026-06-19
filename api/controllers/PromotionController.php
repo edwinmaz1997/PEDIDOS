@@ -22,7 +22,7 @@ class PromotionController {
             $stmt->execute([$today, $today]);
             $promos = $stmt->fetchAll();
             foreach ($promos as &$promo) {
-                $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ?");
+                $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ? ORDER BY product_name ASC");
                 $iStmt->execute([$promo['id']]);
                 $promo['items'] = $iStmt->fetchAll();
             }
@@ -46,7 +46,7 @@ class PromotionController {
             $stmt->execute([$biz['id']]);
             $promos = $stmt->fetchAll();
             foreach ($promos as &$promo) {
-                $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ?");
+                $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ? ORDER BY product_name ASC");
                 $iStmt->execute([$promo['id']]);
                 $promo['items'] = $iStmt->fetchAll();
             }
