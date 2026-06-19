@@ -120,6 +120,10 @@
           style="flex:1;min-width:160px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem">
       </div>
       <div id="promoCatFilter" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button onclick="selectAllPromoProducts()" type="button" style="padding:6px 14px;font-size:.8rem;border:1.5px solid var(--blue);color:var(--blue);background:white;border-radius:20px;cursor:pointer;font-weight:600">☑️ Seleccionar todos</button>
+        <button onclick="deselectAllPromoProducts()" type="button" style="padding:6px 14px;font-size:.8rem;border:1.5px solid var(--border);color:var(--muted);background:white;border-radius:20px;cursor:pointer">Quitar selección</button>
+      </div>
       <div class="item-selector" id="productSelector">
         <div style="padding:20px;text-align:center;color:var(--muted)">Cargando productos...</div>
       </div>
@@ -301,6 +305,41 @@ function renderProductSelector(selected, filtered) {
       }).join('');
   }).join('');
 
+  updateSelectedCount();
+}
+
+function selectAllPromoProducts() {
+  var visibleOptions = document.querySelectorAll('#productSelector .item-option');
+  if (!visibleOptions.length) {
+    APP.toast('No hay productos para seleccionar', 'error');
+    return;
+  }
+  var pct = parseFloat(document.getElementById('promoPercent')?.value);
+
+  visibleOptions.forEach(function(opt) {
+    if (!opt.classList.contains('selected')) {
+      var id = opt.id.replace('opt-', '');
+      var product = allProducts.find(function(p){ return String(p.id) === id; });
+      if (!product) return;
+      opt.classList.add('selected');
+      var cb = opt.querySelector('input[type=checkbox]');
+      if (cb) cb.checked = true;
+      var inp = document.getElementById('promo-price-' + id);
+      if (inp && !inp.value) {
+        inp.value = (pct && pct > 0 && pct < 100) ? (product.price * (1 - pct / 100)).toFixed(2) : product.price;
+      }
+    }
+  });
+  updateSelectedCount();
+  APP.toast('✅ ' + visibleOptions.length + ' producto(s) seleccionados');
+}
+
+function deselectAllPromoProducts() {
+  document.querySelectorAll('#productSelector .item-option.selected').forEach(function(opt) {
+    opt.classList.remove('selected');
+    var cb = opt.querySelector('input[type=checkbox]');
+    if (cb) cb.checked = false;
+  });
   updateSelectedCount();
 }
 
