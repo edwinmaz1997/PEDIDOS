@@ -104,6 +104,16 @@
 
     <div class="form-group">
       <label>Productos en promoción * <span style="font-weight:400;color:var(--muted)">(selecciona y asigna precio promo)</span></label>
+
+      <!-- Aplicar descuento por porcentaje -->
+      <div style="display:flex;gap:8px;align-items:center;background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;flex-wrap:wrap">
+        <span style="font-size:.85rem;font-weight:600;white-space:nowrap">🏷️ Aplicar % de descuento:</span>
+        <input type="number" id="promoPercent" placeholder="10" min="1" max="90" style="width:70px;padding:7px 8px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.88rem">
+        <span style="font-size:.85rem;color:var(--muted)">%</span>
+        <button onclick="applyPercentDiscount()" class="btn-primary" style="padding:7px 16px;font-size:.82rem">Aplicar a seleccionados</button>
+        <span style="font-size:.76rem;color:var(--muted);width:100%">Selecciona los productos abajo, luego escribe el % y aplica — puedes seguir ajustando precios manualmente después.</span>
+      </div>
+
       <!-- Buscador y categorías -->
       <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
         <input type="text" id="promoSearch" placeholder="🔍 Buscar producto..." oninput="filterPromoProducts()"
@@ -206,6 +216,7 @@ function openModal() {
   document.getElementById('p_end').value = '';
   document.getElementById('modalMsg').style.display = 'none';
   if (document.getElementById('promoSearch')) document.getElementById('promoSearch').value = '';
+  if (document.getElementById('promoPercent')) document.getElementById('promoPercent').value = '';
   activePromocat = null;
   renderPromoCatFilter();
   renderProductSelector([]);
@@ -293,6 +304,31 @@ function renderProductSelector(selected, filtered) {
   updateSelectedCount();
 }
 
+function applyPercentDiscount() {
+  var pct = parseFloat(document.getElementById('promoPercent').value);
+  if (!pct || pct <= 0 || pct >= 100) {
+    APP.toast('Ingresa un porcentaje válido (1-90)', 'error');
+    return;
+  }
+
+  var selected = allProducts.filter(function(p){ return document.getElementById('opt-'+p.id)?.classList.contains('selected'); });
+  if (!selected.length) {
+    APP.toast('Primero selecciona al menos un producto', 'error');
+    return;
+  }
+
+  selected.forEach(function(p) {
+    var inp = document.getElementById('promo-price-'+p.id);
+    if (!inp) return;
+    var normalPrice = parseFloat(p.price) || 0;
+    var promoPrice = normalPrice * (1 - pct / 100);
+    inp.value = promoPrice.toFixed(2);
+  });
+
+  updateSelectedCount();
+  APP.toast('✅ ' + pct + '% aplicado a ' + selected.length + ' producto(s)');
+}
+
 function toggleProduct(id, normalPrice) {
   var opt = document.getElementById('opt-'+id);
   var cb  = opt.querySelector('input[type=checkbox]');
@@ -301,7 +337,10 @@ function toggleProduct(id, normalPrice) {
   cb.checked = isNowSelected;
   if (isNowSelected) {
     var inp = document.getElementById('promo-price-'+id);
-    if (!inp.value) inp.value = normalPrice;
+    var pct = parseFloat(document.getElementById('promoPercent')?.value);
+    if (!inp.value) {
+      inp.value = (pct && pct > 0 && pct < 100) ? (normalPrice * (1 - pct / 100)).toFixed(2) : normalPrice;
+    }
   }
   updateSelectedCount();
 }
