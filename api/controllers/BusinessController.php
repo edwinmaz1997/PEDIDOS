@@ -164,13 +164,17 @@ class BusinessController {
 
         $businessType = in_array($body['business_type'] ?? '', ['pedidos','servicios','delivery']) ? $body['business_type'] : 'pedidos';
 
+        // Asignar el siguiente número de orden disponible (al final de la lista)
+        $maxOrder = (int)$this->db->query("SELECT COALESCE(MAX(sort_order), 0) FROM businesses")->fetchColumn();
+        $nextOrder = $maxOrder + 1;
+
         $stmt = $this->db->prepare("
             INSERT INTO businesses
                 (user_id, category_id, business_type, name, slug, description, what_we_offer,
                  address, city, zone, phone, whatsapp, email, website,
                  latitude, longitude, google_maps_url, opening_hours,
-                 accepts_delivery, delivery_fee, service_fee, is_active, is_verified)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                 accepts_delivery, delivery_fee, service_fee, is_active, is_verified, sort_order)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         ");
         $stmt->execute([
             $ownerId,
@@ -196,6 +200,7 @@ class BusinessController {
             SERVICE_FEE,
             0, // is_active - pending admin approval
             0, // is_verified
+            $nextOrder,
         ]);
 
         $id = $this->db->lastInsertId();

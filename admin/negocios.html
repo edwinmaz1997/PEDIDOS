@@ -214,7 +214,7 @@ function renderTable(list) {
       </div>
       <div class="biz-order-btns">
         <button onclick="moveUp(${b.id}, ${b.sort_order||0})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem">▲</button>
-        <span style="font-size:.75rem;color:var(--muted);min-width:16px;text-align:center">${b.sort_order||0}</span>
+        <input type="number" value="${b.sort_order||0}" onchange="setOrder(${b.id}, this.value)" style="width:42px;text-align:center;font-size:.78rem;padding:4px 2px;border:1px solid var(--border);border-radius:6px">
         <button onclick="moveDown(${b.id}, ${b.sort_order||0})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem">▼</button>
       </div>
       <div class="action-group">
@@ -243,6 +243,13 @@ async function toggleActive(id, current) {
 async function toggleFeatured(id, current) {
   const res = await APP.put(`/businesses/${id}`, { is_featured: current ? 0 : 1 });
   if (res?.success) { APP.toast(current ? 'Destacado removido' : '⭐ Negocio marcado como destacado'); init(); }
+  else APP.toast('Error', 'error');
+}
+
+async function setOrder(id, value) {
+  const newOrder = parseInt(value) || 0;
+  const res = await APP.put(`/businesses/${id}`, { sort_order: newOrder });
+  if (res?.success) { APP.toast('Posición actualizada'); init(); }
   else APP.toast('Error', 'error');
 }
 
