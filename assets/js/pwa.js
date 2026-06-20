@@ -200,7 +200,13 @@ function dismissInstall() {
     var dy = (e.changedTouches[0].clientY - startY);
     if (dy > threshold && window.scrollY === 0) {
       if (indicator) indicator.style.top = '0px';
-      setTimeout(function() { window.location.reload(); }, 150);
+      setTimeout(function() {
+        // En iOS PWA standalone, location.reload() a veces sirve desde caché.
+        // Forzamos una navegación con cache-buster para garantizar contenido fresco.
+        var url = new URL(window.location.href);
+        url.searchParams.set('_r', Date.now());
+        window.location.replace(url.toString());
+      }, 150);
     } else if (indicator) {
       indicator.style.top = '-60px';
     }
