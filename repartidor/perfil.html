@@ -233,47 +233,39 @@ function requestNotificationPermission() {
     return;
   }
 
-  // Ya están activas
-  if (Notification.permission === 'granted') {
-    if (window.OneSignal) {
-      window.OneSignal.Notifications.requestPermission();
-    }
-    alert('✅ Las notificaciones ya están activadas.');
-    return;
-  }
-
-  // Ya fueron bloqueadas — el navegador no mostrará el diálogo, hay que ir a configuración
   if (Notification.permission === 'denied') {
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     var isAndroid = /Android/.test(navigator.userAgent);
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     var msg = '🔔 Las notificaciones están bloqueadas.\n\nPara activarlas:\n\n';
-    if (isIOS) {
-      msg += '1. Abre Configuración del iPhone\n2. Busca Safari (o Chrome)\n3. Notificaciones → nuevaexpress.com → Permitir';
-    } else if (isAndroid) {
+    if (isAndroid) {
       msg += '1. Toca los 3 puntos ⋮ del navegador\n2. Configuración → Configuración del sitio\n3. Notificaciones → nuevaexpress.com → Permitir';
+    } else if (isIOS) {
+      msg += '1. Abre Configuración del iPhone\n2. Busca Safari → Configuración avanzada → Datos del sitio web\n   o Chrome → Configuración del sitio\n3. Notificaciones → nuevaexpress.com → Permitir';
     } else {
-      msg += '1. Haz clic en el candado 🔒 en la barra de dirección\n2. Notificaciones → Permitir\n3. Recarga la página';
+      msg += '1. Clic en el candado 🔒 en la barra de dirección\n2. Notificaciones → Permitir\n3. Recarga la página';
     }
     alert(msg);
     return;
   }
 
-  // Primera vez — solicitar permiso vía OneSignal
-  if (window.OneSignal) {
-    window.OneSignal.Notifications.requestPermission().then(function(accepted) {
+  // Usar siempre OneSignalDeferred para garantizar que el init ya terminó
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(function(OneSignal) {
+    OneSignal.Notifications.requestPermission().then(function(accepted) {
       if (accepted) {
+        // Asegurar que el usuario esté vinculado
+        var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+        if (user.id) {
+          OneSignal.login(String(user.id));
+          OneSignal.User.addTag('role', user.role || 'repartidor');
+          OneSignal.User.addTag('name', user.name || '');
+        }
         alert('✅ ¡Notificaciones activadas! Recibirás avisos de nuevos pedidos.');
       } else {
-        alert('⚠️ Permiso denegado. Puedes activarlas desde la configuración del navegador.');
+        alert('⚠️ Permiso denegado. Puedes activarlas desde la configuración del navegador en cualquier momento.');
       }
     });
-  } else if (window.OneSignalDeferred) {
-    window.OneSignalDeferred.push(function(OneSignal) {
-      OneSignal.Notifications.requestPermission();
-    });
-  } else {
-    alert('⚠️ No se pudo cargar el servicio de notificaciones. Si tienes un bloqueador de anuncios, desactívalo para nuevaexpress.com y recarga.');
-  }
+  });
 }
 
 init();

@@ -18,7 +18,7 @@ OneSignalDeferred.push(async function(OneSignal) {
     notifyButton: { enable: false },
     welcomeNotification: { disable: true },
     serviceWorkerParam: { scope: '/' },
-    serviceWorkerPath: 'OneSignalSDKWorker.js',
+    serviceWorkerPath: '/OneSignalSDKWorker.js',
   });
 
   // Link OneSignal user to our user ID when logged in
