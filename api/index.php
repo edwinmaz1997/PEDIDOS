@@ -249,15 +249,12 @@ try {
         // ── DELIVERIES ───────────────────────────────────────
         case 'deliveries':
             $ctrl = new DeliveryController();
-            $delParts = explode('/', ltrim(str_replace('/api', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), '/'));
-            $delId    = isset($delParts[1]) && is_numeric($delParts[1]) ? (int)$delParts[1] : null;
-            $delSub   = isset($delParts[2]) ? trim($delParts[2]) : null;
-            if ($method === 'GET' && $action === 'stats')               { $ctrl->stats(); break; }
-            if ($method === 'GET' && !$delId)                          { $ctrl->index(); break; }
-            if ($delId && $delSub === 'claim'   && $method === 'POST') { $ctrl->claim($delId); break; }
-            if ($delId && $delSub === 'release' && $method === 'POST') { $ctrl->release($delId); break; }
-            if ($delId && $delSub === 'status'  && $method === 'PUT')  { $ctrl->updateStatus($delId, $body); break; }
-            if ($delId && $method === 'PUT')                           { $ctrl->updateStatus($delId, $body); break; }
+            if ($method === 'GET'  && $action === 'stats')                  { $ctrl->stats(); break; }
+            if ($method === 'GET'  && !$id && !$action)                     { $ctrl->index(); break; }
+            if ($id && $subAction === 'claim'   && $method === 'POST')      { $ctrl->claim($id); break; }
+            if ($id && $subAction === 'release' && $method === 'POST')      { $ctrl->release($id); break; }
+            if ($id && $subAction === 'status'  && $method === 'PUT')       { $ctrl->updateStatus($id, $body); break; }
+            if ($id && $method === 'PUT')                                    { $ctrl->updateStatus($id, $body); break; }
             Response::notFound();
             break;
 
