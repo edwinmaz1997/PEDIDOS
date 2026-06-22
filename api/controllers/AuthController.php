@@ -85,6 +85,8 @@ class AuthController {
         $phone    = trim($body['phone'] ?? '');
         $password = $body['password'] ?? '';
         $role     = $body['role'] ?? 'cliente';
+        $address  = trim($body['address'] ?? '');
+        $mapsUrl  = trim($body['google_maps_url'] ?? '');
 
         // Validate
         $errors = [];
