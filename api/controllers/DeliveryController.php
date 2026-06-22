@@ -271,5 +271,4 @@ class DeliveryController {
             Response::error('Error: ' . $e->getMessage(), 500);
         }
     }
-    }
 }
