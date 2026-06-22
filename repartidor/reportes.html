@@ -137,6 +137,7 @@ async function loadStats() {
   document.getElementById('deliveriesList').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
 
   var res = await APP.get('/deliveries/stats?period=' + currentPeriod);
+  console.log('STATS RAW:', JSON.stringify(res));
   if (!res?.success) {
     document.getElementById('deliveriesList').innerHTML = '<div class="empty-state"><p>Error cargando reportes.</p></div>';
     return;
