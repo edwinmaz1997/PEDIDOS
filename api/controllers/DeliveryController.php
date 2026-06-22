@@ -202,4 +202,71 @@ class DeliveryController {
                  ->execute([$userId, 'order_update', $title, $message, json_encode(['url' => $url])]);
         PushNotification::send($userId, $title, $message, $url);
     }
+
+    public function stats(): void {
+        $user = AuthMiddleware::requireRole(['repartidor']);
+        $rid  = (int)$user['id'];
+        $tz   = 'America/Guatemala';
+
+        // Periodo solicitado (por defecto hoy)
+        $period = $_GET['period'] ?? 'today';
+
+        if ($period === 'today') {
+            $from = "DATE(CONVERT_TZ(NOW(), '+00:00', '-06:00'))";
+            $to   = $from;
+        } elseif ($period === 'week') {
+            $from = "DATE(CONVERT_TZ(NOW(), '+00:00', '-06:00')) - INTERVAL WEEKDAY(CONVERT_TZ(NOW(), '+00:00', '-06:00')) DAY";
+            $to   = "DATE(CONVERT_TZ(NOW(), '+00:00', '-06:00'))";
+        } elseif ($period === 'month') {
+            $from = "DATE_FORMAT(CONVERT_TZ(NOW(), '+00:00', '-06:00'), '%Y-%m-01')";
+            $to   = "DATE(CONVERT_TZ(NOW(), '+00:00', '-06:00'))";
+        } else {
+            $from = "DATE(CONVERT_TZ(NOW(), '+00:00', '-06:00'))";
+            $to   = $from;
+        }
+
+        // Pedidos entregados en el periodo
+        $sql = "
+            SELECT
+                COUNT(*) as total_entregas,
+                COALESCE(SUM(o.delivery_fee), 0) as total_delivery,
+                COALESCE(SUM(o.delivery_fee * 0.5), 0) as ganancia_neta
+            FROM deliveries d
+            JOIN orders o ON d.order_id = o.id
+            WHERE d.repartidor_id = ?
+              AND d.status = 'entregado'
+              AND DATE(CONVERT_TZ(d.updated_at, '+00:00', '-06:00')) BETWEEN $from AND $to
+        ";
+        $row = $this->db->prepare($sql);
+        $row->execute([$rid]);
+        $summary = $row->fetch();
+
+        // Detalle de entregas del día
+        $dSql = "
+            SELECT
+                d.id, d.status, d.updated_at,
+                o.order_number, o.delivery_fee,
+                o.delivery_fee * 0.5 as mi_ganancia,
+                o.delivery_address,
+                b.name as negocio
+            FROM deliveries d
+            JOIN orders o ON d.order_id = o.id
+            LEFT JOIN businesses b ON o.business_id = b.id
+            WHERE d.repartidor_id = ?
+              AND d.status = 'entregado'
+              AND DATE(CONVERT_TZ(d.updated_at, '+00:00', '-06:00')) BETWEEN $from AND $to
+            ORDER BY d.updated_at DESC
+        ";
+        $dStmt = $this->db->prepare($dSql);
+        $dStmt->execute([$rid]);
+        $deliveries = $dStmt->fetchAll();
+
+        Response::success([
+            'period'         => $period,
+            'total_entregas' => (int)$summary['total_entregas'],
+            'total_delivery' => (float)$summary['total_delivery'],
+            'ganancia_neta'  => (float)$summary['ganancia_neta'],
+            'entregas'       => $deliveries,
+        ]);
+    }
 }

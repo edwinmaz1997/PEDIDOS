@@ -28,6 +28,7 @@
     </div>
     <ul class="sidebar-nav">
       <li><a href="index.html">🛵 Entregas</a></li>
+      <li><a href="reportes.html">📊 Mis Reportes</a></li>
       <li><a href="perfil.html" class="active">👤 Mi Perfil</a></li>
       <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
     </ul>
@@ -228,7 +229,18 @@ function handleInstall() {
 }
 function requestNotificationPermission() {
   if (!('Notification' in window)) { alert('Tu navegador no soporta notificaciones'); return; }
-  Notification.requestPermission().then(function(p){ if(p==='granted') alert('✅ Notificaciones activadas'); else alert('Permiso denegado. Actívalo en la configuración del navegador.'); });
+  if (Notification.permission === 'granted') { alert('Las notificaciones ya están activadas ✅'); return; }
+  if (window.OneSignal) {
+    window.OneSignal.Notifications.requestPermission().then(function(accepted) {
+      if (accepted) alert('¡Notificaciones activadas! ✅ Recibirás avisos de nuevos pedidos.');
+      else alert('Permiso denegado. Actívalo en la configuración del navegador.');
+    });
+  } else if (window.OneSignalDeferred) {
+    window.OneSignalDeferred.push(function(OneSignal) { OneSignal.Notifications.requestPermission(); });
+    alert('Activando notificaciones... Si no funciona, desactiva tu bloqueador de anuncios para nuevaexpress.com.');
+  } else {
+    alert('⚠️ No se pudo cargar el servicio de notificaciones. Si tienes un bloqueador de anuncios, desactívalo para nuevaexpress.com y recarga la página.');
+  }
 }
 
 init();

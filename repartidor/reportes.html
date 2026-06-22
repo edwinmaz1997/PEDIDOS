@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NuevaExpress">
+<link rel="apple-touch-icon" href="/assets/img/logo.jpg">
+<link rel="icon" type="image/jpeg" href="/assets/img/logo.jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mis Reportes — NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.stat-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:20px 24px; display:flex; flex-direction:column; gap:6px; }
+.stat-value { font-size:2rem; font-weight:800; color:var(--navy); line-height:1; }
+.stat-label { font-size:.82rem; color:var(--muted); font-weight:500; }
+.stat-sub   { font-size:.78rem; color:var(--muted); }
+.stat-card.green { border-left:4px solid var(--success); }
+.stat-card.blue  { border-left:4px solid var(--blue); }
+.stat-card.gold  { border-left:4px solid #F5C518; }
+.delivery-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+.delivery-row:last-child { border-bottom:none; }
+.delivery-num { font-size:.75rem; color:var(--muted); min-width:60px; }
+.delivery-info { flex:1; min-width:0; }
+.delivery-info b { font-size:.9rem; display:block; }
+.delivery-info span { font-size:.78rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+.delivery-fee { text-align:right; flex-shrink:0; }
+.delivery-fee .total { font-size:.95rem; font-weight:700; color:var(--navy); }
+.delivery-fee .ganancia { font-size:.8rem; color:var(--success); font-weight:600; }
+.period-btn { padding:8px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:.82rem; cursor:pointer; font-weight:500; transition:.15s; }
+.period-btn.active { background:var(--navy); color:white; border-color:var(--navy); }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress" style="height:38px;border-radius:8px"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px" id="sidebarUser">Repartidor</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">🛵 Entregas</a></li>
+      <li><a href="reportes.html" class="active">📊 Mis Reportes</a></li>
+      <li><a href="perfil.html">👤 Mi Perfil</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>📊 Mis Reportes</h1>
+        <p class="page-subtitle">Tus ingresos y ganancias de entregas</p>
+      </div>
+    </div>
+
+    <!-- Selector de periodo -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      <button class="period-btn active" onclick="changePeriod('today', this)">Hoy</button>
+      <button class="period-btn" onclick="changePeriod('week', this)">Esta semana</button>
+      <button class="period-btn" onclick="changePeriod('month', this)">Este mes</button>
+    </div>
+
+    <!-- Tarjetas de resumen -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px">
+      <div class="stat-card blue">
+        <div class="stat-label">Entregas completadas</div>
+        <div class="stat-value" id="statEntregas">—</div>
+        <div class="stat-sub" id="statPeriodo">Hoy</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">Total cobrado por clientes</div>
+        <div class="stat-value" id="statTotal">Q—</div>
+        <div class="stat-sub">Monto de delivery recibido</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-label">Tu ganancia (50%)</div>
+        <div class="stat-value" id="statGanancia">Q—</div>
+        <div class="stat-sub">Tu parte del delivery</div>
+      </div>
+    </div>
+
+    <!-- Nota explicativa -->
+    <div style="background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px;font-size:.83rem;color:#1e40af;margin-bottom:20px;line-height:1.6">
+      💡 <strong>¿Cómo se calcula?</strong> El cliente paga el costo de envío (Q15–Q30 según distancia). NuevaExpress te paga el <strong>50% de ese monto</strong> por cada entrega completada. Ejemplo: entrega de Q20 → te corresponden Q10.
+    </div>
+
+    <!-- Listado de entregas -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Detalle de entregas</h3>
+      </div>
+      <div id="deliveriesList" style="padding:0 4px">
+        <div class="loading-state"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+const API = '/api';
+var currentPeriod = 'today';
+
+function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+
+// Cargar usuario
+var usr = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+if (!localStorage.getItem('nuevaexpress_token') || usr.role !== 'repartidor') {
+  window.location.href = '/cliente/login.html';
+}
+document.getElementById('sidebarUser').textContent = usr.name || 'Repartidor';
+
+function changePeriod(period, btn) {
+  currentPeriod = period;
+  document.querySelectorAll('.period-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  loadStats();
+}
+
+async function loadStats() {
+  document.getElementById('statEntregas').textContent = '—';
+  document.getElementById('statTotal').textContent = 'Q—';
+  document.getElementById('statGanancia').textContent = 'Q—';
+  document.getElementById('deliveriesList').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+
+  var res = await APP.get('/deliveries/stats?period=' + currentPeriod);
+  if (!res?.success) {
+    document.getElementById('deliveriesList').innerHTML = '<div class="empty-state"><p>Error cargando reportes.</p></div>';
+    return;
+  }
+
+  var d = res.data;
+  var periodLabel = { today: 'Hoy', week: 'Esta semana', month: 'Este mes' }[currentPeriod];
+  document.getElementById('statEntregas').textContent = d.total_entregas;
+  document.getElementById('statTotal').textContent = 'Q' + parseFloat(d.total_delivery).toFixed(2);
+  document.getElementById('statGanancia').textContent = 'Q' + parseFloat(d.ganancia_neta).toFixed(2);
+  document.getElementById('statPeriodo').textContent = periodLabel;
+
+  if (!d.entregas || !d.entregas.length) {
+    document.getElementById('deliveriesList').innerHTML = '<div class="empty-state"><p>Sin entregas en este periodo.</p></div>';
+    return;
+  }
+
+  document.getElementById('deliveriesList').innerHTML = d.entregas.map(function(e) {
+    var fecha = new Date(e.updated_at);
+    var hora  = fecha.toLocaleTimeString('es-GT', { hour:'2-digit', minute:'2-digit' });
+    var dia   = fecha.toLocaleDateString('es-GT', { day:'2-digit', month:'short' });
+    return '<div class="delivery-row">' +
+      '<div class="delivery-num">#' + (e.order_number || e.id) + '<br><span style="font-size:.7rem;color:var(--muted)">' + dia + ' ' + hora + '</span></div>' +
+      '<div class="delivery-info"><b>' + (e.negocio || 'Pedido') + '</b><span>' + (e.delivery_address || '—') + '</span></div>' +
+      '<div class="delivery-fee">' +
+        '<div class="total">Q' + parseFloat(e.delivery_fee || 0).toFixed(2) + '</div>' +
+        '<div class="ganancia">+Q' + parseFloat(e.mi_ganancia || 0).toFixed(2) + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+loadStats();
+</script>
+<script src="/assets/js/pwa.js"></script>
+</body>
+</html>
