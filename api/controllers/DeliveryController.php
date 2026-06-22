@@ -233,21 +233,21 @@ class DeliveryController {
                 FROM deliveries d
                 JOIN orders o ON d.order_id=o.id
                 WHERE d.repartidor_id=? AND d.status='entregado'
-                  AND DATE(d.updated_at) BETWEEN ? AND ?
+                  AND DATE(d.delivered_at) BETWEEN ? AND ?
             ");
             $stmt->execute([$rid, $from, $to]);
             $s = $stmt->fetch();
 
             $dStmt = $this->db->prepare("
-                SELECT d.id, d.updated_at, o.order_number, o.delivery_fee,
+                SELECT d.id, d.delivered_at as updated_at, o.order_number, o.delivery_fee,
                        ROUND(o.delivery_fee*0.5,2) as mi_ganancia,
                        o.delivery_address, b.name as negocio
                 FROM deliveries d
                 JOIN orders o ON d.order_id=o.id
                 LEFT JOIN businesses b ON o.business_id=b.id
                 WHERE d.repartidor_id=? AND d.status='entregado'
-                  AND DATE(d.updated_at) BETWEEN ? AND ?
-                ORDER BY d.updated_at DESC
+                  AND DATE(d.delivered_at) BETWEEN ? AND ?
+                ORDER BY d.delivered_at DESC
             ");
             $dStmt->execute([$rid, $from, $to]);
 
