@@ -204,13 +204,12 @@ class DeliveryController {
     }
 
     public function stats(): void {
+        try {
         $user = AuthMiddleware::requireRole(['repartidor']);
         $rid  = (int)$user['id'];
 
         $period = $_GET['period'] ?? 'today';
 
-        // Guatemala es UTC-6. Usamos resta directa en lugar de CONVERT_TZ
-        // que requiere la tabla de zonas horarias de MySQL
         $nowGT = "DATE_SUB(UTC_TIMESTAMP(), INTERVAL 6 HOUR)";
 
         if ($period === 'today') {
@@ -270,5 +269,8 @@ class DeliveryController {
             'ganancia_neta'  => (float)$summary['ganancia_neta'],
             'entregas'       => $deliveries,
         ]);
+        } catch (\Throwable $e) {
+            Response::error('Error en stats: ' . $e->getMessage() . ' en ' . basename($e->getFile()) . ':' . $e->getLine(), 500);
+        }
     }
 }
