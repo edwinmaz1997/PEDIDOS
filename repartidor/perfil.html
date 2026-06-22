@@ -228,18 +228,51 @@ function handleInstall() {
   document.getElementById('iosInstallGuide').style.display = 'block';
 }
 function requestNotificationPermission() {
-  if (!('Notification' in window)) { alert('Tu navegador no soporta notificaciones'); return; }
-  if (Notification.permission === 'granted') { alert('Las notificaciones ya están activadas ✅'); return; }
+  if (!('Notification' in window)) {
+    alert('Tu navegador no soporta notificaciones push.');
+    return;
+  }
+
+  // Ya están activas
+  if (Notification.permission === 'granted') {
+    if (window.OneSignal) {
+      window.OneSignal.Notifications.requestPermission();
+    }
+    alert('✅ Las notificaciones ya están activadas.');
+    return;
+  }
+
+  // Ya fueron bloqueadas — el navegador no mostrará el diálogo, hay que ir a configuración
+  if (Notification.permission === 'denied') {
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    var isAndroid = /Android/.test(navigator.userAgent);
+    var msg = '🔔 Las notificaciones están bloqueadas.\n\nPara activarlas:\n\n';
+    if (isIOS) {
+      msg += '1. Abre Configuración del iPhone\n2. Busca Safari (o Chrome)\n3. Notificaciones → nuevaexpress.com → Permitir';
+    } else if (isAndroid) {
+      msg += '1. Toca los 3 puntos ⋮ del navegador\n2. Configuración → Configuración del sitio\n3. Notificaciones → nuevaexpress.com → Permitir';
+    } else {
+      msg += '1. Haz clic en el candado 🔒 en la barra de dirección\n2. Notificaciones → Permitir\n3. Recarga la página';
+    }
+    alert(msg);
+    return;
+  }
+
+  // Primera vez — solicitar permiso vía OneSignal
   if (window.OneSignal) {
     window.OneSignal.Notifications.requestPermission().then(function(accepted) {
-      if (accepted) alert('¡Notificaciones activadas! ✅ Recibirás avisos de nuevos pedidos.');
-      else alert('Permiso denegado. Actívalo en la configuración del navegador.');
+      if (accepted) {
+        alert('✅ ¡Notificaciones activadas! Recibirás avisos de nuevos pedidos.');
+      } else {
+        alert('⚠️ Permiso denegado. Puedes activarlas desde la configuración del navegador.');
+      }
     });
   } else if (window.OneSignalDeferred) {
-    window.OneSignalDeferred.push(function(OneSignal) { OneSignal.Notifications.requestPermission(); });
-    alert('Activando notificaciones... Si no funciona, desactiva tu bloqueador de anuncios para nuevaexpress.com.');
+    window.OneSignalDeferred.push(function(OneSignal) {
+      OneSignal.Notifications.requestPermission();
+    });
   } else {
-    alert('⚠️ No se pudo cargar el servicio de notificaciones. Si tienes un bloqueador de anuncios, desactívalo para nuevaexpress.com y recarga la página.');
+    alert('⚠️ No se pudo cargar el servicio de notificaciones. Si tienes un bloqueador de anuncios, desactívalo para nuevaexpress.com y recarga.');
   }
 }
 
