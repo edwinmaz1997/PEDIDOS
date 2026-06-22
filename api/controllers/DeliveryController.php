@@ -206,26 +206,29 @@ class DeliveryController {
     public function stats(): void {
         $user = AuthMiddleware::requireRole(['repartidor']);
         $rid  = (int)$user['id'];
-        $tz   = 'America/Guatemala';
 
-        // Periodo solicitado (por defecto hoy)
         $period = $_GET['period'] ?? 'today';
 
+        // Guatemala es UTC-6. Usamos resta directa en lugar de CONVERT_TZ
+        // que requiere la tabla de zonas horarias de MySQL
+        $nowGT = "DATE_SUB(UTC_TIMESTAMP(), INTERVAL 6 HOUR)";
+
         if ($period === 'today') {
-            $from = "DATE(CONVERT_TZ(NOW(), '+00:00', '-06:00'))";
+            $from = "DATE($nowGT)";
             $to   = $from;
         } elseif ($period === 'week') {
-            $from = "DATE(CONVERT_TZ(NOW(), '+00:00', '-06:00')) - INTERVAL WEEKDAY(CONVERT_TZ(NOW(), '+00:00', '-06:00')) DAY";
-            $to   = "DATE(CONVERT_TZ(NOW(), '+00:00', '-06:00'))";
+            $from = "DATE(DATE_SUB($nowGT, INTERVAL WEEKDAY($nowGT) DAY))";
+            $to   = "DATE($nowGT)";
         } elseif ($period === 'month') {
-            $from = "DATE_FORMAT(CONVERT_TZ(NOW(), '+00:00', '-06:00'), '%Y-%m-01')";
-            $to   = "DATE(CONVERT_TZ(NOW(), '+00:00', '-06:00'))";
+            $from = "DATE_FORMAT($nowGT, '%Y-%m-01')";
+            $to   = "DATE($nowGT)";
         } else {
-            $from = "DATE(CONVERT_TZ(NOW(), '+00:00', '-06:00'))";
+            $from = "DATE($nowGT)";
             $to   = $from;
         }
 
-        // Pedidos entregados en el periodo
+        $dateExpr = "DATE(DATE_SUB(d.updated_at, INTERVAL 6 HOUR))";
+
         $sql = "
             SELECT
                 COUNT(*) as total_entregas,
@@ -235,18 +238,17 @@ class DeliveryController {
             JOIN orders o ON d.order_id = o.id
             WHERE d.repartidor_id = ?
               AND d.status = 'entregado'
-              AND DATE(CONVERT_TZ(d.updated_at, '+00:00', '-06:00')) BETWEEN $from AND $to
+              AND $dateExpr BETWEEN $from AND $to
         ";
-        $row = $this->db->prepare($sql);
-        $row->execute([$rid]);
-        $summary = $row->fetch();
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$rid]);
+        $summary = $stmt->fetch();
 
-        // Detalle de entregas del día
         $dSql = "
             SELECT
                 d.id, d.status, d.updated_at,
                 o.order_number, o.delivery_fee,
-                o.delivery_fee * 0.5 as mi_ganancia,
+                ROUND(o.delivery_fee * 0.5, 2) as mi_ganancia,
                 o.delivery_address,
                 b.name as negocio
             FROM deliveries d
@@ -254,7 +256,7 @@ class DeliveryController {
             LEFT JOIN businesses b ON o.business_id = b.id
             WHERE d.repartidor_id = ?
               AND d.status = 'entregado'
-              AND DATE(CONVERT_TZ(d.updated_at, '+00:00', '-06:00')) BETWEEN $from AND $to
+              AND $dateExpr BETWEEN $from AND $to
             ORDER BY d.updated_at DESC
         ";
         $dStmt = $this->db->prepare($dSql);
