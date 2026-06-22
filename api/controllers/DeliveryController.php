@@ -204,74 +204,17 @@ class DeliveryController {
     }
 
     public function stats(): void {
+        http_response_code(200);
+        header('Content-Type: application/json; charset=utf-8');
         try {
             $user = AuthMiddleware::requireRole(['repartidor']);
             $rid  = (int)$user['id'];
-            $period = $_GET['period'] ?? 'today';
-
-            // Fechas en UTC-6 (Guatemala)
-            $now = new \DateTime('now', new \DateTimeZone('America/Guatemala'));
-            $today = $now->format('Y-m-d');
-
-            if ($period === 'week') {
-                $dow  = (int)$now->format('N') - 1; // lunes=0
-                $from = (clone $now)->modify("-{$dow} days")->format('Y-m-d');
-                $to   = $today;
-            } elseif ($period === 'month') {
-                $from = $now->format('Y-m-01');
-                $to   = $today;
-            } else {
-                $from = $today;
-                $to   = $today;
-            }
-
-            $sql = "
-                SELECT
-                    COUNT(*) as total_entregas,
-                    COALESCE(SUM(o.delivery_fee), 0) as total_delivery,
-                    COALESCE(SUM(o.delivery_fee * 0.5), 0) as ganancia_neta
-                FROM deliveries d
-                JOIN orders o ON d.order_id = o.id
-                WHERE d.repartidor_id = ?
-                  AND d.status = 'entregado'
-                  AND DATE(d.updated_at) BETWEEN ? AND ?
-            ";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([$rid, $from, $to]);
-            $summary = $stmt->fetch();
-
-            $dSql = "
-                SELECT
-                    d.id, d.status, d.updated_at,
-                    o.order_number, o.delivery_fee,
-                    ROUND(o.delivery_fee * 0.5, 2) as mi_ganancia,
-                    o.delivery_address,
-                    b.name as negocio
-                FROM deliveries d
-                JOIN orders o ON d.order_id = o.id
-                LEFT JOIN businesses b ON o.business_id = b.id
-                WHERE d.repartidor_id = ?
-                  AND d.status = 'entregado'
-                  AND DATE(d.updated_at) BETWEEN ? AND ?
-                ORDER BY d.updated_at DESC
-            ";
-            $dStmt = $this->db->prepare($dSql);
-            $dStmt->execute([$rid, $from, $to]);
-            $deliveries = $dStmt->fetchAll();
-
-            Response::success([
-                'period'         => $period,
-                'total_entregas' => (int)($summary['total_entregas'] ?? 0),
-                'total_delivery' => (float)($summary['total_delivery'] ?? 0),
-                'ganancia_neta'  => (float)($summary['ganancia_neta'] ?? 0),
-                'entregas'       => $deliveries ?: [],
-            ]);
+            echo json_encode(['success' => true, 'debug' => true, 'rid' => $rid,
+                'period' => $_GET['period'] ?? 'today',
+                'total_entregas' => 0, 'total_delivery' => 0, 'ganancia_neta' => 0, 'entregas' => []]);
         } catch (\Throwable $e) {
-            error_log('stats() error: ' . $e->getMessage() . ' L' . $e->getLine());
-            http_response_code(200);
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['success' => false, 'message' => 'ERR: ' . $e->getMessage() . ' L' . $e->getLine()]);
-            exit;
+            echo json_encode(['success' => false, 'message' => 'ERR:' . $e->getMessage() . ' L' . $e->getLine()]);
         }
+        exit;
     }
 }
