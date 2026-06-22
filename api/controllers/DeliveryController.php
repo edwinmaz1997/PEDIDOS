@@ -268,7 +268,10 @@ class DeliveryController {
             ]);
         } catch (\Throwable $e) {
             error_log('stats() error: ' . $e->getMessage() . ' L' . $e->getLine());
-            Response::error('Error: ' . $e->getMessage(), 500);
+            http_response_code(200);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'message' => 'ERR: ' . $e->getMessage() . ' L' . $e->getLine()]);
+            exit;
         }
     }
 }
