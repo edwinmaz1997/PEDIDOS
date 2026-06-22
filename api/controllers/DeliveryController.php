@@ -205,72 +205,71 @@ class DeliveryController {
 
     public function stats(): void {
         try {
-        $user = AuthMiddleware::requireRole(['repartidor']);
-        $rid  = (int)$user['id'];
+            $user = AuthMiddleware::requireRole(['repartidor']);
+            $rid  = (int)$user['id'];
+            $period = $_GET['period'] ?? 'today';
 
-        $period = $_GET['period'] ?? 'today';
+            // Fechas en UTC-6 (Guatemala)
+            $now = new \DateTime('now', new \DateTimeZone('America/Guatemala'));
+            $today = $now->format('Y-m-d');
 
-        $nowGT = "DATE_SUB(UTC_TIMESTAMP(), INTERVAL 6 HOUR)";
+            if ($period === 'week') {
+                $dow  = (int)$now->format('N') - 1; // lunes=0
+                $from = (clone $now)->modify("-{$dow} days")->format('Y-m-d');
+                $to   = $today;
+            } elseif ($period === 'month') {
+                $from = $now->format('Y-m-01');
+                $to   = $today;
+            } else {
+                $from = $today;
+                $to   = $today;
+            }
 
-        if ($period === 'today') {
-            $from = "DATE($nowGT)";
-            $to   = $from;
-        } elseif ($period === 'week') {
-            $from = "DATE(DATE_SUB($nowGT, INTERVAL WEEKDAY($nowGT) DAY))";
-            $to   = "DATE($nowGT)";
-        } elseif ($period === 'month') {
-            $from = "DATE_FORMAT($nowGT, '%Y-%m-01')";
-            $to   = "DATE($nowGT)";
-        } else {
-            $from = "DATE($nowGT)";
-            $to   = $from;
-        }
+            $sql = "
+                SELECT
+                    COUNT(*) as total_entregas,
+                    COALESCE(SUM(o.delivery_fee), 0) as total_delivery,
+                    COALESCE(SUM(o.delivery_fee * 0.5), 0) as ganancia_neta
+                FROM deliveries d
+                JOIN orders o ON d.order_id = o.id
+                WHERE d.repartidor_id = ?
+                  AND d.status = 'entregado'
+                  AND DATE(d.updated_at) BETWEEN ? AND ?
+            ";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$rid, $from, $to]);
+            $summary = $stmt->fetch();
 
-        $dateExpr = "DATE(DATE_SUB(d.updated_at, INTERVAL 6 HOUR))";
+            $dSql = "
+                SELECT
+                    d.id, d.status, d.updated_at,
+                    o.order_number, o.delivery_fee,
+                    ROUND(o.delivery_fee * 0.5, 2) as mi_ganancia,
+                    o.delivery_address,
+                    b.name as negocio
+                FROM deliveries d
+                JOIN orders o ON d.order_id = o.id
+                LEFT JOIN businesses b ON o.business_id = b.id
+                WHERE d.repartidor_id = ?
+                  AND d.status = 'entregado'
+                  AND DATE(d.updated_at) BETWEEN ? AND ?
+                ORDER BY d.updated_at DESC
+            ";
+            $dStmt = $this->db->prepare($dSql);
+            $dStmt->execute([$rid, $from, $to]);
+            $deliveries = $dStmt->fetchAll();
 
-        $sql = "
-            SELECT
-                COUNT(*) as total_entregas,
-                COALESCE(SUM(o.delivery_fee), 0) as total_delivery,
-                COALESCE(SUM(o.delivery_fee * 0.5), 0) as ganancia_neta
-            FROM deliveries d
-            JOIN orders o ON d.order_id = o.id
-            WHERE d.repartidor_id = ?
-              AND d.status = 'entregado'
-              AND $dateExpr BETWEEN $from AND $to
-        ";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$rid]);
-        $summary = $stmt->fetch();
-
-        $dSql = "
-            SELECT
-                d.id, d.status, d.updated_at,
-                o.order_number, o.delivery_fee,
-                ROUND(o.delivery_fee * 0.5, 2) as mi_ganancia,
-                o.delivery_address,
-                b.name as negocio
-            FROM deliveries d
-            JOIN orders o ON d.order_id = o.id
-            LEFT JOIN businesses b ON o.business_id = b.id
-            WHERE d.repartidor_id = ?
-              AND d.status = 'entregado'
-              AND $dateExpr BETWEEN $from AND $to
-            ORDER BY d.updated_at DESC
-        ";
-        $dStmt = $this->db->prepare($dSql);
-        $dStmt->execute([$rid]);
-        $deliveries = $dStmt->fetchAll();
-
-        Response::success([
-            'period'         => $period,
-            'total_entregas' => (int)$summary['total_entregas'],
-            'total_delivery' => (float)$summary['total_delivery'],
-            'ganancia_neta'  => (float)$summary['ganancia_neta'],
-            'entregas'       => $deliveries,
-        ]);
+            Response::success([
+                'period'         => $period,
+                'total_entregas' => (int)($summary['total_entregas'] ?? 0),
+                'total_delivery' => (float)($summary['total_delivery'] ?? 0),
+                'ganancia_neta'  => (float)($summary['ganancia_neta'] ?? 0),
+                'entregas'       => $deliveries ?: [],
+            ]);
         } catch (\Throwable $e) {
-            Response::error('Error en stats: ' . $e->getMessage() . ' en ' . basename($e->getFile()) . ':' . $e->getLine(), 500);
+            error_log('stats() error: ' . $e->getMessage() . ' L' . $e->getLine());
+            Response::error('Error: ' . $e->getMessage(), 500);
         }
+    }
     }
 }
