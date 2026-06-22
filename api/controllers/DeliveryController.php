@@ -204,8 +204,6 @@ class DeliveryController {
     }
 
     public function stats(): void {
-        http_response_code(200);
-        header('Content-Type: application/json; charset=utf-8');
         try {
             $user = AuthMiddleware::requireRole(['repartidor']);
             $rid  = (int)$user['id'];
@@ -251,16 +249,15 @@ class DeliveryController {
             ");
             $dStmt->execute([$rid, $from, $to]);
 
-            echo json_encode(['success'=>true,'message'=>'OK','data'=>[
+            Response::success([
                 'period'         => $period,
-                'total_entregas' => (int)($s['total_entregas']??0),
-                'total_delivery' => (float)($s['total_delivery']??0),
-                'ganancia_neta'  => (float)($s['ganancia_neta']??0),
+                'total_entregas' => (int)($s['total_entregas'] ?? 0),
+                'total_delivery' => (float)($s['total_delivery'] ?? 0),
+                'ganancia_neta'  => (float)($s['ganancia_neta'] ?? 0),
                 'entregas'       => $dStmt->fetchAll() ?: [],
-            ]], JSON_UNESCAPED_UNICODE);
+            ]);
         } catch (\Throwable $e) {
-            echo json_encode(['success'=>false,'message'=>'ERR:'.$e->getMessage().' L'.$e->getLine()]);
+            Response::error('Error en reportes: ' . $e->getMessage(), 500);
         }
-        exit;
     }
 }
