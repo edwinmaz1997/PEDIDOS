@@ -223,27 +223,33 @@
               <input type="text" id="f_zone" placeholder="Zona 10">
             </div>
           </div>
+          <div class="form-group">
+            <label>Link de Google Maps del negocio</label>
+            <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+              <input type="url" id="f_google_maps_url" placeholder="https://maps.app.goo.gl/..." oninput="previewMap()" style="flex:1;min-width:0">
+              <button type="button" onclick="getGPSNegocio()" title="Obtener mi ubicación GPS" style="padding:9px 13px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;flex-shrink:0">📍</button>
+            </div>
+            <a href="https://www.google.com/maps" target="_blank"
+               onclick="setTimeout(function(){ var i=document.getElementById('f_google_maps_url'); if(i) i.placeholder='Pega aquí el link copiado de Google Maps...'; }, 500)"
+               style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1a73e8;color:white;border-radius:var(--radius-sm);text-decoration:none;font-size:.82rem;font-weight:600;margin-bottom:6px">
+              🗺️ Seleccionar en Google Maps
+            </a>
+            <div id="gpsNegocioStatus" style="display:none;font-size:.75rem;color:var(--muted);margin-bottom:4px"></div>
+            <div style="font-size:.8rem;color:var(--muted);margin-top:2px">Abre Maps → ubica tu negocio → comparte → copia el link</div>
+          </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
             <div class="form-group">
-              <label>Latitud <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
+              <label>Latitud <span style="color:var(--muted);font-weight:400">(se llena con GPS)</span></label>
               <input type="number" id="f_latitude" placeholder="14.6349" step="any">
             </div>
             <div class="form-group">
-              <label>Longitud <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
+              <label>Longitud <span style="color:var(--muted);font-weight:400">(se llena con GPS)</span></label>
               <input type="number" id="f_longitude" placeholder="-90.5069" step="any">
             </div>
-          </div>
-          <div class="form-group">
-            <label>Link de Google Maps</label>
-            <input type="url" id="f_google_maps_url" placeholder="https://maps.google.com/...">
-            <div style="font-size:.8rem;color:var(--muted);margin-top:4px">Abre Google Maps → comparte → copia el enlace corto</div>
           </div>
           <div class="map-preview" id="mapPreview" style="display:none">
             <strong>Vista previa:</strong><br>
             <a id="mapLink" href="#" target="_blank" style="color:var(--accent)">Ver en Google Maps →</a>
-          </div>
-          <div style="background:var(--off-white);border-radius:var(--radius-sm);padding:14px;font-size:.85rem;margin-bottom:16px">
-            💡 Puedes obtener las coordenadas exactas en <a href="https://maps.google.com" target="_blank" style="color:var(--accent)">Google Maps</a>: clic derecho en tu negocio → "¿Qué hay aquí?"
           </div>
           <button class="btn-primary" onclick="saveUbicacion()">Guardar ubicación</button>
         </div>
@@ -437,6 +443,29 @@ async function saveContacto() {
   const res = await APP.put(`/businesses/${biz.id}`, data);
   if (res?.success) APP.toast('Contacto guardado');
   else APP.toast(res?.message || 'Error', 'error');
+}
+
+function getGPSNegocio() {
+  if (!navigator.geolocation) { alert('Tu navegador no soporta geolocalización'); return; }
+  var status = document.getElementById('gpsNegocioStatus');
+  status.textContent = '⏳ Obteniendo ubicación...';
+  status.style.display = 'block';
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      var lat = pos.coords.latitude, lng = pos.coords.longitude;
+      document.getElementById('f_latitude').value  = lat.toFixed(6);
+      document.getElementById('f_longitude').value = lng.toFixed(6);
+      document.getElementById('f_google_maps_url').value = 'https://www.google.com/maps?q=' + lat.toFixed(6) + ',' + lng.toFixed(6);
+      status.textContent = '✅ Ubicación obtenida — revisa que el pin sea exactamente donde está tu negocio';
+      previewMap();
+      setTimeout(function(){ status.style.display = 'none'; }, 4000);
+    },
+    function() {
+      status.textContent = '⚠️ No se pudo obtener la ubicación';
+      setTimeout(function(){ status.style.display = 'none'; }, 2500);
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
 }
 
 async function saveUbicacion() {
