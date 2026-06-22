@@ -187,7 +187,7 @@ img { max-width: 100%; display: block; }
 
 /* ── Business Card ───────────────────────────────────────── */
 .biz-card {
-  flex: 0 0 280px; background: white; border-radius: var(--radius);
+  flex: 0 0 320px; background: white; border-radius: var(--radius);
   overflow: hidden; cursor: pointer; scroll-snap-align: start;
   box-shadow: var(--shadow-sm); transition: transform var(--transition), box-shadow var(--transition);
   border: 1px solid var(--border);
@@ -411,7 +411,7 @@ img { max-width: 100%; display: block; }
   .hero p { font-size: .95rem; }
   .search-bar { padding: 5px 5px 5px 16px; }
   .cat-chip { padding: 8px 14px; font-size: .82rem; }
-  .biz-card { flex: 0 0 240px; }
+  .biz-card { flex: 0 0 290px; }
   .card-photo { height: 155px; }
   .section-title { font-size: 1.2rem; }
 
@@ -434,7 +434,7 @@ img { max-width: 100%; display: block; }
   .modal-actions-top { width: 100%; }
   .btn-action { flex: 1; justify-content: center; }
   .auth-card { padding: 24px 20px; }
-  .biz-card { flex: 0 0 220px; }
+  .biz-card { flex: 0 0 260px; }
   .data-table { font-size: .8rem; }
   .data-table th, .data-table td { padding: 8px 10px; }
 }
@@ -535,7 +535,7 @@ img { max-width: 100%; display: block; }
   .cat-chip { padding: 8px 14px; font-size: .82rem; }
 
   /* Cards */
-  .biz-card { flex: 0 0 230px; }
+  .biz-card { flex: 0 0 270px; }
   .card-photo { height: 150px; }
   .section-title { font-size: 1.1rem; }
 
@@ -576,7 +576,7 @@ img { max-width: 100%; display: block; }
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr !important; }
   .main-content { padding: 60px 12px 20px !important; }
-  .biz-card { flex: 0 0 210px; }
+  .biz-card { flex: 0 0 250px; }
   .report-summary-grid { grid-template-columns: 1fr; }
   .nav-right .btn-primary { padding: 6px 12px; font-size: .78rem; }
 }
