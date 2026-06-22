@@ -249,7 +249,13 @@ try {
         // ── DELIVERIES ───────────────────────────────────────
         case 'deliveries':
             $ctrl = new DeliveryController();
-            if ($method === 'GET'  && $action === 'stats')                  { $ctrl->stats(); break; }
+            if ($method === 'GET'  && $action === 'stats') {
+                try { $ctrl->stats(); } catch (\Throwable $e) {
+                    http_response_code(200);
+                    echo json_encode(['success'=>false,'message'=>'CATCH: '.$e->getMessage().' in '.basename($e->getFile()).':'.$e->getLine()]);
+                }
+                break;
+            }
             if ($method === 'GET'  && !$id && !$action)                     { $ctrl->index(); break; }
             if ($id && $subAction === 'claim'   && $method === 'POST')      { $ctrl->claim($id); break; }
             if ($id && $subAction === 'release' && $method === 'POST')      { $ctrl->release($id); break; }
