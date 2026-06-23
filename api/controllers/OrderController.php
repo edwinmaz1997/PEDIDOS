@@ -287,6 +287,24 @@ class OrderController {
         $this->notify($order['client_id'], 'order_update', '📦 Actualización de pedido',
             "Tu pedido #{$order['order_number']} está {$statusLabels[$status]}.");
 
+        // Cuando el negocio marca "listo", notificar al repartidor asignado
+        if ($status === 'listo' && ($order['delivery_type'] ?? '') === 'delivery') {
+            $dRow = $this->db->prepare(
+                "SELECT repartidor_id FROM deliveries WHERE order_id = ? AND repartidor_id IS NOT NULL"
+            );
+            $dRow->execute([$id]);
+            $delivery = $dRow->fetch();
+            if ($delivery && $delivery['repartidor_id']) {
+                $this->notify(
+                    $delivery['repartidor_id'],
+                    'order_ready',
+                    '🟢 Pedido listo para recoger',
+                    "El pedido #{$order['order_number']} ya está listo — puedes pasar a recogerlo.",
+                    '/repartidor/index.html'
+                );
+            }
+        }
+
         Response::success(null, 'Estado actualizado');
     }
 
