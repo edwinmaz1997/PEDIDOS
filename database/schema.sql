@@ -379,6 +379,7 @@ CREATE TABLE IF NOT EXISTS business_services (
     business_id INT NOT NULL,
     name VARCHAR(150) NOT NULL,
     description TEXT,
+    photo_url VARCHAR(500) NULL,
     price_from DECIMAL(10,2) DEFAULT NULL COMMENT 'Precio referencial desde',
     price_to DECIMAL(10,2) DEFAULT NULL COMMENT 'Precio referencial hasta',
     is_available TINYINT(1) DEFAULT 1,

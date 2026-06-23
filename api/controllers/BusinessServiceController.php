@@ -26,11 +26,12 @@ class BusinessServiceController {
         $desc      = Security::sanitize($body['description'] ?? '');
         $priceFrom = isset($body['price_from']) && $body['price_from'] !== '' ? (float)$body['price_from'] : null;
         $priceTo   = isset($body['price_to']) && $body['price_to'] !== '' ? (float)$body['price_to'] : null;
+        $photoUrl  = $body['photo_url'] ?? null;
 
         if (!$name) Response::error('El nombre del servicio es requerido', 400);
 
-        $this->db->prepare("INSERT INTO business_services (business_id, name, description, price_from, price_to) VALUES (?,?,?,?,?)")
-                 ->execute([$businessId, $name, $desc ?: null, $priceFrom, $priceTo]);
+        $this->db->prepare("INSERT INTO business_services (business_id, name, description, photo_url, price_from, price_to) VALUES (?,?,?,?,?,?)")
+                 ->execute([$businessId, $name, $desc ?: null, $photoUrl, $priceFrom, $priceTo]);
 
         $id = $this->db->lastInsertId();
         $stmt = $this->db->prepare("SELECT * FROM business_services WHERE id = ?");
@@ -48,11 +49,17 @@ class BusinessServiceController {
         $priceFrom = isset($body['price_from']) && $body['price_from'] !== '' ? (float)$body['price_from'] : null;
         $priceTo   = isset($body['price_to']) && $body['price_to'] !== '' ? (float)$body['price_to'] : null;
         $available = isset($body['is_available']) ? (int)$body['is_available'] : 1;
+        $photoUrl  = array_key_exists('photo_url', $body) ? ($body['photo_url'] ?: null) : false;
 
         if (!$name) Response::error('El nombre del servicio es requerido', 400);
 
-        $this->db->prepare("UPDATE business_services SET name=?, description=?, price_from=?, price_to=?, is_available=? WHERE id=? AND business_id=?")
-                 ->execute([$name, $desc ?: null, $priceFrom, $priceTo, $available, $sid, $businessId]);
+        if ($photoUrl !== false) {
+            $this->db->prepare("UPDATE business_services SET name=?, description=?, photo_url=?, price_from=?, price_to=?, is_available=? WHERE id=? AND business_id=?")
+                     ->execute([$name, $desc ?: null, $photoUrl, $priceFrom, $priceTo, $available, $sid, $businessId]);
+        } else {
+            $this->db->prepare("UPDATE business_services SET name=?, description=?, price_from=?, price_to=?, is_available=? WHERE id=? AND business_id=?")
+                     ->execute([$name, $desc ?: null, $priceFrom, $priceTo, $available, $sid, $businessId]);
+        }
 
         Response::success(null, 'Servicio actualizado');
     }
