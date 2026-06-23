@@ -169,6 +169,20 @@ async function init() {
 
   isServicio = biz.business_type === 'servicios';
 
+  // Ajustar sidebar inmediatamente
+  var np = document.getElementById('navProductos');
+  var ns = document.getElementById('navServicios');
+  var nped = document.getElementById('navPedidos');
+  if (isServicio) {
+    if (np) np.style.display = 'none';
+    if (ns) ns.style.display = 'block';
+    if (nped) nped.style.display = 'none';
+  } else {
+    if (np) np.style.display = 'block';
+    if (ns) ns.style.display = 'none';
+    if (nped) nped.style.display = 'block';
+  }
+
   // Cambiar el label del selector según tipo
   if (isServicio) {
     var lbl = document.querySelector('label[for="p_image"]')?.closest('.form-group')?.previousElementSibling;
@@ -190,7 +204,6 @@ async function init() {
   ]);
 
   if (isServicio) {
-    console.log('SERVICIOS raw:', items?.data);
     // Mapear servicios al mismo formato que productos
     allProducts = (items?.data || []).filter(function(s){ return s.is_available == 1; }).map(function(s) {
       return {
@@ -528,27 +541,6 @@ function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=documen
 
 init();
 </script>
-<script src="/assets/js/pwa.js">
-// Adaptar sidebar según tipo de negocio
-(async function(){
-  try {
-    var res = await fetch('/api/businesses/mine', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
-    var data = await res.json();
-    var biz = data.data;
-    if (!biz) return;
-    if (biz.business_type === 'servicios') {
-      var np = document.getElementById('navProductos'); if(np) np.style.display='none';
-      var ns = document.getElementById('navServicios'); if(ns) ns.style.display='block';
-      var nz = document.getElementById('navZonas');    if(nz) nz.style.display='none';
-    } else {
-      var np = document.getElementById('navProductos'); if(np) np.style.display='block';
-      var ns = document.getElementById('navServicios'); if(ns) ns.style.display='none';
-      var nav = document.getElementById('navPedidos'); if(nav) nav.style.display='block';
-      var nz = document.getElementById('navZonas');    if(nz) nz.style.display='block';
-    }
-  } catch(e){}
-})();
-
-</script>
+<script src="/assets/js/pwa.js"></script>
 </body>
 </html>
