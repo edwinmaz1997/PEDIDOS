@@ -87,6 +87,18 @@
       <label>Título de la promoción *</label>
       <input type="text" id="p_title" placeholder="Ej: Combo de alitas en oferta">
     </div>
+
+    <div class="form-group">
+      <label>Imagen de portada <span style="font-weight:400;color:var(--muted)">(opcional — se muestra en la tarjeta de la promoción)</span></label>
+      <div id="promoImagePreview" style="display:none;margin-bottom:8px;position:relative;width:100%;max-height:160px;border-radius:10px;overflow:hidden">
+        <img id="promoImagePreviewImg" src="" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px">
+        <button type="button" onclick="clearPromoImage()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:white;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;line-height:1">×</button>
+      </div>
+      <label for="p_image" style="display:flex;align-items:center;gap:8px;padding:10px 14px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:.85rem;color:var(--muted);background:#fafafa" id="promoImageLabel">
+        📷 Toca para seleccionar una imagen
+        <input type="file" id="p_image" accept="image/*" style="display:none" onchange="previewPromoImage(this)">
+      </label>
+    </div>
     <div class="form-group">
       <label>Descripción * <span style="font-weight:400;color:var(--muted)">(esto le llegará a los clientes)</span></label>
       <textarea id="p_desc" rows="3" placeholder="Hoy tu combo de alitas a Q125, precio normal Q150..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical"></textarea>
@@ -221,6 +233,7 @@ function openModal() {
   document.getElementById('modalMsg').style.display = 'none';
   if (document.getElementById('promoSearch')) document.getElementById('promoSearch').value = '';
   if (document.getElementById('promoPercent')) document.getElementById('promoPercent').value = '';
+  clearPromoImage();
   activePromocat = null;
   renderPromoCatFilter();
   renderProductSelector([]);
@@ -393,6 +406,28 @@ function getSelectedItems() {
   });
 }
 
+function previewPromoImage(input) {
+  if (!input.files || !input.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('promoImagePreviewImg').src = e.target.result;
+    document.getElementById('promoImagePreview').style.display = 'block';
+    document.getElementById('promoImageLabel').style.display = 'none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function clearPromoImage() {
+  var inp = document.getElementById('p_image');
+  if (inp) inp.value = '';
+  var prev = document.getElementById('promoImagePreview');
+  if (prev) prev.style.display = 'none';
+  var lbl = document.getElementById('promoImageLabel');
+  if (lbl) lbl.style.display = 'flex';
+  var img = document.getElementById('promoImagePreviewImg');
+  if (img) img.src = '';
+}
+
 async function savePromo() {
   var title = document.getElementById('p_title').value.trim();
   var desc  = document.getElementById('p_desc').value.trim();
@@ -413,7 +448,19 @@ async function savePromo() {
   var btn = document.getElementById('savePromoBtn');
   btn.textContent = 'Publicando...'; btn.disabled = true;
 
-  var res = await APP.post('/promotions', { title, description: desc, starts_at: start, ends_at: end, items });
+  // Subir imagen si hay una seleccionada
+  var imageUrl = null;
+  var imageFile = document.getElementById('p_image')?.files[0];
+  if (imageFile) {
+    btn.textContent = 'Subiendo imagen...';
+    var imgRes = await APP.upload(imageFile, 'promos');
+    if (imgRes?.success) imageUrl = imgRes.data.url;
+  }
+
+  var payload = { title, description: desc, starts_at: start, ends_at: end, items };
+  if (imageUrl) payload.image_url = imageUrl;
+
+  var res = await APP.post('/promotions', payload);
   if (res?.success) {
     closeModal();
     APP.toast('¡Promoción publicada! Clientes notificados 🔔');

@@ -398,6 +398,7 @@ CREATE TABLE IF NOT EXISTS promotions (
     starts_at DATE NOT NULL,
     ends_at DATE NOT NULL,
     is_active TINYINT(1) DEFAULT 1,
+    image_url VARCHAR(500) NULL,
     notified_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,

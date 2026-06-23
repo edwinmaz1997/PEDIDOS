@@ -71,8 +71,9 @@ class PromotionController {
         if (empty($items)) Response::error('Agrega al menos un producto', 400);
         if ($end < $start) Response::error('La fecha fin debe ser mayor a la de inicio', 400);
 
-        $this->db->prepare("INSERT INTO promotions (business_id, title, description, starts_at, ends_at) VALUES (?,?,?,?,?)")
-                 ->execute([$biz['id'], $title, $desc, $start, $end]);
+        $imageUrl = $body['image_url'] ?? null;
+        $this->db->prepare("INSERT INTO promotions (business_id, title, description, starts_at, ends_at, image_url) VALUES (?,?,?,?,?,?)")
+                 ->execute([$biz['id'], $title, $desc, $start, $end, $imageUrl]);
         $promoId = $this->db->lastInsertId();
 
         foreach ($items as $item) {

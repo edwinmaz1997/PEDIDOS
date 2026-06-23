@@ -228,6 +228,7 @@ function handleInstall() {
   document.getElementById('iosInstallGuide').style.display = 'block';
 }
 function requestNotificationPermission() {
+  console.log('Notification.permission:', Notification.permission);
   if (!('Notification' in window)) {
     alert('Tu navegador no soporta notificaciones push.');
     return;
