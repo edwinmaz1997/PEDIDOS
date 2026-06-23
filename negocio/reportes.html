@@ -617,12 +617,11 @@ async function init() {
     // Ocultar todos los tabs excepto saldo
     document.querySelectorAll('.report-tab').forEach(function(btn) { btn.style.display = 'none'; });
     document.querySelectorAll('.report-section').forEach(function(s) { s.classList.remove('active'); });
-    // Mostrar directamente la sección de saldo con mensaje de tarifa fija
     var saldoTab = document.getElementById('tab-saldo');
     if (saldoTab) {
       saldoTab.classList.add('active');
-      // Insertar aviso de tarifa fija antes del contenido existente
-      saldoTab.insertAdjacentHTML('afterbegin',
+      // Reemplazar TODO el contenido del tab con la tarjeta fija (elimina selects y caja original)
+      saldoTab.innerHTML =
         '<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;border-radius:var(--radius);padding:28px;margin-bottom:20px;text-align:center">' +
           '<div style="font-size:.9rem;opacity:.7;margin-bottom:8px">Plan de suscripción mensual</div>' +
           '<div style="font-family:\'Syne\',sans-serif;font-size:3rem;font-weight:800;margin:12px 0">Q75.00</div>' +
@@ -630,11 +629,8 @@ async function init() {
           '<div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15);font-size:.8rem;opacity:.65">' +
             'Incluye: perfil activo en el directorio, panel de administración, soporte técnico y actualizaciones.' +
           '</div>' +
-        '</div>'
-      );
+        '</div>';
     }
-    // Cargar solo el historial de saldo
-    loadSaldo();
     return; // No cargar los otros reportes
   }
 
