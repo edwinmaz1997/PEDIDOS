@@ -33,7 +33,7 @@
 .delivery-fee { text-align:right; flex-shrink:0; }
 .delivery-fee .total { font-size:.95rem; font-weight:700; color:var(--navy); }
 .delivery-fee .ganancia { font-size:.8rem; color:var(--success); font-weight:600; }
-.period-btn { padding:8px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:.82rem; cursor:pointer; font-weight:500; transition:.15s; }
+.period-btn { padding:8px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:.82rem; cursor:pointer; font-weight:500; transition:.15s; -webkit-appearance:none; appearance:none; }
 .period-btn.active { background:var(--navy); color:white; border-color:var(--navy); }
 </style>
 </head>
@@ -98,10 +98,9 @@
       💡 <strong>¿Cómo se calcula?</strong> El cliente paga el costo de envío (Q15–Q30 según distancia). NuevaExpress te paga el <strong>50% de ese monto</strong> por cada entrega completada. Ejemplo: entrega de Q20 → te corresponden Q10.
     </div>
 
-    <!-- Listado de entregas -->
-    <div class="card">
-      <div class="card-header">
-        <h3>Detalle de entregas</h3>
+    <!-- Listado de entregas -->\n    <div style="background:white;border-radius:var(--radius);border:1px solid var(--border)">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+        <h3 style="font-size:1rem;margin:0">Detalle de entregas</h3>
       </div>
       <div id="deliveriesList" style="padding:0 4px">
         <div class="loading-state"><div class="spinner"></div></div>
