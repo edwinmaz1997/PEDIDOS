@@ -227,7 +227,8 @@ class DeliveryController {
             $stmt = $this->db->prepare("
                 SELECT COUNT(*) as total_entregas,
                        COALESCE(SUM(o.delivery_fee),0) as total_delivery,
-                       COALESCE(SUM(o.delivery_fee*0.5),0) as ganancia_neta
+                       COALESCE(SUM(o.delivery_fee*0.5),0) as ganancia_neta,
+                       COALESCE(SUM(o.total + o.delivery_fee),0) as total_cobrado
                 FROM deliveries d
                 JOIN orders o ON d.order_id=o.id
                 WHERE d.repartidor_id=? AND d.status='entregado'
@@ -239,6 +240,7 @@ class DeliveryController {
             $dStmt = $this->db->prepare("
                 SELECT d.id, d.delivered_at as updated_at, o.order_number, o.delivery_fee,
                        ROUND(o.delivery_fee*0.5,2) as mi_ganancia,
+                       ROUND(o.total + o.delivery_fee,2) as total_cobrado,
                        o.delivery_address, b.name as negocio
                 FROM deliveries d
                 JOIN orders o ON d.order_id=o.id
@@ -254,6 +256,7 @@ class DeliveryController {
                 'total_entregas' => (int)($s['total_entregas'] ?? 0),
                 'total_delivery' => (float)($s['total_delivery'] ?? 0),
                 'ganancia_neta'  => (float)($s['ganancia_neta'] ?? 0),
+                'total_cobrado'  => (float)($s['total_cobrado'] ?? 0),
                 'entregas'       => $dStmt->fetchAll() ?: [],
             ]);
         } catch (\Throwable $e) {

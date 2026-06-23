@@ -76,10 +76,15 @@
         <div class="stat-value" id="statEntregas">—</div>
         <div class="stat-sub" id="statPeriodo">Hoy</div>
       </div>
+      <div class="stat-card" style="border-left:4px solid #a855f7">
+        <div class="stat-label">Monto total cobrado</div>
+        <div class="stat-value" id="statCobrado" style="color:#7c3aed">Q—</div>
+        <div class="stat-sub">Subtotal + delivery cobrado al cliente</div>
+      </div>
       <div class="stat-card gold">
-        <div class="stat-label">Total cobrado por clientes</div>
+        <div class="stat-label">Delivery cobrado</div>
         <div class="stat-value" id="statTotal">Q—</div>
-        <div class="stat-sub">Monto de delivery recibido</div>
+        <div class="stat-sub">Solo el costo de envío</div>
       </div>
       <div class="stat-card green">
         <div class="stat-label">Tu ganancia (50%)</div>
@@ -145,9 +150,10 @@ async function loadStats() {
   var d = res.data;
   var periodLabel = { today: 'Hoy', week: 'Esta semana', month: 'Este mes' }[currentPeriod];
   document.getElementById('statEntregas').textContent = d.total_entregas;
-  document.getElementById('statTotal').textContent = 'Q' + parseFloat(d.total_delivery).toFixed(2);
+  document.getElementById('statCobrado').textContent  = 'Q' + parseFloat(d.total_cobrado || 0).toFixed(2);
+  document.getElementById('statTotal').textContent    = 'Q' + parseFloat(d.total_delivery).toFixed(2);
   document.getElementById('statGanancia').textContent = 'Q' + parseFloat(d.ganancia_neta).toFixed(2);
-  document.getElementById('statPeriodo').textContent = periodLabel;
+  document.getElementById('statPeriodo').textContent  = periodLabel;
 
   if (!d.entregas || !d.entregas.length) {
     document.getElementById('deliveriesList').innerHTML = '<div class="empty-state"><p>Sin entregas en este periodo.</p></div>';
@@ -162,8 +168,11 @@ async function loadStats() {
       '<div class="delivery-num">#' + (e.order_number || e.id) + '<br><span style="font-size:.7rem;color:var(--muted)">' + dia + ' ' + hora + '</span></div>' +
       '<div class="delivery-info"><b>' + (e.negocio || 'Pedido') + '</b><span>' + (e.delivery_address || '—') + '</span></div>' +
       '<div class="delivery-fee">' +
+        '<div style="font-size:.75rem;color:var(--muted)">Total orden</div>' +
+        '<div style="font-size:.9rem;font-weight:700;color:#7c3aed">Q' + parseFloat(e.total_cobrado || 0).toFixed(2) + '</div>' +
+        '<div style="font-size:.75rem;color:var(--muted);margin-top:3px">Delivery</div>' +
         '<div class="total">Q' + parseFloat(e.delivery_fee || 0).toFixed(2) + '</div>' +
-        '<div class="ganancia">+Q' + parseFloat(e.mi_ganancia || 0).toFixed(2) + '</div>' +
+        '<div class="ganancia">+Q' + parseFloat(e.mi_ganancia || 0).toFixed(2) + ' tuyo</div>' +
       '</div>' +
     '</div>';
   }).join('');
