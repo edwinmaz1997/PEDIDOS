@@ -402,9 +402,19 @@ function openLightbox(src) {
   stopSliderAuto();
   // Recopilar todas las fotos del slider actual
   var track = document.getElementById('photoSlider');
-  _lightboxPhotos = track ? Array.from(track.children).map(function(img){ return img.src; }) : [src];
-  _lightboxCurrent = _lightboxPhotos.indexOf(src);
-  if (_lightboxCurrent < 0) _lightboxCurrent = 0;
+  var sliderPhotos = track ? Array.from(track.children).map(function(img){ return img.src; }) : [];
+  var idxInSlider = sliderPhotos.indexOf(src);
+
+  if (idxInSlider >= 0) {
+    // La foto pertenece al slider del negocio — mostrar con navegación
+    _lightboxPhotos = sliderPhotos;
+    _lightboxCurrent = idxInSlider;
+  } else {
+    // Es una foto independiente (servicio, producto, etc.) — mostrar solo esa
+    _lightboxPhotos = [src];
+    _lightboxCurrent = 0;
+  }
+
   showLightboxImage();
   document.getElementById('lightbox').style.display = 'flex';
   document.body.style.overflow = 'hidden';
