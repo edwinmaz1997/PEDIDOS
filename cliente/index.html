@@ -170,7 +170,50 @@ function renderOrder(o) {
       </div>
       ${items ? `<div class="order-items">${items}<div class="order-total-row"><span>Total</span><span>Q${parseFloat(o.total).toFixed(2)}</span></div></div>` : ''}
       ${o.notes ? `<div style="font-size:.85rem;color:var(--muted);margin-top:8px">📝 ${esc(o.notes)}</div>` : ''}
-      ${o.business_response ? `<div class="order-response"><strong>Respuesta del negocio:</strong>${esc(o.business_response)}${o.estimated_time ? ` — ⏱ ~${o.estimated_time} min` : ''}</div>` : ''}
+      ${o.business_response ? `<div class="order-response"><strong>Respuesta del negocio:</strong> ${esc(o.business_response)}</div>` : ''}
+      ${o.estimated_time && o.accepted_at && ['aceptado','en_preparacion'].includes(o.status) ? `
+        <div id="timer-${o.id}" style="margin-top:10px;background:linear-gradient(135deg,#eaf2fb,#f0f7ff);border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px">
+          <div style="font-size:.75rem;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">⏱️ Tiempo de preparación</div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="flex:1;background:#dbeafe;border-radius:20px;height:8px;overflow:hidden">
+              <div id="progress-${o.id}" style="height:100%;background:linear-gradient(90deg,#3b82f6,#1d4ed8);border-radius:20px;transition:width .5s ease;width:0%"></div>
+            </div>
+            <div id="countdown-${o.id}" style="font-size:1.1rem;font-weight:800;color:#1e40af;min-width:60px;text-align:right">--:--</div>
+          </div>
+          <div id="timer-label-${o.id}" style="font-size:.75rem;color:#3b82f6;margin-top:4px">Calculando...</div>
+        </div>
+        <script>
+        (function() {
+          var acceptedAt = new Date('${o.accepted_at}Z').getTime();
+          var totalMs = ${o.estimated_time} * 60000;
+          function tick() {
+            var now = Date.now();
+            var elapsed = now - acceptedAt;
+            var remaining = totalMs - elapsed;
+            var cd = document.getElementById('countdown-${o.id}');
+            var pr = document.getElementById('progress-${o.id}');
+            var lb = document.getElementById('timer-label-${o.id}');
+            if (!cd) return;
+            if (remaining <= 0) {
+              cd.textContent = '¡Listo!';
+              cd.style.color = '#16a34a';
+              if (pr) pr.style.width = '100%';
+              if (pr) pr.style.background = 'linear-gradient(90deg,#22c55e,#16a34a)';
+              if (lb) lb.textContent = 'Tu pedido debería estar listo 🎉';
+              return;
+            }
+            var pct = Math.min(100, (elapsed / totalMs) * 100);
+            var mins = Math.floor(remaining / 60000);
+            var secs = Math.floor((remaining % 60000) / 1000);
+            if (pr) pr.style.width = pct + '%';
+            cd.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+            if (lb) lb.textContent = 'Listo en aproximadamente ' + mins + ' min' + (mins !== 1 ? 's' : '');
+            setTimeout(tick, 1000);
+          }
+          tick();
+        })();
+        </script>
+      ` : o.estimated_time ? `<div style="font-size:.83rem;color:var(--muted);margin-top:6px">⏱️ Tiempo estimado: ~${o.estimated_time} min</div>` : ''}
       <div class="order-actions">
         <a href="pedido-detalle.html?id=${o.id}" class="btn-ghost" style="font-size:.85rem;padding:7px 14px">💬 Ver detalle y chat</a>
         ${o.status === 'entregado' && !o.from_promo ? `<button class="btn-ghost" style="font-size:.85rem;padding:7px 14px" onclick="reorder(${o.business_id},${JSON.stringify(o.items||[]).replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_type||'pickup').replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_address||'').replace(/"/g,'&quot;')})">🔁 Pedir de nuevo</button>` : ''}

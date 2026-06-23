@@ -303,7 +303,15 @@ function renderOrder(o) {
             <textarea id="resp-${o.id}" rows="2" placeholder="Mensaje al cliente (opcional)..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem"></textarea>
           </div>
           <div class="form-group" style="margin-bottom:10px">
-            <input type="number" id="time-${o.id}" placeholder="Tiempo estimado (min)" min="1" max="180" style="width:160px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif">
+            <label style="font-size:.82rem;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:4px;margin-bottom:5px">
+              ⏱️ Tiempo estimado de preparación <span style="color:var(--danger)">*</span>
+            </label>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="number" id="time-${o.id}" placeholder="Ej: 20" min="1" max="180"
+                style="width:100px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.95rem">
+              <span style="font-size:.85rem;color:var(--muted)">minutos</span>
+            </div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:4px">El cliente verá un contador con el tiempo restante</div>
           </div>
           <div class="respond-row">
             <button class="btn-primary" onclick="respond(${o.id},'aceptar')" style="padding:9px 18px">✅ Aceptar</button>
@@ -319,6 +327,15 @@ function renderOrder(o) {
 async function respond(orderId, action) {
   const response = document.getElementById(`resp-${orderId}`)?.value || '';
   const estTime  = parseInt(document.getElementById(`time-${orderId}`)?.value) || null;
+
+  if (action === 'aceptar' && (!estTime || estTime < 1)) {
+    const inp = document.getElementById(`time-${orderId}`);
+    inp.style.border = '1.5px solid var(--danger)';
+    inp.focus();
+    setTimeout(() => inp.style.border = '1.5px solid var(--border)', 3000);
+    alert('⏱️ Debes indicar el tiempo estimado de preparación');
+    return;
+  }
   try {
     const res = await fetch(`${API}/orders/${orderId}/respond`, {
       method: 'PUT', headers: { 'Content-Type':'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },

@@ -216,10 +216,18 @@ class OrderController {
         $estTime  = isset($body['estimated_time']) ? (int)$body['estimated_time'] : null;
 
         if (!in_array($action, ['aceptar', 'rechazar'])) Response::error('Acción inválida', 400);
+        if ($action === 'aceptar' && (!$estTime || $estTime < 1)) {
+            Response::error('Debes indicar el tiempo estimado de preparación', 400);
+        }
 
         $newStatus = $action === 'aceptar' ? 'aceptado' : 'cancelado';
-        $this->db->prepare("UPDATE orders SET status = ?, business_response = ?, estimated_time = ? WHERE id = ?")
-                 ->execute([$newStatus, $response, $estTime, $id]);
+        if ($action === 'aceptar') {
+            $this->db->prepare("UPDATE orders SET status=?, business_response=?, estimated_time=?, accepted_at=NOW() WHERE id=?")
+                     ->execute([$newStatus, $response, $estTime, $id]);
+        } else {
+            $this->db->prepare("UPDATE orders SET status=?, business_response=? WHERE id=?")
+                     ->execute([$newStatus, $response, $id]);
+        }
 
         $this->logStatus($id, $newStatus, $response, $user['id']);
 

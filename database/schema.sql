@@ -187,6 +187,7 @@ CREATE TABLE IF NOT EXISTS orders (
     status ENUM('pendiente','aceptado','en_preparacion','listo','en_camino','entregado','cancelado') DEFAULT 'pendiente',
     business_response TEXT,
     estimated_time INT COMMENT 'minutos estimados',
+    accepted_at TIMESTAMP NULL COMMENT 'cuando el negocio aceptó el pedido',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES users(id),
