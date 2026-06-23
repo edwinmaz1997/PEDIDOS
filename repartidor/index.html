@@ -120,6 +120,9 @@
           <div class="route-name" id="dClientName">—</div>
           <div class="route-addr" id="dDeliveryAddr">—</div>
           <a href="#" id="dDeliveryMaps" target="_blank" class="map-btn">🗺️ Ver en Google Maps</a>
+          <a href="#" id="dClientCall" style="display:none;margin-top:6px;align-items:center;gap:6px;padding:7px 14px;background:#25D366;color:white;border-radius:20px;text-decoration:none;font-size:.82rem;font-weight:600">
+            📞 Llamar al cliente
+          </a>
         </div>
       </div>
     </div>
@@ -525,8 +528,14 @@ function openDetail(id) {
 
   // Client phone — only show if repartidor has claimed this delivery
   var isClaimed = d.repartidor_id != null && String(d.repartidor_id) === String(user.id);
-  if (d.client_phone && isClaimed) {
-  } else {
+  var callBtn = document.getElementById('dClientCall');
+  if (callBtn) {
+    if (d.client_phone && isClaimed) {
+      callBtn.href = 'tel:' + d.client_phone.replace(/\D/g, '');
+      callBtn.style.display = 'inline-flex';
+    } else {
+      callBtn.style.display = 'none';
+    }
   }
 
   // Notes
