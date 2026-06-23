@@ -159,19 +159,53 @@ if(!localStorage.getItem('nuevaexpress_token')||user.role!=='negocio') window.lo
 document.getElementById('sidebarUser').textContent = user.name||'';
 
 var allProducts = [];
+var isServicio = false;
 var editingId = null;
 
 async function init() {
-  // Primero obtener el negocio del usuario
   const bizRes = await APP.get('/businesses/mine');
   const biz = bizRes?.data;
   if (!biz) { document.getElementById('promoList').innerHTML = '<div class="empty-state"><p>No se encontró tu negocio.</p></div>'; return; }
 
-  const [promos, prods] = await Promise.all([
+  isServicio = biz.business_type === 'servicios';
+
+  // Cambiar el label del selector según tipo
+  if (isServicio) {
+    var lbl = document.querySelector('label[for="p_image"]')?.closest('.form-group')?.previousElementSibling;
+    var selectorLabel = document.querySelector('.form-group label');
+    // Actualizar el label del selector de items
+    var labels = document.querySelectorAll('.form-group label');
+    labels.forEach(function(l) {
+      if (l.textContent.includes('Productos en promoción')) {
+        l.innerHTML = 'Servicios en promoción * <span style="font-weight:400;color:var(--muted)">(selecciona y asigna precio promo)</span>';
+      }
+    });
+  }
+
+  const [promos, items] = await Promise.all([
     APP.get('/promotions/mine'),
-    APP.get('/products?business_id=' + biz.id)
+    isServicio
+      ? APP.get('/businesses/' + biz.id + '/services')
+      : APP.get('/products?business_id=' + biz.id)
   ]);
-  allProducts = (prods?.data || []).filter(function(p){ return p.is_available == 1; });
+
+  if (isServicio) {
+    // Mapear servicios al mismo formato que productos
+    allProducts = (items?.data || []).filter(function(s){ return s.is_available == 1; }).map(function(s) {
+      return {
+        id: s.id,
+        name: s.name,
+        price: parseFloat(s.price_from || s.price_to || 0),
+        price_to: parseFloat(s.price_to || 0),
+        category_name: 'Servicios',
+        is_available: 1,
+        _isService: true,
+      };
+    });
+  } else {
+    allProducts = (items?.data || []).filter(function(p){ return p.is_available == 1; });
+  }
+
   renderPromos(promos?.data || []);
 }
 
@@ -281,7 +315,9 @@ function renderProductSelector(selected, filtered) {
   var products = filtered !== undefined ? filtered : allProducts;
   var sel = document.getElementById('productSelector');
   if (!allProducts.length) {
-    sel.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted)">No tienes productos. Agrégalos primero en la sección de Productos.</div>';
+    sel.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted)">' +
+      (isServicio ? 'No tienes servicios. Agrégalos primero en la sección de Mis Servicios.' : 'No tienes productos. Agrégalos primero en la sección de Productos.') +
+      '</div>';
     return;
   }
   if (!products.length) {
@@ -303,11 +339,14 @@ function renderProductSelector(selected, filtered) {
         var isSelected = document.getElementById('opt-'+p.id)?.classList.contains('selected') ||
                          (selected && selected.find && selected.find(function(s){ return s.product_id == p.id; }));
         var promoVal = isSelected && document.getElementById('promo-price-'+p.id) ? document.getElementById('promo-price-'+p.id).value : '';
+        var precioNormal = p._isService
+          ? (p.price > 0 && p.price_to > 0 ? 'Q'+p.price.toFixed(2)+' – Q'+p.price_to.toFixed(2) : p.price > 0 ? 'Q'+p.price.toFixed(2) : 'Sin precio definido')
+          : 'Q' + parseFloat(p.price).toFixed(2);
         return '<div class="item-option' + (isSelected?' selected':'') + '" id="opt-'+p.id+'" onclick="toggleProduct('+p.id+','+p.price+')">' +
           '<input type="checkbox" ' + (isSelected?'checked':'') + ' onclick="event.stopPropagation();toggleProduct('+p.id+','+p.price+')">' +
           '<div class="item-info">' +
             '<div class="item-name">' + APP.esc(p.name) + '</div>' +
-            '<div class="item-price">Precio normal: Q' + parseFloat(p.price).toFixed(2) + '</div>' +
+            '<div class="item-price">Precio normal: ' + precioNormal + '</div>' +
           '</div>' +
           '<div class="promo-input">' +
             '<label>Precio promo</label>' +

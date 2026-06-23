@@ -94,9 +94,10 @@ async function init() {
         '<div class="promo-items" id="items-'+p.id+'">' +
           (p.items||[]).map(function(item) {
             var saving = (parseFloat(item.original_price) - parseFloat(item.promo_price)).toFixed(2);
+            var isService = p.business_type === 'servicios';
             return '<div class="promo-item-row">' +
               '<div class="item-left">' +
-                '<div class="item-check" id="chk-'+p.id+'-'+item.id+'" onclick="toggleItem(\''+p.id+'\','+JSON.stringify(item).replace(/'/g,"\\'")+')">✓</div>' +
+                (isService ? '' : '<div class="item-check" id="chk-'+p.id+'-'+item.id+'" onclick="toggleItem(\''+p.id+'\','+JSON.stringify(item).replace(/'/g,"\\'")+')">✓</div>') +
                 '<div class="item-name">' + APP.esc(item.product_name) + '</div>' +
               '</div>' +
               '<div class="item-prices">' +
@@ -107,7 +108,13 @@ async function init() {
             '</div>';
           }).join('') +
         '</div>' +
-        '<button onclick="pedirPromo(' + p.id + ',' + p.business_id + ')" class="btn-primary" style="width:100%;justify-content:center;padding:13px">🛒 Pedir con estos productos</button>' +
+        (p.business_type === 'servicios' ? (function(){
+            var wa = (p.whatsapp || p.phone || '').replace(/\D/g,'');
+            var msg = encodeURIComponent('Hola ' + p.business_name + '! Vi tu promoción "' + p.title + '" en NuevaExpress y me gustaría más información.');
+            return wa ? '<a href="https://wa.me/'+wa+'?text='+msg+'" target="_blank" class="btn-primary" style="width:100%;justify-content:center;padding:13px;text-decoration:none;display:flex;background:#25D366">💬 Contactar por WhatsApp</a>'
+              : '<div style="text-align:center;padding:12px;color:var(--muted);font-size:.85rem">Contáctanos directamente para aprovechar esta oferta</div>';
+          })()
+          : '<button onclick="pedirPromo(' + p.id + ',' + p.business_id + ')" class="btn-primary" style="width:100%;justify-content:center;padding:13px">🛒 Pedir con estos productos</button>') +
       '</div>' +
     '</div>';
   }).join('');

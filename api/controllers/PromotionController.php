@@ -13,7 +13,8 @@ class PromotionController {
                      ->execute([$today]);
 
             $stmt = $this->db->prepare("
-                SELECT p.*, b.name as business_name, b.logo as business_logo
+                SELECT p.*, b.name as business_name, b.logo as business_logo,
+                       b.business_type, b.whatsapp, b.phone
                 FROM promotions p
                 JOIN businesses b ON b.id = p.business_id
                 WHERE p.is_active = 1 AND p.starts_at <= ? AND p.ends_at >= ? AND b.is_active = 1
