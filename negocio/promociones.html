@@ -190,6 +190,7 @@ async function init() {
   ]);
 
   if (isServicio) {
+    console.log('SERVICIOS raw:', items?.data);
     // Mapear servicios al mismo formato que productos
     allProducts = (items?.data || []).filter(function(s){ return s.is_available == 1; }).map(function(s) {
       return {
