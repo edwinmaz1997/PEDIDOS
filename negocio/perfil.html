@@ -664,7 +664,8 @@ function toggleSidebar() {
 }
 </script>
 
-<script src="/assets/js/pwa.js">
+<script src="/assets/js/pwa.js"></script>
+<script>
 // Adaptar sidebar según tipo de negocio
 (async function(){
   try {
@@ -675,7 +676,6 @@ function toggleSidebar() {
     if (biz.business_type === 'servicios') {
       var np = document.getElementById('navProductos'); if(np) np.style.display='none';
       var ns = document.getElementById('navServicios'); if(ns) ns.style.display='block';
-      // Ocultar tab de pedidos en sidebar
       var navPedidos = document.getElementById('navPedidos'); if(navPedidos) navPedidos.style.display='none';
       // Ocultar sección de delivery en el tab de información
       var deliverySection = document.querySelector('[id="f_accepts_delivery"]')?.closest('div[style*="display:flex"]');
@@ -687,7 +687,6 @@ function toggleSidebar() {
     }
   } catch(e){}
 })();
-
 </script>
 </body>
 </html>

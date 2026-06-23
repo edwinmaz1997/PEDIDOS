@@ -604,13 +604,16 @@ function exportDiario() {
 }
 
 async function init() {
-  var res = await APP.get('/businesses');
-  var biz = res?.data?.businesses?.[0];
+  var mineRes = await APP.get('/businesses/mine');
+  var biz = mineRes?.data;
   if (!biz) { window.location.href = 'crear-negocio.html'; return; }
   bizId = biz.id;
 
   // Si es negocio de servicios: ocultar tabs de pedidos y mostrar solo saldo NuevaExpress
   if (biz.business_type === 'servicios') {
+    // Ajustar sidebar
+    var np = document.getElementById('navProductos'); if(np) np.style.display='none';
+    var ns = document.getElementById('navServicios'); if(ns) ns.style.display='block';
     // Ocultar todos los tabs excepto saldo
     document.querySelectorAll('.report-tab').forEach(function(btn) { btn.style.display = 'none'; });
     document.querySelectorAll('.report-section').forEach(function(s) { s.classList.remove('active'); });
@@ -679,25 +682,6 @@ function filterByPeriod(orders, period) {
 }
 
 init();
-
-// Adaptar sidebar según tipo de negocio
-(async function(){
-  try {
-    var res = await fetch('/api/businesses/mine', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
-    var data = await res.json();
-    var biz = data.data;
-    if (!biz) return;
-    if (biz.business_type === 'servicios') {
-      var np = document.getElementById('navProductos'); if(np) np.style.display='none';
-      var ns = document.getElementById('navServicios'); if(ns) ns.style.display='block';
-      var nz = document.getElementById('navZonas');    if(nz) nz.style.display='none';
-    } else {
-      var np = document.getElementById('navProductos'); if(np) np.style.display='block';
-      var ns = document.getElementById('navServicios'); if(ns) ns.style.display='none';
-      var nz = document.getElementById('navZonas');    if(nz) nz.style.display='block';
-    }
-  } catch(e){}
-})();
 
 </script>
 </body>
