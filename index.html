@@ -563,12 +563,15 @@ async function openBusiness(id) {
         if (s.price_from && s.price_to) price = `<span style="color:var(--accent);font-weight:700;font-size:.85rem">Q${parseFloat(s.price_from).toFixed(0)} – Q${parseFloat(s.price_to).toFixed(0)}</span>`;
         else if (s.price_from) price = `<span style="color:var(--accent);font-weight:700;font-size:.85rem">Desde Q${parseFloat(s.price_from).toFixed(0)}</span>`;
         return `<div style="padding:12px 0;border-bottom:1px solid var(--border)">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-            <div>
-              <div style="font-weight:600">${escHtml(s.name)}</div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            ${s.photo_url ? `<img src="${escHtml(s.photo_url)}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:zoom-in" onclick="openLightbox('${escHtml(s.photo_url)}')">` : ''}
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+                <div style="font-weight:600">${escHtml(s.name)}</div>
+                ${price}
+              </div>
               ${s.description ? `<div style="font-size:.82rem;color:var(--muted);margin-top:2px">${escHtml(s.description)}</div>` : ''}
             </div>
-            ${price}
           </div>
         </div>`;
       }).join('');
