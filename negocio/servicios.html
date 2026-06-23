@@ -17,18 +17,103 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.svc-row { display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border); background:white; }
+.svc-row {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  background:white;
+}
 .svc-row:last-child { border-bottom:none; }
 .svc-row:hover { background:var(--off-white); }
-.svc-row .svc-price { flex-shrink:0; width:130px; text-align:right; }
-.svc-row .svc-actions { flex-shrink:0; }
-.svc-name { font-weight:600; font-size:.95rem; }
-.svc-desc { font-size:.8rem; color:var(--muted); margin-top:2px; }
-.svc-price { font-weight:700; color:var(--accent); font-size:.9rem; white-space:nowrap; }
-.svc-actions { display:flex; gap:6px; align-items:center; justify-content:flex-end; }
-.icon-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:6px 10px; cursor:pointer; font-size:.85rem; transition:var(--transition); }
+
+.svc-photo {
+  width:72px;
+  height:72px;
+  border-radius:10px;
+  object-fit:cover;
+  flex-shrink:0;
+  cursor:zoom-in;
+}
+
+.svc-content {
+  flex:1;
+  min-width:0;
+}
+
+.svc-name { font-weight:600; font-size:.95rem; color:var(--navy); }
+.svc-desc {
+  font-size:.8rem;
+  color:var(--muted);
+  margin-top:3px;
+  line-height:1.4;
+  /* Truncar a 2 líneas en móvil */
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.svc-price {
+  font-weight:700;
+  color:var(--accent);
+  font-size:.85rem;
+  white-space:nowrap;
+  margin-top:5px;
+}
+
+.svc-actions {
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-shrink:0;
+}
+
+.icon-btn {
+  background:none;
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:6px 10px;
+  cursor:pointer;
+  font-size:.85rem;
+  transition:var(--transition);
+  white-space:nowrap;
+}
 .icon-btn:hover { background:var(--off-white); }
 .icon-btn.danger:hover { background:#fdf0f0; border-color:var(--danger); color:var(--danger); }
+
+/* Móvil — card vertical */
+@media(max-width:600px) {
+  .svc-row {
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+    padding:14px;
+  }
+  .svc-row-top {
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .svc-photo {
+    width:80px;
+    height:80px;
+    border-radius:10px;
+    flex-shrink:0;
+  }
+  .svc-content { flex:1; min-width:0; }
+  .svc-desc { -webkit-line-clamp:3; }
+  .svc-row-bottom {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top:1px solid var(--border);
+    padding-top:10px;
+    margin-top:2px;
+  }
+  .svc-price { margin-top:0; font-size:.9rem; }
+  .icon-btn { padding:8px 12px; font-size:.9rem; }
+}
 .modal-form { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; display:flex; align-items:flex-end; justify-content:center; }
 @media(min-width:640px){ .modal-form { align-items:center; } }
 .modal-form-box { background:white; border-radius:20px 20px 0 0; padding:28px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; }
@@ -159,18 +244,36 @@ async function loadServices() {
     else                              price = 'Precio a consultar';
 
     return '<div class="svc-row">' +
-      (s.photo_url ? '<img src="'+esc(s.photo_url)+'" style="width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-right:4px" onclick="this.style.display=\'none\'">' : '') +
-      '<div style="flex:1;min-width:0">' +
-        '<div class="svc-name">' + esc(s.name) + (s.is_available ? '' : ' <span style="font-size:.75rem;color:var(--muted);font-weight:400">(no disponible)</span>') + '</div>' +
-        (s.description ? '<div class="svc-desc">' + esc(s.description) + '</div>' : '') +
+      '<div class="svc-row-top">' +
+        (s.photo_url ? '<img src="'+esc(s.photo_url)+'" class="svc-photo" onclick="openSvcLightbox(\''+esc(s.photo_url)+'\')">' : '') +
+        '<div class="svc-content">' +
+          '<div class="svc-name">' + esc(s.name) + (s.is_available ? '' : ' <span style="font-size:.72rem;color:var(--muted);font-weight:400;background:#f0f0f0;padding:2px 7px;border-radius:20px">No disponible</span>') + '</div>' +
+          (s.description ? '<div class="svc-desc">' + esc(s.description) + '</div>' : '') +
+        '</div>' +
       '</div>' +
-      '<div class="svc-price">' + price + '</div>' +
-      '<div class="svc-actions">' +
-        '<button class="icon-btn" onclick="editService(' + JSON.stringify(s).replace(/"/g,'&quot;') + ')">✏️</button>' +
-        '<button class="icon-btn danger" onclick="deleteService(' + s.id + ')">🗑️</button>' +
+      '<div class="svc-row-bottom">' +
+        '<div class="svc-price">' + price + '</div>' +
+        '<div class="svc-actions">' +
+          '<button class="icon-btn" onclick="editService(' + JSON.stringify(s).replace(/"/g,'&quot;') + ')">✏️ Editar</button>' +
+          '<button class="icon-btn danger" onclick="deleteService(' + s.id + ')">🗑️</button>' +
+        '</div>' +
       '</div>' +
     '</div>';
   }).join('');
+}
+
+function openSvcLightbox(url) {
+  var lb = document.getElementById('svcLightbox');
+  if (!lb) {
+    lb = document.createElement('div');
+    lb.id = 'svcLightbox';
+    lb.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;display:flex;align-items:center;justify-content:center;cursor:zoom-out';
+    lb.onclick = function(){ lb.style.display='none'; };
+    lb.innerHTML = '<img id="svcLightboxImg" style="max-width:92vw;max-height:88vh;border-radius:12px;object-fit:contain">';
+    document.body.appendChild(lb);
+  }
+  document.getElementById('svcLightboxImg').src = url;
+  lb.style.display = 'flex';
 }
 
 function previewSvcPhoto(input) {
