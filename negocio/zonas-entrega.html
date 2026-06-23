@@ -42,7 +42,6 @@
       <li><a href="perfil.html">🏪 Mi Perfil</a></li>
       <li id="navProductos"><a href="productos.html">📦 Productos</a></li>
       <li id="navServicios" style="display:none"><a href="servicios.html">🔧 Mis Servicios</a></li>
-      <li id="navZonas"><a href="zonas-entrega.html" class="active">🗺️ Zonas de Entrega</a></li>
       <li><a href="promociones.html">🏷️ Promociones</a></li>
       <li><a href="reportes.html">📊 Reportes</a></li>
       <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
@@ -76,6 +75,8 @@ var bizId=null;
 var selected=new Set();
 
 async function init(){
+  window.location.replace('index.html');
+  return;
   var bizRes = await fetch('/api/businesses/mine',{headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.json());
   var biz = bizRes.data;
   if(!biz){document.getElementById('zonesContainer').innerHTML='<div class="empty-state"><p>Primero crea tu negocio en <a href="perfil.html" style="color:var(--blue)">Mi Perfil</a>.</p></div>';return;}
