@@ -51,7 +51,7 @@
       <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px" id="sidebarUser"></div>
     </div>
     <ul class="sidebar-nav">
-      <li><a href="index.html">📋 Pedidos</a></li>
+      <li id="navPedidos" style="display:none"><a href="index.html">📋 Pedidos</a></li>
       <li><a href="perfil.html">🏪 Mi Perfil</a></li>
       <li id="navProductos"><a href="productos.html">📦 Productos</a></li>
       <li id="navServicios" style="display:none"><a href="servicios.html">🔧 Mis Servicios</a></li>
@@ -503,6 +503,7 @@ init();
     } else {
       var np = document.getElementById('navProductos'); if(np) np.style.display='block';
       var ns = document.getElementById('navServicios'); if(ns) ns.style.display='none';
+      var nav = document.getElementById('navPedidos'); if(nav) nav.style.display='block';
       var nz = document.getElementById('navZonas');    if(nz) nz.style.display='block';
     }
   } catch(e){}
