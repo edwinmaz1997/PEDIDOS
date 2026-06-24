@@ -69,6 +69,56 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
         <button class="role-btn" onclick="setRole('repartidor', this)" style="display:none">🛵 Repartidor</button>
       </div>
 
+      <!-- Instalar app -->
+      <div style="margin-top:14px;margin-bottom:4px">
+        <button onclick="toggleInstallBox()" style="width:100%;background:#f8fafc;border:1.5px solid var(--border);color:var(--charcoal);padding:9px 16px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+          📲 Instalar aplicación
+          <span id="installArrow" style="font-size:.7rem;transition:.2s">▾</span>
+        </button>
+
+        <div id="installBox" style="display:none;margin-top:8px;border:1.5px solid var(--border);border-radius:12px;padding:14px;background:white">
+
+          <!-- Botón automático -->
+          <div id="installBtnWrap" style="display:none;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #e5e7eb">
+            <button id="installNowBtn" onclick="handleInstall()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer">
+              ⚡ Instalar automáticamente
+            </button>
+            <p style="font-size:.72rem;color:#6b7280;text-align:center;margin:5px 0 0">Tu navegador soporta instalación directa</p>
+          </div>
+
+          <!-- Android -->
+          <details style="margin-bottom:8px">
+            <summary style="font-size:.83rem;font-weight:700;color:var(--charcoal);cursor:pointer;list-style:none;display:flex;align-items:center;gap:7px;padding:3px 0">
+              <span>🤖</span> Instalar en Android
+              <span style="margin-left:auto;color:#6b7280;font-size:.72rem">▾</span>
+            </summary>
+            <div style="padding:8px 0 2px 24px;font-size:.79rem;color:#4b5563;line-height:1.9">
+              <div>1. Abre <strong>Chrome</strong> y ve a <strong>nuevaexpress.com</strong></div>
+              <div>2. Toca los <strong>3 puntos ⋮</strong> arriba a la derecha</div>
+              <div>3. Selecciona <strong>"Agregar a pantalla de inicio"</strong></div>
+              <div>4. Toca <strong>"Instalar"</strong> y listo ✅</div>
+            </div>
+          </details>
+
+          <!-- iOS -->
+          <details>
+            <summary style="font-size:.83rem;font-weight:700;color:var(--charcoal);cursor:pointer;list-style:none;display:flex;align-items:center;gap:7px;padding:3px 0">
+              <span>🍎</span> Instalar en iPhone / iPad
+              <span style="margin-left:auto;color:#6b7280;font-size:.72rem">▾</span>
+            </summary>
+            <div style="padding:8px 0 2px 24px;font-size:.79rem;color:#4b5563;line-height:1.9">
+              <div>1. Abre <strong>Safari</strong> y ve a <strong>nuevaexpress.com</strong></div>
+              <div>2. Toca el botón <strong>compartir ⬆️</strong> abajo</div>
+              <div>3. Selecciona <strong>"Agregar a pantalla de inicio"</strong></div>
+              <div>4. Toca <strong>"Agregar"</strong> y listo ✅</div>
+              <div style="margin-top:6px;padding:7px;background:#fef3c7;border-radius:7px;font-size:.74rem;color:#92400e">
+                ⚠️ Solo funciona desde <strong>Safari</strong>, no desde Chrome en iOS
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
       <div class="error-msg" id="errorMsg1"></div>
 
       <div class="two-col">
@@ -157,6 +207,31 @@ function togglePw(id) {
 const API = '/api';
 let selectedRole = 'cliente';
 let formData = {};
+
+// ── PWA Install ──
+var deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  var wrap = document.getElementById('installBtnWrap');
+  if (wrap) wrap.style.display = 'block';
+});
+function toggleInstallBox() {
+  var box = document.getElementById('installBox');
+  var arrow = document.getElementById('installArrow');
+  var open = box.style.display === 'none';
+  box.style.display = open ? 'block' : 'none';
+  arrow.textContent = open ? '▴' : '▾';
+}
+async function handleInstall() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  var result = await deferredInstallPrompt.userChoice;
+  if (result.outcome === 'accepted') {
+    document.getElementById('installBox').style.display = 'none';
+    deferredInstallPrompt = null;
+  }
+}
 
 function setRole(r, btn) {
   selectedRole = r;
