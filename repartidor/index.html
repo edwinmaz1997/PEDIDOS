@@ -119,6 +119,9 @@
           <div class="route-label">🏠 Entregar en</div>
           <div class="route-name" id="dClientName">—</div>
           <div class="route-addr" id="dDeliveryAddr">—</div>
+          <div id="dHouseDesc" style="display:none;margin-top:6px;background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:8px 12px;font-size:.8rem;color:#713f12">
+            <span style="font-weight:700">📝 Descripción:</span> <span id="dHouseDescText"></span>
+          </div>
           <a href="#" id="dDeliveryMaps" target="_blank" class="map-btn">🗺️ Ver en Google Maps</a>
           <a href="#" id="dClientCall" style="display:none;margin-top:6px;align-items:center;gap:6px;padding:7px 14px;background:#25D366;color:white;border-radius:20px;text-decoration:none;font-size:.82rem;font-weight:600">
             📞 Llamar al cliente
@@ -495,7 +498,16 @@ function openDetail(id) {
   if (!isPackage) {
     document.getElementById('dClientName').textContent = d.client_name || 'Cliente';
     var delAddr = d.delivery_address || '';
-  document.getElementById('dDeliveryAddr').textContent = delAddr || 'Sin dirección';
+    document.getElementById('dDeliveryAddr').textContent = delAddr || 'Sin dirección';
+    // Descripción de la casa
+    var houseDesc = document.getElementById('dHouseDesc');
+    var houseDescText = document.getElementById('dHouseDescText');
+    if (d.client_house_description && houseDesc) {
+      houseDescText.textContent = d.client_house_description;
+      houseDesc.style.display = 'block';
+    } else if (houseDesc) {
+      houseDesc.style.display = 'none';
+    }
   if (delAddr) {
     var isUrl = delAddr.startsWith('http');
     // If it's a URL open it directly, otherwise search by text

@@ -89,6 +89,10 @@
           <input type="text" id="f_address" placeholder="Colonia, calle, número...">
         </div>
         <div class="form-group">
+          <label>Descripción de mi casa <span style="font-weight:400;color:var(--muted)">(opcional — ayuda al repartidor a ubicarte)</span></label>
+          <textarea id="f_house_description" rows="3" placeholder="Ej: Casa azul con portón negro, frente a la cancha, segunda casa a la derecha..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical"></textarea>
+        </div>
+        <div class="form-group">
           <label>Link Google Maps de mi casa <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
           <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">
             <input type="url" id="f_maps_url" placeholder="https://maps.app.goo.gl/..." oninput="previewMapsUrl()" style="flex:1;min-width:0">
@@ -187,6 +191,7 @@ async function init() {
   document.getElementById('f_name').value    = u.name || '';
   document.getElementById('f_phone').value   = u.phone || '';
   document.getElementById('f_address').value = u.address || '';
+  document.getElementById('f_house_description').value = u.house_description || '';
   document.getElementById('f_maps_url').value = u.google_maps_url || '';
   if (u.google_maps_url) {
     var mp = document.getElementById('mapsPreview');
@@ -211,6 +216,7 @@ async function saveProfile() {
     name:  document.getElementById('f_name').value.trim(),
     phone:          document.getElementById('f_phone').value.trim(),
     address:        document.getElementById('f_address').value.trim(),
+    house_description: document.getElementById('f_house_description').value.trim(),
     google_maps_url: document.getElementById('f_maps_url').value.trim(),
   });
   if (res?.success) {
