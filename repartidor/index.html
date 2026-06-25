@@ -332,12 +332,11 @@ function startRepartidorTimers() {
       if (remaining <= 0) {
         box.style.background = '#fef2f2';
         box.style.borderColor = '#fca5a5';
-        box.querySelector('div').textContent = '🙏 Perdón por el atraso';
-        box.querySelector('div').style.color = '#dc2626';
         cd.textContent = '⏰';
-        if (pr) pr.style.width = '100%';
-        if (pr) pr.style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
-        if (lb) lb.textContent = 'El pedido debería estar listo pronto';
+        if (pr) { pr.style.width = '100%'; pr.style.background = 'linear-gradient(90deg,#ef4444,#dc2626)'; }
+        if (lb) lb.textContent = '🙏 Perdón por el atraso — actualizando...';
+        // Forzar refresh para detectar si el negocio ya marcó listo
+        setTimeout(function() { init(); }, 2000);
         return;
       }
       var pct  = Math.min(100, (elapsed / totalMs) * 100);
@@ -842,7 +841,7 @@ function doLogout(){localStorage.clear();window.location.href='/cliente/login.ht
 function toggleSidebar(){var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open');}
 
 init();
-setInterval(init, 30000);
+setInterval(init, 10000);
 </script>
 <!-- Confirm Modal -->
 <div id="confirmModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:16px">
