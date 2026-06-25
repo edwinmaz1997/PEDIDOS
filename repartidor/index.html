@@ -386,7 +386,7 @@ function renderCard(d) {
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
 
     // Timer de preparación para pedidos asignados/recogidos
-    (d.estimated_time && d.preparation_started_at && ['asignado','recogido'].includes(d.status) ?
+    (d.estimated_time && d.preparation_started_at && ['disponible','asignado','recogido'].includes(d.status) ?
       '<div id="rtimer-'+d.id+'" data-started="'+d.preparation_started_at+'" data-mins="'+d.estimated_time+'" style="width:100%;margin-bottom:8px;background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:10px 14px">' +
         '<div style="font-size:.73rem;font-weight:700;color:#854d0e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">⏳ El negocio está preparando el pedido</div>' +
         '<div style="display:flex;align-items:center;gap:10px">' +
