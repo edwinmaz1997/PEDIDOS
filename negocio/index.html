@@ -277,9 +277,6 @@ function startNegocioTimers() {
     var id = el.id.replace('ntimer-', '');
     var raw = el.dataset.accepted;
     var acceptedAt = new Date(raw.replace(' ','T')).getTime();
-    if (Date.now() - acceptedAt < 0 || Date.now() - acceptedAt > 86400000) {
-      acceptedAt = new Date(raw.replace(' ','T') + 'Z').getTime();
-    }
     var totalMs = parseInt(el.dataset.mins) * 60000;
     function tick() {
       var now = Date.now(), elapsed = now - acceptedAt, remaining = totalMs - elapsed;

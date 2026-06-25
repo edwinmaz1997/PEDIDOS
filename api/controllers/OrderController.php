@@ -274,7 +274,8 @@ class OrderController {
         }
 
         if ($status === 'en_preparacion') {
-            $this->db->prepare("UPDATE orders SET status=?, preparation_started_at=NOW() WHERE id=?")->execute([$status, $id]);
+            $nowGT = (new \DateTime('now', new \DateTimeZone('America/Guatemala')))->format('Y-m-d H:i:s');
+            $this->db->prepare("UPDATE orders SET status=?, preparation_started_at=? WHERE id=?")->execute([$status, $nowGT, $id]);
         } else {
             $this->db->prepare("UPDATE orders SET status=? WHERE id=?")->execute([$status, $id]);
         }
