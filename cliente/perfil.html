@@ -94,18 +94,25 @@
         </div>
         <div class="form-group">
           <label>Link Google Maps de mi casa <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
-          <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-            <input type="url" id="f_maps_url" placeholder="https://maps.app.goo.gl/..." oninput="previewMapsUrl()" style="flex:1;min-width:0">
-            <button type="button" onclick="getGPSPerfil()" title="Obtener mi ubicación GPS" style="padding:9px 13px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;flex-shrink:0">📍</button>
+
+          <!-- Fila 1: botones de acción -->
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+            <a href="https://www.google.com/maps" target="_blank"
+               onclick="setTimeout(function(){ var i=document.getElementById('f_maps_url'); if(i) i.placeholder='Pega aquí el link copiado de Google Maps...'; }, 500)"
+               style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;background:#1a73e8;color:white;border-radius:var(--radius-sm);text-decoration:none;font-size:.85rem;font-weight:600">
+              🗺️ Abrir Google Maps y copiar link
+            </a>
+            <button type="button" onclick="getGPSPerfil()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600">
+              📍 Usar mi ubicación GPS actual
+            </button>
           </div>
-          <a href="https://www.google.com/maps" target="_blank"
-             onclick="setTimeout(function(){ var i=document.getElementById('f_maps_url'); if(i) i.placeholder='Pega aquí el link copiado de Google Maps...'; }, 500)"
-             style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1a73e8;color:white;border-radius:var(--radius-sm);text-decoration:none;font-size:.82rem;font-weight:600;margin-bottom:6px">
-            🗺️ Seleccionar en Google Maps
-          </a>
-          <div id="gpsPerfilStatus" style="display:none;font-size:.75rem;color:var(--muted);margin-bottom:4px"></div>
-          <div id="mapsPreview" style="display:none;margin-top:4px">
-            <a id="mapsPreviewLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.78rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver mi ubicación</a>
+
+          <!-- Fila 2: input del link -->
+          <input type="url" id="f_maps_url" placeholder="Pega aquí el link de Google Maps..." oninput="previewMapsUrl()" style="width:100%">
+
+          <div id="gpsPerfilStatus" style="display:none;font-size:.75rem;color:var(--muted);margin-top:4px"></div>
+          <div id="mapsPreview" style="display:none;margin-top:8px">
+            <a id="mapsPreviewLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.8rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver mi ubicación guardada</a>
           </div>
         </div>
       </div>
