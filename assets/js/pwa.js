@@ -10,8 +10,6 @@ OneSignalDeferred.push(async function(OneSignal) {
     appId: "36b01031-83d9-4f66-bad8-3c32478f9fb2",
     notifyButton: { enable: false },
     welcomeNotification: { disable: true },
-    serviceWorkerParam: { scope: '/' },
-    serviceWorkerPath: '/OneSignalSDKWorker.js',
   });
 
   // Link OneSignal user to our user ID when logged in
