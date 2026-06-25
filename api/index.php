@@ -355,6 +355,14 @@ try {
             Response::success(['uid' => $uid], 'Push enviado');
             break;
 
+        case 'test-email':
+            $email = $_GET['email'] ?? '';
+            if (!$email) Response::error('Falta email', 400);
+            require_once __DIR__ . '/helpers/Mailer.php';
+            $ok = Mailer::orderAccepted($email, 'Usuario de prueba', 'TEST-001', 'Negocio Demo', 15);
+            Response::success(['sent' => $ok, 'to' => $email], $ok ? 'Email enviado' : 'Error al enviar');
+            break;
+
         default:
             Response::notFound('Endpoint no encontrado');
     }
