@@ -251,6 +251,8 @@ function requestNotificationPermission() {
 
   // OneSignal ya fue inicializado por pwa.js — llamar directamente
   if (window.OneSignal && window.OneSignal.Notifications) {
+    console.log('OneSignal permission state:', window.OneSignal.Notifications.permission);
+    console.log('Native permission:', Notification.permission);
     window.OneSignal.Notifications.requestPermission().then(function(accepted) {
       if (accepted) {
         var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
