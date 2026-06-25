@@ -350,10 +350,10 @@ function renderCard(d) {
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
 
     // Timer de preparación para pedidos asignados/disponibles
-    (d.estimated_time && d.accepted_at && ['asignado','recogido'].includes(d.status) ? (function(){
-      var acceptedAt = new Date(d.accepted_at.replace(' ','T')).getTime();
+    (d.estimated_time && d.preparation_started_at && ['asignado','recogido'].includes(d.status) ? (function(){
+      var acceptedAt = new Date(d.preparation_started_at.replace(' ','T')).getTime();
       if (Date.now() - acceptedAt < 0 || Date.now() - acceptedAt > 86400000) {
-        acceptedAt = new Date(d.accepted_at.replace(' ','T') + 'Z').getTime();
+        acceptedAt = new Date(d.preparation_started_at.replace(' ','T') + 'Z').getTime();
       }
       var totalMs    = d.estimated_time * 60000;
       var now        = Date.now();
@@ -378,10 +378,10 @@ function renderCard(d) {
       '</div>' +
       '<script>(function(){' +
         'function tick'+d.id+'(){' +
-          'var _ac="'+d.accepted_at.replace(' ','T')+'",a=new Date(_ac).getTime();if(Date.now()-a<0||Date.now()-a>86400000)a=new Date(_ac+"Z").getTime();var t='+d.estimated_time+'*60000,n=Date.now(),r=t-(n-a);' +
+          'var _ac="'+d.preparation_started_at.replace(" ","T")+'",a=new Date(_ac).getTime();if(Date.now()-a<0||Date.now()-a>86400000)a=new Date(_ac+"Z").getTime();var t='+d.estimated_time+'*60000,n=Date.now(),r=t-(n-a);' +
           'var cd=document.getElementById("rcd-'+d.id+'"),pr=document.getElementById("rprog-'+d.id+'"),box=document.getElementById("rtimer-'+d.id+'");' +
           'if(!cd||!box)return;' +
-          'if(r<=0){box.style.background="#f0fdf4";box.style.borderColor="#86efac";box.innerHTML="<div style=\\"font-size:.75rem;font-weight:700;color:#16a34a\\">✅ Pedido listo para recoger</div>";return;}' +
+          'if(r<=0){box.style.background="#fef2f2";box.style.borderColor="#fca5a5";box.innerHTML="<div style=\\"font-size:.75rem;font-weight:700;color:#dc2626\\">🙏 Perdón por el atraso — el pedido debería estar listo pronto</div>";return;}' +
           'var m=Math.floor(r/60000),s=Math.floor((r%60000)/1000),p=Math.min(100,((n-a)/t)*100);' +
           'if(cd)cd.textContent=m+":"+(s<10?"0":"")+s;' +
           'if(pr)pr.style.width=p.toFixed(1)+"%";' +

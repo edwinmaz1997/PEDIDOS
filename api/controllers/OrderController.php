@@ -273,7 +273,11 @@ class OrderController {
             Response::error('En pedidos de delivery, solo el repartidor puede marcar como entregado', 403);
         }
 
-        $this->db->prepare("UPDATE orders SET status = ? WHERE id = ?")->execute([$status, $id]);
+        if ($status === 'en_preparacion') {
+            $this->db->prepare("UPDATE orders SET status=?, preparation_started_at=NOW() WHERE id=?")->execute([$status, $id]);
+        } else {
+            $this->db->prepare("UPDATE orders SET status=? WHERE id=?")->execute([$status, $id]);
+        }
         $this->logStatus($id, $status, $body['message'] ?? null, $user['id']);
 
         // Notify client

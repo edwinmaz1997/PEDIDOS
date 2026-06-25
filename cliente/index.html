@@ -179,9 +179,9 @@ function startTimers() {
       var lb = document.getElementById('timer-label-' + id);
       if (!cd) return;
       if (remaining <= 0) {
-        cd.textContent = '¡Listo!'; cd.style.color = '#16a34a';
+        cd.textContent = '⏰'; cd.style.color = '#dc2626';
         if (pr) { pr.style.width = '100%'; pr.style.background = 'linear-gradient(90deg,#22c55e,#16a34a)'; }
-        if (lb) lb.textContent = 'Tu pedido debería estar listo 🎉';
+        if (lb) lb.textContent = '🙏 Perdón por el atraso, tu pedido estará listo pronto';
         return;
       }
       var pct = Math.min(100, (elapsed / totalMs) * 100);
@@ -211,8 +211,8 @@ function renderOrder(o) {
       ${items ? `<div class="order-items">${items}<div class="order-total-row"><span>Total</span><span>Q${parseFloat(o.total).toFixed(2)}</span></div></div>` : ''}
       ${o.notes ? `<div style="font-size:.85rem;color:var(--muted);margin-top:8px">📝 ${esc(o.notes)}</div>` : ''}
       ${o.business_response ? `<div class="order-response"><strong>Respuesta del negocio:</strong> ${esc(o.business_response)}</div>` : ''}
-      ${o.estimated_time && o.accepted_at && ['aceptado','en_preparacion'].includes(o.status) ? `
-        <div id="timer-${o.id}" data-accepted="${o.accepted_at}" data-mins="${o.estimated_time}" style="margin-top:10px;background:linear-gradient(135deg,#eaf2fb,#f0f7ff);border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px">
+      ${o.estimated_time && o.preparation_started_at && o.status === 'en_preparacion' ? `
+        <div id="timer-${o.id}" data-accepted="${o.preparation_started_at}" data-mins="${o.estimated_time}" style="margin-top:10px;background:linear-gradient(135deg,#eaf2fb,#f0f7ff);border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px">
           <div style="font-size:.75rem;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">⏱️ Tiempo de preparación</div>
           <div style="display:flex;align-items:center;gap:12px">
             <div style="flex:1;background:#dbeafe;border-radius:20px;height:8px;overflow:hidden">
