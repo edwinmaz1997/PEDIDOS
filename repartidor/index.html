@@ -405,7 +405,7 @@ function renderCard(d) {
     : '') +
 
       '<button onclick="openDetail('+d.id+')" class="btn-primary" style="padding:8px 16px;font-size:.85rem">Ver detalles</button>' +
-      (!isMine && d.status === 'listo' ? '<button onclick="claimDelivery('+d.id+')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">Tomar entrega</button>' : '') +
+      (!isMine && d.order_status === 'listo' ? '<button onclick="claimDelivery('+d.id+')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">Tomar entrega</button>' : '') +
       (isMine && (d.status === 'asignado') ? '<button onclick="updateStatus('+d.id+',\'recogido\')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">📬 Marcar recogido</button>' : '') +
       (isMine && d.status === 'recogido' ? '<button onclick="updateStatus('+d.id+',\'entregado\')" class="btn-primary" style="padding:8px 16px;font-size:.85rem;background:var(--green)">✔ Entregado</button>' : '') +
     '</div>' +
