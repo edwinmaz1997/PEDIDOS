@@ -314,6 +314,42 @@ function renderList() {
 
   var pageData = filtered.slice((page-1)*perPage, page*perPage);
   container.innerHTML = pageData.map(renderCard).join('');
+  startRepartidorTimers();
+}
+
+function startRepartidorTimers() {
+  document.querySelectorAll('[data-started][data-mins]').forEach(function(el) {
+    var id = el.id.replace('rtimer-', '');
+    var acceptedAt = new Date(el.dataset.started.replace(' ', 'T')).getTime();
+    var totalMs = parseInt(el.dataset.mins) * 60000;
+    function tick() {
+      var now = Date.now(), elapsed = now - acceptedAt, remaining = totalMs - elapsed;
+      var cd  = document.getElementById('rcd-'  + id);
+      var pr  = document.getElementById('rprog-' + id);
+      var lb  = document.getElementById('rlbl-' + id);
+      var box = document.getElementById('rtimer-' + id);
+      if (!cd || !box) return;
+      if (remaining <= 0) {
+        box.style.background = '#fef2f2';
+        box.style.borderColor = '#fca5a5';
+        box.querySelector('div').textContent = '🙏 Perdón por el atraso';
+        box.querySelector('div').style.color = '#dc2626';
+        cd.textContent = '⏰';
+        if (pr) pr.style.width = '100%';
+        if (pr) pr.style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
+        if (lb) lb.textContent = 'El pedido debería estar listo pronto';
+        return;
+      }
+      var pct  = Math.min(100, (elapsed / totalMs) * 100);
+      var mins = Math.floor(remaining / 60000);
+      var secs = Math.floor((remaining % 60000) / 1000);
+      if (pr) pr.style.width = pct.toFixed(1) + '%';
+      cd.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+      if (lb) lb.textContent = 'Disponible para recoger en ~' + mins + ' min';
+      setTimeout(tick, 1000);
+    }
+    tick();
+  });
 }
 
 function renderCard(d) {
@@ -349,43 +385,19 @@ function renderCard(d) {
 
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
 
-    // Timer de preparación para pedidos asignados/disponibles
-    (d.estimated_time && d.preparation_started_at && ['asignado','recogido'].includes(d.status) ? (function(){
-      var acceptedAt = new Date(d.preparation_started_at.replace(' ','T')).getTime();
-      var totalMs    = d.estimated_time * 60000;
-      var now        = Date.now();
-      var remaining  = totalMs - (now - acceptedAt);
-      var pct        = Math.min(100, ((now - acceptedAt) / totalMs) * 100);
-      var mins       = Math.max(0, Math.floor(remaining / 60000));
-      var secs       = Math.max(0, Math.floor((remaining % 60000) / 1000));
-      var isReady    = remaining <= 0;
-      return '<div id="rtimer-'+d.id+'" style="width:100%;margin-bottom:8px;background:'+(isReady?'#f0fdf4':'#fefce8')+';border:1.5px solid '+(isReady?'#86efac':'#fde047')+';border-radius:10px;padding:10px 14px">' +
-        '<div style="font-size:.73rem;font-weight:700;color:'+(isReady?'#16a34a':'#854d0e')+';text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">' +
-          (isReady ? '✅ Pedido listo para recoger' : '⏳ El negocio está preparando el pedido') +
-        '</div>' +
-        (isReady ? '' :
-          '<div style="display:flex;align-items:center;gap:10px">' +
-            '<div style="flex:1;background:#fef9c3;border-radius:20px;height:7px;overflow:hidden">' +
-              '<div id="rprog-'+d.id+'" style="height:100%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:20px;width:'+pct.toFixed(1)+'%"></div>' +
-            '</div>' +
-            '<div id="rcd-'+d.id+'" style="font-size:1rem;font-weight:800;color:#b45309;min-width:52px;text-align:right">'+mins+':'+(secs<10?'0':'')+secs+'</div>' +
+    // Timer de preparación para pedidos asignados/recogidos
+    (d.estimated_time && d.preparation_started_at && ['asignado','recogido'].includes(d.status) ?
+      '<div id="rtimer-'+d.id+'" data-started="'+d.preparation_started_at+'" data-mins="'+d.estimated_time+'" style="width:100%;margin-bottom:8px;background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:10px 14px">' +
+        '<div style="font-size:.73rem;font-weight:700;color:#854d0e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">⏳ El negocio está preparando el pedido</div>' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div style="flex:1;background:#fef9c3;border-radius:20px;height:7px;overflow:hidden">' +
+            '<div id="rprog-'+d.id+'" style="height:100%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:20px;width:0%"></div>' +
           '</div>' +
-          '<div style="font-size:.73rem;color:#92400e;margin-top:3px">Disponible para recoger en ~' + mins + ' min</div>'
-        ) +
-      '</div>' +
-      '<script>(function(){' +
-        'function tick'+d.id+'(){' +
-          'var _ac="'+d.preparation_started_at.replace(" ","T")+'",a=new Date(_ac).getTime(),t='+d.estimated_time+'*60000,n=Date.now(),r=t-(n-a);' +
-          'var cd=document.getElementById("rcd-'+d.id+'"),pr=document.getElementById("rprog-'+d.id+'"),box=document.getElementById("rtimer-'+d.id+'");' +
-          'if(!cd||!box)return;' +
-          'if(r<=0){box.style.background="#fef2f2";box.style.borderColor="#fca5a5";box.innerHTML="<div style=\\"font-size:.75rem;font-weight:700;color:#dc2626\\">🙏 Perdón por el atraso — el pedido debería estar listo pronto</div>";return;}' +
-          'var m=Math.floor(r/60000),s=Math.floor((r%60000)/1000),p=Math.min(100,((n-a)/t)*100);' +
-          'if(cd)cd.textContent=m+":"+(s<10?"0":"")+s;' +
-          'if(pr)pr.style.width=p.toFixed(1)+"%";' +
-          'setTimeout(tick'+d.id+',1000);' +
-        '}tick'+d.id+'();' +
-      '})();<\/script>';
-    })() : '') +
+          '<div id="rcd-'+d.id+'" style="font-size:1rem;font-weight:800;color:#b45309;min-width:52px;text-align:right">--:--</div>' +
+        '</div>' +
+        '<div id="rlbl-'+d.id+'" style="font-size:.73rem;color:#92400e;margin-top:3px">Calculando...</div>' +
+      '</div>'
+    : '') +
 
       '<button onclick="openDetail('+d.id+')" class="btn-primary" style="padding:8px 16px;font-size:.85rem">Ver detalles</button>' +
       (!isMine && d.status === 'listo' ? '<button onclick="claimDelivery('+d.id+')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">Tomar entrega</button>' : '') +
