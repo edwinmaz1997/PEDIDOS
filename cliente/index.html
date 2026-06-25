@@ -160,7 +160,17 @@ function goPage(p){var pages=Math.ceil(filteredOrders.length/perPage);if(p<1||p>
 function startTimers() {
   document.querySelectorAll('[data-accepted][data-mins]').forEach(function(el) {
     var id = el.id.replace('timer-', '');
-    var acceptedAt = new Date(el.dataset.accepted + 'Z').getTime();
+    var acceptedAt = new Date(el.dataset.accepted.replace(' ', 'T')).getTime();
+    // Si el servidor devuelve hora UTC, compensar a Guatemala (UTC-6)
+    // Detectamos si la fecha ya está en hora local comparando con Date.now()
+    var totalMs = parseInt(el.dataset.mins) * 60000;
+    var rawElapsed = Date.now() - acceptedAt;
+    // Si el elapsed es negativo o mayor que 24h, probablemente hay offset de timezone
+    // En ese caso asumimos que accepted_at es UTC y convertimos a local
+    if (rawElapsed < 0 || rawElapsed > 86400000) {
+      // Intentar con Z (UTC)
+      acceptedAt = new Date(el.dataset.accepted.replace(' ', 'T') + 'Z').getTime();
+    }
     var totalMs = parseInt(el.dataset.mins) * 60000;
     function tick() {
       var now = Date.now(), elapsed = now - acceptedAt, remaining = totalMs - elapsed;

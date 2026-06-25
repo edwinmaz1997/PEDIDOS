@@ -351,7 +351,10 @@ function renderCard(d) {
 
     // Timer de preparación para pedidos asignados/disponibles
     (d.estimated_time && d.accepted_at && d.status === 'asignado' ? (function(){
-      var acceptedAt = new Date(d.accepted_at + 'Z').getTime();
+      var acceptedAt = new Date(d.accepted_at.replace(' ','T')).getTime();
+      if (Date.now() - acceptedAt < 0 || Date.now() - acceptedAt > 86400000) {
+        acceptedAt = new Date(d.accepted_at.replace(' ','T') + 'Z').getTime();
+      }
       var totalMs    = d.estimated_time * 60000;
       var now        = Date.now();
       var remaining  = totalMs - (now - acceptedAt);
@@ -375,7 +378,7 @@ function renderCard(d) {
       '</div>' +
       '<script>(function(){' +
         'function tick'+d.id+'(){' +
-          'var a=new Date("'+d.accepted_at+'Z").getTime(),t='+d.estimated_time+'*60000,n=Date.now(),r=t-(n-a);' +
+          'var _ac="'+d.accepted_at.replace(' ','T')+'",a=new Date(_ac).getTime();if(Date.now()-a<0||Date.now()-a>86400000)a=new Date(_ac+"Z").getTime();var t='+d.estimated_time+'*60000,n=Date.now(),r=t-(n-a);' +
           'var cd=document.getElementById("rcd-'+d.id+'"),pr=document.getElementById("rprog-'+d.id+'"),box=document.getElementById("rtimer-'+d.id+'");' +
           'if(!cd||!box)return;' +
           'if(r<=0){box.style.background="#f0fdf4";box.style.borderColor="#86efac";box.innerHTML="<div style=\\"font-size:.75rem;font-weight:700;color:#16a34a\\">✅ Pedido listo para recoger</div>";return;}' +
