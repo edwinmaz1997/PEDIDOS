@@ -81,41 +81,43 @@
     <!-- Datos personales -->
     <div class="profile-card">
       <h3>📝 Datos personales</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div class="form-group"><label>Nombre completo</label><input type="text" id="f_name" placeholder="Tu nombre"></div>
-        <div class="form-group"><label>Teléfono</label><input type="tel" id="f_phone" placeholder="+502 5555 5555"></div>
-        <div class="form-group">
-          <label>Mi dirección de casa</label>
-          <input type="text" id="f_address" placeholder="Colonia, calle, número...">
+
+      <!-- Nombre y teléfono en 2 columnas -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="form-group" style="margin:0"><label>Nombre completo</label><input type="text" id="f_name" placeholder="Tu nombre"></div>
+        <div class="form-group" style="margin:0"><label>Teléfono</label><input type="tel" id="f_phone" placeholder="+502 5555 5555"></div>
+      </div>
+
+      <!-- Dirección, descripción y maps en columna completa -->
+      <div class="form-group">
+        <label>Mi dirección de casa</label>
+        <input type="text" id="f_address" placeholder="Colonia, calle, número...">
+      </div>
+
+      <div class="form-group">
+        <label>Descripción de mi casa <span style="font-weight:400;color:var(--muted)">(ayuda al repartidor a ubicarte)</span></label>
+        <textarea id="f_house_description" rows="3" placeholder="Ej: Casa azul con portón negro, frente a la cancha, segunda casa a la derecha..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Ubicación en Google Maps <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <a href="https://www.google.com/maps" target="_blank"
+             onclick="setTimeout(function(){ var i=document.getElementById('f_maps_url'); if(i) i.placeholder='Pega aquí el link...'; }, 500)"
+             style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:#1a73e8;color:white;border-radius:var(--radius-sm);text-decoration:none;font-size:.82rem;font-weight:600;text-align:center">
+            🗺️ Abrir Google Maps
+          </a>
+          <button type="button" onclick="getGPSPerfil()" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600">
+            📍 Usar GPS
+          </button>
         </div>
-        <div class="form-group">
-          <label>Descripción de mi casa <span style="font-weight:400;color:var(--muted)">(opcional — ayuda al repartidor a ubicarte)</span></label>
-          <textarea id="f_house_description" rows="3" placeholder="Ej: Casa azul con portón negro, frente a la cancha, segunda casa a la derecha..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Link Google Maps de mi casa <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
-
-          <!-- Fila 1: botones de acción -->
-          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
-            <a href="https://www.google.com/maps" target="_blank"
-               onclick="setTimeout(function(){ var i=document.getElementById('f_maps_url'); if(i) i.placeholder='Pega aquí el link copiado de Google Maps...'; }, 500)"
-               style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;background:#1a73e8;color:white;border-radius:var(--radius-sm);text-decoration:none;font-size:.85rem;font-weight:600">
-              🗺️ Abrir Google Maps y copiar link
-            </a>
-            <button type="button" onclick="getGPSPerfil()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600">
-              📍 Usar mi ubicación GPS actual
-            </button>
-          </div>
-
-          <!-- Fila 2: input del link -->
-          <input type="url" id="f_maps_url" placeholder="Pega aquí el link de Google Maps..." oninput="previewMapsUrl()" style="width:100%">
-
-          <div id="gpsPerfilStatus" style="display:none;font-size:.75rem;color:var(--muted);margin-top:4px"></div>
-          <div id="mapsPreview" style="display:none;margin-top:8px">
-            <a id="mapsPreviewLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.8rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver mi ubicación guardada</a>
-          </div>
+        <input type="url" id="f_maps_url" placeholder="Pega aquí el link de Google Maps..." oninput="previewMapsUrl()" style="width:100%">
+        <div id="gpsPerfilStatus" style="display:none;font-size:.75rem;color:var(--muted);margin-top:4px"></div>
+        <div id="mapsPreview" style="display:none;margin-top:8px">
+          <a id="mapsPreviewLink" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#e8f5e9;border:1.5px solid #81c784;border-radius:20px;font-size:.8rem;font-weight:600;color:#2e7d32;text-decoration:none">🗺️ Ver mi ubicación guardada</a>
         </div>
       </div>
+
       <div class="form-group">
         <label>Correo electrónico</label>
         <input type="email" id="f_email" disabled style="background:var(--off-white);color:var(--muted);cursor:not-allowed">
