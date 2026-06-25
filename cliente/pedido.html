@@ -1113,9 +1113,20 @@ async function submitOrder() {
       <div class="success-screen">
         <div class="success-icon">✅</div>
         <h2 style="margin-bottom:8px">¡Pedido enviado!</h2>
-        <p style="color:var(--muted);margin-bottom:8px">Tu pedido <strong>${data.data.order_number}</strong> fue enviado al negocio.</p>
-        <p style="color:var(--muted);margin-bottom:24px">Total: <strong>Q${parseFloat(data.data.total).toFixed(2)}</strong></p>
-        <a href="index.html" class="btn-primary" style="display:inline-flex">Ver mis pedidos</a>
+        <p style="color:var(--muted);margin-bottom:4px">Tu pedido <strong>${data.data.order_number}</strong> fue enviado al negocio.</p>
+        <p style="color:var(--muted);margin-bottom:20px">Total: <strong>Q${parseFloat(data.data.total).toFixed(2)}</strong></p>
+
+        <div style="background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:16px;text-align:left;margin-bottom:24px">
+          <div style="font-size:.82rem;font-weight:700;color:#1e40af;margin-bottom:8px">💡 ¿Qué sigue?</div>
+          <ul style="margin:0;padding-left:18px;font-size:.82rem;color:#374151;line-height:1.9">
+            <li>El negocio revisará tu pedido y lo <strong>aceptará en breve</strong></li>
+            <li>Recibirás una <strong>notificación y correo electrónico</strong> cuando sea aceptado</li>
+            <li>Puedes ver el estado de tu pedido en tiempo real desde <strong>"Mis pedidos"</strong></li>
+            <li>¿Tienes alguna duda? Puedes <strong>enviarle un mensaje al negocio</strong> directamente desde tu pedido</li>
+          </ul>
+        </div>
+
+        <a href="index.html" class="btn-primary" style="display:inline-flex">📋 Ver mis pedidos</a>
       </div>
     `;
   } catch(e) { alert('Error de conexión'); btn.textContent = 'Enviar Pedido'; btn.disabled = false; }
