@@ -116,10 +116,6 @@
 const API = '/api';
 
 
-function closeLaunchModal(permanent) {
-  document.getElementById('launchModal').style.display = 'none';
-  if (permanent) localStorage.setItem('nx_launch_seen', '1');
-}
 
 // ─── State ───────────────────────────────────────────────
 let categories = [];
@@ -127,13 +123,6 @@ let activeCategory = null;
 
 // ─── Init ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  // Mostrar modal de lanzamiento si no lo han descartado
-  if (!localStorage.getItem('nx_launch_seen')) {
-    setTimeout(function() {
-      var m = document.getElementById('launchModal');
-      if (m) m.style.display = 'flex';
-    }, 600);
-  }
   // Update navbar based on auth state
   var token = localStorage.getItem('nuevaexpress_token');
   var user  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
@@ -724,63 +713,6 @@ setTimeout(initCatCarousel, 1500);
   <div id="lightboxCounter" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.7);font-size:.85rem"></div>
 </div>
 
-<!-- Modal de lanzamiento -->
-<div id="launchModal" style="display:none;position:fixed;inset:0;z-index:400;align-items:center;justify-content:center;padding:20px;background:rgba(10,15,30,.75);backdrop-filter:blur(6px)">
-  <div style="background:white;border-radius:24px;max-width:360px;width:100%;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35);animation:launchPop .35s cubic-bezier(.34,1.56,.64,1)">
-
-    <!-- Header con gradiente -->
-    <div style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);padding:36px 28px 28px;text-align:center;position:relative">
-      <!-- Destellos decorativos -->
-      <div style="position:absolute;top:18px;left:28px;font-size:1.2rem;opacity:.7">✨</div>
-      <div style="position:absolute;top:14px;right:32px;font-size:.9rem;opacity:.6">🎉</div>
-      <div style="position:absolute;bottom:22px;right:22px;font-size:.8rem;opacity:.5">⭐</div>
-
-      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:30px;padding:6px 16px;margin-bottom:18px">
-        <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;box-shadow:0 0 8px #22c55e"></span>
-        <span style="font-size:.75rem;color:rgba(255,255,255,.85);font-weight:600;letter-spacing:.5px">INAUGURACIÓN OFICIAL</span>
-      </div>
-
-      <div style="font-size:3rem;margin-bottom:10px">🛵</div>
-
-      <h2 style="font-family:'Syne',sans-serif;color:white;font-size:1.45rem;font-weight:800;margin:0 0 6px;line-height:1.2">
-        NuevaExpress ya<br>está aquí
-      </h2>
-      <p style="color:rgba(255,255,255,.65);font-size:.85rem;margin:0">Tu municipio, en tu bolsillo</p>
-    </div>
-
-    <!-- Cuerpo -->
-    <div style="padding:24px 28px">
-      <div style="text-align:center;margin-bottom:22px">
-        <div style="font-size:.75rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Comenzamos operaciones el</div>
-        <div style="background:linear-gradient(135deg,#f5c518,#ff8c42);border-radius:16px;padding:14px 20px;display:inline-block">
-          <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:900;color:#1a1a2e;line-height:1">1° de Julio</div>
-          <div style="font-size:.8rem;font-weight:700;color:#7c5200;margin-top:2px">2026 · Nueva Concepción, Escuintla</div>
-        </div>
-      </div>
-
-      <p style="font-size:.86rem;color:#4b5563;line-height:1.65;text-align:center;margin:0 0 22px">
-        La primera plataforma de delivery y servicios 100% local de tu municipio. Pide desde casa, apoya negocios locales.
-      </p>
-
-      <!-- CTA -->
-      <button onclick="closeLaunchModal()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;letter-spacing:.2px">
-        ¡Explorar el directorio! 🗺️
-      </button>
-
-      <p style="text-align:center;font-size:.75rem;color:#9ca3af;margin:12px 0 0">
-        No volver a mostrar
-        <button onclick="closeLaunchModal(true)" style="background:none;border:none;color:#4A90D9;font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;text-decoration:underline;padding:0 0 0 3px">click aquí</button>
-      </p>
-    </div>
-  </div>
-</div>
-
-<style>
-@keyframes launchPop {
-  from { opacity:0; transform:scale(.85) translateY(20px); }
-  to   { opacity:1; transform:scale(1) translateY(0); }
-}
-</style>
 
 </body>
 </html>
