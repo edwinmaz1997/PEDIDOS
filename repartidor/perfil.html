@@ -234,7 +234,23 @@ function requestNotificationPermission() {
     return;
   }
 
-  if (Notification.permission === 'denied') {
+  if (Notification.permission === 'granted') {
+    // Ya tiene permiso — solo vincular usuario con OneSignal
+    var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+    if (window.OneSignal && user.id) {
+      try {
+        window.OneSignal.login(String(user.id));
+        window.OneSignal.User.addTag('role', 'repartidor');
+        window.OneSignal.User.addTag('name', user.name || '');
+        alert('✅ Notificaciones ya activas y vinculadas correctamente.');
+      } catch(e) {
+        alert('✅ Las notificaciones ya están activadas.');
+      }
+    } else {
+      alert('✅ Las notificaciones ya están activadas.');
+    }
+    return;
+  }
     var isAndroid = /Android/.test(navigator.userAgent);
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     var msg = '🔔 Las notificaciones están bloqueadas.\n\nPara activarlas:\n\n';
