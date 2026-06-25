@@ -320,7 +320,7 @@ function renderList() {
 function startRepartidorTimers() {
   document.querySelectorAll('[data-started][data-mins]').forEach(function(el) {
     var id = el.id.replace('rtimer-', '');
-    var acceptedAt = new Date(el.dataset.started.replace(' ', 'T')).getTime();
+    var acceptedAt = parseInt(el.dataset.ts) * 1000;
     var totalMs = parseInt(el.dataset.mins) * 60000;
     function tick() {
       var now = Date.now(), elapsed = now - acceptedAt, remaining = totalMs - elapsed;
@@ -386,8 +386,8 @@ function renderCard(d) {
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
 
     // Timer de preparación para pedidos asignados/recogidos
-    (d.estimated_time && d.preparation_started_at && ['disponible','asignado','recogido'].includes(d.status) ?
-      '<div id="rtimer-'+d.id+'" data-started="'+d.preparation_started_at+'" data-mins="'+d.estimated_time+'" style="width:100%;margin-bottom:8px;background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:10px 14px">' +
+    (d.estimated_time && d.prep_ts && ['disponible','asignado','recogido'].includes(d.status) ?
+      '<div id="rtimer-'+d.id+'" data-ts="'+d.prep_ts+'" data-mins="'+d.estimated_time+'" style="width:100%;margin-bottom:8px;background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:10px 14px">' +
         '<div style="font-size:.73rem;font-weight:700;color:#854d0e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">⏳ El negocio está preparando el pedido</div>' +
         '<div style="display:flex;align-items:center;gap:10px">' +
           '<div style="flex:1;background:#fef9c3;border-radius:20px;height:7px;overflow:hidden">' +

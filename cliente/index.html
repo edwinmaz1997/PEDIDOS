@@ -160,17 +160,7 @@ function goPage(p){var pages=Math.ceil(filteredOrders.length/perPage);if(p<1||p>
 function startTimers() {
   document.querySelectorAll('[data-accepted][data-mins]').forEach(function(el) {
     var id = el.id.replace('timer-', '');
-    var acceptedAt = new Date(el.dataset.accepted.replace(' ', 'T')).getTime();
-    // Si el servidor devuelve hora UTC, compensar a Guatemala (UTC-6)
-    // Detectamos si la fecha ya está en hora local comparando con Date.now()
-    var totalMs = parseInt(el.dataset.mins) * 60000;
-    var rawElapsed = Date.now() - acceptedAt;
-    // Si el elapsed es negativo o mayor que 24h, probablemente hay offset de timezone
-    // En ese caso asumimos que accepted_at es UTC y convertimos a local
-    if (rawElapsed < 0 || rawElapsed > 86400000) {
-      // Intentar con Z (UTC)
-      acceptedAt = new Date(el.dataset.accepted.replace(' ', 'T') + 'Z').getTime();
-    }
+    var acceptedAt = parseInt(el.dataset.ts) * 1000;
     var totalMs = parseInt(el.dataset.mins) * 60000;
     function tick() {
       var now = Date.now(), elapsed = now - acceptedAt, remaining = totalMs - elapsed;
@@ -211,8 +201,8 @@ function renderOrder(o) {
       ${items ? `<div class="order-items">${items}<div class="order-total-row"><span>Total</span><span>Q${parseFloat(o.total).toFixed(2)}</span></div></div>` : ''}
       ${o.notes ? `<div style="font-size:.85rem;color:var(--muted);margin-top:8px">📝 ${esc(o.notes)}</div>` : ''}
       ${o.business_response ? `<div class="order-response"><strong>Respuesta del negocio:</strong> ${esc(o.business_response)}</div>` : ''}
-      ${o.estimated_time && o.preparation_started_at && o.status === 'en_preparacion' ? `
-        <div id="timer-${o.id}" data-accepted="${o.preparation_started_at}" data-mins="${o.estimated_time}" style="margin-top:10px;background:linear-gradient(135deg,#eaf2fb,#f0f7ff);border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px">
+      ${o.estimated_time && o.prep_ts && o.status === 'en_preparacion' ? `
+        <div id="timer-${o.id}" data-ts="${o.prep_ts}" data-mins="${o.estimated_time}" style="margin-top:10px;background:linear-gradient(135deg,#eaf2fb,#f0f7ff);border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px">
           <div style="font-size:.75rem;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">⏱️ Tiempo de preparación</div>
           <div style="display:flex;align-items:center;gap:12px">
             <div style="flex:1;background:#dbeafe;border-radius:20px;height:8px;overflow:hidden">

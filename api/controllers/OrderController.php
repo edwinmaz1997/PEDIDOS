@@ -23,7 +23,8 @@ class OrderController {
         $status = Security::sanitize($_GET['status'] ?? '');
 
         $sql    = "SELECT o.*, b.name as business_name, b.logo as business_logo,
-                          u.name as client_name, u.phone as client_phone
+                          u.name as client_name, u.phone as client_phone,
+                          UNIX_TIMESTAMP(o.preparation_started_at) as prep_ts
                    FROM orders o
                    JOIN businesses b ON o.business_id = b.id
                    JOIN users u ON o.client_id = u.id
