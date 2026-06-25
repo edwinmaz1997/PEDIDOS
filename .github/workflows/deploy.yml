@@ -26,6 +26,5 @@ jobs:
             **/.git*/**
             **/node_modules/**
             api/config/config.php
-            .htaccess
             api/.htaccess
             uploads/**
