@@ -249,24 +249,34 @@ function requestNotificationPermission() {
     return;
   }
 
-  // Usar siempre OneSignalDeferred para garantizar que el init ya terminó
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  window.OneSignalDeferred.push(function(OneSignal) {
-    OneSignal.Notifications.requestPermission().then(function(accepted) {
+  // OneSignal ya fue inicializado por pwa.js — llamar directamente
+  if (window.OneSignal && window.OneSignal.Notifications) {
+    window.OneSignal.Notifications.requestPermission().then(function(accepted) {
       if (accepted) {
-        // Asegurar que el usuario esté vinculado
         var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
         if (user.id) {
-          OneSignal.login(String(user.id));
-          OneSignal.User.addTag('role', user.role || 'repartidor');
-          OneSignal.User.addTag('name', user.name || '');
+          window.OneSignal.login(String(user.id));
+          window.OneSignal.User.addTag('role', 'repartidor');
+          window.OneSignal.User.addTag('name', user.name || '');
         }
         alert('✅ ¡Notificaciones activadas! Recibirás avisos de nuevos pedidos.');
       } else {
-        alert('⚠️ Permiso denegado. Puedes activarlas desde la configuración del navegador en cualquier momento.');
+        alert('⚠️ Permiso denegado. Actívalo desde Configuración del navegador → Notificaciones → nuevaexpress.com → Permitir');
       }
+    }).catch(function(err) {
+      console.error('requestPermission error:', err);
+      alert('⚠️ Error al solicitar permiso: ' + err.message);
     });
-  });
+  } else {
+    // SDK aún cargando — reintentar en 1 segundo
+    setTimeout(function() {
+      if (window.OneSignal && window.OneSignal.Notifications) {
+        window.OneSignal.Notifications.requestPermission();
+      } else {
+        alert('⚠️ No se pudo cargar el servicio de notificaciones. Recarga la página e inténtalo de nuevo.');
+      }
+    }, 1000);
+  }
 }
 
 init();
