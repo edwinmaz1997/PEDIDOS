@@ -190,6 +190,7 @@ function renderOrders() {
     return;
   }
   container.innerHTML = pageData.map(renderOrder).join('');
+  startNegocioTimers();
 }
 
 async function loadEntregadosHoy(tabBtn) {
@@ -271,6 +272,41 @@ async function loadOrders(status, tabBtn) {
   } catch(e) { document.getElementById('ordersContainer').innerHTML = '<div class="empty-state"><p>Error cargando pedidos.</p></div>'; }
 }
 
+function startNegocioTimers() {
+  document.querySelectorAll('[data-accepted][data-mins]').forEach(function(el) {
+    var id = el.id.replace('ntimer-', '');
+    var raw = el.dataset.accepted;
+    var acceptedAt = new Date(raw.replace(' ','T')).getTime();
+    if (Date.now() - acceptedAt < 0 || Date.now() - acceptedAt > 86400000) {
+      acceptedAt = new Date(raw.replace(' ','T') + 'Z').getTime();
+    }
+    var totalMs = parseInt(el.dataset.mins) * 60000;
+    function tick() {
+      var now = Date.now(), elapsed = now - acceptedAt, remaining = totalMs - elapsed;
+      var cd = document.getElementById('ncd-' + id);
+      var pr = document.getElementById('nprog-' + id);
+      var lb = document.getElementById('nlbl-' + id);
+      if (!cd) return;
+      if (remaining <= 0) {
+        var over = Math.round(-remaining / 60000);
+        cd.textContent = '¡Listo!'; cd.style.color = '#16a34a';
+        if (pr) { pr.style.width = '100%'; pr.style.background = 'linear-gradient(90deg,#22c55e,#16a34a)'; }
+        if (lb) lb.textContent = over > 0 ? '⚠️ Pasado por ' + over + ' min' : '✅ Listo para entregar';
+        el.style.background = '#f0fdf4'; el.style.borderColor = '#86efac';
+        return;
+      }
+      var pct = Math.min(100, (elapsed / totalMs) * 100);
+      var mins = Math.floor(remaining / 60000);
+      var secs = Math.floor((remaining % 60000) / 1000);
+      if (pr) pr.style.width = pct.toFixed(1) + '%';
+      cd.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+      if (lb) lb.textContent = 'Faltan ' + mins + ' min para entregar al cliente';
+      setTimeout(tick, 1000);
+    }
+    tick();
+  });
+}
+
 function renderOrder(o) {
   const items = (o.items || []).map(i => `<div class="order-item-line"><span>${esc(i.product_name)} ×${i.quantity}</span>${i.notes?`<span style="color:var(--muted);font-size:.8rem">${esc(i.notes)}</span>`:''}</div>`).join('');
   const canRespond = o.status === 'pendiente';
@@ -288,6 +324,18 @@ function renderOrder(o) {
       </div>
       ${items?`<div class="order-items-list">${items}</div>`:''}
       ${o.notes?`<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);font-size:.85rem;margin-top:8px">📝 ${esc(o.notes)}</div>`:''}
+      ${o.estimated_time && o.accepted_at && ['aceptado','en_preparacion'].includes(o.status) ? `
+        <div id="ntimer-${o.id}" data-accepted="${o.accepted_at}" data-mins="${o.estimated_time}" style="margin-top:10px;background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:10px 14px">
+          <div style="font-size:.73rem;font-weight:700;color:#854d0e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">⏱️ Tiempo prometido al cliente</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1;background:#fef9c3;border-radius:20px;height:7px;overflow:hidden">
+              <div id="nprog-${o.id}" style="height:100%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:20px;width:0%"></div>
+            </div>
+            <div id="ncd-${o.id}" style="font-size:1rem;font-weight:800;color:#b45309;min-width:52px;text-align:right">--:--</div>
+          </div>
+          <div id="nlbl-${o.id}" style="font-size:.72rem;color:#92400e;margin-top:3px">Calculando...</div>
+        </div>
+      ` : ''}
       <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
         <div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:4px">
           <span>Total cobrado al cliente</span><span>Q${parseFloat(o.total).toFixed(2)}</span>

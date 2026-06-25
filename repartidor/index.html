@@ -350,7 +350,7 @@ function renderCard(d) {
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
 
     // Timer de preparación para pedidos asignados/disponibles
-    (d.estimated_time && d.accepted_at && d.status === 'asignado' ? (function(){
+    (d.estimated_time && d.accepted_at && ['asignado','recogido'].includes(d.status) ? (function(){
       var acceptedAt = new Date(d.accepted_at.replace(' ','T')).getTime();
       if (Date.now() - acceptedAt < 0 || Date.now() - acceptedAt > 86400000) {
         acceptedAt = new Date(d.accepted_at.replace(' ','T') + 'Z').getTime();
