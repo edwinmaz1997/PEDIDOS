@@ -92,7 +92,7 @@ function requestNotificationPermission() {
     window.OneSignalDeferred.push(function(OneSignal) {
       OneSignal.Notifications.requestPermission();
     });
-    alert('Activando notificaciones... Si no funciona, desactiva tu bloqueador de anuncios para nuevaexpress.com y vuelve a intentarlo.');
+    alert('⏳ Activando notificaciones...\n\nSi no aparece ningún diálogo en 5 segundos, el SDK de notificaciones no pudo cargar. Verifica:\n\n• Desactiva bloqueadores de contenido en Safari\n• Asegúrate de estar en iOS 16.4 o superior\n• Abre la app desde el ícono instalado, no desde Safari directamente');
   } else {
     alert('⚠️ No se pudo cargar el servicio de notificaciones.\n\nSi tienes un bloqueador de anuncios (AdBlock, uBlock, etc.), desactívalo para nuevaexpress.com y recarga la página.');
   }
