@@ -275,7 +275,10 @@ class OrderController {
         }
 
         if ($status === 'en_preparacion') {
-            $this->db->prepare("UPDATE orders SET status=?, preparation_started_at=NOW() WHERE id=?")->execute([$status, $id]);
+            // Usar timestamp enviado por el cliente para evitar latencia de red
+            $clientTs = isset($body['client_ts']) ? (int)$body['client_ts'] : time();
+            $prepStarted = date('Y-m-d H:i:s', $clientTs);
+            $this->db->prepare("UPDATE orders SET status=?, preparation_started_at=? WHERE id=?")->execute([$status, $prepStarted, $id]);
         } else {
             $this->db->prepare("UPDATE orders SET status=? WHERE id=?")->execute([$status, $id]);
         }
