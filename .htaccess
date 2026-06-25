@@ -8,6 +8,14 @@
     Header set Access-Control-Allow-Origin "*"
 </Files>
 
+<Files "OneSignalSDK.sw.js">
+    Order Allow,Deny
+    Allow from all
+    Satisfy Any
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Access-Control-Allow-Origin "*"
+</Files>
+
 Options -Indexes
 RewriteEngine On
 
