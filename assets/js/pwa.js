@@ -2,13 +2,6 @@
 // NuevaExpress PWA — OneSignal Push + Install Prompt
 // ============================================================
 
-// ── Register OneSignal SW first ───────────────────────────────
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/OneSignalSDKWorker.js', { scope: '/' })
-    .then(function(reg) { console.log('OneSignal SW registered', reg.scope); })
-    .catch(function(err) { console.error('OneSignal SW error:', err); });
-}
-
 // ── OneSignal Init ────────────────────────────────────────────
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 
