@@ -158,7 +158,7 @@ function renderPag(total) {
 function goPage(p){var pages=Math.ceil(filteredOrders.length/perPage);if(p<1||p>pages)return;page=p;renderPage();window.scrollTo(0,0);}
 
 function startTimers() {
-  document.querySelectorAll('[data-accepted][data-mins]').forEach(function(el) {
+  document.querySelectorAll('[data-ts][data-mins]').forEach(function(el) {
     var id = el.id.replace('timer-', '');
     var acceptedAt = el.dataset.ts ? parseInt(el.dataset.ts)*1000 : new Date(el.dataset.started.replace(' ','T')+'Z').getTime();
     var totalMs = parseInt(el.dataset.mins) * 60000;

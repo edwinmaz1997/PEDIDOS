@@ -273,10 +273,9 @@ async function loadOrders(status, tabBtn) {
 }
 
 function startNegocioTimers() {
-  document.querySelectorAll('[data-accepted][data-mins]').forEach(function(el) {
+  document.querySelectorAll('[data-ts][data-mins]').forEach(function(el) {
     var id = el.id.replace('ntimer-', '');
     var acceptedAt = el.dataset.ts ? parseInt(el.dataset.ts)*1000 : new Date(el.dataset.started.replace(' ','T')+'Z').getTime();
-    console.log('TIMER id:'+id, 'ts:'+el.dataset.ts, 'started:'+el.dataset.started, 'acceptedAt:'+acceptedAt, 'now:'+Date.now(), 'diff:'+(Date.now()-acceptedAt));
     var totalMs = parseInt(el.dataset.mins) * 60000;
     function tick() {
       var now = Date.now(), elapsed = now - acceptedAt, remaining = totalMs - elapsed;
