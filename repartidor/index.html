@@ -391,6 +391,7 @@ function renderCard(d) {
         '<div style="font-size:.85rem;font-weight:700;color:#16a34a">✅ Pedido listo para recoger</div>' +
         '<div style="font-size:.75rem;color:#15803d;margin-top:3px">El negocio ya preparó el pedido — puedes pasar a recogerlo</div>' +
       '</div>'
+    : ['en_camino','entregado'].includes(d.order_status) ? ''
     : d.estimated_time && d.preparation_started_at && ['disponible','asignado','recogido'].includes(d.status) ?
       '<div id="rtimer-'+d.id+'" data-ts="'+d.prep_ts+'" data-started="'+d.preparation_started_at+'" data-mins="'+d.estimated_time+'" style="width:100%;margin-bottom:8px;background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:10px 14px">' +
         '<div style="font-size:.73rem;font-weight:700;color:#854d0e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">⏳ El negocio está preparando el pedido</div>' +
