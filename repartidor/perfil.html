@@ -251,6 +251,8 @@ function requestNotificationPermission() {
     }
     return;
   }
+
+  if (Notification.permission === 'denied') {
     var isAndroid = /Android/.test(navigator.userAgent);
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     var msg = '🔔 Las notificaciones están bloqueadas.\n\nPara activarlas:\n\n';
