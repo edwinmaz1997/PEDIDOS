@@ -13,13 +13,18 @@ if ('serviceWorker' in navigator) {
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 
 OneSignalDeferred.push(async function(OneSignal) {
-  await OneSignal.init({
-    appId: "36b01031-83d9-4f66-bad8-3c32478f9fb2",
-    notifyButton: { enable: false },
-    welcomeNotification: { disable: true },
-    serviceWorkerParam: { scope: '/' },
-    serviceWorkerPath: '/OneSignalSDKWorker.js',
-  });
+  try {
+    await OneSignal.init({
+      appId: "36b01031-83d9-4f66-bad8-3c32478f9fb2",
+      notifyButton: { enable: false },
+      welcomeNotification: { disable: true },
+      serviceWorkerParam: { scope: '/' },
+      serviceWorkerPath: '/OneSignalSDKWorker.js',
+    });
+  } catch(e) {
+    console.warn('OneSignal init error (permiso bloqueado o no soportado):', e.message);
+    return;
+  }
 
   // Link OneSignal user to our user ID when logged in
   var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
