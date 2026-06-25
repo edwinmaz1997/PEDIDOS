@@ -73,22 +73,37 @@ function requestNotificationPermission() {
     alert('Las notificaciones ya están activadas ✅');
     return;
   }
-  if (window.OneSignal) {
-    window.OneSignal.Notifications.requestPermission().then(function(accepted) {
-      if (accepted) {
-        alert('¡Notificaciones activadas! ✅ Recibirás avisos de tus pedidos.');
-      } else {
-        alert('Notificaciones rechazadas. Puedes activarlas desde la configuración del navegador.');
-      }
-    });
-  } else if (window.OneSignalDeferred) {
-    window.OneSignalDeferred.push(function(OneSignal) {
-      OneSignal.Notifications.requestPermission();
-    });
-    alert('Activando notificaciones... Si no funciona, desactiva tu bloqueador de anuncios para nuevaexpress.com y vuelve a intentarlo.');
-  } else {
-    alert('⚠️ No se pudo cargar el servicio de notificaciones.\n\nSi tienes un bloqueador de anuncios (AdBlock, uBlock, etc.), desactívalo para nuevaexpress.com y recarga la página.');
+
+  function doRequest() {
+    if (window.OneSignal && window.OneSignal.Notifications) {
+      window.OneSignal.Notifications.requestPermission().then(function(accepted) {
+        if (accepted) {
+          alert('¡Notificaciones activadas! ✅ Recibirás avisos de tus pedidos.');
+        } else {
+          alert('Notificaciones rechazadas. Puedes activarlas desde la configuración del navegador.');
+        }
+      }).catch(function(e) {
+        alert('Error: ' + e.message);
+      });
+    } else {
+      // Esperar hasta 5 segundos a que OneSignal cargue
+      var attempts = 0;
+      var interval = setInterval(function() {
+        attempts++;
+        if (window.OneSignal && window.OneSignal.Notifications) {
+          clearInterval(interval);
+          window.OneSignal.Notifications.requestPermission().then(function(accepted) {
+            if (accepted) alert('¡Notificaciones activadas! ✅');
+            else alert('Notificaciones rechazadas.');
+          });
+        } else if (attempts >= 10) {
+          clearInterval(interval);
+          alert('⚠️ No se pudo cargar el servicio de notificaciones.\n\nIntenta:\n1. Desactivar AdBlock para nuevaexpress.com\n2. Hacer Clear site data (F12 → Application → Storage)\n3. Recargar la página');
+        }
+      }, 500);
+    }
   }
+  doRequest();
 }
 
 // ── PWA Install Prompt ────────────────────────────────────────
