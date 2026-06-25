@@ -2,22 +2,24 @@
 // NuevaExpress PWA — OneSignal Push + Install Prompt
 // ============================================================
 
+// ── Register OneSignal SW first ───────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/OneSignalSDKWorker.js', { scope: '/' })
+    .then(function(reg) { console.log('OneSignal SW registered', reg.scope); })
+    .catch(function(err) { console.error('OneSignal SW error:', err); });
+}
+
 // ── OneSignal Init ────────────────────────────────────────────
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 
 OneSignalDeferred.push(async function(OneSignal) {
-  try {
-    await OneSignal.init({
-      appId: "36b01031-83d9-4f66-bad8-3c32478f9fb2",
-      notifyButton: { enable: false },
-      welcomeNotification: { disable: true },
-      serviceWorkerParam: { scope: '/' },
-      serviceWorkerPath: '/OneSignalSDKWorker.js',
-    });
-  } catch(e) {
-    console.warn('OneSignal init error (permiso bloqueado o no soportado):', e.message);
-    return;
-  }
+  await OneSignal.init({
+    appId: "36b01031-83d9-4f66-bad8-3c32478f9fb2",
+    notifyButton: { enable: false },
+    welcomeNotification: { disable: true },
+    serviceWorkerParam: { scope: '/' },
+    serviceWorkerPath: '/OneSignalSDKWorker.js',
+  });
 
   // Link OneSignal user to our user ID when logged in
   var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
@@ -92,7 +94,7 @@ function requestNotificationPermission() {
     window.OneSignalDeferred.push(function(OneSignal) {
       OneSignal.Notifications.requestPermission();
     });
-    alert('⏳ Activando notificaciones...\n\nSi no aparece ningún diálogo en 5 segundos, el SDK de notificaciones no pudo cargar. Verifica:\n\n• Desactiva bloqueadores de contenido en Safari\n• Asegúrate de estar en iOS 16.4 o superior\n• Abre la app desde el ícono instalado, no desde Safari directamente');
+    alert('Activando notificaciones... Si no funciona, desactiva tu bloqueador de anuncios para nuevaexpress.com y vuelve a intentarlo.');
   } else {
     alert('⚠️ No se pudo cargar el servicio de notificaciones.\n\nSi tienes un bloqueador de anuncios (AdBlock, uBlock, etc.), desactívalo para nuevaexpress.com y recarga la página.');
   }

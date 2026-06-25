@@ -227,6 +227,47 @@ function handleInstall() {
   if (deferredInstallPrompt) { deferredInstallPrompt.prompt(); deferredInstallPrompt.userChoice.then(function(){ deferredInstallPrompt=null; }); return; }
   document.getElementById('iosInstallGuide').style.display = 'block';
 }
+function requestNotificationPermission() {
+  console.log('Notification.permission:', Notification.permission);
+  if (!('Notification' in window)) {
+    alert('Tu navegador no soporta notificaciones push.');
+    return;
+  }
+
+  if (Notification.permission === 'denied') {
+    var isAndroid = /Android/.test(navigator.userAgent);
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    var msg = '🔔 Las notificaciones están bloqueadas.\n\nPara activarlas:\n\n';
+    if (isAndroid) {
+      msg += '1. Toca los 3 puntos ⋮ del navegador\n2. Configuración → Configuración del sitio\n3. Notificaciones → nuevaexpress.com → Permitir';
+    } else if (isIOS) {
+      msg += '1. Abre Configuración del iPhone\n2. Busca Safari → Configuración avanzada → Datos del sitio web\n   o Chrome → Configuración del sitio\n3. Notificaciones → nuevaexpress.com → Permitir';
+    } else {
+      msg += '1. Clic en el candado 🔒 en la barra de dirección\n2. Notificaciones → Permitir\n3. Recarga la página';
+    }
+    alert(msg);
+    return;
+  }
+
+  // Usar siempre OneSignalDeferred para garantizar que el init ya terminó
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(function(OneSignal) {
+    OneSignal.Notifications.requestPermission().then(function(accepted) {
+      if (accepted) {
+        // Asegurar que el usuario esté vinculado
+        var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
+        if (user.id) {
+          OneSignal.login(String(user.id));
+          OneSignal.User.addTag('role', user.role || 'repartidor');
+          OneSignal.User.addTag('name', user.name || '');
+        }
+        alert('✅ ¡Notificaciones activadas! Recibirás avisos de nuevos pedidos.');
+      } else {
+        alert('⚠️ Permiso denegado. Puedes activarlas desde la configuración del navegador en cualquier momento.');
+      }
+    });
+  });
+}
 
 init();
 </script>
