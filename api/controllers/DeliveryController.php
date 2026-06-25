@@ -2,6 +2,7 @@
 // ============================================================
 // Delivery Controller
 // ============================================================
+require_once __DIR__ . '/../helpers/Mailer.php';
 class DeliveryController {
     private $db;
     public function __construct() { $this->db = Database::connect(); }
@@ -177,7 +178,16 @@ class DeliveryController {
 
         // Update order status + notify client
         $orderStatus = $dbStatus === 'entregado' ? 'entregado' : 'en_camino';
-        $stmt = $this->db->prepare("SELECT o.id, o.client_id, o.order_number FROM deliveries d JOIN orders o ON o.id = d.order_id WHERE d.id = ?");
+        $stmt = $this->db->prepare("
+            SELECT o.id, o.client_id, o.order_number, u.email as client_email, u.name as client_name,
+                   b.name as business_name, us.name as repartidor_name
+            FROM deliveries d
+            JOIN orders o ON o.id = d.order_id
+            JOIN users u ON o.client_id = u.id
+            JOIN businesses b ON o.business_id = b.id
+            LEFT JOIN users us ON d.repartidor_id = us.id
+            WHERE d.id = ?
+        ");
         $stmt->execute([$id]);
         $row = $stmt->fetch();
         if ($row) {
@@ -188,10 +198,18 @@ class DeliveryController {
                 $this->pushToUser((int)$row['client_id'], '🛵 Tu pedido está en camino',
                     "Tu pedido #{$row['order_number']} fue recogido y ya va en camino. ¡Pronto llegará!",
                     '/cliente/pedido-detalle.html?id=' . $row['id']);
+                if (!empty($row['client_email'])) {
+                    try { Mailer::orderOnTheWay($row['client_email'], $row['client_name'], $row['order_number'], $row['repartidor_name'] ?? ''); }
+                    catch (\Exception $e) { error_log('Mailer error: ' . $e->getMessage()); }
+                }
             } elseif ($dbStatus === 'entregado') {
                 $this->pushToUser((int)$row['client_id'], '✅ Pedido entregado',
                     "Tu pedido #{$row['order_number']} fue entregado. ¡Gracias por elegirnos, esperamos verte pronto!",
                     '/cliente/pedido-detalle.html?id=' . $row['id']);
+                if (!empty($row['client_email'])) {
+                    try { Mailer::orderDelivered($row['client_email'], $row['client_name'], $row['order_number'], $row['business_name']); }
+                    catch (\Exception $e) { error_log('Mailer error: ' . $e->getMessage()); }
+                }
             }
         }
 

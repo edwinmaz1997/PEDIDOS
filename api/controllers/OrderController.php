@@ -2,6 +2,7 @@
 // ============================================================
 // Order Controller
 // ============================================================
+require_once __DIR__ . '/../helpers/Mailer.php';
 
 class OrderController {
 
@@ -253,6 +254,17 @@ class OrderController {
                 ? "Tu pedido #{$order['order_number']} fue aceptado. Tiempo estimado: {$estTime} min."
                 : "Tu pedido #{$order['order_number']} fue rechazado. {$response}";
             $this->notify($order['client_id'], 'order_update', '📦 Actualización de pedido', $msg, '/cliente/pedido-detalle.html?id='.$id);
+
+            // Email al cliente cuando es aceptado
+            if ($action === 'aceptar' && !empty($order['client_email'])) {
+                Mailer::orderAccepted(
+                    $order['client_email'],
+                    $order['client_name'],
+                    $order['order_number'],
+                    $order['business_name'],
+                    (int)$estTime
+                );
+            }
         } catch (\Exception $e) {
             error_log("notify client error: " . $e->getMessage());
         }
@@ -295,6 +307,17 @@ class OrderController {
         $this->notify($order['client_id'], 'order_update', '📦 Actualización de pedido',
             "Tu pedido #{$order['order_number']} está {$statusLabels[$status]}.");
 
+        // Email al cliente según estado
+        if (!empty($order['client_email'])) {
+            try {
+                if ($status === 'listo') {
+                    Mailer::orderReady($order['client_email'], $order['client_name'], $order['order_number'], $order['business_name']);
+                }
+            } catch (\Exception $e) {
+                error_log('Mailer error: ' . $e->getMessage());
+            }
+        }
+
         // Cuando el negocio marca "listo", notificar al repartidor asignado
         if ($status === 'listo' && ($order['delivery_type'] ?? '') === 'delivery') {
             $dRow = $this->db->prepare(
@@ -325,7 +348,14 @@ class OrderController {
     // Private helpers
     // --------------------------------------------------------
     private function findOrder(int $id): array {
-        $stmt = $this->db->prepare("SELECT * FROM orders WHERE id = ?");
+        $stmt = $this->db->prepare("
+            SELECT o.*, u.name as client_name, u.email as client_email, u.phone as client_phone,
+                   b.name as business_name
+            FROM orders o
+            JOIN users u ON o.client_id = u.id
+            JOIN businesses b ON o.business_id = b.id
+            WHERE o.id = ?
+        ");
         $stmt->execute([$id]);
         $order = $stmt->fetch();
         if (!$order) Response::notFound('Pedido no encontrado');
