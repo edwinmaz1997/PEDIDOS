@@ -267,7 +267,7 @@ async function loadOrders(status, tabBtn) {
     allOrders = data.data?.orders || [];
     filteredOrders = allOrders.slice();
     if (document.getElementById('searchQ')) document.getElementById('searchQ').value = '';
-    updateStats(allOrders);
+    refreshStats();
     renderOrders();
   } catch(e) { document.getElementById('ordersContainer').innerHTML = '<div class="empty-state"><p>Error cargando pedidos.</p></div>'; }
 }
@@ -419,6 +419,15 @@ function updateStats(orders) {
   document.getElementById('pendingCount').style.display = pending ? '' : 'none';
 }
 
+async function refreshStats() {
+  try {
+    var token = localStorage.getItem('nuevaexpress_token');
+    var res = await fetch('/api/orders', { headers: { 'Authorization': 'Bearer ' + token } });
+    var data = await res.json();
+    if (data.success) updateStats(data.data?.orders || []);
+  } catch(e) {}
+}
+
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
 
@@ -482,7 +491,7 @@ setInterval(async function() {
       allOrders = silentData.data?.orders || [];
       filteredOrders = allOrders.slice();
       page = 1;
-      updateStats(allOrders);
+      refreshStats();
       renderOrders();
     }
   } catch(e) {}
