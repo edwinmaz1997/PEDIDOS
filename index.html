@@ -538,15 +538,12 @@ async function openBusiness(id) {
             </div>
           ` : ''}
           ${b.business_type === 'delivery' ? `
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:20px">
-              <a href="cliente/pedido.html?business=${b.id}&type=pedido" class="btn-order" style="text-align:center;text-decoration:none;background:var(--accent);font-size:.82rem">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px">
+              <a href="cliente/pedido.html?business=${b.id}&type=pedido" class="btn-order" style="text-align:center;text-decoration:none;background:var(--accent)">
                 🛒 Hacer Pedido
               </a>
-              <a href="cliente/pedido.html?business=${b.id}&type=paquete" class="btn-order" style="text-align:center;text-decoration:none;background:#FF8C42;font-size:.82rem">
+              <a href="cliente/pedido.html?business=${b.id}&type=paquete" class="btn-order" style="text-align:center;text-decoration:none;background:#FF8C42">
                 📦 Enviar Paquete
-              </a>
-              <a href="cliente/pedido.html?business=${b.id}&type=compras" class="btn-order" style="text-align:center;text-decoration:none;background:#7c3aed;font-size:.82rem">
-                🛍️ Ir a Comprar
               </a>
             </div>
           ` : `
