@@ -471,7 +471,6 @@ setInterval(async function() {
       var diff = pendingNow - lastPendingCount;
       var msg = '🔔 ' + diff + ' nuevo' + (diff>1?'s':'') + ' pedido' + (diff>1?'s':'') + ' pendiente' + (diff>1?'s':'');
       if (typeof APP !== 'undefined') APP.toast(msg, 'success');
-      if (navigator.vibrate) navigator.vibrate([200,100,200]);
       try {
         var ctx = new (window.AudioContext||window.webkitAudioContext)();
         var osc = ctx.createOscillator(); var gain = ctx.createGain();
