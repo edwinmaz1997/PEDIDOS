@@ -200,6 +200,15 @@ function renderOrder(o) {
       </div>
       ${items ? `<div class="order-items">${items}<div class="order-total-row"><span>Total</span><span>Q${parseFloat(o.total).toFixed(2)}</span></div></div>` : ''}
       ${o.notes ? `<div style="font-size:.85rem;color:var(--muted);margin-top:8px">📝 ${esc(o.notes)}</div>` : ''}
+      ${o.boleta_url ? `<div style="margin-top:8px;display:flex;align-items:center;gap:10px;background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:8px;padding:10px">
+        <a href="${esc(o.boleta_url)}" target="_blank" style="flex-shrink:0">
+          <img src="${esc(o.boleta_url)}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;cursor:zoom-in">
+        </a>
+        <div>
+          <div style="font-size:.8rem;font-weight:700;color:#7c3aed">📸 Tu boleta</div>
+          <a href="${esc(o.boleta_url)}" target="_blank" style="font-size:.75rem;color:#7c3aed;text-decoration:underline">Ver imagen completa</a>
+        </div>
+      </div>` : ''}
       ${o.business_response ? `<div class="order-response"><strong>Respuesta del negocio:</strong> ${esc(o.business_response)}</div>` : ''}
       ${o.estimated_time && o.preparation_started_at && o.status === 'en_preparacion' ? `
         <div id="timer-${o.id}" data-ts="${o.prep_ts}" data-started="${o.preparation_started_at}" data-mins="${o.estimated_time}" style="margin-top:10px;background:linear-gradient(135deg,#eaf2fb,#f0f7ff);border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px">
