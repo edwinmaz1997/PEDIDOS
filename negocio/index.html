@@ -464,8 +464,6 @@ setInterval(async function() {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     var data = await res.json();
-    console.log('Poll:', data.success, data.data?.orders?.length, 'status:', currentStatus);
-    console.log('Orders IDs:', (data.data?.orders||[]).map(function(o){return o.order_number+':'+o.status;}));
     if (!data.success) return;
     var newOrders = data.data?.orders || [];
     var pendingNow = newOrders.filter(function(o){ return o.status === 'pendiente'; }).length;
@@ -476,7 +474,8 @@ setInterval(async function() {
     }
     lastPendingCount = pendingNow;
     allOrders = newOrders;
-    applySearch();
+    filteredOrders = allOrders.slice();
+    renderOrders();
   } catch(e) { console.error('Poll error:', e); }
 }, 8000);
 </script>
