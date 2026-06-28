@@ -634,6 +634,10 @@ async function init() {
     return; // No cargar los otros reportes
   }
 
+  // Mostrar navPedidos para negocios de tipo pedidos
+  var navPed = document.getElementById('navPedidos');
+  if (navPed) navPed.style.display = 'block';
+
   // Populate year selectors
   var currentYear = new Date().getFullYear();
   var years = [currentYear, currentYear-1, currentYear-2];
