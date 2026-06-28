@@ -379,7 +379,7 @@ function getVariants() {
 
 async function openModal(productId = null) {
   photoFileToUpload = null;
-  const p = productId ? products.find(x => x.id === productId) : null;
+  const p = productId ? (allProducts || products).find(x => x.id === productId) : null;
   window.editingProduct = p || null;
   document.getElementById('modalTitle').textContent = p ? 'Editar Producto' : 'Nuevo Producto';
   document.getElementById('p_id').value = productId || '';
