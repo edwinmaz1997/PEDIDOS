@@ -1178,11 +1178,19 @@ async function submitOrder() {
     }
   }
 
-  // Subir boleta si el cliente adjuntó una
-  var boletaUrl = null;
+    var boletaUrl = null;
   if (boletaFileToUpload) {
-    var imgRes = await APP.upload(boletaFileToUpload, 'boletas');
-    if (imgRes?.success) boletaUrl = imgRes.data.url;
+    var fd = new FormData();
+    fd.append('image', boletaFileToUpload);
+    fd.append('folder', 'boletas');
+    var imgRes = await fetch(API + '/upload', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
+      body: fd
+    });
+    var imgData = await imgRes.json();
+    if (imgData.success) boletaUrl = imgData.data.url;
+    else { alert('Error al subir la boleta. Intenta de nuevo.'); submitBtn.disabled = false; submitBtn.textContent = 'Enviar Pedido'; return; }
   }
 
   // ── Flujo paquete ──────────────────────────────────────
