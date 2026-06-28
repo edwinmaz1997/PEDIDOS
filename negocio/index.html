@@ -59,12 +59,12 @@
     </div>
 
     <div class="stats-grid" id="statsGrid">
-      <div class="stat-card"><div class="stat-label">Pedidos hoy</div><div class="stat-value" id="statToday">—</div></div>
-      <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value" id="statPending" style="color:var(--warning)">—</div></div>
-      <div class="stat-card"><div class="stat-label">Aceptados</div><div class="stat-value" id="statAccepted" style="color:var(--blue)">—</div></div>
-      <div class="stat-card"><div class="stat-label">En preparación</div><div class="stat-value" id="statPrep" style="color:var(--accent)">—</div></div>
-      <div class="stat-card"><div class="stat-label">Listos</div><div class="stat-value" id="statReady" style="color:#a855f7">—</div></div>
-      <div class="stat-card"><div class="stat-label">Entregados hoy</div><div class="stat-value" id="statDone" style="color:var(--success)">—</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="loadOrders('',document.querySelector('.tab-btn:last-of-type'))"><div class="stat-label">Pedidos hoy</div><div class="stat-value" id="statToday">—</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="loadOrders('pendiente',document.querySelectorAll('.tab-btn')[0])"><div class="stat-label">Pendientes</div><div class="stat-value" id="statPending" style="color:var(--warning)">—</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="loadOrders('aceptado',document.querySelectorAll('.tab-btn')[1])"><div class="stat-label">Aceptados</div><div class="stat-value" id="statAccepted" style="color:var(--blue)">—</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="loadOrders('en_preparacion',document.querySelectorAll('.tab-btn')[2])"><div class="stat-label">En preparación</div><div class="stat-value" id="statPrep" style="color:var(--accent)">—</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="loadOrders('listo',document.querySelectorAll('.tab-btn')[3])"><div class="stat-label">Listos</div><div class="stat-value" id="statReady" style="color:#a855f7">—</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="loadEntregadosHoy(document.querySelectorAll('.tab-btn')[4])"><div class="stat-label">Entregados hoy</div><div class="stat-value" id="statDone" style="color:var(--success)">—</div></div>
     </div>
 
     <div class="tab-nav">
@@ -263,7 +263,7 @@ async function loadOrders(status, tabBtn) {
   page = 1;
   document.getElementById('ordersContainer').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
   try {
-    const qs = status ? '?status=' + status : '';
+    const qs = (status ? '?status=' + status : '?') + '&all=1';
     const res = await fetch(API + '/orders' + qs, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
     const data = await res.json();
     allOrders = data.data?.orders || [];
@@ -426,7 +426,7 @@ function updateStats(orders) {
 async function refreshStats() {
   try {
     var token = localStorage.getItem('nuevaexpress_token');
-    var res = await fetch('/api/orders', { headers: { 'Authorization': 'Bearer ' + token } });
+    var res = await fetch('/api/orders?all=1', { headers: { 'Authorization': 'Bearer ' + token } });
     var data = await res.json();
     if (data.success) updateStats(data.data?.orders || []);
   } catch(e) {}
@@ -473,7 +473,7 @@ var lastPendingCount = null;
 setInterval(async function() {
   try {
     var token = localStorage.getItem('nuevaexpress_token');
-    var res = await fetch('/api/orders?status=pendiente', {
+    var res = await fetch('/api/orders?status=pendiente&all=1', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     var data = await res.json();
@@ -487,7 +487,7 @@ setInterval(async function() {
     lastPendingCount = pendingNow;
     // Reload silencioso del tab actual
     var status = currentStatus || 'pendiente';
-    var silentRes = await fetch('/api/orders' + (status ? '?status=' + status : ''), {
+    var silentRes = await fetch('/api/orders' + (status ? '?status=' + status + '&all=1' : '?all=1'), {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     var silentData = await silentRes.json();
