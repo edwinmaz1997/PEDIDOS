@@ -377,7 +377,7 @@ function renderProducts() {
   const section = document.getElementById('productsSection');
   // No mostrar si estamos en modo paquete
   if (orderType !== 'paquete') section.style.display = 'block';
-  const products = business.products || [];
+  products = business.products || [];
   if (!products.length) {
     document.getElementById('productsList').innerHTML = '<p style="color:var(--muted);font-size:.9rem">Este negocio no tiene productos. Usa el campo personalizado.</p>';
     return;
@@ -394,10 +394,11 @@ function renderProducts() {
 
 var activeProdCat = null;
 var productMap = {};
+var products = [];
 
 function openProductModal() {
   // Build product lookup
-  var products = business.products || [];
+  products = business.products || [];
   products.forEach(function(p){ productMap[p.id] = { name: p.name, price: parseFloat(p.price||0), has_variants: p.has_variants, variants: p.variants||[] }; });
   var pm = document.getElementById('productModal'); pm.style.display = 'flex'; pm.style.alignItems = 'center';
   document.body.style.overflow = 'hidden';
@@ -410,7 +411,7 @@ function closeProductModal() {
 }
 
 function renderProductModal(searchQ, catId) {
-  var products = business.products || [];
+  products = business.products || [];
   var q = (searchQ || document.getElementById('prodSearch')?.value || '').toLowerCase();
   var cat = catId !== undefined ? catId : activeProdCat;
 
