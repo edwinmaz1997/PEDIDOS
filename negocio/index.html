@@ -423,15 +423,37 @@ function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'
 function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
 
 loadOrders('pendiente', null);
+var lastPendingCount = null;
+
 setInterval(async function() {
-  // Silent refresh - keep current tab and page
   const res = await APP.get('/orders' + (currentStatus ? '?status=' + currentStatus : ''));
   if (!res?.success) return;
-  allOrders = res.data?.orders || [];
+  const newOrders = res.data?.orders || [];
+
+  // Detectar pedidos nuevos pendientes
+  const pendingNow = newOrders.filter(function(o){ return o.status === 'pendiente'; }).length;
+  if (lastPendingCount !== null && pendingNow > lastPendingCount) {
+    var diff = pendingNow - lastPendingCount;
+    APP.toast('🔔 ' + diff + ' nuevo' + (diff > 1 ? 's' : '') + ' pedido' + (diff > 1 ? 's' : '') + ' pendiente' + (diff > 1 ? 's' : ''), 'success');
+    // Vibrar si el dispositivo lo soporta
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    // Sonido de notificación
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880; gain.gain.value = 0.3;
+      osc.start(); osc.stop(ctx.currentTime + 0.15);
+    } catch(e) {}
+  }
+  lastPendingCount = pendingNow;
+
+  allOrders = newOrders;
   filteredOrders = allOrders.slice();
   document.getElementById('searchQ').value = '';
   renderOrders();
-}, 20000);
+}, 8000);
 </script>
 
 <script>
