@@ -133,7 +133,6 @@ async function init() {
     }).then(function(r){ return r.json(); });
     if (!res.success) { window.location.href = 'index.html'; return; }
     order = res.data;
-    console.log('order.items:', order.items, 'order.boleta_url:', order.boleta_url);
     document.getElementById('pageTitle').textContent = order.order_number;
     renderStatus();
     renderItems();

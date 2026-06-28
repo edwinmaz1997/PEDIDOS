@@ -239,10 +239,10 @@ try {
             if ($orderId2 && $orderSub === 'status') { $ctrl->updateStatus($orderId2, $body); break; }
 
             // Standard CRUD
-            if ($method === 'GET'  && !$id)   $ctrl->index();
-            elseif ($method === 'GET'  && $id) $ctrl->show($id);
-            elseif ($method === 'POST' && !$id)$ctrl->store($body);
-            elseif ($method === 'PUT'  && $id) $ctrl->updateStatus($id, $body);
+            if ($method === 'GET'  && !$orderId2)   $ctrl->index();
+            elseif ($method === 'GET'  && $orderId2) $ctrl->show($orderId2);
+            elseif ($method === 'POST' && !$orderId2)$ctrl->store($body);
+            elseif ($method === 'PUT'  && $orderId2) $ctrl->updateStatus($orderId2, $body);
             else Response::notFound();
             break;
 
