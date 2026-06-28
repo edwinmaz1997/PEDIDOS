@@ -64,7 +64,7 @@
       <div class="stat-card" style="cursor:pointer" onclick="loadOrders('aceptado',document.querySelectorAll('.tab-btn')[1])"><div class="stat-label">Aceptados</div><div class="stat-value" id="statAccepted" style="color:var(--blue)">—</div></div>
       <div class="stat-card" style="cursor:pointer" onclick="loadOrders('en_preparacion',document.querySelectorAll('.tab-btn')[2])"><div class="stat-label">En preparación</div><div class="stat-value" id="statPrep" style="color:var(--accent)">—</div></div>
       <div class="stat-card" style="cursor:pointer" onclick="loadOrders('listo',document.querySelectorAll('.tab-btn')[3])"><div class="stat-label">Listos</div><div class="stat-value" id="statReady" style="color:#a855f7">—</div></div>
-      <div class="stat-card" style="cursor:pointer" onclick="loadEntregadosHoy(document.querySelectorAll('.tab-btn')[4])"><div class="stat-label">Entregados hoy</div><div class="stat-value" id="statDone" style="color:var(--success)">—</div></div>
+      <div class="stat-card" style="cursor:pointer" onclick="loadEntregadosHoy(document.querySelectorAll('.tab-btn')[5])"><div class="stat-label">Entregados hoy</div><div class="stat-value" id="statDone" style="color:var(--success)">—</div></div>
     </div>
 
     <div class="tab-nav">
@@ -473,9 +473,8 @@ var lastPendingCount = null;
 setInterval(async function() {
   try {
     var token = localStorage.getItem('nuevaexpress_token');
-    var res = await fetch('/api/orders?status=pendiente&all=1', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
+    // Contar pendientes para notificar
+    var res = await fetch('/api/orders?status=pendiente&all=1', { headers: { 'Authorization': 'Bearer ' + token } });
     var data = await res.json();
     if (!data.success) return;
     var pendingNow = (data.data?.orders || []).length;
@@ -485,11 +484,11 @@ setInterval(async function() {
       if (typeof APP !== 'undefined') APP.toast(msg, 'success');
     }
     lastPendingCount = pendingNow;
-    // Reload silencioso del tab actual
-    var status = currentStatus || 'pendiente';
-    var silentRes = await fetch('/api/orders' + (status ? '?status=' + status + '&all=1' : '?all=1'), {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
+    // Reload silencioso — saltar si está en Entregados hoy (tiene filtro especial de fecha)
+    if (document.querySelector('.tab-btn:nth-child(6)')?.classList.contains('active')) return;
+    var status = currentStatus;
+    var qs = status ? '?status=' + status + '&all=1' : '?all=1';
+    var silentRes = await fetch('/api/orders' + qs, { headers: { 'Authorization': 'Bearer ' + token } });
     var silentData = await silentRes.json();
     if (silentData.success) {
       allOrders = silentData.data?.orders || [];
