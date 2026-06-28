@@ -61,7 +61,9 @@
     <div class="stats-grid" id="statsGrid">
       <div class="stat-card"><div class="stat-label">Pedidos hoy</div><div class="stat-value" id="statToday">—</div></div>
       <div class="stat-card"><div class="stat-label">Pendientes</div><div class="stat-value" id="statPending" style="color:var(--warning)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Aceptados</div><div class="stat-value" id="statAccepted" style="color:var(--blue)">—</div></div>
       <div class="stat-card"><div class="stat-label">En preparación</div><div class="stat-value" id="statPrep" style="color:var(--accent)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Listos</div><div class="stat-value" id="statReady" style="color:#a855f7">—</div></div>
       <div class="stat-card"><div class="stat-label">Entregados hoy</div><div class="stat-value" id="statDone" style="color:var(--success)">—</div></div>
     </div>
 
@@ -412,7 +414,9 @@ function updateStats(orders) {
   function _isToday(s) { if(!s)return false; var d=new Date((s||'').replace(' ','T')); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')===_hoy; }
   document.getElementById('statToday').textContent = orders.filter(o => _isToday(o.created_at)).length;
   document.getElementById('statPending').textContent = orders.filter(o=>o.status==='pendiente').length;
+  document.getElementById('statAccepted').textContent = orders.filter(o=>o.status==='aceptado').length;
   document.getElementById('statPrep').textContent = orders.filter(o=>o.status==='en_preparacion').length;
+  document.getElementById('statReady').textContent = orders.filter(o=>o.status==='listo').length;
   document.getElementById('statDone').textContent = orders.filter(o=>o.status==='entregado' && _isToday(o.updated_at||o.created_at)).length;
   const pending = orders.filter(o=>o.status==='pendiente').length;
   document.getElementById('pendingCount').textContent = pending || '';
