@@ -11,7 +11,18 @@ class ProductController {
         if (!$businessId) Response::error('business_id requerido', 400);
         $stmt = $this->db->prepare("SELECT p.*, c.name as category_name, c.icon as category_icon FROM products_services p LEFT JOIN product_categories c ON p.category_id = c.id WHERE p.business_id = ? ORDER BY p.is_available DESC, c.sort_order, p.sort_order, p.name");
         $stmt->execute([$businessId]);
-        Response::success($stmt->fetchAll());
+        $products = $stmt->fetchAll();
+        // Agregar variantes a cada producto
+        foreach ($products as &$p) {
+            if ($p['has_variants']) {
+                $vStmt = $this->db->prepare("SELECT * FROM product_variants WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
+                $vStmt->execute([$p['id']]);
+                $p['variants'] = $vStmt->fetchAll();
+            } else {
+                $p['variants'] = [];
+            }
+        }
+        Response::success($products);
     }
 
     public function show(int $id): void {
@@ -19,7 +30,22 @@ class ProductController {
         $stmt->execute([$id]);
         $p = $stmt->fetch();
         if (!$p) Response::notFound();
+        if ($p['has_variants']) {
+            $vStmt = $this->db->prepare("SELECT * FROM product_variants WHERE product_id = ? ORDER BY sort_order, id");
+            $vStmt->execute([$id]);
+            $p['variants'] = $vStmt->fetchAll();
+        }
         Response::success($p);
+    }
+
+    private function saveVariants(int $productId, array $variants): void {
+        $this->db->prepare("DELETE FROM product_variants WHERE product_id = ?")->execute([$productId]);
+        $vStmt = $this->db->prepare("INSERT INTO product_variants (product_id, name, price, sort_order) VALUES (?,?,?,?)");
+        foreach ($variants as $i => $v) {
+            if (!empty($v['name']) && isset($v['price'])) {
+                $vStmt->execute([$productId, $v['name'], (float)$v['price'], $i]);
+            }
+        }
     }
 
     public function store(array $body): void {
@@ -28,14 +54,20 @@ class ProductController {
         if (!$businessId) Response::error('business_id requerido', 400);
         if (empty($body['name'])) Response::error('Nombre requerido', 400);
 
-        $stmt = $this->db->prepare("INSERT INTO products_services (business_id, name, description, price, photo, sort_order, category_id) VALUES (?,?,?,?,?,?,?)");
-        $stmt->execute([$businessId, $body['name'], $body['description'] ?? null, $body['price'] ?? null, $body['photo'] ?? null, $body['sort_order'] ?? 0, $body['category_id'] ?? null]);
-        Response::success(['id' => $this->db->lastInsertId()], 'Producto creado', 201);
+        $hasVariants = !empty($body['has_variants']) ? 1 : 0;
+        $stmt = $this->db->prepare("INSERT INTO products_services (business_id, name, description, price, photo, sort_order, category_id, has_variants) VALUES (?,?,?,?,?,?,?,?)");
+        $stmt->execute([$businessId, $body['name'], $body['description'] ?? null, $body['price'] ?? null, $body['photo'] ?? null, $body['sort_order'] ?? 0, $body['category_id'] ?? null, $hasVariants]);
+        $productId = (int)$this->db->lastInsertId();
+
+        if ($hasVariants && !empty($body['variants'])) {
+            $this->saveVariants($productId, $body['variants']);
+        }
+        Response::success(['id' => $productId], 'Producto creado', 201);
     }
 
     public function update(int $id, array $body): void {
         AuthMiddleware::requireRole(['negocio', 'admin']);
-        $fields = ['name','description','price','is_available','sort_order','category_id','photo'];
+        $fields = ['name','description','price','is_available','sort_order','category_id','photo','has_variants'];
         $sets = []; $params = [];
         foreach ($fields as $f) {
             if (array_key_exists($f, $body)) { $sets[] = "$f = ?"; $params[] = $body[$f]; }
@@ -43,6 +75,11 @@ class ProductController {
         if (!$sets) Response::error('Sin datos', 400);
         $params[] = $id;
         $this->db->prepare("UPDATE products_services SET " . implode(', ', $sets) . " WHERE id = ?")->execute($params);
+
+        // Actualizar variantes si se enviaron
+        if (array_key_exists('variants', $body)) {
+            $this->saveVariants($id, $body['variants'] ?: []);
+        }
         Response::success(null, 'Producto actualizado');
     }
 

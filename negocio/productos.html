@@ -150,6 +150,24 @@ input:checked + .slider:before { transform:translateX(20px); }
         <option value="">Sin categoría</option>
       </select>
     </div>
+
+    <!-- Variantes -->
+    <div class="form-group" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label style="margin:0">Variantes <span style="font-weight:400;color:var(--muted)">(tamaños, opciones, etc.)</span></label>
+        <label class="switch" style="margin:0">
+          <input type="checkbox" id="p_has_variants" onchange="toggleVariants()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="variantsSection" style="display:none">
+        <p style="font-size:.78rem;color:var(--muted);margin:0 0 10px">Agrega las variantes del producto. El precio base se ignorará si tiene variantes.</p>
+        <div id="variantsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div>
+        <button type="button" onclick="addVariantRow()" style="width:100%;padding:8px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;color:var(--muted)">
+          + Agregar variante
+        </button>
+      </div>
+    </div>
     <div class="toggle-available" style="margin-bottom:20px">
       <label class="switch"><input type="checkbox" id="p_available" checked><span class="slider"></span></label>
       <span style="font-size:.9rem">Disponible para pedidos</span>
@@ -312,7 +330,7 @@ function renderProductRow(p) {
         <div class="prod-name">${APP.esc(p.name)}</div>
         ${p.description ? `<div class="prod-desc">${APP.esc(p.description)}</div>` : ''}
       </div>
-      <div class="prod-price">${p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
+      <div class="prod-price">${p.has_variants ? '<span style="color:var(--muted);font-weight:400;font-size:.8rem">'+( p.variants?.length||0)+' variante(s)</span>' : p.price ? APP.money(p.price) : '<span style="color:var(--muted);font-weight:400">Precio variable</span>'}</div>
       <div class="prod-actions">
         <button class="icon-btn" onclick="openModal(${p.id})" title="Editar">✏️</button>
         <button class="icon-btn" onclick="toggleAvailable(${p.id}, ${p.is_available?0:1})" title="${p.is_available?'Desactivar':'Activar'}">${p.is_available?'⏸':'▶'}</button>
@@ -328,7 +346,38 @@ async function toggleAvailable(id, available) {
   else { APP.toast(val ? 'Producto activado' : 'Producto desactivado'); loadProducts(); }
 }
 
-function openModal(productId = null) {
+function toggleVariants() {
+  var hasVariants = document.getElementById('p_has_variants').checked;
+  document.getElementById('variantsSection').style.display = hasVariants ? 'block' : 'none';
+  document.getElementById('p_price').closest('.form-group').style.opacity = hasVariants ? '.4' : '1';
+  if (hasVariants && document.getElementById('variantsList').children.length === 0) {
+    addVariantRow();
+    addVariantRow();
+  }
+}
+
+function addVariantRow(name = '', price = '') {
+  var list = document.getElementById('variantsList');
+  var div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;align-items:center';
+  div.innerHTML = `
+    <input type="text" placeholder="Ej: 12 oz" value="${name}" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem" class="variant-name">
+    <input type="number" placeholder="Q0.00" value="${price}" min="0" step="0.50" style="width:90px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem" class="variant-price">
+    <button type="button" onclick="this.parentNode.remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:4px">✕</button>
+  `;
+  list.appendChild(div);
+}
+
+function getVariants() {
+  return Array.from(document.querySelectorAll('#variantsList > div')).map(function(row) {
+    return {
+      name: row.querySelector('.variant-name').value.trim(),
+      price: parseFloat(row.querySelector('.variant-price').value) || 0
+    };
+  }).filter(function(v) { return v.name && v.price > 0; });
+}
+
+async function openModal(productId = null) {
   photoFileToUpload = null;
   const p = productId ? products.find(x => x.id === productId) : null;
   window.editingProduct = p || null;
@@ -343,6 +392,19 @@ function openModal(productId = null) {
   const placeholder = document.getElementById('p_photoPlaceholder');
   if (p?.photo) { preview.src = p.photo; preview.style.display = 'block'; placeholder.style.display = 'none'; }
   else { preview.style.display = 'none'; placeholder.style.display = 'flex'; }
+
+  // Variantes
+  document.getElementById('variantsList').innerHTML = '';
+  var hasVariants = !!(p?.has_variants);
+  document.getElementById('p_has_variants').checked = hasVariants;
+  document.getElementById('variantsSection').style.display = hasVariants ? 'block' : 'none';
+  document.getElementById('p_price').closest('.form-group').style.opacity = hasVariants ? '.4' : '1';
+  if (hasVariants && p?.variants?.length) {
+    p.variants.forEach(function(v) { addVariantRow(v.name, v.price); });
+  } else if (hasVariants) {
+    addVariantRow(); addVariantRow();
+  }
+
   document.getElementById('productModal').style.display = 'flex';
 }
 
@@ -372,14 +434,19 @@ async function saveProduct() {
     if (upRes?.success) photoUrl = upRes.data.url;
   }
 
+  const hasVariants = document.getElementById('p_has_variants').checked;
+  const variants = hasVariants ? getVariants() : [];
+
   const payload = {
     business_id: bizId,
     name,
     description: document.getElementById('p_description').value,
-    price: document.getElementById('p_price').value || null,
+    price: hasVariants ? null : (document.getElementById('p_price').value || null),
     is_available: document.getElementById('p_available').checked ? 1 : 0,
     category_id: document.getElementById('p_category').value || null,
     photo: photoUrl,
+    has_variants: hasVariants ? 1 : 0,
+    variants: variants,
   };
 
   let res;

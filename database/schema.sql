@@ -163,10 +163,24 @@ CREATE TABLE IF NOT EXISTS products_services (
     category_id INT DEFAULT NULL,
     is_available TINYINT(1) DEFAULT 1,
     sort_order INT DEFAULT 0,
+    has_variants TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,
     FULLTEXT INDEX ft_product_search (name, description)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
+-- PRODUCT VARIANTS
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS product_variants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL COMMENT 'Ej: 12 oz, 16 oz, Grande',
+    price DECIMAL(10,2) NOT NULL,
+    is_available TINYINT(1) DEFAULT 1,
+    sort_order INT DEFAULT 0,
+    FOREIGN KEY (product_id) REFERENCES products_services(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ------------------------------------------------------------
