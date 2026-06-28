@@ -464,6 +464,7 @@ setInterval(async function() {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     var data = await res.json();
+    console.log('Poll:', data.success, data.data?.orders?.length, 'status:', currentStatus);
     if (!data.success) return;
     var newOrders = data.data?.orders || [];
     var pendingNow = newOrders.filter(function(o){ return o.status === 'pendiente'; }).length;
@@ -471,13 +472,6 @@ setInterval(async function() {
       var diff = pendingNow - lastPendingCount;
       var msg = '🔔 ' + diff + ' nuevo' + (diff>1?'s':'') + ' pedido' + (diff>1?'s':'') + ' pendiente' + (diff>1?'s':'');
       if (typeof APP !== 'undefined') APP.toast(msg, 'success');
-      try {
-        var ctx = new (window.AudioContext||window.webkitAudioContext)();
-        var osc = ctx.createOscillator(); var gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.frequency.value = 880; gain.gain.value = 0.3;
-        osc.start(); osc.stop(ctx.currentTime + 0.15);
-      } catch(e) {}
     }
     lastPendingCount = pendingNow;
     allOrders = newOrders;
