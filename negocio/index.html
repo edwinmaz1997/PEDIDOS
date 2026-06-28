@@ -460,25 +460,32 @@ var lastPendingCount = null;
 setInterval(async function() {
   try {
     var token = localStorage.getItem('nuevaexpress_token');
-    var res = await fetch('/api/orders' + (currentStatus ? '?status=' + currentStatus : ''), {
+    var res = await fetch('/api/orders?status=pendiente', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     var data = await res.json();
     if (!data.success) return;
-    var newOrders = data.data?.orders || [];
-    var pendingNow = newOrders.filter(function(o){ return o.status === 'pendiente'; }).length;
+    var pendingNow = (data.data?.orders || []).length;
     if (lastPendingCount !== null && pendingNow > lastPendingCount) {
       var diff = pendingNow - lastPendingCount;
       var msg = '🔔 ' + diff + ' nuevo' + (diff>1?'s':'') + ' pedido' + (diff>1?'s':'') + ' pendiente' + (diff>1?'s':'');
       if (typeof APP !== 'undefined') APP.toast(msg, 'success');
     }
     lastPendingCount = pendingNow;
-    allOrders = newOrders;
-    filteredOrders = allOrders.slice();
-    page = 1;
-    updateStats(allOrders);
-    renderOrders();
-  } catch(e) { console.error('Poll error:', e); }
+    // Reload silencioso del tab actual
+    var status = currentStatus || 'pendiente';
+    var silentRes = await fetch('/api/orders' + (status ? '?status=' + status : ''), {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    var silentData = await silentRes.json();
+    if (silentData.success) {
+      allOrders = silentData.data?.orders || [];
+      filteredOrders = allOrders.slice();
+      page = 1;
+      updateStats(allOrders);
+      renderOrders();
+    }
+  } catch(e) {}
 }, 8000);
 </script>
 </body>
