@@ -465,6 +465,7 @@ setInterval(async function() {
     });
     var data = await res.json();
     console.log('Poll:', data.success, data.data?.orders?.length, 'status:', currentStatus);
+    console.log('Orders IDs:', (data.data?.orders||[]).map(function(o){return o.order_number+':'+o.status;}));
     if (!data.success) return;
     var newOrders = data.data?.orders || [];
     var pendingNow = newOrders.filter(function(o){ return o.status === 'pendiente'; }).length;
