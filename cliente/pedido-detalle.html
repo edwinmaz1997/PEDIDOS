@@ -215,7 +215,10 @@ async function loadMessages() {
 
     // Update total if changed
     if (res.data.order && parseFloat(res.data.order.total) !== parseFloat(order.total)) {
-      order = res.data.order;
+      order.total = res.data.order.total;
+      order.subtotal = res.data.order.subtotal;
+      order.delivery_fee = res.data.order.delivery_fee;
+      order.status = res.data.order.status;
       if (typeof renderItems === 'function') renderItems();
     }
 
