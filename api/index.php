@@ -219,8 +219,9 @@ try {
 
             // Re-parse URI directly to avoid any variable conflicts
             $uriParts   = explode('/', ltrim(str_replace('/api', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)), '/'));
-            $orderId2   = isset($uriParts[1]) && is_numeric($uriParts[1]) ? (int)$uriParts[1] : null;
-            $orderSub   = isset($uriParts[2]) ? trim($uriParts[2]) : null;
+            $rawId2     = isset($uriParts[1]) ? explode('?', $uriParts[1])[0] : null;
+            $orderId2   = $rawId2 && is_numeric($rawId2) ? (int)$rawId2 : null;
+            $orderSub   = isset($uriParts[2]) ? trim(explode('?', $uriParts[2])[0]) : null;
 
             // /orders/unread
             if ($parts[1] === 'unread') { $msgCtrl->unreadCounts(); break; }
