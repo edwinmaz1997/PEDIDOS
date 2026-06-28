@@ -475,10 +475,8 @@ setInterval(async function() {
     }
     lastPendingCount = pendingNow;
     allOrders = newOrders;
-    filteredOrders = allOrders.slice();
-    document.getElementById('searchQ').value = '';
-    renderOrders();
-  } catch(e) {}
+    filterOrders();
+  } catch(e) { console.error('Poll error:', e); }
 }, 8000);
 </script>
 </body>
