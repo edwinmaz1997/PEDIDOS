@@ -643,8 +643,7 @@ function applyOrderType(type) {
   var badge           = document.getElementById('orderTypeBadge');
   var badgeInner      = document.getElementById('orderTypeBadgeInner');
 
-
-  } else if (type === 'paquete') {
+  if (type === 'paquete') {
     // Mostrar solo formulario de paquete
     packageForm.style.display     = 'block';
     productsSection.style.display = 'none';
