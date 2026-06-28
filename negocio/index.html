@@ -475,6 +475,8 @@ setInterval(async function() {
     lastPendingCount = pendingNow;
     allOrders = newOrders;
     filteredOrders = allOrders.slice();
+    page = 1;
+    updateStats(allOrders);
     renderOrders();
   } catch(e) { console.error('Poll error:', e); }
 }, 8000);
