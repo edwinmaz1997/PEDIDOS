@@ -203,6 +203,7 @@ CREATE TABLE IF NOT EXISTS orders (
     estimated_time INT COMMENT 'minutos estimados',
     accepted_at TIMESTAMP NULL COMMENT 'cuando el negocio aceptó el pedido',
     preparation_started_at TIMESTAMP NULL COMMENT 'cuando el negocio inició preparación',
+    boleta_url VARCHAR(500) NULL COMMENT 'foto de boleta para pedidos de compras',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (client_id) REFERENCES users(id),

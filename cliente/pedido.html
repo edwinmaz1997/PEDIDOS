@@ -164,6 +164,46 @@
           </div>
         </div>
 
+        <!-- Formulario de Ir a Comprar -->
+        <div id="comprasForm" style="display:none;margin-bottom:12px">
+          <div style="background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:var(--radius-sm);padding:16px;margin-bottom:10px">
+            <div style="font-weight:700;font-size:.9rem;color:#7c3aed;margin-bottom:6px">🛍️ Ir a Comprar</div>
+            <p style="font-size:.82rem;color:#4b5563;margin:0 0 12px">El repartidor irá a comprar por ti. Sube la foto de la boleta o lista de productos con el monto total para confirmar el pedido.</p>
+
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:.85rem;font-weight:600">📍 ¿En dónde compramos? <span style="color:var(--danger)">*</span></label>
+              <input type="text" id="comprasLugar" placeholder="Ej: Pollo Campero zona 1, Café Barista..." style="width:100%;margin-top:4px">
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:.85rem;font-weight:600">💰 Monto total a pagar <span style="color:var(--danger)">*</span></label>
+              <input type="number" id="comprasMonto" placeholder="Q0.00" min="0" step="0.50" style="width:100%;margin-top:4px" oninput="updateCart()">
+            </div>
+
+            <div class="form-group" style="margin-bottom:0">
+              <label style="font-size:.85rem;font-weight:600">📸 Foto de boleta / lista de productos <span style="color:var(--danger)">*</span></label>
+              <p style="font-size:.75rem;color:var(--muted);margin:4px 0 8px">Sube una foto clara de la boleta o lista con los productos y precios.</p>
+              <div id="boletaPreview" style="display:none;margin-bottom:8px;position:relative">
+                <img id="boletaImg" src="" style="width:100%;max-height:220px;object-fit:cover;border-radius:8px;border:2px solid #c4b5fd">
+                <button type="button" onclick="clearBoleta()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem">×</button>
+              </div>
+              <label for="boletaInput" id="boletaLabel" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:2px dashed #c4b5fd;border-radius:10px;cursor:pointer;font-size:.85rem;color:#7c3aed;background:#faf5ff">
+                📷 Toca para subir la foto de boleta
+                <input type="file" id="boletaInput" accept="image/*" style="display:none" onchange="previewBoleta(this)">
+              </label>
+            </div>
+          </div>
+
+          <!-- Calculadora de envío para compras -->
+          <div style="background:white;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px">
+            <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">🗺️ Dirección de entrega</div>
+            <div id="comprasSavedOption" style="display:none;margin-bottom:8px"></div>
+            <input type="url" id="comprasDeliveryMaps" placeholder="Link de Google Maps de tu dirección..." style="width:100%;margin-bottom:8px">
+            <button onclick="calcularEnvioCompras()" class="btn-primary" style="width:100%;padding:10px">📏 Calcular costo de envío</button>
+            <div id="comprasResult" style="margin-top:8px;font-size:.85rem"></div>
+          </div>
+        </div>
+
         <div class="delivery-toggle" id="deliveryToggle">
           <button class="delivery-btn active" onclick="setDelivery('pickup',this)">🏃 Recoger</button>
           <button class="delivery-btn" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
@@ -545,6 +585,54 @@ function toggleAddressMode() {
   invalidateDeliveryCalc();
 }
 
+// ── Boleta de compras ────────────────────────────────────────
+var boletaFileToUpload = null;
+
+function previewBoleta(input) {
+  if (!input.files || !input.files[0]) return;
+  boletaFileToUpload = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('boletaImg').src = e.target.result;
+    document.getElementById('boletaPreview').style.display = 'block';
+    document.getElementById('boletaLabel').style.display = 'none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function clearBoleta() {
+  boletaFileToUpload = null;
+  document.getElementById('boletaInput').value = '';
+  document.getElementById('boletaImg').src = '';
+  document.getElementById('boletaPreview').style.display = 'none';
+  document.getElementById('boletaLabel').style.display = 'flex';
+}
+
+async function calcularEnvioCompras() {
+  var mapsUrl = document.getElementById('comprasDeliveryMaps').value.trim();
+  if (!mapsUrl) { document.getElementById('comprasResult').innerHTML = '⚠️ Ingresa el link de Google Maps de tu dirección.'; return; }
+  var result = document.getElementById('comprasResult');
+  result.innerHTML = '⏳ Calculando...';
+  try {
+    var res = await fetch(`${API}/businesses/${businessId}/calculate-delivery`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
+      body: JSON.stringify({ delivery_maps_url: mapsUrl })
+    });
+    var data = await res.json();
+    if (data.success) {
+      window._comprasDeliveryFee = data.data.delivery_fee;
+      window._comprasDeliveryAddress = mapsUrl;
+      result.innerHTML = `✅ Costo de envío: <strong>Q${parseFloat(data.data.delivery_fee).toFixed(2)}</strong> (${data.data.distance_km} km)`;
+      updateCart();
+    } else {
+      result.innerHTML = '⚠️ ' + (data.message || 'No se pudo calcular el envío.');
+    }
+  } catch(e) {
+    result.innerHTML = '⚠️ Error al calcular el envío.';
+  }
+}
+
 function loadSavedAddress() {
   var user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
   // Fetch latest profile to get address
@@ -582,7 +670,19 @@ function applyOrderType(type) {
   var badge           = document.getElementById('orderTypeBadge');
   var badgeInner      = document.getElementById('orderTypeBadgeInner');
 
-  if (type === 'paquete') {
+  if (type === 'compras') {
+    packageForm.style.display     = 'none';
+    document.getElementById('comprasForm').style.display = 'block';
+    productsSection.style.display = 'none';
+    deliveryToggle.style.display  = 'none';
+    deliveryWrap.style.display    = 'none';
+    deliveryType = 'delivery';
+    badgeInner.style.background = '#f5f3ff';
+    badgeInner.style.color      = '#7c3aed';
+    badgeInner.textContent      = '🛍️ Ir a Comprar';
+    badge.style.display = 'block';
+    loadSavedAddress();
+  } else if (type === 'paquete') {
     // Mostrar solo formulario de paquete
     packageForm.style.display     = 'block';
     productsSection.style.display = 'none';
@@ -1017,32 +1117,36 @@ function updateCart() {
     if (inp.value.trim()) lines.push(`<div class="cart-item"><span>${esc(inp.value.trim())}</span><span></span></div>`);
   });
 
-  if (!lines.length) { cartEl.innerHTML = orderType === 'paquete' ? '' : '<p style="color:var(--muted);font-size:.9rem">Agrega productos a tu pedido</p>'; }
+  if (!lines.length) { cartEl.innerHTML = orderType === 'paquete' || orderType === 'compras' ? '' : '<p style="color:var(--muted);font-size:.9rem">Agrega productos a tu pedido</p>'; }
   else { cartEl.innerHTML = lines.join(''); }
 
   const deliveryFee = orderType === 'paquete'
     ? (window._pkgCalculatedDeliveryFee != null ? window._pkgCalculatedDeliveryFee : 0)
+    : orderType === 'compras'
+    ? (window._comprasDeliveryFee != null ? window._comprasDeliveryFee : 0)
     : (deliveryType === 'delivery' && business?.accepts_delivery
         ? (window._calculatedDeliveryFee != null ? window._calculatedDeliveryFee : 0)
         : 0);
-  const total = subtotal + deliveryFee;
+
+  const comprasMonto = orderType === 'compras' ? (parseFloat(document.getElementById('comprasMonto')?.value)||0) : 0;
+  const total = subtotal + deliveryFee + comprasMonto;
 
   feeEl.innerHTML = `
+    ${comprasMonto > 0 ? `<div class="fee-row"><span>Compras</span><span>Q${comprasMonto.toFixed(2)}</span></div>` : ''}
     ${subtotal > 0 ? `<div class="fee-row"><span>Subtotal</span><span>Q${subtotal.toFixed(2)}</span></div>` : ''}
     ${deliveryFee > 0 && orderType === 'paquete' ? `<div class="fee-row"><span>Envío (${window._pkgCalculatedDistanceKm != null ? window._pkgCalculatedDistanceKm + ' km' : ''})</span><span>Q${deliveryFee.toFixed(2)}</span></div>` : ''}
-    ${deliveryFee > 0 && orderType !== 'paquete' ? `<div class="fee-row"><span>Delivery (${window._calculatedDistanceKm != null ? window._calculatedDistanceKm + ' km' : ''})</span><span>Q${deliveryFee.toFixed(2)}</span></div>` : ''}
+    ${deliveryFee > 0 && orderType === 'compras' ? `<div class="fee-row"><span>Envío</span><span>Q${deliveryFee.toFixed(2)}</span></div>` : ''}
+    ${deliveryFee > 0 && orderType !== 'paquete' && orderType !== 'compras' ? `<div class="fee-row"><span>Delivery (${window._calculatedDistanceKm != null ? window._calculatedDistanceKm + ' km' : ''})</span><span>Q${deliveryFee.toFixed(2)}</span></div>` : ''}
   `;
   totalEl.textContent = `Q${total.toFixed(2)}`;
 
-  // Bloquear/ocultar envío si aún no se calculó el costo
-  var needsDeliveryCalc = orderType !== 'paquete' && deliveryType === 'delivery' && business?.accepts_delivery && window._calculatedDeliveryFee == null;
+  var needsDeliveryCalc = orderType !== 'paquete' && orderType !== 'compras' && deliveryType === 'delivery' && business?.accepts_delivery && window._calculatedDeliveryFee == null;
   var needsPkgCalc      = orderType === 'paquete' && window._pkgCalculatedDeliveryFee == null;
+  var needsComprasCalc  = orderType === 'compras' && window._comprasDeliveryFee == null;
 
-  // Validar pedido mínimo para delivery
   var minOrder = parseFloat(business?.min_order_delivery || 0);
-  var belowMin = orderType !== 'paquete' && deliveryType === 'delivery' && minOrder > 0 && subtotal < minOrder;
+  var belowMin = orderType !== 'paquete' && orderType !== 'compras' && deliveryType === 'delivery' && minOrder > 0 && subtotal < minOrder;
 
-  // Mostrar aviso de pedido mínimo si no se alcanza
   var minNotice = document.getElementById('minOrderNotice');
   if (!minNotice) {
     minNotice = document.createElement('div');
@@ -1055,9 +1159,10 @@ function updateCart() {
     minNotice.innerHTML = '';
   }
 
-  submitBtn.style.display = (needsDeliveryCalc || needsPkgCalc) ? 'none' : 'block';
-  submitBtn.disabled = orderType === 'paquete' ? needsPkgCalc : (lines.length === 0 || needsDeliveryCalc || belowMin);
+  submitBtn.style.display = (needsDeliveryCalc || needsPkgCalc || needsComprasCalc) ? 'none' : 'block';
+  submitBtn.disabled = orderType === 'paquete' ? needsPkgCalc : orderType === 'compras' ? needsComprasCalc : (lines.length === 0 || needsDeliveryCalc || belowMin);
   if (orderType === 'paquete') submitBtn.textContent = '📦 Solicitar envío';
+  else if (orderType === 'compras') submitBtn.textContent = '🛍️ Solicitar compra';
   else submitBtn.textContent = 'Enviar Pedido';
 }
 
@@ -1119,6 +1224,71 @@ async function submitOrder() {
           <a href="index.html" class="btn-primary" style="display:inline-flex">Ver mis pedidos</a>
         </div>`;
     } catch(e) { alert('Error de conexión'); btn.textContent = 'Enviar'; btn.disabled = false; }
+    return;
+  }
+
+  // ── Flujo compras ───────────────────────────────────────
+  if (orderType === 'compras') {
+    var lugar  = document.getElementById('comprasLugar').value.trim();
+    var monto  = parseFloat(document.getElementById('comprasMonto').value) || 0;
+    var dropC  = document.getElementById('comprasDeliveryMaps').value.trim();
+
+    if (!lugar)           { alert('Indica en dónde compramos'); return; }
+    if (monto <= 0)       { alert('Ingresa el monto total a pagar'); return; }
+    if (!boletaFileToUpload) { alert('Sube la foto de la boleta o lista de productos'); return; }
+    if (!dropC)           { alert('Ingresa tu dirección de entrega'); return; }
+    if (window._comprasDeliveryFee == null) { alert('Primero calcula el costo de envío'); return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.textContent = 'Subiendo boleta...'; btn.disabled = true;
+
+    // Subir foto de boleta
+    var boletaUrl = null;
+    var imgRes = await APP.upload(boletaFileToUpload, 'boletas');
+    if (imgRes?.success) boletaUrl = imgRes.data.url;
+    else { alert('Error al subir la boleta. Intenta de nuevo.'); btn.textContent = '🛍️ Solicitar compra'; btn.disabled = false; return; }
+
+    btn.textContent = 'Enviando...';
+    var comprasNotes = '🛍️ IR A COMPRAR\n' +
+      '🏪 Lugar: ' + lugar + '\n' +
+      '💰 Monto total: Q' + monto.toFixed(2) + '\n' +
+      '📸 Boleta: ' + boletaUrl +
+      (notes ? '\n💬 Nota: ' + notes : '');
+
+    try {
+      const res = await fetch(`${API}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
+        body: JSON.stringify({
+          business_id: businessId,
+          delivery_type: 'delivery',
+          delivery_address: dropC,
+          notes: comprasNotes,
+          items: [{ name: 'Compras en ' + lugar, quantity: 1, price: monto }],
+          delivery_fee: window._comprasDeliveryFee,
+          boleta_url: boletaUrl,
+          order_type_label: 'compras'
+        })
+      });
+      const data = await res.json();
+      if (!data.success) { alert(data.message || 'Error al enviar'); btn.textContent = '🛍️ Solicitar compra'; btn.disabled = false; return; }
+      document.getElementById('mainContent').innerHTML = `
+        <div class="success-screen">
+          <div class="success-icon">✅</div>
+          <h2>¡Solicitud enviada!</h2>
+          <p style="color:var(--muted);margin-bottom:4px">Pedido <strong>${data.data.order_number}</strong></p>
+          <p style="color:var(--muted);margin-bottom:20px">Total: <strong>Q${(monto + window._comprasDeliveryFee).toFixed(2)}</strong></p>
+          <div style="background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:12px;padding:14px;text-align:left;margin-bottom:24px">
+            <div style="font-size:.82rem;font-weight:700;color:#7c3aed;margin-bottom:8px">🛍️ ¿Qué sigue?</div>
+            <ul style="margin:0;padding-left:18px;font-size:.82rem;color:#374151;line-height:1.9">
+              <li>El repartidor revisará tu solicitud</li>
+              <li>Irá a comprar en <strong>${lugar}</strong></li>
+              <li>Recibirás notificación cuando salga</li>
+            </ul>
+          </div>
+          <a href="index.html" class="btn-primary" style="display:inline-flex">📋 Ver mis pedidos</a>
+        </div>`;
+    } catch(e) { alert('Error de conexión'); btn.textContent = '🛍️ Solicitar compra'; btn.disabled = false; }
     return;
   }
 

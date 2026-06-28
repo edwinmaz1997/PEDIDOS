@@ -322,6 +322,7 @@ function renderOrder(o) {
       </div>
       ${items?`<div class="order-items-list">${items}</div>`:''}
       ${o.notes?`<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);font-size:.85rem;margin-top:8px">📝 ${esc(o.notes)}</div>`:''}
+      ${o.boleta_url?`<div style="margin-top:8px"><a href="${esc(o.boleta_url)}" target="_blank"><img src="${esc(o.boleta_url)}" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;border:1.5px solid #c4b5fd;cursor:zoom-in" alt="Boleta"></a><div style="font-size:.75rem;color:#7c3aed;margin-top:4px">📸 Boleta del cliente — toca para ver completa</div></div>`:''}
       ${o.estimated_time && o.preparation_started_at && o.status === 'en_preparacion' ? `
         <div id="ntimer-${o.id}" data-ts="${o.prep_ts}" data-started="${o.preparation_started_at}" data-mins="${o.estimated_time}" style="margin-top:10px;background:#fefce8;border:1.5px solid #fde047;border-radius:10px;padding:10px 14px">
           <div style="font-size:.73rem;font-weight:700;color:#854d0e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">⏱️ Tiempo prometido al cliente</div>
