@@ -171,6 +171,18 @@ function renderItems() {
     return '<div class="item-row"><div><div style="font-weight:500">'+esc(i.product_name)+' <span style="color:var(--muted)">×'+i.quantity+'</span></div>'+(i.unit_price?'<div style="font-size:.78rem;color:var(--muted)">Q'+parseFloat(i.unit_price).toFixed(2)+' c/u</div>':'<div style="font-size:.78rem;color:var(--muted)">Precio pendiente</div>')+'</div>'+(lt?'<span style="font-weight:700;color:var(--blue)">Q'+lt.toFixed(2)+'</span>':'<span style="color:var(--muted)">—</span>')+'</div>';
   }).join('') || '<p style="color:var(--muted);font-size:.9rem">Sin productos listados</p>';
   if (order.notes) document.getElementById('itemsList').innerHTML += '<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);margin-top:8px;font-size:.85rem;color:var(--muted)">📝 '+esc(order.notes)+'</div>';
+  if (order.boleta_url) {
+    document.getElementById('itemsList').innerHTML += `
+      <div style="margin-top:8px;display:flex;align-items:center;gap:10px;background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:8px;padding:10px">
+        <a href="${esc(order.boleta_url)}" target="_blank" style="flex-shrink:0">
+          <img src="${esc(order.boleta_url)}" style="width:56px;height:56px;object-fit:cover;border-radius:6px;cursor:zoom-in">
+        </a>
+        <div>
+          <div style="font-size:.8rem;font-weight:700;color:#7c3aed">📸 Tu boleta</div>
+          <a href="${esc(order.boleta_url)}" target="_blank" style="font-size:.75rem;color:#7c3aed;text-decoration:underline">Ver imagen completa</a>
+        </div>
+      </div>\`;
+  }
   document.getElementById('subtotalVal').textContent = 'Q'+parseFloat(order.subtotal||0).toFixed(2);
   var clientTotal = parseFloat(order.subtotal||0) + parseFloat(order.delivery_fee||0);
   document.getElementById('totalVal').textContent = 'Q'+clientTotal.toFixed(2);
