@@ -76,20 +76,8 @@
       <!-- Notes -->
       <div class="order-section">
         <h3>Observaciones</h3>
-        <div class="form-group" style="margin:0 0 12px">
-          <textarea id="notes" rows="3" placeholder="Observaciones..."></textarea>
-        </div>
-        <!-- Boleta opcional para pedidos con productos de terceros -->
         <div class="form-group" style="margin:0">
-          <label style="font-size:.82rem;font-weight:600;color:var(--muted)">📸 Boleta / referencia <span style="font-weight:400">(opcional)</span></label>
-          <div id="boletaPreview" style="display:none;margin-top:6px;position:relative">
-            <img id="boletaImg" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1.5px solid var(--border)">
-            <button type="button" onclick="clearBoleta()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:.9rem">×</button>
-          </div>
-          <label for="boletaInput" id="boletaLabel" style="display:flex;align-items:center;gap:8px;padding:10px 14px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:.82rem;color:var(--muted);background:#fafafa;margin-top:6px">
-            📷 Subir foto de boleta
-            <input type="file" id="boletaInput" accept="image/*" style="display:none" onchange="previewBoleta(this)">
-          </label>
+          <textarea id="notes" rows="3" placeholder="Observaciones..."></textarea>
         </div>
       </div>
     </div>
@@ -216,6 +204,23 @@
               📍 Calcular costo de envío
             </button>
             <div id="deliveryCalcResult" style="display:none;margin-top:8px;padding:10px 12px;border-radius:var(--radius-sm);font-size:.85rem"></div>
+          </div>
+
+          <!-- Boleta — solo para NuevaExpress (business 5) -->
+          <div id="boletaSection" style="display:none;margin-top:12px;padding:14px;background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:var(--radius-sm)">
+            <div style="font-size:.85rem;font-weight:700;color:#7c3aed;margin-bottom:4px">
+              📸 Foto de boleta <span id="boletaRequired" style="display:none;color:var(--danger)">*</span>
+              <span id="boletaOptionalLabel" style="font-weight:400;color:var(--muted)">(opcional)</span>
+            </div>
+            <p style="font-size:.75rem;color:#4b5563;margin:0 0 8px">Sube una foto de la boleta o lista de productos del lugar donde compraremos.</p>
+            <div id="boletaPreview" style="display:none;margin-bottom:8px;position:relative">
+              <img id="boletaImg" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1.5px solid #c4b5fd">
+              <button type="button" onclick="clearBoleta()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:.9rem">×</button>
+            </div>
+            <label for="boletaInput" id="boletaLabel" style="display:flex;align-items:center;gap:8px;padding:10px;border:1.5px dashed #c4b5fd;border-radius:8px;cursor:pointer;font-size:.82rem;color:#7c3aed;background:white">
+              📷 Subir foto de boleta
+              <input type="file" id="boletaInput" accept="image/*" style="display:none" onchange="previewBoleta(this)">
+            </label>
           </div>
         </div>
         <div id="cartItems"></div>
@@ -560,6 +565,18 @@ function toggleAddressMode() {
 
 // ── Boleta de compras ────────────────────────────────────────
 var boletaFileToUpload = null;
+
+function updateBoletaRequired() {
+  if (businessId !== 5) return;
+  var required = Object.keys(cart).some(function(id) {
+    var p = products.find(function(x){ return x.id == id; });
+    return p && p.requires_boleta && cart[id].qty > 0;
+  });
+  var reqEl  = document.getElementById('boletaRequired');
+  var optEl  = document.getElementById('boletaOptionalLabel');
+  if (reqEl)  reqEl.style.display  = required ? 'inline' : 'none';
+  if (optEl)  optEl.style.display  = required ? 'none' : 'inline';
+}
 
 function previewBoleta(input) {
   if (!input.files || !input.files[0]) return;
@@ -1016,6 +1033,12 @@ async function calculateDeliveryFee() {
     window._calculatedDeliveryFee = data.data.delivery_fee;
     window._calculatedDistanceKm  = data.data.distance_km;
 
+    // Mostrar boleta para NuevaExpress (business 5)
+    if (businessId === 5) {
+      var bs = document.getElementById('boletaSection');
+      if (bs) { bs.style.display = 'block'; updateBoletaRequired(); }
+    }
+
     result.style.display = 'block';
     result.style.background = '#e8f5e9';
     result.style.color = '#2e7d32';
@@ -1044,6 +1067,7 @@ function setDelivery(type, btn) {
 }
 
 function updateCart() {
+  updateBoletaRequired();
   // Update modal footer button
   var totalItems = Object.values(cart).reduce(function(s,i){ return s+i.qty; }, 0);
   var totalPrice = Object.values(cart).reduce(function(s,i){ return s+i.price*i.qty; }, 0);
@@ -1141,6 +1165,18 @@ async function submitOrder() {
     return;
   }
   const notes = document.getElementById('notes').value.trim();
+
+  // Validar boleta si es negocio 5 y algún producto la requiere
+  if (businessId === 5) {
+    var boletaRequerida = Object.keys(cart).some(function(id) {
+      var p = products.find(function(x){ return x.id == id; });
+      return p && p.requires_boleta && cart[id].qty > 0;
+    });
+    if (boletaRequerida && !boletaFileToUpload) {
+      alert('Este pedido requiere que subas la foto de la boleta.');
+      return;
+    }
+  }
 
   // Subir boleta si el cliente adjuntó una
   var boletaUrl = null;

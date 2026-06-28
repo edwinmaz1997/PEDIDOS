@@ -55,8 +55,9 @@ class ProductController {
         if (empty($body['name'])) Response::error('Nombre requerido', 400);
 
         $hasVariants = !empty($body['has_variants']) ? 1 : 0;
-        $stmt = $this->db->prepare("INSERT INTO products_services (business_id, name, description, price, photo, sort_order, category_id, has_variants) VALUES (?,?,?,?,?,?,?,?)");
-        $stmt->execute([$businessId, $body['name'], $body['description'] ?? null, $body['price'] ?? null, $body['photo'] ?? null, $body['sort_order'] ?? 0, $body['category_id'] ?? null, $hasVariants]);
+        $requiresBoleta = !empty($body['requires_boleta']) ? 1 : 0;
+        $stmt = $this->db->prepare("INSERT INTO products_services (business_id, name, description, price, photo, sort_order, category_id, has_variants, requires_boleta) VALUES (?,?,?,?,?,?,?,?,?)");
+        $stmt->execute([$businessId, $body['name'], $body['description'] ?? null, $body['price'] ?? null, $body['photo'] ?? null, $body['sort_order'] ?? 0, $body['category_id'] ?? null, $hasVariants, $requiresBoleta]);
         $productId = (int)$this->db->lastInsertId();
 
         if ($hasVariants && !empty($body['variants'])) {
@@ -67,7 +68,7 @@ class ProductController {
 
     public function update(int $id, array $body): void {
         AuthMiddleware::requireRole(['negocio', 'admin']);
-        $fields = ['name','description','price','is_available','sort_order','category_id','photo','has_variants'];
+        $fields = ['name','description','price','is_available','sort_order','category_id','photo','has_variants','requires_boleta'];
         $sets = []; $params = [];
         foreach ($fields as $f) {
             if (array_key_exists($f, $body)) { $sets[] = "$f = ?"; $params[] = $body[$f]; }

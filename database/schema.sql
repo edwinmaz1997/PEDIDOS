@@ -164,6 +164,7 @@ CREATE TABLE IF NOT EXISTS products_services (
     is_available TINYINT(1) DEFAULT 1,
     sort_order INT DEFAULT 0,
     has_variants TINYINT(1) DEFAULT 0,
+    requires_boleta TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE CASCADE,

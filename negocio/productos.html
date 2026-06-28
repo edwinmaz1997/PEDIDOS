@@ -179,6 +179,20 @@ input:checked + .slider:before { transform:translateX(20px); }
         </button>
       </div>
     </div>
+
+    <!-- Requiere boleta -->
+    <div class="form-group" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <label style="margin:0">📸 Requiere boleta</label>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:2px">El cliente debe subir foto de boleta al pedir este producto</div>
+        </div>
+        <label class="switch" style="margin:0;flex-shrink:0">
+          <input type="checkbox" id="p_requires_boleta">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
     <div class="toggle-available" style="margin-bottom:20px">
       <label class="switch"><input type="checkbox" id="p_available" checked><span class="slider"></span></label>
       <span style="font-size:.9rem">Disponible para pedidos</span>
@@ -452,6 +466,7 @@ async function openModal(productId = null) {
   document.getElementById('variantsList').innerHTML = '';
   var hasVariants = !!(p?.has_variants);
   document.getElementById('p_has_variants').checked = hasVariants;
+  document.getElementById('p_requires_boleta').checked = !!(p?.requires_boleta);
   document.getElementById('variantsSection').style.display = hasVariants ? 'block' : 'none';
   document.getElementById('p_price').closest('.form-group').style.opacity = hasVariants ? '.4' : '1';
   if (hasVariants && p?.variants?.length) {
@@ -502,6 +517,7 @@ async function saveProduct() {
     photo: photoUrl,
     has_variants: hasVariants ? 1 : 0,
     variants: variants,
+    requires_boleta: document.getElementById('p_requires_boleta').checked ? 1 : 0,
   };
 
   let res;
