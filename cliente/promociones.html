@@ -85,7 +85,10 @@ async function init() {
     return '<div class="promo-card">' +
       (p.image_url ? '<div onclick="openLightbox(this.querySelector(\'img\').src)" style="cursor:zoom-in"><img src="' + p.image_url + '" style="width:100%;height:160px;object-fit:cover;display:block"></div>' : '') +
       '<div class="promo-banner">' +
-        '<div class="biz">🏪 ' + APP.esc(p.business_name) + '</div>' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+          (p.business_logo ? '<img src="'+APP.esc(p.business_logo)+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.5);flex-shrink:0">' : '<div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">🏪</div>') +
+          '<div class="biz" style="margin:0">' + APP.esc(p.business_name) + '</div>' +
+        '</div>' +
         '<h2>' + APP.esc(p.title) + '</h2>' +
         '<div class="desc">' + APP.esc(p.description) + '</div>' +
       '</div>' +
