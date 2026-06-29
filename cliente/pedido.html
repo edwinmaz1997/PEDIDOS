@@ -374,20 +374,26 @@ function renderBizInfo() {
         ${business.address ? `<p style="color:var(--muted);font-size:.85rem">📍 ${esc(business.address)}</p>` : ''}
         ${business.phone ? `<a href="tel:${esc(business.phone)}" style="color:var(--accent);font-size:.85rem">📞 ${esc(business.phone)}</a>` : ''}
         ${hoursHtml}
-        ${business.id === 5 ? `
-        <div style="margin-top:14px;background:linear-gradient(135deg,#fefce8,#fff7ed);border:1.5px solid #fed7aa;border-radius:12px;padding:14px">
-          <div style="font-size:.82rem;font-weight:700;color:#c2410c;margin-bottom:8px">⚠️ ¿Por qué los precios son más altos?</div>
-          <div style="font-size:.78rem;color:#78350f;line-height:1.7">
-            Nuestro servicio de <strong>Ir a Comprar</strong> implica que un repartidor sale desde Nueva Concepción hacia otros municipios para traerte lo que necesitas. El precio incluye:<br>
-            🛣️ <strong>Distancia recorrida</strong> — algunos destinos están a 15+ km de ida y vuelta<br>
-            ⏱️ <strong>Tiempo de espera y traslado</strong> — puede tomar entre 45 min y 2 horas<br>
-            ☀️ <strong>Condiciones del camino</strong> — calor, lluvia, tráfico y desgaste del vehículo<br>
-            💼 <strong>Servicio personalizado</strong> — el repartidor compra exactamente lo que pediste<br><br>
-            <span style="color:#92400e">¡Valora el esfuerzo de quien va a buscarlo por ti! 🙏</span>
-          </div>
-        </div>` : ''}
       </div>
     </div>
+    ${business.id === 5 ? `
+    <div style="margin-top:14px">
+      <button onclick="var c=document.getElementById('preciosInfo');var a=document.getElementById('preciosArr');var open=c.style.display==='block';c.style.display=open?'none':'block';a.textContent=open?'▼':'▲';"
+        style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;color:#c2410c">
+        <span>❓ ¿Alguna duda con nuestros precios?</span>
+        <span id="preciosArr" style="font-size:.7rem;color:var(--muted)">▼</span>
+      </button>
+      <div id="preciosInfo" style="display:none;background:#fefce8;border:1.5px solid #fed7aa;border-top:none;border-radius:0 0 10px 10px;padding:14px 16px">
+        <div style="font-size:.8rem;color:#78350f;line-height:1.9">
+          Nuestro servicio implica que un repartidor sale desde Nueva Concepción hacia otros municipios para traerte lo que necesitas. El precio incluye:<br>
+          🛣️ <strong>Distancia recorrida</strong> — algunos destinos están a 15+ km de ida y vuelta<br>
+          ⏱️ <strong>Tiempo de espera y traslado</strong> — puede tomar entre 45 min y 2 horas<br>
+          ☀️ <strong>Condiciones del camino</strong> — calor, lluvia, tráfico y desgaste del vehículo<br>
+          💼 <strong>Servicio personalizado</strong> — el repartidor compra exactamente lo que pediste<br>
+          <span style="color:#92400e;margin-top:6px;display:block">¡Valora el esfuerzo de quien va a buscarlo por ti! 🙏</span>
+        </div>
+      </div>
+    </div>` : ''}
   `;
   // Enable/disable delivery button
   if (!business.accepts_delivery) {
