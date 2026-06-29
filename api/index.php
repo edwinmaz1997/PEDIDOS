@@ -91,6 +91,7 @@ try {
             $subAction = $parts[1] ?? null;
             if ($subAction === 'mine' && $method === 'GET')                  { $pc->mine(); break; }
             if (!$promoId && $method === 'GET')                              { $pc->index(); break; }
+            if ($promoId  && $method === 'GET')                              { $pc->show($promoId); break; }
             if (!$promoId && $method === 'POST')                             { $pc->store($body); break; }
             if ($promoId  && $method === 'PUT')                              { $pc->update($promoId, $body); break; }
             if ($promoId  && $method === 'DELETE')                           { $pc->destroy($promoId); break; }

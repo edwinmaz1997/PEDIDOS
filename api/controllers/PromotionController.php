@@ -88,18 +88,32 @@ class PromotionController {
     }
 
     // PUT /api/promotions/{id}
+    public function show(int $id): void {
+        AuthMiddleware::authenticate();
+        $stmt = $this->db->prepare("SELECT p.*, b.name as business_name FROM promotions p JOIN businesses b ON p.business_id = b.id WHERE p.id = ?");
+        $stmt->execute([$id]);
+        $promo = $stmt->fetch();
+        if (!$promo) Response::notFound('Promoción no encontrada');
+        $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ?");
+        $iStmt->execute([$id]);
+        $promo['items'] = $iStmt->fetchAll();
+        Response::success($promo);
+    }
+
     public function update(int $id, array $body): void {
         $user  = AuthMiddleware::requireRole('negocio');
         $biz   = $this->getBiz($user['id']);
         $promo = $this->getPromo($id, $biz['id']);
 
-        $this->db->prepare("UPDATE promotions SET title=?, description=?, starts_at=?, ends_at=?, is_active=? WHERE id=?")
+        $isActive = isset($body['is_active']) ? (int)$body['is_active'] : $promo['is_active'];
+        $this->db->prepare("UPDATE promotions SET title=?, description=?, starts_at=?, ends_at=?, is_active=?, image_url=COALESCE(?,image_url) WHERE id=?")
                  ->execute([
                      $body['title']       ?? $promo['title'],
                      $body['description'] ?? $promo['description'],
                      $body['starts_at']   ?? $promo['starts_at'],
                      $body['ends_at']     ?? $promo['ends_at'],
-                     isset($body['is_active']) ? (int)$body['is_active'] : $promo['is_active'],
+                     $isActive,
+                     $body['image_url']   ?? null,
                      $id
                  ]);
 
@@ -110,6 +124,13 @@ class PromotionController {
                          ->execute([$id, $item['product_id'] ?? null, $item['product_name'], $item['original_price'], $item['promo_price']]);
             }
         }
+
+        // Renotificar si se activa con notify=1
+        if (!empty($body['notify']) && $isActive) {
+            $updatedPromo = $this->getPromo($id, $biz['id']);
+            $this->notifyClients($biz['name'], $updatedPromo['title'], $updatedPromo['description'], $id);
+        }
+
         Response::success(null, 'Promoción actualizada');
     }
 

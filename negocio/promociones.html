@@ -102,14 +102,22 @@
       <label>Descripción * <span style="font-weight:400;color:var(--muted)">(esto le llegará a los clientes)</span></label>
       <textarea id="p_desc" rows="3" placeholder="Hoy tu combo de alitas a Q125, precio normal Q150..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical"></textarea>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="form-group">
         <label>Fecha inicio *</label>
         <input type="date" id="p_start" style="width:100%;box-sizing:border-box">
       </div>
       <div class="form-group">
+        <label>Hora inicio</label>
+        <input type="time" id="p_start_time" value="00:00" style="width:100%;box-sizing:border-box">
+      </div>
+      <div class="form-group">
         <label>Fecha fin *</label>
         <input type="date" id="p_end" style="width:100%;box-sizing:border-box">
+      </div>
+      <div class="form-group">
+        <label>Hora fin</label>
+        <input type="time" id="p_end_time" value="23:59" style="width:100%;box-sizing:border-box">
       </div>
     </div>
 
@@ -258,6 +266,7 @@ function renderPromos(promos) {
       '</div>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
         '<button onclick="toggleActive(' + p.id + ',' + (p.is_active?0:1) + ')" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">' + (p.is_active ? 'Desactivar' : 'Activar') + '</button>' +
+        '<button onclick="editPromo('+p.id+')" style="padding:7px 14px;font-size:.82rem;background:none;border:1.5px solid var(--blue);color:var(--blue);border-radius:var(--radius-sm);cursor:pointer">Editar</button>' +
         '<button onclick="deletePromo(' + p.id + ')" style="padding:7px 14px;font-size:.82rem;background:none;border:1.5px solid var(--danger);color:var(--danger);border-radius:var(--radius-sm);cursor:pointer">Eliminar</button>' +
       '</div>' +
     '</div>';
@@ -273,10 +282,13 @@ function updateSelectedCount() {
 function openModal() {
   editingId = null;
   document.getElementById('modalTitle').textContent = 'Nueva promoción';
+  document.getElementById('savePromoBtn').textContent = 'Publicar y notificar 🔔';
   document.getElementById('p_title').value = '';
   document.getElementById('p_desc').value = '';
   document.getElementById('p_start').value = new Date().toISOString().substring(0,10);
   document.getElementById('p_end').value = '';
+  document.getElementById('p_start_time').value = '00:00';
+  document.getElementById('p_end_time').value = '23:59';
   document.getElementById('modalMsg').style.display = 'none';
   if (document.getElementById('promoSearch')) document.getElementById('promoSearch').value = '';
   if (document.getElementById('promoPercent')) document.getElementById('promoPercent').value = '';
@@ -284,6 +296,40 @@ function openModal() {
   activePromocat = null;
   renderPromoCatFilter();
   renderProductSelector([]);
+  document.getElementById('promoModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+async function editPromo(id) {
+  var res = await fetch('/api/promotions/'+id, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+  var data = await res.json();
+  if (!data.success) return APP.toast('Error al cargar la promoción', 'error');
+  var p = data.data;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'Editar promoción';
+  document.getElementById('savePromoBtn').textContent = 'Guardar cambios 💾';
+  document.getElementById('p_title').value = p.title || '';
+  document.getElementById('p_desc').value = p.description || '';
+  var startParts = (p.starts_at || '').split(' ');
+  var endParts   = (p.ends_at || '').split(' ');
+  document.getElementById('p_start').value = startParts[0] || '';
+  document.getElementById('p_end').value   = endParts[0] || '';
+  document.getElementById('p_start_time').value = startParts[1]?.substring(0,5) || '00:00';
+  document.getElementById('p_end_time').value   = endParts[1]?.substring(0,5) || '23:59';
+  if (p.image_url) {
+    document.getElementById('promoImagePreviewImg').src = p.image_url;
+    document.getElementById('promoImagePreview').style.display = 'block';
+    document.getElementById('promoImageLabel').style.display = 'none';
+  } else {
+    clearPromoImage();
+  }
+  document.getElementById('modalMsg').style.display = 'none';
+  if (document.getElementById('promoSearch')) document.getElementById('promoSearch').value = '';
+  activePromocat = null;
+  renderPromoCatFilter();
+  // Pre-seleccionar productos con precio promo
+  var preSelected = (p.items || []).map(function(i){ return { product_id: i.product_id, promo_price: i.promo_price }; });
+  renderProductSelector(preSelected);
   document.getElementById('promoModal').style.display = 'block';
   document.body.style.overflow = 'hidden';
 }
@@ -485,6 +531,8 @@ async function savePromo() {
   var desc  = document.getElementById('p_desc').value.trim();
   var start = document.getElementById('p_start').value;
   var end   = document.getElementById('p_end').value;
+  var startTime = document.getElementById('p_start_time').value || '00:00';
+  var endTime   = document.getElementById('p_end_time').value   || '23:59';
   var items = getSelectedItems();
   var msg   = document.getElementById('modalMsg');
 
@@ -498,7 +546,7 @@ async function savePromo() {
   if (items.some(function(i){ return i.promo_price <= 0; })) return showErr('Todos los productos necesitan un precio de promoción mayor a 0');
 
   var btn = document.getElementById('savePromoBtn');
-  btn.textContent = 'Publicando...'; btn.disabled = true;
+  btn.textContent = editingId ? 'Guardando...' : 'Publicando...'; btn.disabled = true;
 
   // Subir imagen si hay una seleccionada
   var imageUrl = null;
@@ -509,23 +557,34 @@ async function savePromo() {
     if (imgRes?.success) imageUrl = imgRes.data.url;
   }
 
-  var payload = { title, description: desc, starts_at: start, ends_at: end, items };
+  var payload = {
+    title, description: desc,
+    starts_at: start + ' ' + startTime + ':00',
+    ends_at:   end   + ' ' + endTime   + ':00',
+    items
+  };
   if (imageUrl) payload.image_url = imageUrl;
 
-  var res = await APP.post('/promotions', payload);
+  var res;
+  if (editingId) {
+    res = await APP.put('/promotions/'+editingId, payload);
+  } else {
+    res = await APP.post('/promotions', payload);
+  }
+
   if (res?.success) {
     closeModal();
-    APP.toast('¡Promoción publicada! Clientes notificados 🔔');
+    APP.toast(editingId ? 'Promoción actualizada ✅' : '¡Promoción publicada! Clientes notificados 🔔');
     init();
   } else {
     showErr(res?.message || 'Error al guardar');
   }
-  btn.textContent = 'Publicar y notificar 🔔'; btn.disabled = false;
+  btn.textContent = editingId ? 'Guardar cambios 💾' : 'Publicar y notificar 🔔'; btn.disabled = false;
 }
 
 async function toggleActive(id, val) {
-  var res = await APP.put('/promotions/'+id, { is_active: val });
-  if (res?.success) { APP.toast(val ? 'Promoción activada' : 'Promoción desactivada'); init(); }
+  var res = await APP.put('/promotions/'+id, { is_active: val, notify: val ? 1 : 0 });
+  if (res?.success) { APP.toast(val ? '¡Promoción activada! Clientes notificados 🔔' : 'Promoción desactivada'); init(); }
   else APP.toast(res?.message||'Error', 'error');
 }
 
