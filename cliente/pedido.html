@@ -577,7 +577,11 @@ function changeQty(id, delta) {
   var p = products.find(function(x){ return x.id === id; });
   // Si tiene variantes y no hay una seleccionada, pedir que seleccione
   if (p?.has_variants && p?.variants?.length && delta > 0 && !cart[id]?.variant) {
-    APP.toast('Selecciona una opción primero', 'error');
+    var t2 = document.createElement('div');
+    t2.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#c0392b;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999';
+    t2.textContent = 'Selecciona una opción primero';
+    document.body.appendChild(t2);
+    setTimeout(function(){ t2.remove(); }, 2500);
     return;
   }
   var price = promoOverrides[id] !== undefined ? promoOverrides[id] : (cart[id]?.price || pm.price || 0);
@@ -679,7 +683,11 @@ function addCustomizedToCart() {
 
   document.getElementById('customizeModal').style.display = 'none';
   updateCart();
-  APP.toast('✅ '+p.name+' agregado al carrito');
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+  t.textContent = '✅ ' + p.name + ' agregado';
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 2500);
 }
 
 var boletaFileToUpload = null;
