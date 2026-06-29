@@ -83,7 +83,7 @@ async function init() {
   container.innerHTML = promos.map(function(p) {
     selectedItems[p.id] = {};
     return '<div class="promo-card">' +
-      (p.image_url ? '<a href="' + p.image_url + '" target="_blank"><img src="' + p.image_url + '" style="width:100%;height:160px;object-fit:cover;display:block;cursor:zoom-in"></a>' : '') +
+      (p.image_url ? '<div onclick="openLightbox(\'' + p.image_url + '\'')" style="cursor:zoom-in"><img src="' + p.image_url + '" style="width:100%;height:160px;object-fit:cover;display:block"></div>' : '') +
       '<div class="promo-banner">' +
         '<div class="biz">🏪 ' + APP.esc(p.business_name) + '</div>' +
         '<h2>' + APP.esc(p.title) + '</h2>' +
@@ -158,5 +158,11 @@ function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=documen
 init();
 </script>
 <script src="/assets/js/pwa.js"></script>
+
+<!-- Lightbox de imagen -->
+<div id="imgLightbox" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px">
+  <button onclick="document.getElementById('imgLightbox').style.display='none'" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:1.3rem;cursor:pointer;z-index:1">✕</button>
+  <img id="imgLightboxImg" src="" style="max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain">
+</div>
 </body>
 </html>
