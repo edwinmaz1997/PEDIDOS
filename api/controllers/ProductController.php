@@ -12,7 +12,8 @@ class ProductController {
         $stmt = $this->db->prepare("SELECT p.*, c.name as category_name, c.icon as category_icon FROM products_services p LEFT JOIN product_categories c ON p.category_id = c.id WHERE p.business_id = ? ORDER BY p.is_available DESC, c.sort_order, p.sort_order, p.name");
         $stmt->execute([$businessId]);
         $products = $stmt->fetchAll();
-        // Agregar variantes a cada producto
+        // Agregar variantes y extras a cada producto
+        $eStmt = $this->db->prepare("SELECT * FROM product_extras WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
         foreach ($products as &$p) {
             if ($p['has_variants']) {
                 $vStmt = $this->db->prepare("SELECT * FROM product_variants WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
@@ -21,6 +22,8 @@ class ProductController {
             } else {
                 $p['variants'] = [];
             }
+            $eStmt->execute([$p['id']]);
+            $p['extras'] = $eStmt->fetchAll();
         }
         Response::success($products);
     }
@@ -36,6 +39,16 @@ class ProductController {
             $p['variants'] = $vStmt->fetchAll();
         }
         Response::success($p);
+    }
+
+    private function saveExtras(int $productId, array $extras): void {
+        $this->db->prepare("DELETE FROM product_extras WHERE product_id = ?")->execute([$productId]);
+        $stmt = $this->db->prepare("INSERT INTO product_extras (product_id, name, price, sort_order) VALUES (?,?,?,?)");
+        foreach ($extras as $i => $e) {
+            if (!empty($e['name'])) {
+                $stmt->execute([$productId, $e['name'], (float)($e['price'] ?? 0), $i]);
+            }
+        }
     }
 
     private function saveVariants(int $productId, array $variants): void {
@@ -63,6 +76,9 @@ class ProductController {
         if ($hasVariants && !empty($body['variants'])) {
             $this->saveVariants($productId, $body['variants']);
         }
+        if (array_key_exists('extras', $body)) {
+            $this->saveExtras($productId, $body['extras'] ?: []);
+        }
         Response::success(['id' => $productId], 'Producto creado', 201);
     }
 
@@ -80,6 +96,9 @@ class ProductController {
         // Actualizar variantes si se enviaron
         if (array_key_exists('variants', $body)) {
             $this->saveVariants($id, $body['variants'] ?: []);
+        }
+        if (array_key_exists('extras', $body)) {
+            $this->saveExtras($id, $body['extras'] ?: []);
         }
         Response::success(null, 'Producto actualizado');
     }
