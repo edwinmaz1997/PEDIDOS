@@ -99,7 +99,7 @@ class OrderController {
         $user = AuthMiddleware::requireRole('cliente');
 
         $businessId    = (int)($body['business_id'] ?? 0);
-        $deliveryType  = in_array($body['delivery_type'] ?? '', ['pickup','delivery']) ? $body['delivery_type'] : 'pickup';
+        $deliveryType  = in_array($body['delivery_type'] ?? '', ['pickup','delivery','dine_in']) ? $body['delivery_type'] : 'pickup';
         $notes         = $body['notes'] ?? '';
         $items         = $body['items'] ?? [];
 
