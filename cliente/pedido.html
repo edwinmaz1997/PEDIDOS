@@ -662,14 +662,16 @@ function addCustomizedToCart() {
   var extrasTotal = selectedExtras.reduce(function(s,e){ return s + e.price; }, 0);
   var totalPrice = base + extrasTotal;
   var extrasLabel = selectedExtras.length ? ' (+ ' + selectedExtras.map(function(e){ return e.name; }).join(', ') + ')' : '';
+  var extrasNotes = selectedExtras.length ? 'Extras: ' + selectedExtras.map(function(e){ return e.name + ' +Q' + e.price.toFixed(2); }).join(', ') : '';
 
   if (!cart[p.id]) {
-    cart[p.id] = { name: p.name + extrasLabel, price: totalPrice, qty: 1, extras: selectedExtras };
+    cart[p.id] = { name: p.name + extrasLabel, price: totalPrice, qty: 1, extras: selectedExtras, notes: extrasNotes };
   } else {
     cart[p.id].qty += 1;
     cart[p.id].price = totalPrice;
     cart[p.id].name = p.name + extrasLabel;
     cart[p.id].extras = selectedExtras;
+    cart[p.id].notes = extrasNotes;
   }
 
   var ppEl = document.getElementById('pp-'+p.id);
@@ -1385,7 +1387,7 @@ async function submitOrder() {
     if (!dineTime) { alert('Selecciona tu hora de llegada'); return; }
     const items = [];
     Object.entries(cart).forEach(([id, item]) => {
-      if (item.qty > 0) items.push({ product_id: parseInt(id), name: item.name, price: item.price || 0, quantity: item.qty });
+      if (item.qty > 0) items.push({ product_id: parseInt(id), name: item.name, price: item.price || 0, quantity: item.qty, notes: item.notes || '' });
     });
     if (!items.length) { alert('Agrega al menos un producto'); return; }
     submitBtn.disabled = true; submitBtn.textContent = 'Enviando...';
@@ -1421,7 +1423,7 @@ async function submitOrder() {
 
   const items = [];
   Object.entries(cart).forEach(([id, item]) => {
-    if (item.qty > 0) items.push({ product_id: parseInt(id), name: item.name, price: item.price || 0, quantity: item.qty });
+    if (item.qty > 0) items.push({ product_id: parseInt(id), name: item.name, price: item.price || 0, quantity: item.qty, notes: item.notes || '' });
   });
   document.querySelectorAll('.custom-input').forEach((inp, i) => {
     if (inp.value.trim()) items.push({ name: inp.value.trim(), quantity: 1 });

@@ -306,7 +306,7 @@ function startNegocioTimers() {
 }
 
 function renderOrder(o) {
-  const items = (o.items || []).map(i => `<div class="order-item-line"><span>${esc(i.product_name)} ×${i.quantity}</span>${i.notes?`<span style="color:var(--muted);font-size:.8rem">${esc(i.notes)}</span>`:''}</div>`).join('');
+  const items = (o.items || []).map(i => `<div class="order-item-line"><span>${esc(i.product_name)} ×${i.quantity}</span>${i.notes?`<div style="font-size:.75rem;color:var(--accent);margin-top:2px;padding-left:4px">🍫 ${esc(i.notes)}</div>`:''}</div>`).join('');
   const canRespond = o.status === 'pendiente';
   const canAdvance = nextStatus[o.status];
   return `
