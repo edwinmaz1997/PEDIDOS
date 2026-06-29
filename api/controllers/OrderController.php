@@ -308,7 +308,8 @@ class OrderController {
             'cancelado'      => 'cancelado',
         ];
         $this->notify($order['client_id'], 'order_update', '📦 Actualización de pedido',
-            "Tu pedido #{$order['order_number']} está {$statusLabels[$status]}.");
+            "Tu pedido #{$order['order_number']} está {$statusLabels[$status]}.",
+            '/cliente/pedido-detalle.html?id='.$id);
 
         // Email al cliente según estado
         if (!empty($order['client_email'])) {
