@@ -531,7 +531,10 @@ async function toggleActive(id, val) {
 
 async function deletePromo(id) {
   if (!confirm('¿Eliminar esta promoción? No se puede deshacer.')) return;
-  var res = await APP.del('/promotions/'+id);
+  var res = await fetch('/api/promotions/'+id, {
+    method: 'DELETE',
+    headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') }
+  }).then(function(r){ return r.json(); });
   if (res?.success) { APP.toast('Promoción eliminada'); init(); }
   else APP.toast(res?.message||'Error', 'error');
 }
