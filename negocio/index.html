@@ -322,6 +322,7 @@ function renderOrder(o) {
       </div>
       ${items?`<div class="order-items-list">${items}</div>`:''}
       ${o.notes?`<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);font-size:.85rem;margin-top:8px">📝 ${esc(o.notes)}</div>`:''}
+      ${o.dine_in_persons?`<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:10px 14px;margin-top:8px;font-size:.85rem">🍽️ <strong>${o.dine_in_persons} persona(s)</strong> · Hora de llegada: <strong>${o.dine_in_time}</strong></div>`:''}
       ${o.boleta_url?`<div style="margin-top:8px;display:flex;align-items:center;gap:10px;background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:8px;padding:10px">
         <a href="${esc(o.boleta_url)}" target="_blank" style="flex-shrink:0">
           <img src="${esc(o.boleta_url)}" style="width:56px;height:56px;object-fit:cover;border-radius:6px;border:1px solid #c4b5fd;cursor:zoom-in" alt="Boleta">
@@ -363,11 +364,12 @@ function renderOrder(o) {
               ⏱️ Tiempo estimado de preparación <span style="color:var(--danger)">*</span>
             </label>
             <div style="display:flex;align-items:center;gap:8px">
-              <input type="number" id="time-${o.id}" placeholder="Ej: 20" min="1" max="180"
-                style="width:100px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.95rem">
+              <input type="number" id="time-${o.id}" placeholder="Ej: 20" min="1" max="480"
+                style="width:100px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.95rem"
+                value="${o.dine_in_time ? (function(t){ var now=new Date(); var p=t.split(':'); var tgt=new Date(now.getFullYear(),now.getMonth(),now.getDate(),parseInt(p[0]),parseInt(p[1]),0); if(tgt<=now)tgt.setDate(tgt.getDate()+1); return Math.max(1,Math.round((tgt-now)/60000)); })(o.dine_in_time) : ''}">
               <span style="font-size:.85rem;color:var(--muted)">minutos</span>
             </div>
-            <div style="font-size:.75rem;color:var(--muted);margin-top:4px">El cliente verá un contador con el tiempo restante</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:4px">${o.dine_in_time ? '🍽️ Precalculado según hora de llegada del cliente ('+o.dine_in_time+')' : 'El cliente verá un contador con el tiempo restante'}</div>
           </div>
           <div class="respond-row">
             <button class="btn-primary" onclick="respond(${o.id},'aceptar')" style="padding:9px 18px">✅ Aceptar</button>

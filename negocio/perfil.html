@@ -157,6 +157,9 @@
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem;margin-top:6px">
               <input type="checkbox" id="f_accepts_delivery" style="width:16px;height:16px" onchange="toggleDeliveryFeeField()"> Acepta delivery
             </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.9rem;margin-top:6px">
+              <input type="checkbox" id="f_allows_dine_in" style="width:16px;height:16px"> Permite consumo en el negocio
+            </label>
             <div id="deliveryFeeField" style="display:none">
               <div style="display:flex;gap:16px;flex-wrap:wrap">
                 <div class="form-group" style="margin:0">
@@ -393,6 +396,7 @@ function fillForm() {
   e('f_description').value = biz.description || '';
   e('f_what_we_offer').value = biz.what_we_offer || '';
   e('f_accepts_delivery').checked = !!biz.accepts_delivery;
+  e('f_allows_dine_in').checked = !!biz.allows_dine_in;
   e('f_delivery_fee').value = biz.delivery_fee || 15;
   e('f_min_order_delivery').value = biz.min_order_delivery || 0;
   toggleDeliveryFeeField();
@@ -475,6 +479,7 @@ async function saveInfo() {
     description: document.getElementById('f_description').value,
     what_we_offer: document.getElementById('f_what_we_offer').value,
     accepts_delivery: document.getElementById('f_accepts_delivery').checked ? 1 : 0,
+    allows_dine_in: document.getElementById('f_allows_dine_in').checked ? 1 : 0,
     delivery_fee: parseFloat(document.getElementById('f_delivery_fee').value) || 15,
     min_order_delivery: parseFloat(document.getElementById('f_min_order_delivery').value) || 0,
   };

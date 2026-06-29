@@ -168,6 +168,22 @@
         <div class="delivery-toggle" id="deliveryToggle">
           <button class="delivery-btn active" onclick="setDelivery('pickup',this)">🏃 Recoger</button>
           <button class="delivery-btn" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
+          <button class="delivery-btn" id="dineInBtn" style="display:none" onclick="setDelivery('dine_in',this)">🍽️ Comer aquí</button>
+        </div>
+        <!-- Formulario Comer aquí -->
+        <div id="dineInForm" style="display:none;margin-top:10px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:var(--radius-sm);padding:14px">
+          <div style="font-weight:700;font-size:.88rem;color:#166534;margin-bottom:10px">🍽️ Reserva de mesa</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-group" style="margin:0">
+              <label style="font-size:.82rem">👥 Personas</label>
+              <input type="number" id="dineInPersons" min="1" max="20" value="1" placeholder="1" style="width:100%;margin-top:4px" oninput="updateCart()">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:.82rem">🕐 Hora de llegada</label>
+              <input type="time" id="dineInTime" style="width:100%;margin-top:4px" oninput="updateCart()">
+            </div>
+          </div>
+          <div id="dineInCountdown" style="display:none;margin-top:10px;font-size:.82rem;color:#166534;font-weight:600"></div>
         </div>
         <div id="deliveryAddressWrap" style="display:none;margin-bottom:12px">
           <!-- Saved address option -->
@@ -328,6 +344,10 @@ async function init() {
 
 function renderBizInfo() {
   const el = document.getElementById('bizInfo');
+
+  // Mostrar botón Comer aquí si el negocio lo permite
+  var dineBtn = document.getElementById('dineInBtn');
+  if (dineBtn) dineBtn.style.display = business.allows_dine_in ? 'block' : 'none';
 
   // Construir HTML de horarios
   var hoursHtml = '';
@@ -1079,9 +1099,32 @@ function setDelivery(type, btn) {
   document.querySelectorAll('.delivery-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('deliveryAddressWrap').style.display = type === 'delivery' ? 'block' : 'none';
-  invalidateDeliveryCalc();
-  if (type === 'delivery') loadSavedAddress();
+  document.getElementById('dineInForm').style.display = type === 'dine_in' ? 'block' : 'none';
+  if (type === 'dine_in') {
+    invalidateDeliveryCalc();
+    updateDineInCountdown();
+  } else {
+    invalidateDeliveryCalc();
+    if (type === 'delivery') loadSavedAddress();
+  }
   updateCart();
+}
+
+function updateDineInCountdown() {
+  var timeVal = document.getElementById('dineInTime')?.value;
+  var el = document.getElementById('dineInCountdown');
+  if (!el) return;
+  if (!timeVal) { el.style.display = 'none'; return; }
+  var now = new Date();
+  var parts = timeVal.split(':');
+  var target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(parts[0]), parseInt(parts[1]), 0);
+  if (target <= now) target.setDate(target.getDate() + 1);
+  var diffMs = target - now;
+  var diffMins = Math.round(diffMs / 60000);
+  var hrs = Math.floor(diffMins / 60);
+  var mins = diffMins % 60;
+  el.style.display = 'block';
+  el.textContent = '⏱️ Tiempo hasta tu llegada: ' + (hrs > 0 ? hrs + 'h ' : '') + mins + ' min';
 }
 
 function updateCart() {
@@ -1146,6 +1189,7 @@ function updateCart() {
   var needsDeliveryCalc = orderType !== 'paquete' && orderType !== 'compras' && deliveryType === 'delivery' && business?.accepts_delivery && window._calculatedDeliveryFee == null;
   var needsPkgCalc      = orderType === 'paquete' && window._pkgCalculatedDeliveryFee == null;
   var needsComprasCalc  = orderType === 'compras' && window._comprasDeliveryFee == null;
+  var needsDineInTime   = deliveryType === 'dine_in' && !document.getElementById('dineInTime')?.value;
 
   var minOrder = parseFloat(business?.min_order_delivery || 0);
   var belowMin = orderType !== 'paquete' && orderType !== 'compras' && deliveryType === 'delivery' && minOrder > 0 && subtotal < minOrder;
@@ -1163,9 +1207,10 @@ function updateCart() {
   }
 
   submitBtn.style.display = (needsDeliveryCalc || needsPkgCalc || needsComprasCalc) ? 'none' : 'block';
-  submitBtn.disabled = orderType === 'paquete' ? needsPkgCalc : orderType === 'compras' ? needsComprasCalc : (lines.length === 0 || needsDeliveryCalc || belowMin);
+  submitBtn.disabled = orderType === 'paquete' ? needsPkgCalc : orderType === 'compras' ? needsComprasCalc : (lines.length === 0 || needsDeliveryCalc || belowMin || needsDineInTime);
   if (orderType === 'paquete') submitBtn.textContent = '📦 Solicitar envío';
   else if (orderType === 'compras') submitBtn.textContent = '🛍️ Solicitar compra';
+  else if (deliveryType === 'dine_in') submitBtn.textContent = '🍽️ Reservar mesa';
   else submitBtn.textContent = 'Enviar Pedido';
 }
 
@@ -1259,6 +1304,35 @@ async function submitOrder() {
 
 
   // ── Flujo normal ───────────────────────────────────────
+  if (deliveryType === 'dine_in') {
+    var persons = parseInt(document.getElementById('dineInPersons')?.value) || 1;
+    var dineTime = document.getElementById('dineInTime')?.value;
+    if (!dineTime) { alert('Selecciona tu hora de llegada'); return; }
+    const items = [];
+    Object.entries(cart).forEach(([id, item]) => {
+      if (item.qty > 0) items.push({ product_id: parseInt(id), name: item.name, price: item.price || 0, quantity: item.qty });
+    });
+    if (!items.length) { alert('Agrega al menos un producto'); return; }
+    submitBtn.disabled = true; submitBtn.textContent = 'Enviando...';
+    try {
+      const res = await fetch(`${API}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
+        body: JSON.stringify({ business_id: businessId, delivery_type: 'dine_in', notes, items, dine_in_persons: persons, dine_in_time: dineTime, delivery_fee: 0 })
+      });
+      const data = await res.json();
+      if (!data.success) { alert(data.message || 'Error'); submitBtn.disabled = false; submitBtn.textContent = 'Enviar Pedido'; return; }
+      document.getElementById('mainContent').innerHTML = `
+        <div class="success-screen">
+          <div class="success-icon">✅</div>
+          <h2 style="margin-bottom:8px">¡Pedido enviado!</h2>
+          <p style="color:var(--muted);margin-bottom:4px">Pedido <strong>${data.data.order_number}</strong></p>
+          <p style="color:var(--muted);margin-bottom:20px">🍽️ ${persons} persona(s) · Llegada: ${dineTime}</p>
+          <a href="index.html" class="btn-primary" style="display:inline-flex">📋 Ver mis pedidos</a>
+        </div>`;
+    } catch(e) { alert('Error de conexión'); submitBtn.disabled = false; submitBtn.textContent = 'Enviar Pedido'; }
+    return;
+  }
   var useSaved = document.getElementById('useSavedAddress')?.checked;
   var deliveryAddress = '';
   if (deliveryType === 'delivery') {

@@ -168,15 +168,17 @@ class OrderController {
         $stmt = $this->db->prepare("
             INSERT INTO orders
                 (order_number, client_id, business_id, delivery_type, delivery_address, notes,
-                 subtotal, service_fee, delivery_fee, total, from_promo, boleta_url)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+                 subtotal, service_fee, delivery_fee, total, from_promo, boleta_url, dine_in_persons, dine_in_time)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         ");
         $stmt->execute([
             $orderNumber, $user['id'], $businessId, $deliveryType,
             $body['delivery_address'] ?? null, $notes,
             $subtotal, $serviceFee, $deliveryFee, $total,
             isset($body['from_promo']) ? (int)$body['from_promo'] : 0,
-            $body['boleta_url'] ?? null
+            $body['boleta_url'] ?? null,
+            isset($body['dine_in_persons']) ? (int)$body['dine_in_persons'] : null,
+            $body['dine_in_time'] ?? null
         ]);
         $orderId = $this->db->lastInsertId();
 

@@ -115,6 +115,7 @@ CREATE TABLE IF NOT EXISTS businesses (
     is_active TINYINT(1) DEFAULT 1,
     is_verified TINYINT(1) DEFAULT 0,
     accepts_delivery TINYINT(1) DEFAULT 0,
+    allows_dine_in TINYINT(1) DEFAULT 0,
     delivery_fee DECIMAL(10,2) DEFAULT 15.00,
     service_fee DECIMAL(10,2) DEFAULT 5.00,
     rating DECIMAL(3,2) DEFAULT 0.00,
