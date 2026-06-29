@@ -314,7 +314,7 @@ function renderItems() {
           var eName = match[1];
           var ePrice = parseFloat(match[2]) || 0;
           extrasTotal += ePrice;
-          extraLines += '<div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--accent);padding:2px 0 2px 12px">🍫 '+esc(eName)+' ×'+i.quantity+'<span>Q'+(ePrice*i.quantity).toFixed(2)+'</span></div>';
+          extraLines += '<div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--accent);padding:2px 0 2px 12px">➕ '+esc(eName)+' ×'+i.quantity+'<span>Q'+(ePrice*i.quantity).toFixed(2)+'</span></div>';
         }
       });
       basePrice = basePrice - extrasTotal;
