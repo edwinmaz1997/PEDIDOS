@@ -7,10 +7,10 @@ class PromotionController {
     public function index(): void {
         AuthMiddleware::authenticate();
         try {
-            $today = date('Y-m-d');
+            $now = date('Y-m-d H:i:s');
             // Auto-desactivar vencidas
             $this->db->prepare("UPDATE promotions SET is_active = 0 WHERE ends_at < ? AND is_active = 1")
-                     ->execute([$today]);
+                     ->execute([$now]);
 
             $stmt = $this->db->prepare("
                 SELECT p.*, b.name as business_name, b.logo as business_logo,
@@ -20,7 +20,7 @@ class PromotionController {
                 WHERE p.is_active = 1 AND p.starts_at <= ? AND p.ends_at >= ? AND b.is_active = 1
                 ORDER BY p.created_at DESC
             ");
-            $stmt->execute([$today, $today]);
+            $stmt->execute([$now, $now]);
             $promos = $stmt->fetchAll();
             foreach ($promos as &$promo) {
                 $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ? ORDER BY product_name ASC");
