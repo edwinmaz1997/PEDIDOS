@@ -264,12 +264,31 @@ function renderCatList() {
   const el = document.getElementById('catList');
   if (!categories.length) { el.innerHTML = '<p style="color:var(--muted);font-size:.85rem">No hay categorías aún.</p>'; return; }
   el.innerHTML = categories.map(function(c){
-    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">' +
-      '<span style="font-size:1.2rem">'+c.icon+'</span>' +
-      '<span style="flex:1;font-weight:600">'+APP.esc(c.name)+'</span>' +
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)" id="catrow-'+c.id+'">' +
+      '<span style="font-size:1.2rem" id="cicon-'+c.id+'">'+c.icon+'</span>' +
+      '<span style="flex:1;font-weight:600" id="cname-'+c.id+'">'+APP.esc(c.name)+'</span>' +
+      '<button onclick="startEditCat('+c.id+',\''+APP.esc(c.icon)+'\',\''+APP.esc(c.name)+'\')" class="icon-btn" style="padding:5px 10px;font-size:.8rem">✏️</button>' +
       '<button onclick="deleteCategory('+c.id+')" class="icon-btn danger" style="padding:5px 10px;font-size:.8rem">🗑️</button>' +
     '</div>';
   }).join('');
+}
+
+function startEditCat(id, icon, name) {
+  var row = document.getElementById('catrow-'+id);
+  row.innerHTML =
+    '<input type="text" value="'+icon+'" maxlength="4" style="width:48px;padding:7px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-align:center;font-size:1.1rem;font-family:\'DM Sans\',sans-serif" id="edit-icon-'+id+'">' +
+    '<input type="text" value="'+name+'" style="flex:1;padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif;font-size:.9rem" id="edit-name-'+id+'">' +
+    '<button onclick="saveEditCat('+id+')" class="btn-primary" style="padding:6px 12px;font-size:.82rem">✓</button>' +
+    '<button onclick="renderCatList()" class="icon-btn" style="padding:6px 10px;font-size:.82rem">✕</button>';
+}
+
+async function saveEditCat(id) {
+  var icon = document.getElementById('edit-icon-'+id).value.trim() || '🏷️';
+  var name = document.getElementById('edit-name-'+id).value.trim();
+  if (!name) return;
+  var res = await APP.put('/product-categories/'+id, { name, icon });
+  if (res?.success) { await loadCategories(); APP.toast('Categoría actualizada'); }
+  else APP.toast(res?.message || 'Error', 'error');
 }
 
 function filterByCat(catId, btn) {
