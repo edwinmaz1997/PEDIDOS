@@ -239,7 +239,7 @@ function renderPromos(promos) {
   }
   var today = new Date().toISOString().substring(0,10);
   container.innerHTML = promos.map(function(p) {
-    var status = !p.is_active ? 'inactive' : (p.starts_at > today ? 'scheduled' : (p.ends_at < today ? 'inactive' : 'active'));
+    var now = new Date(); var startDt = new Date(p.starts_at.replace(' ','T')); var endDt = new Date(p.ends_at.replace(' ','T')); var status = !p.is_active ? 'inactive' : (startDt > now ? 'scheduled' : (endDt < now ? 'inactive' : 'active'));
     var statusLabel = status==='active' ? '✅ Vigente' : status==='scheduled' ? '⏳ Programada' : '❌ Inactiva';
     var statusClass = 'badge-' + status;
     return '<div class="promo-card">' +

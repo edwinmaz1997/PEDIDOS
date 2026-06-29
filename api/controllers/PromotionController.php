@@ -40,7 +40,7 @@ class PromotionController {
         try {
             $biz  = $this->getBiz($user['id']);
             // Auto-desactivar vencidas
-            $this->db->prepare("UPDATE promotions SET is_active = 0 WHERE business_id = ? AND ends_at < CURDATE() AND is_active = 1")
+            $this->db->prepare("UPDATE promotions SET is_active = 0 WHERE business_id = ? AND ends_at < NOW() AND is_active = 1")
                      ->execute([$biz['id']]);
 
             $stmt = $this->db->prepare("SELECT * FROM promotions WHERE business_id = ? ORDER BY created_at DESC");
