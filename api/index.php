@@ -344,10 +344,12 @@ try {
                 // Marcar todas como leídas
                 $db->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?")->execute([$user['id']]);
                 Response::success(null);
+            } elseif ($method === 'DELETE') {
+                // Borrar todas
+                $db->prepare("DELETE FROM notifications WHERE user_id = ?")->execute([$user['id']]);
+                Response::success(null);
             }
             break;
-
-        // ── CATEGORIES ───────────────────────────────────────
         case 'categories':
             $db = Database::connect();
             Response::success($db->query("SELECT * FROM business_categories WHERE is_active=1 ORDER BY sort_order ASC, name ASC")->fetchAll());

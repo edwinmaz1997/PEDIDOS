@@ -196,12 +196,11 @@ function dismissInstall() {
     var panel = document.createElement('div');
     panel.id = 'nx-notif-panel';
     panel.style.cssText = 'display:none;position:fixed;top:0;left:260px;width:320px;height:100vh;background:white;z-index:500;box-shadow:4px 0 20px rgba(0,0,0,.15);flex-direction:column;overflow:hidden';
-    panel.innerHTML = '<div style="padding:16px 20px;background:var(--navy);display:flex;align-items:center;justify-content:space-between">' +
-      '<div style="color:white;font-weight:700;font-size:.95rem">🔔 Notificaciones</div>' +
-      '<div style="display:flex;gap:8px;align-items:center">' +
-        '<button onclick="window._nxMarkAllRead()" style="background:rgba(255,255,255,.15);border:none;color:white;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.75rem">Marcar todas leídas</button>' +
-        '<button onclick="window._nxClosePanel()" style="background:none;border:none;color:rgba(255,255,255,.7);cursor:pointer;font-size:1.2rem">✕</button>' +
-      '</div>' +
+    panel.innerHTML = '<div style="padding:14px 16px;background:var(--navy);display:flex;align-items:center;gap:10px">' +
+      '<button onclick="window._nxClosePanel()" style="background:rgba(255,255,255,.15);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;flex-shrink:0">←</button>' +
+      '<div style="color:white;font-weight:700;font-size:.95rem;flex:1">🔔 Notificaciones</div>' +
+      '<button onclick="window._nxMarkAllRead()" style="background:rgba(255,255,255,.15);border:none;color:white;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.72rem;white-space:nowrap">✓ Leídas</button>' +
+      '<button onclick="window._nxDeleteAll()" style="background:rgba(239,68,68,.4);border:none;color:white;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.72rem;white-space:nowrap">🗑️ Borrar</button>' +
     '</div>' +
     '<div id="nx-notif-list" style="flex:1;overflow-y:auto;padding:8px 0"></div>';
     document.body.appendChild(panel);
@@ -216,6 +215,7 @@ function dismissInstall() {
     // Exponer funciones globales
     window._nxClosePanel = closeNotifPanel;
     window._nxMarkAllRead = markAllRead;
+    window._nxDeleteAll = deleteAll;
 
     // Ajustar panel en móvil
     function adjustPanel() {
@@ -287,6 +287,16 @@ function dismissInstall() {
       if (url && url !== '#') window.location.href = url;
       else fetchNotifs();
     };
+  }
+
+  async function deleteAll() {
+    if (!confirm('¿Borrar todas las notificaciones?')) return;
+    await fetch('/api/notifications?delete_all=1', { method: 'DELETE', headers: { Authorization: 'Bearer ' + getToken() } });
+    var list = document.getElementById('nx-notif-list');
+    if (list) list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:#9ca3af"><div style="font-size:2rem;margin-bottom:8px">🔔</div><div style="font-size:.88rem">No tienes notificaciones</div></div>';
+    _lastUnread = 0;
+    var badge = document.getElementById('nx-badge');
+    if (badge) badge.style.display = 'none';
   }
 
   function toggleNotifPanel() {
