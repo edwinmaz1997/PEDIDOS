@@ -225,7 +225,13 @@ function dismissInstall() {
     window._nxDeleteAll = deleteAll;
 
     fetchNotifs();
-    setInterval(fetchNotifs, 15000);
+  }
+
+  // Polling independiente — siempre arranca aunque no haya sidebar
+  function startPolling() {
+    if (!getToken()) return;
+    fetchNotifs();
+    setInterval(fetchNotifs, 10000);
   }
 
   async function fetchNotifs() {
@@ -324,6 +330,10 @@ function dismissInstall() {
     if (badge) badge.style.display = 'none';
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initBell);
-  else setTimeout(initBell, 500);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ initBell(); startPolling(); });
+  } else {
+    setTimeout(initBell, 500);
+    startPolling();
+  }
 })();
