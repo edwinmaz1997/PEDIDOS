@@ -307,7 +307,6 @@ function renderItems() {
 
     // Parsear extras desde notes "Extras: nombre +Qprecio, ..."
     if (i.notes && i.notes.startsWith('Extras:')) {
-      console.log('notes raw:', JSON.stringify(i.notes));
       var parts = i.notes.replace('Extras: ', '').split(', ');
       parts.forEach(function(part) {
         var match = part.match(/^(.+?)\s+\+Q([\d.]+)$/);
@@ -412,7 +411,9 @@ async function loadMessages() {
 
     // Update total if changed
     if (res.data.order && parseFloat(res.data.order.total) !== parseFloat(order.total)) {
-      order = res.data.order;
+      order.total = res.data.order.total;
+      order.subtotal = res.data.order.subtotal;
+      order.status = res.data.order.status;
       if (typeof renderItems === 'function') renderItems();
     }
 
