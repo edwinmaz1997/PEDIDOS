@@ -156,6 +156,12 @@ function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.
 function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
 
 init();
+function openLightbox(src) {
+  var lb = document.getElementById('imgLightbox');
+  document.getElementById('imgLightboxImg').src = src;
+  lb.style.display = 'flex';
+}
+
 </script>
 <script src="/assets/js/pwa.js"></script>
 
