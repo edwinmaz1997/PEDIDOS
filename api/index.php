@@ -322,7 +322,29 @@ try {
 
         // ── NOTIFICATIONS ────────────────────────────────────
         case 'notifications':
-            Response::success([]);
+            $user = AuthMiddleware::authenticate();
+            $db   = Database::connect();
+            $notifId = isset($segments[1]) && is_numeric($segments[1]) ? (int)$segments[1] : null;
+
+            if ($method === 'GET') {
+                // Traer últimas 30 notificaciones
+                $stmt = $db->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 30");
+                $stmt->execute([$user['id']]);
+                $notifs = $stmt->fetchAll();
+                // Contar no leídas
+                $countStmt = $db->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
+                $countStmt->execute([$user['id']]);
+                $unread = (int)$countStmt->fetchColumn();
+                Response::success(['notifications' => $notifs, 'unread' => $unread]);
+            } elseif ($method === 'PUT' && $notifId) {
+                // Marcar una como leída
+                $db->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?")->execute([$notifId, $user['id']]);
+                Response::success(null);
+            } elseif ($method === 'PUT') {
+                // Marcar todas como leídas
+                $db->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?")->execute([$user['id']]);
+                Response::success(null);
+            }
             break;
 
         // ── CATEGORIES ───────────────────────────────────────
