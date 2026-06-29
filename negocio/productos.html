@@ -464,7 +464,7 @@ function getExtras() {
   }).filter(function(e) { return e.name; });
 }
 
-
+function toggleVariants() {
   var hasVariants = document.getElementById('p_has_variants').checked;
   document.getElementById('variantsSection').style.display = hasVariants ? 'block' : 'none';
   document.getElementById('p_price').closest('.form-group').style.opacity = hasVariants ? '.4' : '1';
