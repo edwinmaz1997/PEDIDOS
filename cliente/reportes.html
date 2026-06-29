@@ -100,6 +100,10 @@
         <div class="val" id="mPickup">—</div>
         <div class="lbl">Para recoger</div>
       </div>
+      <div class="metric-box">
+        <div class="val" id="mDineIn">—</div>
+        <div class="lbl">Consumo en negocio</div>
+      </div>
     </div>
 
     <!-- Negocios favoritos -->
@@ -172,6 +176,7 @@ async function init() {
   var bizSet   = new Set(orders.map(function(o){ return o.business_id; }));
   var deliveries = orders.filter(function(o){ return o.delivery_type==='delivery'; }).length;
   var pickups    = orders.filter(function(o){ return o.delivery_type==='pickup'; }).length;
+  var dineIns    = orders.filter(function(o){ return o.delivery_type==='dine_in'; }).length;
 
   document.getElementById('mTotal').textContent    = money(total);
   document.getElementById('mOrders').textContent   = orders.length;
@@ -179,6 +184,7 @@ async function init() {
   document.getElementById('mBizCount').textContent = bizSet.size;
   document.getElementById('mDelivery').textContent = deliveries;
   document.getElementById('mPickup').textContent   = pickups;
+  if (document.getElementById('mDineIn')) document.getElementById('mDineIn').textContent = dineIns;
 
   // ── Negocios ────────────────────────────────────────────────
   var bizMap = {};

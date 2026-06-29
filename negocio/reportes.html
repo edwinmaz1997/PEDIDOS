@@ -146,6 +146,7 @@
         <div class="metric-box"><div class="val" id="dAvgTicket">—</div><div class="lbl">Ticket promedio</div></div>
         <div class="metric-box"><div class="val" id="dDeliveries">—</div><div class="lbl">Deliveries</div></div>
         <div class="metric-box"><div class="val" id="dPickups">—</div><div class="lbl">Para recoger</div></div>
+        <div class="metric-box"><div class="val" id="dDineIn">—</div><div class="lbl">Consumo en negocio</div></div>
       </div>
 
       <div class="report-card">
@@ -487,6 +488,7 @@ async function loadDiario() {
   var avgTicket   = totalOrders ? totalIncome/totalOrders : 0;
   var deliveries  = orders.filter(function(o){ return o.delivery_type === 'delivery'; }).length;
   var pickups     = orders.filter(function(o){ return o.delivery_type === 'pickup'; }).length;
+  var dineIns     = orders.filter(function(o){ return o.delivery_type === 'dine_in'; }).length;
 
   document.getElementById('dTotalOrders').textContent = totalOrders;
   document.getElementById('dTotalIncome').textContent = money(totalIncome);
@@ -494,6 +496,7 @@ async function loadDiario() {
   document.getElementById('dAvgTicket').textContent   = money(avgTicket);
   document.getElementById('dDeliveries').textContent  = deliveries;
   document.getElementById('dPickups').textContent     = pickups;
+  if (document.getElementById('dDineIn')) document.getElementById('dDineIn').textContent = dineIns;
 
   // Detail table
   if (!orders.length) {
@@ -534,7 +537,7 @@ async function loadDiario() {
         '<td style="font-weight:600">' + esc(o.order_number) + '</td>' +
         '<td>' + esc(o.client_name) + '</td>' +
         '<td style="font-size:.82rem;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (items||'—') + '</td>' +
-        '<td>' + (o.delivery_type==='delivery'?'🛵':'🏃') + '</td>' +
+        '<td>' + (o.delivery_type==='delivery'?'🛵':o.delivery_type==='dine_in'?'🍽️':'🏃') + '</td>' +
         '<td><strong>' + money(o.subtotal) + '</strong></td>' +
         '<td>' + (statusLabels[o.status]||o.status) + '</td>' +
         '<td style="font-size:.82rem;color:var(--muted)">' + time + '</td>' +
@@ -588,7 +591,7 @@ function exportDiario() {
       o.order_number,
       '"'+(o.client_name||'')+'"',
       o.client_phone||'',
-      o.delivery_type==='delivery'?'Delivery':'Recoger',
+      o.delivery_type==='delivery'?'Delivery':o.delivery_type==='dine_in'?'Consumo en negocio':'Recoger',
       '"'+items+'"',
       sub.toFixed(2),
       SERVICE_FEE.toFixed(2),

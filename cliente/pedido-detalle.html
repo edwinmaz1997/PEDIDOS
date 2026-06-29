@@ -194,7 +194,7 @@ function renderItems() {
 function renderBizInfo() {
   document.getElementById('bizInfo').innerHTML =
     '<div style="font-weight:600;margin-bottom:4px">'+esc(order.business_name||'')+'</div>'+
-    (order.delivery_type==='delivery'?'<div style="font-size:.85rem;color:var(--muted)">🛵 Delivery a: '+esc(order.delivery_address||'')+'</div>':'<div style="font-size:.85rem;color:var(--muted)">🏃 Recoger en negocio</div>')+
+    (order.delivery_type==='delivery'?'<div style="font-size:.85rem;color:var(--muted)">🛵 Delivery a: '+esc(order.delivery_address||'')+'</div>':order.delivery_type==='dine_in'?'<div style="font-size:.85rem;color:#166534;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:8px 12px;margin-top:6px">🍽️ <strong>Consumo en el negocio</strong><br>👥 '+esc(String(order.dine_in_persons||1))+' persona(s) · 🕐 Llegada: <strong>'+esc(order.dine_in_time||'')+'</strong></div>':'<div style="font-size:.85rem;color:var(--muted)">🏃 Recoger en negocio</div>')+
     '<div style="font-size:.8rem;color:var(--muted);margin-top:4px">'+formatDate(order.created_at)+'</div>';
 }
 
