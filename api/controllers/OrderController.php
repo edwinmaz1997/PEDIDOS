@@ -100,7 +100,6 @@ class OrderController {
 
         $businessId    = (int)($body['business_id'] ?? 0);
         $deliveryType  = in_array($body['delivery_type'] ?? '', ['pickup','delivery','dine_in']) ? $body['delivery_type'] : 'pickup';
-        error_log('NX delivery_type raw: ' . ($body['delivery_type'] ?? 'NULL') . ' | parsed: ' . $deliveryType);
         $notes         = $body['notes'] ?? '';
         $items         = $body['items'] ?? [];
 
