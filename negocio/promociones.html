@@ -247,7 +247,7 @@ function renderPromos(promos) {
       '<div class="promo-header">' +
         '<div>' +
           '<h3>' + APP.esc(p.title) + '</h3>' +
-          '<div class="dates">📅 ' + p.starts_at + ' → ' + p.ends_at + '</div>' +
+          '<div class="dates">📅 ' + (function(s){if(!s)return '';var p=s.split(' ');var d=p[0].split('-');var t=p[1]?p[1].substring(0,5):'';var h=t?parseInt(t.split(':')[0]):0;var m=t?t.split(':')[1]:'';var ampm=h>=12?'PM':'AM';h=h%12||12;return d[2]+'/'+d[1]+'/'+d[0]+(t?' '+h+':'+m+' '+ampm:'');})(p.starts_at) + ' → ' + (function(s){if(!s)return '';var p=s.split(' ');var d=p[0].split('-');var t=p[1]?p[1].substring(0,5):'';var h=t?parseInt(t.split(':')[0]):0;var m=t?t.split(':')[1]:'';var ampm=h>=12?'PM':'AM';h=h%12||12;return d[2]+'/'+d[1]+'/'+d[0]+(t?' '+h+':'+m+' '+ampm:'');})(p.ends_at) + '</div>' +
         '</div>' +
         '<span class="' + statusClass + '">' + statusLabel + '</span>' +
       '</div>' +

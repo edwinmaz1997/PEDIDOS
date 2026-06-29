@@ -90,7 +90,7 @@ async function init() {
         '<div class="desc">' + APP.esc(p.description) + '</div>' +
       '</div>' +
       '<div class="promo-body">' +
-        '<div class="dates">📅 Válida del ' + p.starts_at + ' al ' + p.ends_at + '</div>' +
+        '<div class="dates">📅 Válida del ' + (function(s){if(!s)return '';var p=s.split(' ');var d=p[0].split('-');var t=p[1]?p[1].substring(0,5):'';var h=t?parseInt(t.split(':')[0]):0;var m=t?t.split(':')[1]:'';var ampm=h>=12?'PM':'AM';h=h%12||12;return d[2]+'/'+d[1]+'/'+d[0]+(t?' '+h+':'+m+' '+ampm:'');})(p.starts_at) + ' al ' + (function(s){if(!s)return '';var p=s.split(' ');var d=p[0].split('-');var t=p[1]?p[1].substring(0,5):'';var h=t?parseInt(t.split(':')[0]):0;var m=t?t.split(':')[1]:'';var ampm=h>=12?'PM':'AM';h=h%12||12;return d[2]+'/'+d[1]+'/'+d[0]+(t?' '+h+':'+m+' '+ampm:'');})(p.ends_at) + '</div>' +
         '<div class="promo-items" id="items-'+p.id+'">' +
           (p.items||[]).map(function(item) {
             var saving = (parseFloat(item.original_price) - parseFloat(item.promo_price)).toFixed(2);
