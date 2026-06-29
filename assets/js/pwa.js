@@ -162,182 +162,168 @@ function dismissInstall() {
 (function() {
   var _notifOpen = false;
   var _lastUnread = 0;
-  var _pollInterval = null;
 
-  function getToken() {
-    return localStorage.getItem('nuevaexpress_token');
-  }
+  function getToken() { return localStorage.getItem('nuevaexpress_token'); }
 
   function timeAgo(dateStr) {
-    var d = new Date(dateStr.replace(' ', 'T'));
-    var diff = Math.floor((Date.now() - d) / 1000);
-    if (diff < 60) return 'ahora';
-    if (diff < 3600) return Math.floor(diff/60) + ' min';
-    if (diff < 86400) return Math.floor(diff/3600) + 'h';
-    return Math.floor(diff/86400) + 'd';
+    var d = new Date(dateStr.replace(' ','T'));
+    var diff = Math.floor((Date.now()-d)/1000);
+    if (diff<60) return 'ahora';
+    if (diff<3600) return Math.floor(diff/60)+' min';
+    if (diff<86400) return Math.floor(diff/3600)+'h';
+    return Math.floor(diff/86400)+'d';
+  }
+
+  function getUrl(n) {
+    try {
+      var data = n.data ? (typeof n.data==='string' ? JSON.parse(n.data) : n.data) : {};
+      return data.url || null;
+    } catch(e) { return null; }
+  }
+
+  function typeIcon(type) {
+    var icons = { new_order:'🛒', order_update:'📦', new_message:'💬', promotion:'🏷️', total_updated:'💰' };
+    return icons[type] || '🔔';
   }
 
   function initBell() {
     if (!getToken()) return;
-    // Buscar el sidebar-logo para agregar la campanita
     var sidebarLogo = document.querySelector('.sidebar-logo');
-    if (!sidebarLogo) return;
-    if (document.getElementById('nx-bell')) return;
+    if (!sidebarLogo || document.getElementById('nx-bell')) return;
 
-    // Crear campanita
-    var bell = document.createElement('div');
+    // Campanita
+    var bell = document.createElement('button');
     bell.id = 'nx-bell';
-    bell.style.cssText = 'position:relative;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);margin-top:8px;flex-shrink:0';
-    bell.innerHTML = '<span style="font-size:1.2rem">🔔</span><span id="nx-badge" style="display:none;position:absolute;top:-2px;right:-2px;background:#ef4444;color:white;font-size:.6rem;font-weight:700;min-width:16px;height:16px;border-radius:20px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid #1a1a2e">0</span>';
-    bell.onclick = toggleNotifPanel;
+    bell.onclick = togglePanel;
+    bell.innerHTML = '<span style="font-size:1.1rem">🔔</span><span id="nx-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:white;font-size:.6rem;font-weight:700;min-width:18px;height:18px;border-radius:20px;align-items:center;justify-content:center;padding:0 4px;border:2px solid #1a1a2e">0</span>';
+    bell.style.cssText = 'position:relative;background:rgba(255,255,255,.12);border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:10px;transition:.2s;flex-shrink:0';
+    bell.onmouseenter = function(){ this.style.background='rgba(255,255,255,.2)'; };
+    bell.onmouseleave = function(){ this.style.background='rgba(255,255,255,.12)'; };
     sidebarLogo.appendChild(bell);
 
-    // Crear panel dropdown
+    // Panel
     var panel = document.createElement('div');
-    panel.id = 'nx-notif-panel';
-    panel.style.cssText = 'display:none;position:fixed;top:0;left:260px;width:320px;height:100vh;background:white;z-index:500;box-shadow:4px 0 20px rgba(0,0,0,.15);flex-direction:column;overflow:hidden';
-    panel.innerHTML = '<div style="padding:14px 16px;background:var(--navy);display:flex;align-items:center;gap:10px">' +
-      '<button onclick="window._nxClosePanel()" style="background:rgba(255,255,255,.15);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;flex-shrink:0">←</button>' +
-      '<div style="color:white;font-weight:700;font-size:.95rem;flex:1">🔔 Notificaciones</div>' +
-      '<button onclick="window._nxMarkAllRead()" style="background:rgba(255,255,255,.15);border:none;color:white;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.72rem;white-space:nowrap">✓ Leídas</button>' +
-      '<button onclick="window._nxDeleteAll()" style="background:rgba(239,68,68,.4);border:none;color:white;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.72rem;white-space:nowrap">🗑️ Borrar</button>' +
-    '</div>' +
-    '<div id="nx-notif-list" style="flex:1;overflow-y:auto;padding:8px 0"></div>';
+    panel.id = 'nx-panel';
+    panel.style.cssText = 'display:none;position:fixed;inset:0;z-index:600;';
+    panel.innerHTML =
+      '<div id="nx-overlay" onclick="window._nxClose()" style="position:absolute;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(2px)"></div>'+
+      '<div id="nx-drawer" style="position:absolute;right:0;top:0;height:100%;width:min(380px,100vw);background:#f8fafc;display:flex;flex-direction:column;box-shadow:-4px 0 30px rgba(0,0,0,.2);transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)">'+
+        '<div style="background:linear-gradient(135deg,#1a1a2e,#2d3a6e);padding:16px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0">'+
+          '<button onclick="window._nxClose()" style="background:rgba(255,255,255,.15);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">←</button>'+
+          '<div style="flex:1;color:white;font-weight:700;font-size:1rem">Notificaciones</div>'+
+          '<div style="display:flex;gap:6px">'+
+            '<button onclick="window._nxMarkAll()" style="background:rgba(255,255,255,.15);border:none;color:white;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:.72rem;font-family:inherit">✓ Leídas</button>'+
+            '<button onclick="window._nxDeleteAll()" style="background:rgba(239,68,68,.4);border:none;color:white;padding:6px 10px;border-radius:8px;cursor:pointer;font-size:.72rem;font-family:inherit">🗑️ Borrar</button>'+
+          '</div>'+
+        '</div>'+
+        '<div id="nx-list" style="flex:1;overflow-y:auto"></div>'+
+      '</div>';
     document.body.appendChild(panel);
 
-    // Overlay para cerrar
-    var overlay = document.createElement('div');
-    overlay.id = 'nx-overlay';
-    overlay.style.cssText = 'display:none;position:fixed;inset:0;z-index:499;background:rgba(0,0,0,.3)';
-    overlay.onclick = closeNotifPanel;
-    document.body.appendChild(overlay);
-
-    // Exponer funciones globales
-    window._nxClosePanel = closeNotifPanel;
-    window._nxMarkAllRead = markAllRead;
+    window._nxClose = closePanel;
+    window._nxMarkAll = markAll;
     window._nxDeleteAll = deleteAll;
 
-    // Ajustar panel en móvil
-    function adjustPanel() {
-      var p = document.getElementById('nx-notif-panel');
-      if (!p) return;
-      if (window.innerWidth < 768) {
-        p.style.left = '0';
-        p.style.width = '100%';
-      } else {
-        p.style.left = '260px';
-        p.style.width = '320px';
-      }
-    }
-    window.addEventListener('resize', adjustPanel);
-    adjustPanel();
-
-    // Iniciar polling
     fetchNotifs();
-    _pollInterval = setInterval(fetchNotifs, 15000);
+    setInterval(fetchNotifs, 15000);
   }
 
   async function fetchNotifs() {
     if (!getToken()) return;
     try {
-      var res = await fetch('/api/notifications', { headers: { Authorization: 'Bearer ' + getToken() } });
+      var res = await fetch('/api/notifications', { headers: { Authorization: 'Bearer '+getToken() } });
       var data = await res.json();
       if (!data.success) return;
       var unread = data.data.unread || 0;
       var badge = document.getElementById('nx-badge');
-      if (badge) {
-        badge.textContent = unread > 99 ? '99+' : unread;
-        badge.style.display = unread > 0 ? 'flex' : 'none';
-      }
-      // Notificación visual si llegó algo nuevo
-      if (unread > _lastUnread && _lastUnread !== null && document.visibilityState === 'visible') {
+      if (badge) { badge.textContent = unread>99?'99+':unread; badge.style.display = unread>0?'flex':'none'; }
+      if (unread > _lastUnread && _lastUnread !== null) {
         var bell = document.getElementById('nx-bell');
-        if (bell) { bell.style.background = 'rgba(239,68,68,.3)'; setTimeout(function(){ bell.style.background = 'rgba(255,255,255,.1)'; }, 1500); }
+        if (bell) { bell.style.background='rgba(239,68,68,.3)'; setTimeout(function(){ bell.style.background='rgba(255,255,255,.12)'; },1500); }
       }
       _lastUnread = unread;
-      if (_notifOpen) renderNotifs(data.data.notifications || []);
+      if (_notifOpen) renderList(data.data.notifications || []);
     } catch(e) {}
   }
 
-  function renderNotifs(notifs) {
-    var list = document.getElementById('nx-notif-list');
+  function renderList(notifs) {
+    var list = document.getElementById('nx-list');
     if (!list) return;
     if (!notifs.length) {
-      list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:#9ca3af"><div style="font-size:2rem;margin-bottom:8px">🔔</div><div style="font-size:.88rem">No tienes notificaciones</div></div>';
+      list.innerHTML = '<div style="padding:60px 24px;text-align:center"><div style="font-size:2.5rem;margin-bottom:12px">🔔</div><div style="color:#6b7280;font-size:.9rem">Sin notificaciones</div></div>';
       return;
     }
     list.innerHTML = notifs.map(function(n) {
-      var data = n.data ? (typeof n.data === 'string' ? JSON.parse(n.data) : n.data) : {};
-      var url = data.url || '#';
-      return '<div onclick="window._nxClickNotif('+n.id+',\''+url+'\')" style="padding:14px 20px;border-bottom:1px solid #f3f4f6;cursor:pointer;background:'+(n.is_read?'white':'#f0f7ff')+';transition:.15s" onmouseenter="this.style.background=\'#f9fafb\'" onmouseleave="this.style.background=\''+(n.is_read?'white':'#f0f7ff')+'\'">' +
-        '<div style="display:flex;align-items:flex-start;gap:10px">' +
-          (n.is_read ? '' : '<div style="width:8px;height:8px;border-radius:50%;background:#3b82f6;flex-shrink:0;margin-top:5px"></div>') +
-          '<div style="flex:1">' +
-            '<div style="font-size:.85rem;font-weight:'+(n.is_read?'400':'600')+';color:#111;line-height:1.4">'+n.title+'</div>' +
-            '<div style="font-size:.78rem;color:#6b7280;margin-top:2px;line-height:1.4">'+n.message+'</div>' +
-            '<div style="font-size:.72rem;color:#9ca3af;margin-top:4px">'+timeAgo(n.created_at)+'</div>' +
-          '</div>' +
-        '</div>' +
+      var url = getUrl(n);
+      var icon = typeIcon(n.type);
+      var bg = n.is_read ? 'white' : '#eff6ff';
+      var borderL = n.is_read ? 'transparent' : '#3b82f6';
+      return '<div onclick="window._nxClick('+n.id+',\''+encodeURIComponent(url||'')+'\')\" '+
+        'style="display:flex;gap:14px;padding:16px 20px;border-bottom:1px solid #f1f5f9;background:'+bg+';border-left:3px solid '+borderL+';cursor:pointer;transition:.15s" '+
+        'onmouseenter="this.style.background=\'#f8fafc\'" onmouseleave="this.style.background=\''+bg+'\'">' +
+        '<div style="width:40px;height:40px;border-radius:50%;background:'+(n.is_read?'#f1f5f9':'#dbeafe')+';display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">'+icon+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:.85rem;font-weight:'+(n.is_read?'400':'600')+';color:#0f172a;line-height:1.4;margin-bottom:3px">'+n.title+'</div>'+
+          '<div style="font-size:.78rem;color:#64748b;line-height:1.4;margin-bottom:4px">'+n.message+'</div>'+
+          '<div style="font-size:.7rem;color:#94a3b8">'+timeAgo(n.created_at)+'</div>'+
+        '</div>'+
+        (url ? '<div style="color:#94a3b8;font-size:.9rem;align-self:center">›</div>' : '')+
       '</div>';
     }).join('');
 
-    window._nxClickNotif = async function(id, url) {
-      await fetch('/api/notifications/'+id, { method: 'PUT', headers: { Authorization: 'Bearer ' + getToken() } });
-      closeNotifPanel();
-      if (url && url !== '#') window.location.href = url;
+    window._nxClick = async function(id, encodedUrl) {
+      await fetch('/api/notifications/'+id, { method:'PUT', headers:{ Authorization:'Bearer '+getToken() } });
+      var url = decodeURIComponent(encodedUrl);
+      closePanel();
+      if (url && url !== 'null') window.location.href = url;
       else fetchNotifs();
     };
   }
 
+  function togglePanel() { _notifOpen ? closePanel() : openPanel(); }
+
+  async function openPanel() {
+    _notifOpen = true;
+    var panel = document.getElementById('nx-panel');
+    var drawer = document.getElementById('nx-drawer');
+    if (!panel) return;
+    panel.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    setTimeout(function(){ if(drawer) drawer.style.transform='translateX(0)'; }, 10);
+    try {
+      var res = await fetch('/api/notifications', { headers:{ Authorization:'Bearer '+getToken() } });
+      var data = await res.json();
+      if (data.success) renderList(data.data.notifications || []);
+    } catch(e) {}
+  }
+
+  function closePanel() {
+    _notifOpen = false;
+    var drawer = document.getElementById('nx-drawer');
+    var panel = document.getElementById('nx-panel');
+    if (drawer) drawer.style.transform = 'translateX(100%)';
+    setTimeout(function(){
+      if (panel) panel.style.display = 'none';
+      document.body.style.overflow = '';
+    }, 260);
+    fetchNotifs();
+  }
+
+  async function markAll() {
+    await fetch('/api/notifications', { method:'PUT', headers:{ Authorization:'Bearer '+getToken() } });
+    fetchNotifs();
+  }
+
   async function deleteAll() {
     if (!confirm('¿Borrar todas las notificaciones?')) return;
-    await fetch('/api/notifications?delete_all=1', { method: 'DELETE', headers: { Authorization: 'Bearer ' + getToken() } });
-    var list = document.getElementById('nx-notif-list');
-    if (list) list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:#9ca3af"><div style="font-size:2rem;margin-bottom:8px">🔔</div><div style="font-size:.88rem">No tienes notificaciones</div></div>';
+    await fetch('/api/notifications', { method:'DELETE', headers:{ Authorization:'Bearer '+getToken() } });
+    var list = document.getElementById('nx-list');
+    if (list) list.innerHTML = '<div style="padding:60px 24px;text-align:center"><div style="font-size:2.5rem;margin-bottom:12px">🔔</div><div style="color:#6b7280;font-size:.9rem">Sin notificaciones</div></div>';
     _lastUnread = 0;
     var badge = document.getElementById('nx-badge');
     if (badge) badge.style.display = 'none';
   }
 
-  function toggleNotifPanel() {
-    _notifOpen ? closeNotifPanel() : openNotifPanel();
-  }
-
-  async function openNotifPanel() {
-    _notifOpen = true;
-    var panel = document.getElementById('nx-notif-panel');
-    var overlay = document.getElementById('nx-overlay');
-    if (panel) panel.style.display = 'flex';
-    if (overlay) overlay.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    try {
-      var res = await fetch('/api/notifications', { headers: { Authorization: 'Bearer ' + getToken() } });
-      var data = await res.json();
-      if (data.success) renderNotifs(data.data.notifications || []);
-    } catch(e) {}
-  }
-
-  function closeNotifPanel() {
-    _notifOpen = false;
-    var panel = document.getElementById('nx-notif-panel');
-    var overlay = document.getElementById('nx-overlay');
-    if (panel) panel.style.display = 'none';
-    if (overlay) overlay.style.display = 'none';
-    document.body.style.overflow = '';
-    fetchNotifs();
-  }
-
-  async function markAllRead() {
-    await fetch('/api/notifications', { method: 'PUT', headers: { Authorization: 'Bearer ' + getToken() } });
-    fetchNotifs();
-    var list = document.getElementById('nx-notif-list');
-    if (list) { var items = list.querySelectorAll('[style*="f0f7ff"]'); items.forEach(function(el){ el.style.background = 'white'; }); }
-  }
-
-  // Inicializar cuando el DOM esté listo
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initBell);
-  } else {
-    setTimeout(initBell, 500);
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initBell);
+  else setTimeout(initBell, 500);
 })();
