@@ -209,10 +209,14 @@
           <!-- Boleta — solo para NuevaExpress (business 5) -->
           <div id="boletaSection" style="display:none;margin-top:12px;padding:14px;background:#f5f3ff;border:1.5px solid #c4b5fd;border-radius:var(--radius-sm)">
             <div style="font-size:.85rem;font-weight:700;color:#7c3aed;margin-bottom:4px">
-              📸 Foto de boleta <span id="boletaRequired" style="display:none;color:var(--danger)">*</span>
-              <span id="boletaOptionalLabel" style="font-weight:400;color:var(--muted)">(opcional)</span>
+              📸 Foto de boleta <span id="boletaRequired" style="color:var(--danger)">*</span>
             </div>
             <p style="font-size:.75rem;color:#4b5563;margin:0 0 8px">Sube la fotografía de tu boleta. El negocio validará la veracidad antes de procesar tu pedido.</p>
+            <div style="background:#ede9fe;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.78rem;color:#4c1d95;line-height:1.6">
+              💳 Puedes realizar tu transferencia o depósito a:<br>
+              <strong>Banco Industrial · Cuenta de Ahorro</strong><br>
+              Número: <strong>1550773</strong> · Edwin Mazariegos
+            </div>
             <div id="boletaPreview" style="display:none;margin-bottom:8px;position:relative">
               <img id="boletaImg" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1.5px solid #c4b5fd">
               <button type="button" onclick="clearBoleta()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:white;border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:.9rem">×</button>
@@ -590,10 +594,9 @@ function updateBoletaRequired() {
     var p = products.find(function(x){ return x.id == id; });
     return p && p.requires_boleta && cart[id].qty > 0;
   });
-  var reqEl  = document.getElementById('boletaRequired');
-  var optEl  = document.getElementById('boletaOptionalLabel');
-  if (reqEl)  reqEl.style.display  = required ? 'inline' : 'none';
-  if (optEl)  optEl.style.display  = required ? 'none' : 'inline';
+  var bs = document.getElementById('boletaSection');
+  if (bs) bs.style.display = required ? 'block' : 'none';
+  if (!required) { clearBoleta(); }
 }
 
 function previewBoleta(input) {
@@ -1051,11 +1054,8 @@ async function calculateDeliveryFee() {
     window._calculatedDeliveryFee = data.data.delivery_fee;
     window._calculatedDistanceKm  = data.data.distance_km;
 
-    // Mostrar boleta para NuevaExpress (business 5)
-    if (businessId === 5) {
-      var bs = document.getElementById('boletaSection');
-      if (bs) { bs.style.display = 'block'; updateBoletaRequired(); }
-    }
+    // Mostrar boleta si hay productos que la requieren (negocio 5)
+    if (businessId === 5) updateBoletaRequired();
 
     result.style.display = 'block';
     result.style.background = '#e8f5e9';
