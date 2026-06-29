@@ -160,15 +160,17 @@ class PromotionController {
     }
 
     private function notifyClients(string $bizName, string $title, string $desc, int $promoId): void {
-        // TEMPORAL: solo notificar al usuario id 10 para pruebas
-        $clientIds = [10];
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE role_id = 3 AND is_active = 1");
+        $stmt->execute();
+        $clientIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        if (empty($clientIds)) return;
 
         $notifTitle = "🏷️ Promoción de {$bizName}";
         $notifMsg   = "{$title}: {$desc}";
         PushNotification::sendToMany($clientIds, $notifTitle, $notifMsg, '/cliente/promociones.html');
 
         $insertStmt = $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)");
-        foreach ($clientIds as $clientId) {
+        foreach (array_slice($clientIds, 0, 200) as $clientId) {
             $insertStmt->execute([$clientId, 'promotion', $notifTitle, $notifMsg, json_encode(['promotion_id' => $promoId])]);
         }
     }
