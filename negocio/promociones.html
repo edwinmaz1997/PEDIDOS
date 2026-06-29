@@ -243,6 +243,7 @@ function renderPromos(promos) {
     var statusLabel = status==='active' ? '✅ Vigente' : status==='scheduled' ? '⏳ Programada' : '❌ Inactiva';
     var statusClass = 'badge-' + status;
     return '<div class="promo-card">' +
+      (p.image_url ? '<a href="'+APP.esc(p.image_url)+'" target="_blank" style="display:block;margin-bottom:12px"><img src="'+APP.esc(p.image_url)+'" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;cursor:zoom-in"></a>' : '') +
       '<div class="promo-header">' +
         '<div>' +
           '<h3>' + APP.esc(p.title) + '</h3>' +

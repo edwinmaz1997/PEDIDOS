@@ -83,7 +83,7 @@ async function init() {
   container.innerHTML = promos.map(function(p) {
     selectedItems[p.id] = {};
     return '<div class="promo-card">' +
-      (p.image_url ? '<img src="' + p.image_url + '" style="width:100%;height:160px;object-fit:cover;display:block">' : '') +
+      (p.image_url ? '<a href="' + p.image_url + '" target="_blank"><img src="' + p.image_url + '" style="width:100%;height:160px;object-fit:cover;display:block;cursor:zoom-in"></a>' : '') +
       '<div class="promo-banner">' +
         '<div class="biz">🏪 ' + APP.esc(p.business_name) + '</div>' +
         '<h2>' + APP.esc(p.title) + '</h2>' +
