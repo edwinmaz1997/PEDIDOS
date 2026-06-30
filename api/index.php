@@ -261,6 +261,10 @@ try {
             break;
 
         // ── ADMIN ────────────────────────────────────────────
+        case 'test-avisos':
+            Response::success(['ok' => true, 'method' => $method]);
+            break;
+
         case 'admin':
             $ctrl     = new AdminController();
             $userCtrl = new UserController();
