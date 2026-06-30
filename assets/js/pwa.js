@@ -264,9 +264,8 @@ function dismissInstall() {
       var icon = typeIcon(n.type);
       var bg = n.is_read ? 'white' : '#eff6ff';
       var borderL = n.is_read ? 'transparent' : '#3b82f6';
-      return '<div onclick="window._nxClick('+n.id+',\''+encodeURIComponent(url||'')+'\')\" '+
-        'style="display:flex;gap:14px;padding:16px 20px;border-bottom:1px solid #f1f5f9;background:'+bg+';border-left:3px solid '+borderL+';cursor:pointer;transition:.15s" '+
-        'onmouseenter="this.style.background=\'#f8fafc\'" onmouseleave="this.style.background=\''+bg+'\'">' +
+      return '<div class="nx-item" data-id="'+n.id+'" data-url="'+(url ? url.replace(/"/g,'&quot;') : '')+'" '+
+        'style="display:flex;gap:14px;padding:16px 20px;border-bottom:1px solid #f1f5f9;background:'+bg+';border-left:3px solid '+borderL+';cursor:pointer;transition:.15s">' +
         '<div style="width:40px;height:40px;border-radius:50%;background:'+(n.is_read?'#f1f5f9':'#dbeafe')+';display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">'+icon+'</div>'+
         '<div style="flex:1;min-width:0">'+
           '<div style="font-size:.85rem;font-weight:'+(n.is_read?'400':'600')+';color:#0f172a;line-height:1.4;margin-bottom:3px">'+n.title+'</div>'+
@@ -277,13 +276,17 @@ function dismissInstall() {
       '</div>';
     }).join('');
 
-    window._nxClick = async function(id, encodedUrl) {
-      await fetch('/api/notifications/'+id, { method:'PUT', headers:{ Authorization:'Bearer '+getToken() } });
-      var url = decodeURIComponent(encodedUrl);
-      closePanel();
-      if (url && url !== 'null') window.location.href = url;
-      else fetchNotifs();
-    };
+    // Adjuntar listeners en lugar de onclick inline (evita problemas con comillas en URL)
+    list.querySelectorAll('.nx-item').forEach(function(item) {
+      item.addEventListener('click', async function() {
+        var id = this.dataset.id;
+        var url = this.dataset.url;
+        await fetch('/api/notifications/'+id, { method:'PUT', headers:{ Authorization:'Bearer '+getToken() } });
+        closePanel();
+        if (url) window.location.href = url;
+        else fetchNotifs();
+      });
+    });
   }
 
   function togglePanel() { _notifOpen ? closePanel() : openPanel(); }
