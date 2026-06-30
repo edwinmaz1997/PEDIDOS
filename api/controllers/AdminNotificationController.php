@@ -183,7 +183,12 @@ class NotificationController {
 
     public function getAvisos(): void {
         AuthMiddleware::requireRole('admin');
-        $stmt = $this->db->query("SELECT * FROM admin_avisos ORDER BY created_at DESC LIMIT 30");
-        Response::success($stmt->fetchAll());
+        try {
+            $stmt = $this->db->query("SELECT * FROM admin_avisos ORDER BY created_at DESC LIMIT 30");
+            Response::success($stmt->fetchAll());
+        } catch (\Exception $e) {
+            error_log('getAvisos error: ' . $e->getMessage());
+            Response::error('Error: ' . $e->getMessage(), 500);
+        }
     }
 }
