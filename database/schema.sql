@@ -297,6 +297,19 @@ CREATE TABLE IF NOT EXISTS notifications (
 SET foreign_key_checks = 1;
 
 -- ------------------------------------------------------------
+-- ADMIN AVISOS (historial de avisos masivos a negocios)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS admin_avisos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    description TEXT NOT NULL,
+    recipient_count INT DEFAULT 0,
+    created_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ------------------------------------------------------------
 -- PASSWORD RESETS
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS password_resets (

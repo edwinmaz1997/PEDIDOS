@@ -148,4 +148,43 @@ class NotificationController {
 
         Response::success(null, 'Base de datos limpiada. Usuarios, negocios y categorías conservados.');
     }
+
+    public function sendAviso(array $body): void {
+        $user = AuthMiddleware::requireRole('admin');
+        $title = trim($body['title'] ?? '');
+        $desc  = trim($body['description'] ?? '');
+        if (!$title || !$desc) Response::error('Título y descripción son requeridos', 400);
+
+        // Obtener todos los usuarios con rol negocio activos
+        $stmt = $this->db->prepare("
+            SELECT u.id FROM users u
+            JOIN roles r ON u.role_id = r.id
+            WHERE r.name = 'negocio' AND u.is_active = 1
+        ");
+        $stmt->execute();
+        $userIds = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+        $notifTitle = "📢 {$title}";
+        $insertStmt = $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)");
+        foreach ($userIds as $uid) {
+            $insertStmt->execute([$uid, 'admin_aviso', $notifTitle, $desc, json_encode(['url' => '/negocio/index.html'])]);
+        }
+
+        require_once __DIR__ . '/../helpers/PushNotification.php';
+        if (!empty($userIds)) {
+            PushNotification::sendToMany($userIds, $notifTitle, $desc, '/negocio/index.html');
+        }
+
+        // Guardar en historial
+        $this->db->prepare("INSERT INTO admin_avisos (title, description, recipient_count, created_by) VALUES (?,?,?,?)")
+                 ->execute([$title, $desc, count($userIds), $user['id']]);
+
+        Response::success(['count' => count($userIds)], 'Aviso enviado');
+    }
+
+    public function getAvisos(): void {
+        AuthMiddleware::requireRole('admin');
+        $stmt = $this->db->query("SELECT * FROM admin_avisos ORDER BY created_at DESC LIMIT 30");
+        Response::success($stmt->fetchAll());
+    }
 }
