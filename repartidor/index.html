@@ -254,6 +254,15 @@ async function init() {
     }).length;
 
     applyFilters();
+
+    // Si viene delivery_id en la URL, abrir el detalle automáticamente
+    var urlParams = new URLSearchParams(window.location.search);
+    var targetId = urlParams.get('delivery_id');
+    if (targetId && !window._nxAutoOpened) {
+      window._nxAutoOpened = true;
+      var exists = allDeliveries.find(function(d){ return d.id == targetId; });
+      if (exists) openDetail(parseInt(targetId));
+    }
   } catch(e) {
     document.getElementById('deliveriesContainer').innerHTML = '<div class="empty-state"><p>Error cargando entregas.</p></div>';
   }

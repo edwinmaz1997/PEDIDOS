@@ -313,13 +313,13 @@ class OrderController {
 
         // Notificar al repartidor asignado si el pedido ya está listo para recoger
         if ($status === 'listo' && $order['delivery_type'] === 'delivery') {
-            $repStmt = $this->db->prepare("SELECT repartidor_id FROM deliveries WHERE order_id = ? AND repartidor_id IS NOT NULL LIMIT 1");
+            $repStmt = $this->db->prepare("SELECT id, repartidor_id FROM deliveries WHERE order_id = ? AND repartidor_id IS NOT NULL LIMIT 1");
             $repStmt->execute([$id]);
-            $repId = $repStmt->fetchColumn();
-            if ($repId) {
-                $this->notify((int)$repId, 'order_update', '✅ Pedido listo para recoger',
+            $repRow = $repStmt->fetch();
+            if ($repRow && $repRow['repartidor_id']) {
+                $this->notify((int)$repRow['repartidor_id'], 'order_update', '✅ Pedido listo para recoger',
                     "El pedido #{$order['order_number']} ya está listo — puedes pasar a recogerlo.",
-                    '/repartidor/index.html');
+                    '/repartidor/index.html?delivery_id='.$repRow['id']);
             }
         }
 

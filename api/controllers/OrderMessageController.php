@@ -72,9 +72,11 @@ class OrderMessageController {
                  ->execute([$orderId, $user['id'], $role, $message]);
 
         // Notify the other party según rol
-        $repStmt = $this->db->prepare("SELECT repartidor_id FROM deliveries WHERE order_id = ? AND repartidor_id IS NOT NULL LIMIT 1");
+        $repStmt = $this->db->prepare("SELECT id, repartidor_id FROM deliveries WHERE order_id = ? AND repartidor_id IS NOT NULL LIMIT 1");
         $repStmt->execute([$orderId]);
-        $repartidorId = $repStmt->fetchColumn();
+        $repRow = $repStmt->fetch();
+        $repartidorId = $repRow['repartidor_id'] ?? null;
+        $repDeliveryId = $repRow['id'] ?? null;
 
         if ($role === 'cliente') {
             // Cliente → notificar negocio
