@@ -263,8 +263,10 @@ try {
         // ── ADMIN ────────────────────────────────────────────
         case 'test-avisos':
             try {
-                $testCtrl = new AdminController();
-                $testCtrl->getAvisos();
+                AuthMiddleware::requireRole('admin');
+                $db = Database::connect();
+                $stmt = $db->query("SELECT * FROM admin_avisos ORDER BY created_at DESC LIMIT 30");
+                Response::success($stmt->fetchAll());
             } catch (\Throwable $e) {
                 Response::error('CAUGHT: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), 500);
             }
