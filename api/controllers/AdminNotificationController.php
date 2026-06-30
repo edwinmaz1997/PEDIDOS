@@ -180,7 +180,7 @@ class NotificationController {
                      ->execute([$title, $desc, count($userIds), $user['id']]);
 
             Response::success(['count' => count($userIds)], 'Aviso enviado');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             error_log('sendAviso error: ' . $e->getMessage());
             Response::error('Error: ' . $e->getMessage(), 500);
         }
@@ -191,7 +191,7 @@ class NotificationController {
         try {
             $stmt = $this->db->query("SELECT * FROM admin_avisos ORDER BY created_at DESC LIMIT 30");
             Response::success($stmt->fetchAll());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             error_log('getAvisos error: ' . $e->getMessage());
             Response::error('Error: ' . $e->getMessage(), 500);
         }
