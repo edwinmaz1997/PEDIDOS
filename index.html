@@ -312,15 +312,35 @@ function slideCarousel(catId, dir) {
 }
 
 // ─── Render Card ──────────────────────────────────────────
+function isBusinessOpen(business) {
+  try {
+    var hours = {};
+    if (business.opening_hours) {
+      hours = typeof business.opening_hours === 'string' ? JSON.parse(business.opening_hours) : business.opening_hours;
+    }
+    if (!hours || !Object.keys(hours).length) return null; // sin horario configurado
+    var dayKeys = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+    var now = new Date();
+    var dayKey = dayKeys[now.getDay()];
+    var h = hours[dayKey];
+    var cur = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    if (h && h.closed) return false;
+    if (h && h.open && h.close) return !(cur < h.open || cur > h.close);
+    return null;
+  } catch(e) { return null; }
+}
+
 function renderCard(b) {
   const photo = b.photos?.[0]?.photo_url || b.cover_photo || 'assets/img/placeholder.svg';
   const products = (b.products_preview || []).slice(0,3).map(p => `<span class="tag">${escHtml(p.name)}</span>`).join('');
+  const openStatus = isBusinessOpen(b);
   return `
     <article class="biz-card ${b.is_featured ? 'biz-card-featured' : ''}" onclick="openBusiness(${b.id})">
       <div class="card-photo" style="background-image:url('${escHtml(photo)}')">
         <span class="card-badge" style="background:${escHtml(b.category_color || '#888')}">${escHtml(b.category_name || '')}</span>
         ${b.is_featured ? '<span style="position:absolute;top:8px;right:8px;background:#f59e0b;color:white;font-size:.85rem;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2)">⭐</span>' : ''}
         ${b.business_type === 'delivery' ? '<span class="card-delivery" style="background:#FF8C42">🛵 Solo Delivery</span>' : b.accepts_delivery ? '<span class="card-delivery">🛵 Delivery</span>' : ''}
+        ${openStatus !== null ? `<span style="position:absolute;bottom:8px;left:8px;background:${openStatus ? 'rgba(34,197,94,.92)' : 'rgba(239,68,68,.92)'};color:white;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:white${openStatus ? ';animation:pulse 2s infinite' : ''}"></span>${openStatus ? 'Abierto' : 'Cerrado'}</span>` : ''}
       </div>
       <div class="card-body">
         <h3>${escHtml(b.name)}</h3>
