@@ -87,13 +87,13 @@ class OrderMessageController {
                 $this->notify($biz['user_id'], 'new_message', '💬 Nuevo mensaje', "El cliente envió un mensaje en el pedido #{$order['order_number']}", '/negocio/pedido-detalle.html?id='.$orderId);
             }
             if ($repartidorId) {
-                $this->notify((int)$repartidorId, 'new_message', '💬 Mensaje del cliente', "Mensaje en el pedido #{$order['order_number']}", '/repartidor/index.html');
+                $this->notify((int)$repartidorId, 'new_message', '💬 Mensaje del cliente', "Mensaje en el pedido #{$order['order_number']}", '/repartidor/index.html?delivery_id='.$repDeliveryId);
             }
         } elseif ($role === 'negocio') {
             // Negocio → notificar cliente y repartidor
             $this->notify($order['client_id'], 'new_message', '💬 Respuesta del negocio', "El negocio respondió en tu pedido #{$order['order_number']}", '/cliente/pedido-detalle.html?id='.$orderId);
             if ($repartidorId) {
-                $this->notify((int)$repartidorId, 'new_message', '💬 Mensaje del negocio', "Mensaje en el pedido #{$order['order_number']}", '/repartidor/index.html');
+                $this->notify((int)$repartidorId, 'new_message', '💬 Mensaje del negocio', "Mensaje en el pedido #{$order['order_number']}", '/repartidor/index.html?delivery_id='.$repDeliveryId);
             }
         } elseif ($role === 'repartidor') {
             // Repartidor → notificar cliente y negocio
