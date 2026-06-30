@@ -72,6 +72,10 @@ class OrderMessageController {
                  ->execute([$orderId, $user['id'], $role, $message]);
 
         // Notify the other party según rol
+        $repStmt = $this->db->prepare("SELECT repartidor_id FROM deliveries WHERE order_id = ? AND repartidor_id IS NOT NULL LIMIT 1");
+        $repStmt->execute([$orderId]);
+        $repartidorId = $repStmt->fetchColumn();
+
         if ($role === 'cliente') {
             // Cliente → notificar negocio
             $bizStmt = $this->db->prepare("SELECT user_id FROM businesses WHERE id = ?");
@@ -80,12 +84,25 @@ class OrderMessageController {
             if ($biz) {
                 $this->notify($biz['user_id'], 'new_message', '💬 Nuevo mensaje', "El cliente envió un mensaje en el pedido #{$order['order_number']}", '/negocio/pedido-detalle.html?id='.$orderId);
             }
+            if ($repartidorId) {
+                $this->notify((int)$repartidorId, 'new_message', '💬 Mensaje del cliente', "Mensaje en el pedido #{$order['order_number']}", '/repartidor/index.html');
+            }
         } elseif ($role === 'negocio') {
-            // Negocio → notificar cliente
+            // Negocio → notificar cliente y repartidor
             $this->notify($order['client_id'], 'new_message', '💬 Respuesta del negocio', "El negocio respondió en tu pedido #{$order['order_number']}", '/cliente/pedido-detalle.html?id='.$orderId);
+            if ($repartidorId) {
+                $this->notify((int)$repartidorId, 'new_message', '💬 Mensaje del negocio', "Mensaje en el pedido #{$order['order_number']}", '/repartidor/index.html');
+            }
+        } elseif ($role === 'repartidor') {
+            // Repartidor → notificar cliente y negocio
+            $this->notify($order['client_id'], 'new_message', '💬 Mensaje del repartidor', "Tu repartidor envió un mensaje sobre el pedido #{$order['order_number']}", '/cliente/pedido-detalle.html?id='.$orderId);
+            $bizStmt = $this->db->prepare("SELECT user_id FROM businesses WHERE id = ?");
+            $bizStmt->execute([$order['business_id']]);
+            $biz = $bizStmt->fetch();
+            if ($biz) {
+                $this->notify($biz['user_id'], 'new_message', '💬 Mensaje del repartidor', "El repartidor envió un mensaje en el pedido #{$order['order_number']}", '/negocio/pedido-detalle.html?id='.$orderId);
+            }
         }
-        // repartidor y admin — no generan push de chat
-        // sus acciones ya generan notificaciones propias (tomó, liberó, recogió, entregó)
 
         Response::success(['id' => $this->db->lastInsertId()], 'Mensaje enviado', 201);
     }
