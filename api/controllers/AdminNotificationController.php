@@ -170,7 +170,6 @@ class NotificationController {
             $insertStmt->execute([$uid, 'admin_aviso', $notifTitle, $desc, json_encode(['url' => '/negocio/index.html'])]);
         }
 
-        require_once __DIR__ . '/../helpers/PushNotification.php';
         if (!empty($userIds)) {
             PushNotification::sendToMany($userIds, $notifTitle, $desc, '/negocio/index.html');
         }
