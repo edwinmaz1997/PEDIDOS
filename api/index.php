@@ -262,13 +262,13 @@ try {
 
         // ── ADMIN ────────────────────────────────────────────
         case 'admin':
+            $ctrl     = new AdminController();
+            $userCtrl = new UserController();
             // /admin/assign-business
             if ($action === 'assign-business' && $method === 'POST') {
                 $ctrl->assignBusiness($body['business_id'] ?? 0, $body['user_id'] ?? 0);
                 break;
             }
-            $ctrl     = new AdminController();
-            $userCtrl = new UserController();
             // /api/admin/users/{id} — subAction holds the id when action is a word
             $adminUserId = null;
             if ($action === 'users' && isset($parts[2]) && is_numeric($parts[2])) {
