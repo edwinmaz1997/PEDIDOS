@@ -320,8 +320,46 @@ try {
             if ($action === 'orders' && $adminOrderId && $method === 'DELETE') { $ctrl->deleteOrder($adminOrderId); break; }
 
             // Avisos a negocios
-            if ($action === 'avisos' && $method === 'POST') { $ctrl->sendAviso($body); break; }
-            if ($action === 'avisos' && $method === 'GET')  { $ctrl->getAvisos(); break; }
+            if ($action === 'avisos' && $method === 'POST') {
+                try {
+                    $avisoUser = AuthMiddleware::requireRole('admin');
+                    $avisoDb = Database::connect();
+                    $title = trim($body['title'] ?? '');
+                    $desc  = trim($body['description'] ?? '');
+                    if (!$title || !$desc) { Response::error('Título y descripción son requeridos', 400); break; }
+
+                    $stmt = $avisoDb->prepare("SELECT u.id FROM users u JOIN roles r ON u.role_id = r.id WHERE r.name = 'negocio' AND u.is_active = 1");
+                    $stmt->execute();
+                    $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+                    $notifTitle = "📢 {$title}";
+                    $insertStmt = $avisoDb->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)");
+                    foreach ($userIds as $uid) {
+                        $insertStmt->execute([$uid, 'admin_aviso', $notifTitle, $desc, json_encode(['url' => '/negocio/index.html'])]);
+                    }
+                    if (!empty($userIds)) {
+                        PushNotification::sendToMany($userIds, $notifTitle, $desc, '/negocio/index.html');
+                    }
+                    $avisoDb->prepare("INSERT INTO admin_avisos (title, description, recipient_count, created_by) VALUES (?,?,?,?)")
+                            ->execute([$title, $desc, count($userIds), $avisoUser['id']]);
+
+                    Response::success(['count' => count($userIds)], 'Aviso enviado');
+                } catch (\Throwable $e) {
+                    Response::error('Error: ' . $e->getMessage(), 500);
+                }
+                break;
+            }
+            if ($action === 'avisos' && $method === 'GET') {
+                try {
+                    AuthMiddleware::requireRole('admin');
+                    $avisoDb = Database::connect();
+                    $stmt = $avisoDb->query("SELECT * FROM admin_avisos ORDER BY created_at DESC LIMIT 30");
+                    Response::success($stmt->fetchAll());
+                } catch (\Throwable $e) {
+                    Response::error('Error: ' . $e->getMessage(), 500);
+                }
+                break;
+            }
 
             // POST /api/admin/reset-data — limpiar datos de prueba
             if ($action === 'reset-data' && $method === 'POST') { $ctrl->resetData($body); break; }
