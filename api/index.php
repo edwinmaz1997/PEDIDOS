@@ -262,7 +262,12 @@ try {
 
         // ── ADMIN ────────────────────────────────────────────
         case 'test-avisos':
-            Response::success(['ok' => true, 'method' => $method]);
+            try {
+                $testCtrl = new AdminController();
+                $testCtrl->getAvisos();
+            } catch (\Throwable $e) {
+                Response::error('CAUGHT: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine(), 500);
+            }
             break;
 
         case 'admin':
