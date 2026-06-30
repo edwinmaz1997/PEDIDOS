@@ -162,7 +162,7 @@ class NotificationController {
             WHERE r.name = 'negocio' AND u.is_active = 1
         ");
         $stmt->execute();
-        $userIds = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         $notifTitle = "📢 {$title}";
         $insertStmt = $this->db->prepare("INSERT INTO notifications (user_id, type, title, message, data) VALUES (?,?,?,?,?)");
