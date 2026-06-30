@@ -173,14 +173,14 @@
         <!-- Formulario Comer aquí -->
         <div id="dineInForm" style="display:none;margin-top:10px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:var(--radius-sm);padding:14px">
           <div style="font-weight:700;font-size:.88rem;color:#166534;margin-bottom:10px">🍽️ Reserva de mesa</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="display:flex;flex-direction:column;gap:10px">
             <div class="form-group" style="margin:0">
-              <label style="font-size:.82rem">👥 Personas</label>
-              <input type="number" id="dineInPersons" min="1" max="20" value="1" placeholder="1" style="width:100%;margin-top:4px" oninput="updateCart()">
+              <label style="font-size:.82rem">👥 Cantidad de personas</label>
+              <input type="number" id="dineInPersons" min="1" max="20" value="1" placeholder="1" style="width:100%;margin-top:4px;box-sizing:border-box" oninput="updateCart()">
             </div>
             <div class="form-group" style="margin:0">
               <label style="font-size:.82rem">🕐 Hora de llegada</label>
-              <input type="time" id="dineInTime" style="width:100%;margin-top:4px" oninput="updateCart()">
+              <input type="time" id="dineInTime" style="width:100%;margin-top:4px;box-sizing:border-box" oninput="updateCart()">
             </div>
           </div>
           <div id="dineInCountdown" style="display:none;margin-top:10px;font-size:.82rem;color:#166534;font-weight:600"></div>
