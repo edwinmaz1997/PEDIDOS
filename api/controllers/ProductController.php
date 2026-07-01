@@ -24,6 +24,9 @@ class ProductController {
             }
             $eStmt->execute([$p['id']]);
             $p['extras'] = $eStmt->fetchAll();
+            $cStmt = $this->db->prepare("SELECT * FROM product_complements WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
+            $cStmt->execute([$p['id']]);
+            $p['complements'] = $cStmt->fetchAll();
         }
         Response::success($products);
     }
@@ -39,6 +42,14 @@ class ProductController {
             $p['variants'] = $vStmt->fetchAll();
         }
         Response::success($p);
+    }
+
+    private function saveComplements(int $productId, array $complements): void {
+        $this->db->prepare("DELETE FROM product_complements WHERE product_id = ?")->execute([$productId]);
+        $stmt = $this->db->prepare("INSERT INTO product_complements (product_id, name, sort_order) VALUES (?,?,?)");
+        foreach ($complements as $i => $c) {
+            if (!empty($c['name'])) $stmt->execute([$productId, $c['name'], $i]);
+        }
     }
 
     private function saveExtras(int $productId, array $extras): void {
@@ -69,22 +80,21 @@ class ProductController {
 
         $hasVariants = !empty($body['has_variants']) ? 1 : 0;
         $requiresBoleta = !empty($body['requires_boleta']) ? 1 : 0;
-        $stmt = $this->db->prepare("INSERT INTO products_services (business_id, name, description, price, photo, sort_order, category_id, has_variants, requires_boleta) VALUES (?,?,?,?,?,?,?,?,?)");
-        $stmt->execute([$businessId, $body['name'], $body['description'] ?? null, $body['price'] ?? null, $body['photo'] ?? null, $body['sort_order'] ?? 0, $body['category_id'] ?? null, $hasVariants, $requiresBoleta]);
+        $hasComplements = !empty($body['has_complements']) ? 1 : 0;
+        $complementsRequired = isset($body['complements_required']) ? (int)$body['complements_required'] : 1;
+        $stmt = $this->db->prepare("INSERT INTO products_services (business_id, name, description, price, photo, sort_order, category_id, has_variants, requires_boleta, has_complements, complements_required) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+        $stmt->execute([$businessId, $body['name'], $body['description'] ?? null, $body['price'] ?? null, $body['photo'] ?? null, $body['sort_order'] ?? 0, $body['category_id'] ?? null, $hasVariants, $requiresBoleta, $hasComplements, $complementsRequired]);
         $productId = (int)$this->db->lastInsertId();
 
-        if ($hasVariants && !empty($body['variants'])) {
-            $this->saveVariants($productId, $body['variants']);
-        }
-        if (array_key_exists('extras', $body)) {
-            $this->saveExtras($productId, $body['extras'] ?: []);
-        }
+        if ($hasVariants && !empty($body['variants'])) $this->saveVariants($productId, $body['variants']);
+        if (array_key_exists('extras', $body)) $this->saveExtras($productId, $body['extras'] ?: []);
+        if ($hasComplements && !empty($body['complements'])) $this->saveComplements($productId, $body['complements']);
         Response::success(['id' => $productId], 'Producto creado', 201);
     }
 
     public function update(int $id, array $body): void {
         AuthMiddleware::requireRole(['negocio', 'admin']);
-        $fields = ['name','description','price','is_available','sort_order','category_id','photo','has_variants','requires_boleta'];
+        $fields = ['name','description','price','is_available','sort_order','category_id','photo','has_variants','requires_boleta','has_complements','complements_required'];
         $sets = []; $params = [];
         foreach ($fields as $f) {
             if (array_key_exists($f, $body)) { $sets[] = "$f = ?"; $params[] = $body[$f]; }
@@ -93,13 +103,9 @@ class ProductController {
         $params[] = $id;
         $this->db->prepare("UPDATE products_services SET " . implode(', ', $sets) . " WHERE id = ?")->execute($params);
 
-        // Actualizar variantes si se enviaron
-        if (array_key_exists('variants', $body)) {
-            $this->saveVariants($id, $body['variants'] ?: []);
-        }
-        if (array_key_exists('extras', $body)) {
-            $this->saveExtras($id, $body['extras'] ?: []);
-        }
+        if (array_key_exists('variants', $body)) $this->saveVariants($id, $body['variants'] ?: []);
+        if (array_key_exists('extras', $body)) $this->saveExtras($id, $body['extras'] ?: []);
+        if (array_key_exists('complements', $body)) $this->saveComplements($id, $body['complements'] ?: []);
         Response::success(null, 'Producto actualizado');
     }
 

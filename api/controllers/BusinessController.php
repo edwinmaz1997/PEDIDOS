@@ -275,6 +275,7 @@ class BusinessController {
         $products = $stmt->fetchAll();
         $vStmt = $this->db->prepare("SELECT * FROM product_variants WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
         $eStmt = $this->db->prepare("SELECT * FROM product_extras WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
+        $cStmt = $this->db->prepare("SELECT * FROM product_complements WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
         foreach ($products as &$p) {
             if ($p['has_variants']) {
                 $vStmt->execute([$p['id']]);
@@ -284,6 +285,8 @@ class BusinessController {
             }
             $eStmt->execute([$p['id']]);
             $p['extras'] = $eStmt->fetchAll();
+            $cStmt->execute([$p['id']]);
+            $p['complements'] = $cStmt->fetchAll();
         }
         return $products;
     }
