@@ -196,6 +196,26 @@ class OrderController {
         // Notify business
         $this->notify($business['user_id'], 'new_order', '🛒 Nuevo pedido', "Tienes un nuevo pedido #{$orderNumber}", '/negocio/index.html');
 
+        // Email al negocio
+        try {
+            $bizUserStmt = $this->db->prepare("SELECT email, name FROM users WHERE id = ? LIMIT 1");
+            $bizUserStmt->execute([$business['user_id']]);
+            $bizUser = $bizUserStmt->fetch();
+            if ($bizUser && !empty($bizUser['email'])) {
+                Mailer::sendGeneric(
+                    $bizUser['email'],
+                    $bizUser['name'],
+                    "🛒 Nuevo pedido #{$orderNumber} — NuevaExpress",
+                    "<p>Hola <strong>{$bizUser['name']}</strong>,</p>
+                     <p>Tienes un nuevo pedido <strong>#{$orderNumber}</strong> esperando tu confirmación.</p>
+                     <p>Ingresa a tu panel para verlo y aceptarlo: <a href='https://nuevaexpress.com/negocio/index.html'>Ver pedido</a></p>
+                     <p>— NuevaExpress</p>"
+                );
+            }
+        } catch (\Exception $e) {
+            error_log('Email negocio nuevo pedido: ' . $e->getMessage());
+        }
+
 
 
         Response::success([

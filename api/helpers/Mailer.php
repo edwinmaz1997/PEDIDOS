@@ -85,6 +85,10 @@ HTML;
     }
 
     // ── 1. Pedido aceptado ────────────────────────────────────
+    public static function sendGeneric(string $toEmail, string $toName, string $subject, string $htmlBody): bool {
+        return self::send($toEmail, $toName, $subject, $htmlBody, strip_tags($htmlBody));
+    }
+
     public static function orderAccepted(string $toEmail, string $toName, string $orderNumber, string $businessName, int $estimatedTime): bool {
         $body = "
             <div style='background:#f0fdf4;border-left:4px solid #22c55e;border-radius:8px;padding:16px;margin-bottom:16px'>
