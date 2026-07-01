@@ -544,7 +544,7 @@ async function savePromo() {
   if (!start || !end) return showErr('Las fechas son requeridas');
   if (end < start) return showErr('La fecha fin debe ser después de la de inicio');
   if (!items.length) return showErr('Selecciona al menos un producto');
-  if (items.some(function(i){ return i.promo_price <= 0; })) return showErr('Todos los productos necesitan un precio de promoción mayor a 0');
+  if (items.some(function(i){ return i.promo_price < 0; })) return showErr('El precio de promoción no puede ser negativo');
 
   var btn = document.getElementById('savePromoBtn');
   btn.textContent = editingId ? 'Guardando...' : 'Publicando...'; btn.disabled = true;
