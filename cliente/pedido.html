@@ -687,7 +687,7 @@ function adjComp(btn, delta) {
   updateCustomizeTotal(_customizeProductId);
 }
 
-
+function updateCustomizeTotal(productId) {
   var p = products.find(function(x){ return x.id === productId; });
   if (!p) return;
   var base = parseFloat(p.price) || 0;
