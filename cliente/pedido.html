@@ -499,7 +499,7 @@ function renderProductModal(searchQ, catId) {
     var qty = cart[p.id]?.qty || 0;
     var inCart = qty > 0;
     var hasVariants = p.has_variants && p.variants && p.variants.length > 0;
-    var hasExtras = (p.extras && p.extras.length > 0) || (p.has_complements && p.complements && p.complements.length > 0);
+    var hasExtras = (p.extras && p.extras.length > 0) || (p.has_complements && p.complements && p.complements.length > 0) || (p.has_complements2 && p.complements2 && p.complements2.length > 0) || (p.has_complements3 && p.complements3 && p.complements3.length > 0);
     var selectedVariant = cart[p.id]?.variant || null;
     var displayPrice = hasVariants
       ? (selectedVariant ? 'Q' + parseFloat(selectedVariant.price).toFixed(2) : 'Desde Q' + parseFloat(p.variants[0].price).toFixed(2))
@@ -626,24 +626,32 @@ function openCustomizeModal(productId) {
   document.getElementById('cm_desc').textContent  = p.description || '';
   document.getElementById('cm_price').textContent = p.price ? 'Q' + parseFloat(p.price).toFixed(2) : '';
 
-  // Complementos obligatorios
-  var compSection = document.getElementById('cm_complements_section');
+  // Complementos grupos 1, 2, 3
+  var compSect = document.getElementById('cm_complements_section');
   var compEl = document.getElementById('cm_complements');
-  if (p.has_complements && p.complements && p.complements.length) {
-    var req = parseInt(p.complements_required) || 1;
-    document.getElementById('cm_complements_label').innerHTML = '🍓 Elige <strong>'+req+'</strong> complemento'+(req>1?'s':'')+' <span style="color:var(--danger)">*</span>';
-    compEl.innerHTML = p.complements.map(function(c) {
-      var inputType = req === 1 ? 'radio' : 'checkbox';
-      return '<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid #86efac;border-radius:10px;cursor:pointer;background:#f0fdf4">' +
-        '<input type="'+inputType+'" name="complement_'+productId+'" class="complement-check" data-name="'+esc(c.name)+'" style="width:18px;height:18px;accent-color:#16a34a;flex-shrink:0">' +
-        '<span style="font-size:.9rem">'+esc(c.name)+'</span>' +
-        '<span style="margin-left:auto;font-size:.8rem;color:#16a34a;font-weight:600">Gratis</span>' +
-      '</label>';
-    }).join('');
-    compSection.style.display = 'block';
-  } else {
-    compSection.style.display = 'none';
-  }
+  compEl.innerHTML = '';
+  var hasAnyComp = false;
+  [
+    { n:1, has: p.has_complements, list: p.complements, req: parseInt(p.complements_required)||1, label: p.complement1_name||'Complemento' },
+    { n:2, has: p.has_complements2, list: p.complements2, req: parseInt(p.complements2_required)||1, label: p.complement2_name||'Complemento 2' },
+    { n:3, has: p.has_complements3, list: p.complements3, req: parseInt(p.complements3_required)||1, label: p.complement3_name||'Complemento 3' }
+  ].forEach(function(g) {
+    if (!g.has || !g.list || !g.list.length) return;
+    hasAnyComp = true;
+    var inputType = g.req === 1 ? 'radio' : 'checkbox';
+    compEl.innerHTML +=
+      '<div style="margin-bottom:12px">' +
+        '<div style="font-size:.82rem;font-weight:700;color:#16a34a;margin-bottom:6px">'+esc(g.label)+' <span style="color:var(--danger)">*</span> <span style="font-weight:400;color:#6b7280">(elige '+g.req+')</span></div>' +
+        g.list.map(function(c) {
+          return '<label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid #86efac;border-radius:8px;cursor:pointer;background:#f0fdf4;margin-bottom:4px">' +
+            '<input type="'+inputType+'" name="complement_g'+g.n+'_'+productId+'" class="complement-check" data-group="'+g.n+'" data-req="'+g.req+'" data-name="'+esc(c.name)+'" style="width:16px;height:16px;accent-color:#16a34a;flex-shrink:0">' +
+            '<span style="font-size:.88rem">'+esc(c.name)+'</span>' +
+            '<span style="margin-left:auto;font-size:.75rem;color:#16a34a;font-weight:600">Gratis</span>' +
+          '</label>';
+        }).join('') +
+      '</div>';
+  });
+  compSect.style.display = hasAnyComp ? 'block' : 'none';
 
   // Extras opcionales
   var extrasSection = document.getElementById('cm_extras_section');
@@ -682,14 +690,20 @@ function addCustomizedToCart() {
   var p = products.find(function(x){ return x.id === _customizeProductId; });
   if (!p) return;
 
-  // Validar complementos obligatorios
-  if (p.has_complements && p.complements && p.complements.length) {
-    var req = parseInt(p.complements_required) || 1;
-    var selected = document.querySelectorAll('.complement-check:checked');
-    if (selected.length < req) {
+  // Validar complementos obligatorios de cada grupo
+  var compGroups = [
+    { n:1, has: p.has_complements, req: parseInt(p.complements_required)||1, label: p.complement1_name||'Complemento' },
+    { n:2, has: p.has_complements2, req: parseInt(p.complements2_required)||1, label: p.complement2_name||'Complemento 2' },
+    { n:3, has: p.has_complements3, req: parseInt(p.complements3_required)||1, label: p.complement3_name||'Complemento 3' }
+  ];
+  for (var gi = 0; gi < compGroups.length; gi++) {
+    var g = compGroups[gi];
+    if (!g.has) continue;
+    var sel = document.querySelectorAll('.complement-check[data-group="'+g.n+'"]:checked');
+    if (sel.length < g.req) {
       var t = document.createElement('div');
-      t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#dc2626;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:9999';
-      t.textContent = 'Debes elegir ' + req + ' complemento' + (req>1?'s':'');
+      t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#dc2626;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:9999;text-align:center';
+      t.textContent = 'Debes elegir ' + g.req + ' opción' + (g.req>1?'es':'') + ' en "' + g.label + '"';
       document.body.appendChild(t);
       setTimeout(function(){ t.remove(); }, 2500);
       return;
@@ -698,10 +712,15 @@ function addCustomizedToCart() {
 
   var base = parseFloat(p.price) || 0;
 
-  // Complementos seleccionados
+  // Complementos seleccionados de todos los grupos
   var selectedComplements = [];
-  document.querySelectorAll('.complement-check:checked').forEach(function(cb) {
-    selectedComplements.push(cb.dataset.name);
+  compGroups.forEach(function(g) {
+    if (!g.has) return;
+    var groupSel = [];
+    document.querySelectorAll('.complement-check[data-group="'+g.n+'"]:checked').forEach(function(cb) {
+      groupSel.push(cb.dataset.name);
+    });
+    if (groupSel.length) selectedComplements.push(g.label + ': ' + groupSel.join(', '));
   });
 
   // Extras seleccionados

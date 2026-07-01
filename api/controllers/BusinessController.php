@@ -276,17 +276,14 @@ class BusinessController {
         $vStmt = $this->db->prepare("SELECT * FROM product_variants WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
         $eStmt = $this->db->prepare("SELECT * FROM product_extras WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
         $cStmt = $this->db->prepare("SELECT * FROM product_complements WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
+        $c2Stmt = $this->db->prepare("SELECT * FROM product_complements2 WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
+        $c3Stmt = $this->db->prepare("SELECT * FROM product_complements3 WHERE product_id = ? AND is_available = 1 ORDER BY sort_order, id");
         foreach ($products as &$p) {
-            if ($p['has_variants']) {
-                $vStmt->execute([$p['id']]);
-                $p['variants'] = $vStmt->fetchAll();
-            } else {
-                $p['variants'] = [];
-            }
-            $eStmt->execute([$p['id']]);
-            $p['extras'] = $eStmt->fetchAll();
-            $cStmt->execute([$p['id']]);
-            $p['complements'] = $cStmt->fetchAll();
+            if ($p['has_variants']) { $vStmt->execute([$p['id']]); $p['variants'] = $vStmt->fetchAll(); } else { $p['variants'] = []; }
+            $eStmt->execute([$p['id']]); $p['extras'] = $eStmt->fetchAll();
+            $cStmt->execute([$p['id']]); $p['complements'] = $cStmt->fetchAll();
+            $c2Stmt->execute([$p['id']]); $p['complements2'] = $c2Stmt->fetchAll();
+            $c3Stmt->execute([$p['id']]); $p['complements3'] = $c3Stmt->fetchAll();
         }
         return $products;
     }

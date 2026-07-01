@@ -198,28 +198,75 @@ input:checked + .slider:before { transform:translateX(20px); }
       <span style="font-size:.9rem">Disponible para pedidos</span>
     </div>
 
-    <!-- Complementos (obligatorios, sin costo) -->
-    <div class="form-group" style="margin-bottom:16px">
+    <!-- Complemento 1 -->
+    <div class="form-group" style="margin-bottom:12px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div>
-          <label style="margin:0">🍓 Complementos <span style="font-weight:400;color:var(--muted)">(obligatorios, sin costo)</span></label>
-          <div style="font-size:.73rem;color:var(--muted);margin-top:2px">El cliente debe elegir N opciones obligatoriamente</div>
-        </div>
+        <label style="margin:0;font-weight:600">🍓 Grupo de complementos 1</label>
         <label class="switch" style="margin:0;flex-shrink:0">
-          <input type="checkbox" id="p_has_complements" onchange="toggleComplements()">
+          <input type="checkbox" id="p_has_complements" onchange="toggleComplements(1)">
           <span class="slider"></span>
         </label>
       </div>
-      <div id="complementsSection" style="display:none">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px">
+      <div id="complementsSection1" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px">
+        <div style="margin-bottom:10px">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:4px">Nombre que verá el cliente</label>
+          <input type="text" id="p_complement1_name" value="Complemento" placeholder="Ej: Aderezo, Salsa, Proteína" style="width:100%;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;box-sizing:border-box">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <label style="font-size:.82rem;margin:0;white-space:nowrap">El cliente debe elegir</label>
-          <input type="number" id="p_complements_required" value="1" min="1" max="10" style="width:60px;padding:6px 8px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;text-align:center">
-          <label style="font-size:.82rem;margin:0">complemento(s)</label>
+          <input type="number" id="p_complements_required" value="1" min="1" max="10" style="width:55px;padding:6px 8px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;text-align:center">
+          <label style="font-size:.82rem;margin:0">opción(es)</label>
         </div>
         <div id="complementsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
-        <button type="button" onclick="addComplementRow()" style="width:100%;padding:8px;border:1.5px dashed #86efac;border-radius:var(--radius-sm);background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;color:#16a34a">
-          + Agregar complemento
-        </button>
+        <button type="button" onclick="addComplementRow(1)" style="width:100%;padding:7px;border:1.5px dashed #86efac;border-radius:8px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;color:#16a34a">+ Agregar opción</button>
+      </div>
+    </div>
+
+    <!-- Complemento 2 -->
+    <div class="form-group" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label style="margin:0;font-weight:600">🍓 Grupo de complementos 2</label>
+        <label class="switch" style="margin:0;flex-shrink:0">
+          <input type="checkbox" id="p_has_complements2" onchange="toggleComplements(2)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="complementsSection2" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px">
+        <div style="margin-bottom:10px">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:4px">Nombre que verá el cliente</label>
+          <input type="text" id="p_complement2_name" value="Complemento 2" placeholder="Ej: Tamaño, Tipo de pan" style="width:100%;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;box-sizing:border-box">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <label style="font-size:.82rem;margin:0;white-space:nowrap">El cliente debe elegir</label>
+          <input type="number" id="p_complements2_required" value="1" min="1" max="10" style="width:55px;padding:6px 8px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;text-align:center">
+          <label style="font-size:.82rem;margin:0">opción(es)</label>
+        </div>
+        <div id="complementsList2" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+        <button type="button" onclick="addComplementRow(2)" style="width:100%;padding:7px;border:1.5px dashed #86efac;border-radius:8px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;color:#16a34a">+ Agregar opción</button>
+      </div>
+    </div>
+
+    <!-- Complemento 3 -->
+    <div class="form-group" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label style="margin:0;font-weight:600">🍓 Grupo de complementos 3</label>
+        <label class="switch" style="margin:0;flex-shrink:0">
+          <input type="checkbox" id="p_has_complements3" onchange="toggleComplements(3)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="complementsSection3" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px">
+        <div style="margin-bottom:10px">
+          <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:4px">Nombre que verá el cliente</label>
+          <input type="text" id="p_complement3_name" value="Complemento 3" placeholder="Ej: Acompañamiento, Bebida" style="width:100%;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;box-sizing:border-box">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <label style="font-size:.82rem;margin:0;white-space:nowrap">El cliente debe elegir</label>
+          <input type="number" id="p_complements3_required" value="1" min="1" max="10" style="width:55px;padding:6px 8px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;text-align:center">
+          <label style="font-size:.82rem;margin:0">opción(es)</label>
+        </div>
+        <div id="complementsList3" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+        <button type="button" onclick="addComplementRow(3)" style="width:100%;padding:7px;border:1.5px dashed #86efac;border-radius:8px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;color:#16a34a">+ Agregar opción</button>
       </div>
     </div>
 
@@ -480,10 +527,10 @@ async function toggleAvailable(id, available) {
   else { APP.toast(val ? 'Producto activado' : 'Producto desactivado'); loadProducts(); }
 }
 
-function toggleComplements() {
-  var has = document.getElementById('p_has_complements').checked;
-  document.getElementById('complementsSection').style.display = has ? 'block' : 'none';
-  if (has && document.getElementById('complementsList').children.length === 0) addComplementRow();
+function toggleComplements(n) {
+  var has = document.getElementById('p_has_complements'+(n>1?n:'')).checked;
+  document.getElementById('complementsSection'+n).style.display = has ? 'block' : 'none';
+  if (has && document.getElementById('complementsList'+(n>1?n:'')).children.length === 0) addComplementRow(n);
 }
 
 function toggleExtras() {
@@ -492,19 +539,20 @@ function toggleExtras() {
   if (has && document.getElementById('extrasList').children.length === 0) addExtraRow();
 }
 
-function addComplementRow(name = '') {
-  var list = document.getElementById('complementsList');
+function addComplementRow(n, name = '') {
+  var listId = 'complementsList' + (n > 1 ? n : '');
+  var list = document.getElementById(listId);
   var div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:8px;align-items:center';
   div.innerHTML =
-    '<input type="text" placeholder="Ej: Fresa, Banano, Melocotón" value="'+name+'" style="flex:1;padding:8px 12px;border:1.5px solid #86efac;border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif;font-size:.85rem" class="complement-name">' +
+    '<input type="text" placeholder="Ej: Fresa, Banano..." value="'+name+'" style="flex:1;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:.85rem" class="complement-name complement-group-'+n+'">' +
     '<button type="button" onclick="this.parentNode.remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:4px">✕</button>';
   list.appendChild(div);
 }
 
-function getComplements() {
-  return Array.from(document.querySelectorAll('#complementsList > div')).map(function(row) {
-    return { name: row.querySelector('.complement-name').value.trim() };
+function getComplements(n) {
+  return Array.from(document.querySelectorAll('.complement-group-'+n)).map(function(el) {
+    return { name: el.value.trim() };
   }).filter(function(c) { return c.name; });
 }
 
@@ -578,24 +626,34 @@ async function openModal(productId = null) {
   // Variantes
   document.getElementById('variantsList').innerHTML = '';
   var hasVariants = !!(p?.has_variants);
-  // Complementos
-  document.getElementById('complementsList').innerHTML = '';
-  var hasComplements = !!(p?.has_complements);
-  document.getElementById('p_has_complements').checked = hasComplements;
-  document.getElementById('complementsSection').style.display = hasComplements ? 'block' : 'none';
-  document.getElementById('p_complements_required').value = p?.complements_required || 1;
-  if (hasComplements && p?.complements?.length) {
-    p.complements.forEach(function(c) { addComplementRow(c.name); });
-  } else if (hasComplements) { addComplementRow(); }
+  // Complementos 1, 2, 3
+  [1,2,3].forEach(function(n) {
+    var key = n === 1 ? '' : n;
+    var hasId = 'p_has_complements' + (n > 1 ? n : '');
+    var sectionId = 'complementsSection' + n;
+    var listId = 'complementsList' + (n > 1 ? n : '');
+    var nameId = 'p_complement' + n + '_name';
+    var reqId = 'p_complements' + (n > 1 ? n : '') + '_required';
+    var hasVal = !!(p?.['has_complements' + (n > 1 ? n : '')]);
+    var nameVal = p?.['complement' + n + '_name'] || (n === 1 ? 'Complemento' : 'Complemento ' + n);
+    var reqVal = p?.['complements' + (n > 1 ? n : '') + '_required'] || 1;
+    var comps = p?.['complements' + (n > 1 ? n : '')] || [];
+
+    document.getElementById(hasId).checked = hasVal;
+    document.getElementById(sectionId).style.display = hasVal ? 'block' : 'none';
+    if (document.getElementById(nameId)) document.getElementById(nameId).value = nameVal;
+    if (document.getElementById(reqId)) document.getElementById(reqId).value = reqVal;
+    document.getElementById(listId).innerHTML = '';
+    if (hasVal && comps.length) comps.forEach(function(c) { addComplementRow(n, c.name); });
+    else if (hasVal) addComplementRow(n);
+  });
 
   // Extras
   document.getElementById('extrasList').innerHTML = '';
   var hasExtras = !!(p?.extras?.length);
   document.getElementById('p_has_extras').checked = hasExtras;
   document.getElementById('extrasSection').style.display = hasExtras ? 'block' : 'none';
-  if (p?.extras?.length) {
-    p.extras.forEach(function(e) { addExtraRow(e.name, e.price); });
-  }
+  if (p?.extras?.length) p.extras.forEach(function(e) { addExtraRow(e.name, e.price); });
   document.getElementById('variantsSection').style.display = hasVariants ? 'block' : 'none';
   document.getElementById('p_price').closest('.form-group').style.opacity = hasVariants ? '.4' : '1';
   if (hasVariants && p?.variants?.length) {
@@ -649,7 +707,16 @@ async function saveProduct() {
     requires_boleta: document.getElementById('p_requires_boleta').checked ? 1 : 0,
     has_complements: document.getElementById('p_has_complements').checked ? 1 : 0,
     complements_required: parseInt(document.getElementById('p_complements_required').value) || 1,
-    complements: getComplements(),
+    complement1_name: document.getElementById('p_complement1_name').value.trim() || 'Complemento',
+    complements: getComplements(1),
+    has_complements2: document.getElementById('p_has_complements2').checked ? 1 : 0,
+    complements2_required: parseInt(document.getElementById('p_complements2_required').value) || 1,
+    complement2_name: document.getElementById('p_complement2_name').value.trim() || 'Complemento 2',
+    complements2: getComplements(2),
+    has_complements3: document.getElementById('p_has_complements3').checked ? 1 : 0,
+    complements3_required: parseInt(document.getElementById('p_complements3_required').value) || 1,
+    complement3_name: document.getElementById('p_complement3_name').value.trim() || 'Complemento 3',
+    complements3: getComplements(3),
     extras: document.getElementById('p_has_extras').checked ? getExtras() : [],
   };
 
