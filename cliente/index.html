@@ -191,19 +191,23 @@ function renderOrder(o) {
     var basePrice = parseFloat(i.unit_price) || 0;
     var notesHtml = '';
     if (i.notes) {
-      var compMatch = i.notes.match(/Complementos: ([^|]+)/);
-      if (compMatch) notesHtml += `<div style="font-size:.72rem;color:#16a34a;margin-top:1px"><strong>Complemento:</strong> ${esc(compMatch[1].trim())}</div>`;
-      var extrasMatch = i.notes.match(/Extras: (.+)$/);
-      if (extrasMatch) {
-        extrasMatch[1].split(', ').forEach(function(part) {
-          var match = part.match(/^(.+?)\s+\+Q([\d.]+)$/);
-          if (match) {
-            var ePrice = parseFloat(match[2]) || 0;
-            basePrice -= ePrice;
-            notesHtml += `<div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--accent);margin-top:1px"><span><strong>Extra:</strong> ${esc(match[1])}</span><span>+Q${(ePrice*i.quantity).toFixed(2)}</span></div>`;
+      i.notes.split(' | ').forEach(function(part) {
+        if (part.startsWith('Extras:')) {
+          part.replace('Extras: ', '').split(', ').forEach(function(ep) {
+            var m = ep.match(/^(.+?)\s+\+Q([\d.]+)$/);
+            if (m) {
+              var ePrice = parseFloat(m[2]) || 0;
+              basePrice -= ePrice;
+              notesHtml += `<div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--accent);margin-top:1px"><span><strong>Extra:</strong> ${esc(m[1])}</span><span>+Q${(ePrice*i.quantity).toFixed(2)}</span></div>`;
+            }
+          });
+        } else {
+          var colonIdx = part.indexOf(': ');
+          if (colonIdx > -1) {
+            notesHtml += `<div style="font-size:.72rem;color:#16a34a;margin-top:1px"><strong>${esc(part.substring(0,colonIdx))}:</strong> ${esc(part.substring(colonIdx+2))}</div>`;
           }
-        });
-      }
+        }
+      });
     }
     return `<div class="order-item-row"><span>${esc(i.product_name)} x${i.quantity}</span>${i.unit_price ? `<span>Q${(basePrice*i.quantity).toFixed(2)}</span>` : ''}</div>${notesHtml}`;
   }).join('');

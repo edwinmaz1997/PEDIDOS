@@ -306,24 +306,26 @@ function renderItems() {
     var notesHtml = '';
 
     if (i.notes) {
-      // Complementos (sin costo)
-      var compMatch = i.notes.match(/Complementos: ([^|]+)/);
-      if (compMatch) {
-        notesHtml += '<div style="font-size:.78rem;color:#16a34a;margin-top:3px;padding-left:4px"><strong>Complemento:</strong> ' + esc(compMatch[1].trim()) + '</div>';
-      }
-      // Extras (con costo) — desglosadar como líneas separadas
-      var extrasMatch = i.notes.match(/Extras: (.+)$/);
-      if (extrasMatch) {
-        extrasMatch[1].split(', ').forEach(function(part) {
-          var match = part.match(/^(.+?)\s+\+Q([\d.]+)$/);
-          if (match) {
-            var ePrice = parseFloat(match[2]) || 0;
-            extrasTotal += ePrice;
-            notesHtml += '<div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--accent);margin-top:2px;padding-left:4px"><span><strong>Extra:</strong> '+esc(match[1])+'</span><span>Q'+(ePrice*i.quantity).toFixed(2)+'</span></div>';
+      i.notes.split(' | ').forEach(function(part) {
+        if (part.startsWith('Extras:')) {
+          part.replace('Extras: ', '').split(', ').forEach(function(ep) {
+            var m = ep.match(/^(.+?)\s+\+Q([\d.]+)$/);
+            if (m) {
+              var ePrice = parseFloat(m[2]) || 0;
+              extrasTotal += ePrice;
+              notesHtml += '<div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--accent);margin-top:2px;padding-left:4px"><span><strong>Extra:</strong> '+esc(m[1])+'</span><span>Q'+(ePrice*i.quantity).toFixed(2)+'</span></div>';
+            }
+          });
+          basePrice = basePrice - extrasTotal;
+        } else {
+          var colonIdx = part.indexOf(': ');
+          if (colonIdx > -1) {
+            var gLabel = part.substring(0, colonIdx);
+            var gVals = part.substring(colonIdx + 2);
+            notesHtml += '<div style="font-size:.78rem;color:#16a34a;margin-top:3px;padding-left:4px"><strong>'+esc(gLabel)+':</strong> '+esc(gVals)+'</div>';
           }
-        });
-        basePrice = basePrice - extrasTotal;
-      }
+        }
+      });
     }
 
     return '<div style="border-bottom:1px solid var(--border);padding:10px 0">' +

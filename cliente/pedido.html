@@ -638,16 +638,19 @@ function openCustomizeModal(productId) {
   ].forEach(function(g) {
     if (!g.has || !g.list || !g.list.length) return;
     hasAnyComp = true;
-    var inputType = g.req === 1 ? 'radio' : 'checkbox';
     compEl.innerHTML +=
       '<div style="margin-bottom:12px">' +
         '<div style="font-size:.82rem;font-weight:700;color:#16a34a;margin-bottom:6px">'+esc(g.label)+' <span style="color:var(--danger)">*</span> <span style="font-weight:400;color:#6b7280">(elige '+g.req+')</span></div>' +
         g.list.map(function(c) {
-          return '<label style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid #86efac;border-radius:8px;cursor:pointer;background:#f0fdf4;margin-bottom:4px">' +
-            '<input type="'+inputType+'" name="complement_g'+g.n+'_'+productId+'" class="complement-check" data-group="'+g.n+'" data-req="'+g.req+'" data-name="'+esc(c.name)+'" style="width:16px;height:16px;accent-color:#16a34a;flex-shrink:0">' +
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;margin-bottom:4px">' +
             '<span style="font-size:.88rem">'+esc(c.name)+'</span>' +
-            '<span style="margin-left:auto;font-size:.75rem;color:#16a34a;font-weight:600">Gratis</span>' +
-          '</label>';
+            '<div style="display:flex;align-items:center;gap:8px">' +
+              '<span style="font-size:.75rem;color:#16a34a;font-weight:600">Gratis</span>' +
+              '<button type="button" onclick="adjComp(this,-1)" style="width:26px;height:26px;border-radius:50%;border:1.5px solid #86efac;background:white;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;color:#16a34a;font-weight:700">−</button>' +
+              '<span class="comp-qty" data-group="'+g.n+'" data-name="'+esc(c.name)+'" data-req="'+g.req+'" style="min-width:20px;text-align:center;font-weight:700;font-size:.9rem" onchange="updateCustomizeTotal('+productId+')">0</span>' +
+              '<button type="button" onclick="adjComp(this,1)" style="width:26px;height:26px;border-radius:50%;border:none;background:#16a34a;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:700">+</button>' +
+            '</div>' +
+          '</div>';
         }).join('') +
       '</div>';
   });
@@ -675,7 +678,16 @@ function openCustomizeModal(productId) {
   document.getElementById('customizeModal').style.display = 'flex';
 }
 
-function updateCustomizeTotal(productId) {
+function adjComp(btn, delta) {
+  var row = btn.parentNode;
+  var span = row.querySelector('.comp-qty');
+  var val = parseInt(span.textContent) + delta;
+  if (val < 0) val = 0;
+  span.textContent = val;
+  updateCustomizeTotal(_customizeProductId);
+}
+
+
   var p = products.find(function(x){ return x.id === productId; });
   if (!p) return;
   var base = parseFloat(p.price) || 0;
@@ -699,28 +711,29 @@ function addCustomizedToCart() {
   for (var gi = 0; gi < compGroups.length; gi++) {
     var g = compGroups[gi];
     if (!g.has) continue;
-    var sel = document.querySelectorAll('.complement-check[data-group="'+g.n+'"]:checked');
-    if (sel.length < g.req) {
+    var total = 0;
+    document.querySelectorAll('.comp-qty[data-group="'+g.n+'"]').forEach(function(s){ total += parseInt(s.textContent)||0; });
+    if (total < g.req) {
       var t = document.createElement('div');
       t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#dc2626;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:9999;text-align:center';
       t.textContent = 'Debes elegir ' + g.req + ' opción' + (g.req>1?'es':'') + ' en "' + g.label + '"';
-      document.body.appendChild(t);
-      setTimeout(function(){ t.remove(); }, 2500);
+      document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 2500);
       return;
     }
   }
 
   var base = parseFloat(p.price) || 0;
 
-  // Complementos seleccionados de todos los grupos
+  // Complementos seleccionados con cantidad
   var selectedComplements = [];
   compGroups.forEach(function(g) {
     if (!g.has) return;
-    var groupSel = [];
-    document.querySelectorAll('.complement-check[data-group="'+g.n+'"]:checked').forEach(function(cb) {
-      groupSel.push(cb.dataset.name);
+    var parts = [];
+    document.querySelectorAll('.comp-qty[data-group="'+g.n+'"]').forEach(function(s) {
+      var qty = parseInt(s.textContent)||0;
+      if (qty > 0) parts.push(qty > 1 ? s.dataset.name + ' ×'+qty : s.dataset.name);
     });
-    if (groupSel.length) selectedComplements.push(g.label + ': ' + groupSel.join(', '));
+    if (parts.length) selectedComplements.push(g.label + ': ' + parts.join(', '));
   });
 
   // Extras seleccionados
@@ -738,7 +751,7 @@ function addCustomizedToCart() {
   var label = labelParts.length ? ' (' + labelParts.join(' | ') + ')' : '';
 
   var notesParts = [];
-  if (selectedComplements.length) notesParts.push('Complementos: ' + selectedComplements.join(', '));
+  if (selectedComplements.length) notesParts.push(selectedComplements.join(' | '));
   if (selectedExtras.length) notesParts.push('Extras: ' + selectedExtras.map(function(e){ return e.name + ' +Q' + e.price.toFixed(2); }).join(', '));
   var notes = notesParts.join(' | ');
 
