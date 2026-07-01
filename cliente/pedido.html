@@ -639,7 +639,7 @@ function openCustomizeModal(productId) {
     if (!g.has || !g.list || !g.list.length) return;
     hasAnyComp = true;
     compEl.innerHTML +=
-      '<details open style="margin-bottom:8px;border:1.5px solid #86efac;border-radius:10px;overflow:hidden">' +
+      '<details style="margin-bottom:8px;border:1.5px solid #86efac;border-radius:10px;overflow:hidden">' +
         '<summary style="padding:10px 14px;background:#f0fdf4;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-size:.85rem;font-weight:700;color:#16a34a">' +
           esc(g.label)+' <span style="color:var(--danger);margin-left:2px">*</span>' +
           '<span style="font-size:.72rem;font-weight:400;color:#6b7280">elige '+g.req+' ▼</span>' +
@@ -1696,7 +1696,7 @@ document.getElementById('customItems').addEventListener('input', updateCart);
         <div id="cm_complements" style="display:flex;flex-direction:column;gap:6px"></div>
       </div>
       <div id="cm_extras_section" style="display:none">
-        <details open>
+        <details>
           <summary style="font-size:.85rem;font-weight:700;color:var(--navy);cursor:pointer;padding:8px 0;list-style:none;display:flex;align-items:center;justify-content:space-between">
             ➕ Extras disponibles <span style="font-size:.7rem;color:var(--muted)">▼</span>
           </summary>
@@ -1711,9 +1711,7 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     <button onclick="addCustomizedToCart()" class="btn-primary" style="width:100%;justify-content:center;padding:12px">
       🛒 Agregar al carrito
     </button>
-    <button onclick="document.getElementById('customizeModal').style.display='none'" style="width:100%;margin-top:6px;padding:10px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem">
-      Cancelar
-    </button>
+
   </div>
 </div>
 
