@@ -189,8 +189,29 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
     <div id="step3" style="display:none;text-align:center">
       <div style="font-size:4rem;margin-bottom:16px">🎉</div>
       <h2 style="margin-bottom:8px">¡Cuenta creada!</h2>
-      <p style="color:var(--muted);margin-bottom:32px">Bienvenido a NuevaExpress. Redirigiendo...</p>
-      <div class="spinner" style="margin:0 auto"></div>
+      <p style="color:var(--muted);margin-bottom:20px">Bienvenido a NuevaExpress.</p>
+
+      <!-- Instalación PWA -->
+      <div id="installStep3" style="display:none;background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:16px;margin-bottom:20px;text-align:left">
+        <div style="font-weight:700;font-size:.92rem;margin-bottom:8px">📲 Instala la app para una mejor experiencia</div>
+        <div id="installBtnWrap3" style="display:none;margin-bottom:10px">
+          <button onclick="handleInstall()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer">
+            ⚡ Instalar automáticamente
+          </button>
+        </div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.6">
+          <strong>Android:</strong> Toca ⋮ → Agregar a pantalla de inicio<br>
+          <strong>iPhone:</strong> Toca 📤 → Agregar a pantalla de inicio
+        </div>
+      </div>
+
+      <div id="step3Redirect" style="display:none">
+        <div class="spinner" style="margin:0 auto 12px"></div>
+        <p style="color:var(--muted);font-size:.88rem">Redirigiendo...</p>
+      </div>
+      <button id="step3ContinueBtn" onclick="doRedirect()" class="btn-primary" style="width:100%;justify-content:center;padding:12px;display:none">
+        Continuar →
+      </button>
     </div>
   </div>
 </div>
@@ -210,11 +231,19 @@ let formData = {};
 
 // ── PWA Install ──
 var deferredInstallPrompt = null;
+function doRedirect() {
+  document.getElementById('step3ContinueBtn').style.display = 'none';
+  document.getElementById('step3Redirect').style.display = 'block';
+  setTimeout(function(){ window.location.href = window._redirectUrl || '/cliente/index.html'; }, 1000);
+}
+
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
   deferredInstallPrompt = e;
   var wrap = document.getElementById('installBtnWrap');
   if (wrap) wrap.style.display = 'block';
+  var wrap3 = document.getElementById('installBtnWrap3');
+  if (wrap3) wrap3.style.display = 'block';
 });
 function toggleInstallBox() {
   var box = document.getElementById('installBox');
@@ -369,11 +398,22 @@ async function doVerify() {
     const role    = rData.data.user.role;
     const token   = rData.data.token;
     const userStr = encodeURIComponent(JSON.stringify(rData.data.user));
-    setTimeout(() => {
-      if (role === 'negocio')         window.location.href = '/negocio/crear-negocio.html#tk=' + token + '&us=' + userStr;
-      else if (role === 'repartidor') window.location.href = '/repartidor/index.html#tk=' + token + '&us=' + userStr;
-      else                            window.location.href = '/cliente/index.html#tk=' + token + '&us=' + userStr;
-    }, 2000);
+
+    window._redirectUrl = role === 'negocio' ? '/negocio/crear-negocio.html#tk=' + token + '&us=' + userStr
+                        : role === 'repartidor' ? '/repartidor/index.html#tk=' + token + '&us=' + userStr
+                        : '/cliente/index.html#tk=' + token + '&us=' + userStr;
+
+    // Mostrar pantalla de instalación si hay prompt disponible
+    if (deferredInstallPrompt) {
+      document.getElementById('installStep3').style.display = 'block';
+      document.getElementById('installBtnWrap3').style.display = 'block';
+      document.getElementById('step3ContinueBtn').style.display = 'block';
+    } else {
+      document.getElementById('installStep3').style.display = 'block';
+      document.getElementById('step3ContinueBtn').style.display = 'block';
+      // Auto-redirigir después de 4s si no instala
+      setTimeout(doRedirect, 4000);
+    }
 
   } catch(e) { showError('errorMsg2', 'Error de conexión. Intenta de nuevo.'); }
   finally { btn.textContent = 'Verificar código'; btn.disabled = false; }
