@@ -530,7 +530,20 @@ async function toggleAvailable(id, available) {
 function toggleComplements(n) {
   var has = document.getElementById('p_has_complements'+(n>1?n:'')).checked;
   document.getElementById('complementsSection'+n).style.display = has ? 'block' : 'none';
-  if (has && document.getElementById('complementsList'+(n>1?n:'')).children.length === 0) addComplementRow(n);
+  if (has) {
+    var listId = 'complementsList'+(n>1?n:'');
+    var list = document.getElementById(listId);
+    if (list.children.length === 0) {
+      // Intentar cargar desde el producto actual (editingProduct)
+      var compsKey = n === 1 ? 'complements' : 'complements'+n;
+      var saved = window.editingProduct && window.editingProduct[compsKey];
+      if (saved && saved.length) {
+        saved.forEach(function(c) { addComplementRow(n, c.name); });
+      } else {
+        addComplementRow(n);
+      }
+    }
+  }
 }
 
 function toggleExtras() {
