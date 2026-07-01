@@ -167,16 +167,30 @@ function renderStatus() {
 function renderItems() {
   var items = order.items || [];
   document.getElementById('itemsList').innerHTML = items.map(function(i) {
-    var lt = i.unit_price ? parseFloat(i.unit_price)*i.quantity : null;
+    var basePrice = parseFloat(i.unit_price) || 0;
+    var extrasTotal = 0;
     var notesHtml = '';
+
     if (i.notes) {
       var compMatch = i.notes.match(/Complementos: ([^|]+)/);
-      if (compMatch) notesHtml += '<div style="font-size:.75rem;color:#16a34a;margin-top:2px">🍓 ' + esc(compMatch[1].trim()) + '</div>';
+      if (compMatch) notesHtml += '<div style="font-size:.78rem;color:#16a34a;margin-top:3px"><strong>Complemento:</strong> ' + esc(compMatch[1].trim()) + '</div>';
       var extrasMatch = i.notes.match(/Extras: (.+)$/);
-      if (extrasMatch) notesHtml += '<div style="font-size:.75rem;color:var(--accent);margin-top:2px">➕ ' + esc(extrasMatch[1].trim()) + '</div>';
-      if (!compMatch && !extrasMatch) notesHtml = '<div style="font-size:.75rem;color:var(--accent);margin-top:2px">➕ ' + esc(i.notes) + '</div>';
+      if (extrasMatch) {
+        extrasMatch[1].split(', ').forEach(function(part) {
+          var match = part.match(/^(.+?)\s+\+Q([\d.]+)$/);
+          if (match) {
+            var ePrice = parseFloat(match[2]) || 0;
+            extrasTotal += ePrice;
+            notesHtml += '<div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--accent);margin-top:2px"><span><strong>Extra:</strong> '+esc(match[1])+'</span><span style="font-weight:700">+Q'+(ePrice*i.quantity).toFixed(2)+'</span></div>';
+          }
+        });
+        basePrice = basePrice - extrasTotal;
+      }
+      if (!compMatch && !extrasMatch) notesHtml = '<div style="font-size:.78rem;color:var(--accent);margin-top:2px">➕ ' + esc(i.notes) + '</div>';
     }
-    return '<div class="item-row"><div><div style="font-weight:500">'+esc(i.product_name)+' <span style="color:var(--muted)">×'+i.quantity+'</span></div>'+notesHtml+(i.unit_price?'<div style="font-size:.78rem;color:var(--muted)">Q'+parseFloat(i.unit_price).toFixed(2)+' c/u</div>':'<div style="font-size:.78rem;color:var(--muted)">Precio pendiente</div>')+'</div>'+(lt?'<span style="font-weight:700;color:var(--blue)">Q'+lt.toFixed(2)+'</span>':'<span style="color:var(--muted)">—</span>')+'</div>';
+
+    var baseLine = '<div style="display:flex;justify-content:space-between;font-weight:500"><span>'+esc(i.product_name)+' <span style="color:var(--muted)">×'+i.quantity+'</span></span><span style="font-weight:700;color:var(--blue)">Q'+(basePrice*i.quantity).toFixed(2)+'</span></div>';
+    return '<div style="border-bottom:1px solid var(--border);padding:10px 0">' + baseLine + notesHtml + '</div>';
   }).join('') || '<p style="color:var(--muted);font-size:.9rem">Sin productos listados</p>';
   if (order.notes) document.getElementById('itemsList').innerHTML += '<div style="background:var(--off-white);padding:8px 12px;border-radius:var(--radius-sm);margin-top:8px;font-size:.85rem;color:var(--muted)">📝 '+esc(order.notes)+'</div>';
   if (order.boleta_url) {

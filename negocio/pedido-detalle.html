@@ -303,34 +303,33 @@ function renderItems() {
   document.getElementById('itemsList').innerHTML = items.map(function(i) {
     var basePrice = parseFloat(i.unit_price) || 0;
     var extrasTotal = 0;
-    var extraLines = '';
+    var notesHtml = '';
 
-    // Parsear complementos y extras desde notes
     if (i.notes) {
-      var notesHtml = '';
       // Complementos (sin costo)
       var compMatch = i.notes.match(/Complementos: ([^|]+)/);
       if (compMatch) {
-        notesHtml += '<div style="font-size:.75rem;color:#16a34a;margin-top:2px">🍓 ' + esc(compMatch[1].trim()) + '</div>';
+        notesHtml += '<div style="font-size:.78rem;color:#16a34a;margin-top:3px;padding-left:4px"><strong>Complemento:</strong> ' + esc(compMatch[1].trim()) + '</div>';
       }
-      // Extras (con costo)
-      var extraStr = i.notes.startsWith('Extras:') ? i.notes : (i.notes.match(/Extras: (.+)$/) || [])[1];
-      if (extraStr) {
-        var parts = extraStr.replace(/^Extras: /, '').split(', ');
-        parts.forEach(function(part) {
+      // Extras (con costo) — desglosadar como líneas separadas
+      var extrasMatch = i.notes.match(/Extras: (.+)$/);
+      if (extrasMatch) {
+        extrasMatch[1].split(', ').forEach(function(part) {
           var match = part.match(/^(.+?)\s+\+Q([\d.]+)$/);
           if (match) {
             var ePrice = parseFloat(match[2]) || 0;
             extrasTotal += ePrice;
-            notesHtml += '<div style="font-size:.75rem;color:var(--accent);padding:2px 0 2px 12px">➕ '+esc(match[1])+' ×'+i.quantity+' <span style="float:right">Q'+(ePrice*i.quantity).toFixed(2)+'</span></div>';
+            notesHtml += '<div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--accent);margin-top:2px;padding-left:4px"><span><strong>Extra:</strong> '+esc(match[1])+'</span><span>Q'+(ePrice*i.quantity).toFixed(2)+'</span></div>';
           }
         });
         basePrice = basePrice - extrasTotal;
       }
-      extraLines = notesHtml;
     }
 
-    return '<div class="item-row"><div style="flex:1"><span style="font-weight:500">'+esc(i.product_name)+' ×'+i.quantity+'</span></div><span>Q'+(basePrice*i.quantity).toFixed(2)+'</span></div>' + extraLines;
+    return '<div style="border-bottom:1px solid var(--border);padding:10px 0">' +
+      '<div style="display:flex;justify-content:space-between"><span style="font-weight:500">'+esc(i.product_name)+' ×'+i.quantity+'</span><span>Q'+(basePrice*i.quantity).toFixed(2)+'</span></div>' +
+      notesHtml +
+    '</div>';
   }).join('') || '<p style="color:var(--muted);font-size:.9rem">Pedido personalizado — ver notas del cliente</p>';
 
   if (order.notes) {
