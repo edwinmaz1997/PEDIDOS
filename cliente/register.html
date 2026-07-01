@@ -249,12 +249,20 @@ function toggleInstallBox() {
   arrow.textContent = open ? '▴' : '▾';
 }
 async function handleInstall() {
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  var result = await deferredInstallPrompt.userChoice;
-  if (result.outcome === 'accepted') {
-    document.getElementById('installBox').style.display = 'none';
-    deferredInstallPrompt = null;
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    var result = await deferredInstallPrompt.userChoice;
+    if (result.outcome === 'accepted') {
+      deferredInstallPrompt = null;
+    }
+  } else {
+    // Detectar SO y mostrar instrucciones
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      alert('En iPhone/iPad:\n1. Toca el botón compartir ⬆️ abajo\n2. Selecciona "Agregar a pantalla de inicio"\n3. Toca "Agregar" ✅\n\n⚠️ Solo funciona desde Safari');
+    } else {
+      alert('En Android:\n1. Toca los 3 puntos ⋮ en Chrome\n2. Selecciona "Agregar a pantalla de inicio"\n3. Toca "Instalar" ✅');
+    }
   }
 }
 
