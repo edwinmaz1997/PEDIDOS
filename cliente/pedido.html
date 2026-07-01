@@ -681,8 +681,21 @@ function openCustomizeModal(productId) {
 function adjComp(btn, delta) {
   var row = btn.parentNode;
   var span = row.querySelector('.comp-qty');
+  var group = span.dataset.group;
+  var req = parseInt(span.dataset.req) || 1;
   var val = parseInt(span.textContent) + delta;
   if (val < 0) val = 0;
+
+  // Calcular total actual del grupo (sin este item)
+  var totalGroup = 0;
+  document.querySelectorAll('.comp-qty[data-group="'+group+'"]').forEach(function(s) {
+    if (s !== span) totalGroup += parseInt(s.textContent) || 0;
+  });
+
+  // No exceder el req del grupo
+  if (delta > 0 && totalGroup + val > req) val = req - totalGroup;
+  if (val < 0) val = 0;
+
   span.textContent = val;
   updateCustomizeTotal(_customizeProductId);
 }
