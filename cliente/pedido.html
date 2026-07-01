@@ -1682,7 +1682,11 @@ document.getElementById('customItems').addEventListener('input', updateCart);
 <!-- Product Modal -->
 <!-- Modal de Personalización de Extras -->
 <div id="customizeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;align-items:center;justify-content:center;padding:16px">
-  <div style="background:white;border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:24px">
+  <div style="background:white;border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <span style="font-weight:700;font-size:.95rem;color:var(--navy)">🎨 Personalizar</span>
+      <button onclick="document.getElementById('customizeModal').style.display='none'" style="background:var(--off-white);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
       <div id="cm_photo" style="width:64px;height:64px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1.6rem"></div>
       <div style="flex:1">
@@ -1711,7 +1715,9 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     <button onclick="addCustomizedToCart()" class="btn-primary" style="width:100%;justify-content:center;padding:12px">
       🛒 Agregar al carrito
     </button>
-
+    <button onclick="document.getElementById('customizeModal').style.display='none'" style="width:100%;margin-top:6px;padding:10px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem">
+      Cancelar
+    </button>
   </div>
 </div>
 
