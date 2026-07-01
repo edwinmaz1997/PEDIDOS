@@ -403,17 +403,11 @@ async function doVerify() {
                         : role === 'repartidor' ? '/repartidor/index.html#tk=' + token + '&us=' + userStr
                         : '/cliente/index.html#tk=' + token + '&us=' + userStr;
 
-    // Mostrar pantalla de instalación si hay prompt disponible
+    document.getElementById('installStep3').style.display = 'block';
     if (deferredInstallPrompt) {
-      document.getElementById('installStep3').style.display = 'block';
       document.getElementById('installBtnWrap3').style.display = 'block';
-      document.getElementById('step3ContinueBtn').style.display = 'block';
-    } else {
-      document.getElementById('installStep3').style.display = 'block';
-      document.getElementById('step3ContinueBtn').style.display = 'block';
-      // Auto-redirigir después de 4s si no instala
-      setTimeout(doRedirect, 4000);
     }
+    document.getElementById('step3ContinueBtn').style.display = 'block';
 
   } catch(e) { showError('errorMsg2', 'Error de conexión. Intenta de nuevo.'); }
   finally { btn.textContent = 'Verificar código'; btn.disabled = false; }
