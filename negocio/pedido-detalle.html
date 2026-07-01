@@ -305,19 +305,29 @@ function renderItems() {
     var extrasTotal = 0;
     var extraLines = '';
 
-    // Parsear extras desde notes "Extras: nombre +Qprecio, ..."
-    if (i.notes && i.notes.startsWith('Extras:')) {
-      var parts = i.notes.replace('Extras: ', '').split(', ');
-      parts.forEach(function(part) {
-        var match = part.match(/^(.+?)\s+\+Q([\d.]+)$/);
-        if (match) {
-          var eName = match[1];
-          var ePrice = parseFloat(match[2]) || 0;
-          extrasTotal += ePrice;
-          extraLines += '<div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--accent);padding:2px 0 2px 12px">➕ '+esc(eName)+' ×'+i.quantity+'<span>Q'+(ePrice*i.quantity).toFixed(2)+'</span></div>';
-        }
-      });
-      basePrice = basePrice - extrasTotal;
+    // Parsear complementos y extras desde notes
+    if (i.notes) {
+      var notesHtml = '';
+      // Complementos (sin costo)
+      var compMatch = i.notes.match(/Complementos: ([^|]+)/);
+      if (compMatch) {
+        notesHtml += '<div style="font-size:.75rem;color:#16a34a;margin-top:2px">🍓 ' + esc(compMatch[1].trim()) + '</div>';
+      }
+      // Extras (con costo)
+      var extraStr = i.notes.startsWith('Extras:') ? i.notes : (i.notes.match(/Extras: (.+)$/) || [])[1];
+      if (extraStr) {
+        var parts = extraStr.replace(/^Extras: /, '').split(', ');
+        parts.forEach(function(part) {
+          var match = part.match(/^(.+?)\s+\+Q([\d.]+)$/);
+          if (match) {
+            var ePrice = parseFloat(match[2]) || 0;
+            extrasTotal += ePrice;
+            notesHtml += '<div style="font-size:.75rem;color:var(--accent);padding:2px 0 2px 12px">➕ '+esc(match[1])+' ×'+i.quantity+' <span style="float:right">Q'+(ePrice*i.quantity).toFixed(2)+'</span></div>';
+          }
+        });
+        basePrice = basePrice - extrasTotal;
+      }
+      extraLines = notesHtml;
     }
 
     return '<div class="item-row"><div style="flex:1"><span style="font-weight:500">'+esc(i.product_name)+' ×'+i.quantity+'</span></div><span>Q'+(basePrice*i.quantity).toFixed(2)+'</span></div>' + extraLines;
