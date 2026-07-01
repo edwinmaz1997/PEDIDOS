@@ -508,7 +508,7 @@ function getComplements() {
   }).filter(function(c) { return c.name; });
 }
 
-
+function addExtraRow(name = '', price = '') {
   var list = document.getElementById('extrasList');
   var div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:8px;align-items:center';
