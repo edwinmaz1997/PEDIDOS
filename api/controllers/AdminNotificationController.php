@@ -36,7 +36,14 @@ class AdminController {
 
     public function orders(): void {
         AuthMiddleware::requireRole('admin');
-        $orders = $this->db->query("SELECT o.*, b.name as business_name, u.name as client_name FROM orders o JOIN businesses b ON o.business_id=b.id JOIN users u ON o.client_id=u.id ORDER BY o.created_at DESC LIMIT 2000")->fetchAll();
+        $date = $_GET['date'] ?? null;
+        if ($date && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            $stmt = $this->db->prepare("SELECT o.*, b.name as business_name, u.name as client_name FROM orders o JOIN businesses b ON o.business_id=b.id JOIN users u ON o.client_id=u.id WHERE DATE(o.created_at) = ? ORDER BY o.created_at DESC");
+            $stmt->execute([$date]);
+            $orders = $stmt->fetchAll();
+        } else {
+            $orders = $this->db->query("SELECT o.*, b.name as business_name, u.name as client_name FROM orders o JOIN businesses b ON o.business_id=b.id JOIN users u ON o.client_id=u.id ORDER BY o.created_at DESC LIMIT 2000")->fetchAll();
+        }
         Response::success($orders);
     }
 

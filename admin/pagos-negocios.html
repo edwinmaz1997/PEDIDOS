@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pagos a negocios — Admin NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.pago-card { background:white; border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:14px; }
+.pago-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+.pago-biz { font-weight:700; font-size:1rem; }
+.pago-total { font-size:1.4rem; font-weight:800; color:var(--blue); }
+.pago-sub { font-size:.78rem; color:var(--muted); }
+.orden-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f3f4f6; font-size:.85rem; }
+.orden-row:last-child { border-bottom:none; }
+.badge-paid { background:#d1fae5; color:#065f46; padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:700; }
+.badge-pending { background:#fef3c7; color:#92400e; padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:700; }
+.total-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0 0; margin-top:6px; border-top:2px solid var(--border); font-weight:700; }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Administrador</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="negocios.html">🏪 Negocios</a></li>
+      <li><a href="usuarios.html">👥 Usuarios</a></li>
+      <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="categorias.html">🏷️ Categorías</a></li>
+      <li><a href="zonas-entrega.html">🗺️ Zonas de Entrega</a></li>
+      <li><a href="buscar.html">🔍 Buscador</a></li>
+      <li><a href="reportes.html">📊 Reportes</a></li>
+      <li><a href="pagos-negocios.html" class="active">💸 Pagos a negocios</a></li>
+      <li><a href="avisos.html">📢 Avisos</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px">
+      <div class="page-header" style="margin:0">
+        <h1>💸 Pagos a negocios</h1>
+        <p>Ventas netas a transferir (sin delivery ni fee)</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input type="date" id="datePicker" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+        <button onclick="loadReport()" class="btn-primary" style="padding:9px 18px">Ver pagos</button>
+      </div>
+    </div>
+
+    <!-- Resumen total del día -->
+    <div id="summaryBar" style="display:none;background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:var(--radius);padding:20px;margin-bottom:20px;color:white">
+      <div style="font-size:.82rem;opacity:.7;margin-bottom:4px">Total a transferir hoy</div>
+      <div id="totalDia" style="font-size:2rem;font-weight:800">Q0.00</div>
+      <div id="resumenNegocios" style="font-size:.78rem;opacity:.6;margin-top:4px"></div>
+    </div>
+
+    <div id="loadingEl" style="display:none;text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></div>
+    <div id="noData" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin pedidos entregados en esta fecha.</div>
+    <div id="reportEl"></div>
+  </main>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+(function() {
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('tk=') !== -1) {
+    var parts = hash.substring(1).split('&');
+    var tk='',us='';
+    parts.forEach(function(p){ if(p.indexOf('tk=')===0)tk=p.substring(3); if(p.indexOf('us=')===0)us=decodeURIComponent(p.substring(3)); });
+    if(tk){ localStorage.setItem('nuevaexpress_token',tk); if(us)localStorage.setItem('nuevaexpress_user',us); history.replaceState(null,'',window.location.pathname); }
+  }
+})();
+var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if(!localStorage.getItem('nuevaexpress_token')||adminUser.role!=='admin') window.location.href='/cliente/login.html';
+function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
+function money(v){ return 'Q'+parseFloat(v||0).toFixed(2); }
+function esc(s){ var d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+
+// Set default date = today
+var dp = document.getElementById('datePicker');
+var now = new Date();
+dp.value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+
+async function loadReport() {
+  var date = document.getElementById('datePicker').value;
+  if (!date) return;
+
+  document.getElementById('reportEl').innerHTML = '';
+  document.getElementById('summaryBar').style.display = 'none';
+  document.getElementById('noData').style.display = 'none';
+  document.getElementById('loadingEl').style.display = 'block';
+
+  var res = await fetch('/api/admin/orders?date='+date, { headers: { Authorization: 'Bearer '+getToken() } });
+  var data = await res.json();
+  document.getElementById('loadingEl').style.display = 'none';
+
+  if (!data.success) { document.getElementById('noData').style.display = 'block'; return; }
+
+  // Filtrar solo pedidos entregados de ese día
+  var orders = (data.data || []).filter(function(o) {
+    if (o.status !== 'entregado' && o.status !== 'listo') return false;
+    var d = (o.updated_at || o.created_at || '').substring(0, 10);
+    return d === date;
+  });
+
+  if (!orders.length) { document.getElementById('noData').style.display = 'block'; return; }
+
+  // Agrupar por negocio
+  var byBiz = {};
+  orders.forEach(function(o) {
+    var bizId = o.business_id;
+    var bizName = o.business_name || 'Negocio #'+bizId;
+    if (!byBiz[bizId]) byBiz[bizId] = { name: bizName, orders: [] };
+    byBiz[bizId].orders.push(o);
+  });
+
+  var totalDia = 0;
+  var html = '';
+
+  Object.values(byBiz).forEach(function(biz) {
+    // Subtotal neto = subtotal (sin delivery_fee ni service_fee)
+    var netoTotal = biz.orders.reduce(function(s, o) { return s + parseFloat(o.subtotal || 0); }, 0);
+    totalDia += netoTotal;
+
+    html += '<div class="pago-card">' +
+      '<div class="pago-header">' +
+        '<div>' +
+          '<div class="pago-biz">🏪 '+esc(biz.name)+'</div>' +
+          '<div class="pago-sub">'+biz.orders.length+' pedido(s) entregado(s)</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div class="pago-total">'+money(netoTotal)+'</div>' +
+          '<div class="pago-sub">A transferir</div>' +
+        '</div>' +
+      '</div>' +
+      '<div>';
+
+    biz.orders.forEach(function(o) {
+      html += '<div class="orden-row">' +
+        '<div>' +
+          '<div style="font-weight:600">#'+esc(o.order_number)+'</div>' +
+          '<div style="color:var(--muted);font-size:.75rem">'+esc(o.client_name||'')+'</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div style="font-weight:700">'+money(o.subtotal)+'</div>' +
+          '<div style="font-size:.72rem;color:var(--muted)">Delivery: '+money(o.delivery_fee)+' · Fee: '+money(o.service_fee)+'</div>' +
+        '</div>' +
+      '</div>';
+    });
+
+    html += '</div>' +
+      '<div class="total-row">' +
+        '<span>💳 Total a transferir a '+esc(biz.name)+'</span>' +
+        '<span style="color:var(--blue);font-size:1.1rem">'+money(netoTotal)+'</span>' +
+      '</div>' +
+    '</div>';
+  });
+
+  document.getElementById('reportEl').innerHTML = html;
+  document.getElementById('totalDia').textContent = money(totalDia);
+  document.getElementById('resumenNegocios').textContent = Object.keys(byBiz).length + ' negocio(s) · '+orders.length+' pedido(s)';
+  document.getElementById('summaryBar').style.display = 'block';
+}
+
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+// Cargar automáticamente al entrar
+loadReport();
+</script>
+<script src="/assets/js/pwa.js"></script>
+</body>
+</html>
