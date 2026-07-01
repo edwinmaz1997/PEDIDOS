@@ -51,10 +51,19 @@
     </div>
 
     <div class="report-header no-print">
-      <div class="page-header" style="margin:0"><h1>📊 Reportes Mensuales</h1><p>Cobros por negocio y período</p></div>
+      <div class="page-header" style="margin:0"><h1>📊 Reportes</h1><p>Cobros por negocio y período</p></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <select id="monthSel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white"></select>
-        <select id="yearSel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white"></select>
+        <select id="modeFilter" onchange="toggleMode()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white">
+          <option value="month">Por mes</option>
+          <option value="day">Por día</option>
+        </select>
+        <div id="monthFilters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <select id="monthSel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white"></select>
+          <select id="yearSel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white"></select>
+        </div>
+        <div id="dayFilters" style="display:none">
+          <input type="date" id="daySel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+        </div>
         <select id="bizFilter" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white;max-width:200px">
           <option value="">Todos los negocios</option>
         </select>
@@ -135,23 +144,41 @@ async function init() {
   loadReport();
 }
 
+function toggleMode() {
+  var mode = document.getElementById('modeFilter').value;
+  document.getElementById('monthFilters').style.display = mode === 'month' ? 'flex' : 'none';
+  document.getElementById('dayFilters').style.display   = mode === 'day'   ? 'block' : 'none';
+  if (mode === 'day' && !document.getElementById('daySel').value) {
+    var now = new Date();
+    document.getElementById('daySel').value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  }
+  loadReport();
+}
+
 function loadReport() {
-  var month   = parseInt(document.getElementById('monthSel').value);
-  var year    = parseInt(document.getElementById('yearSel').value);
-  var bizId   = document.getElementById('bizFilter').value;
-  var monthName = months[month-1];
+  var mode  = document.getElementById('modeFilter').value;
+  var bizId = document.getElementById('bizFilter').value;
+  var filtered;
 
-  document.getElementById('printPeriod').textContent = monthName + ' ' + year;
-  document.getElementById('printDate').textContent   = new Date().toLocaleDateString('es-GT');
+  if (mode === 'day') {
+    var day = document.getElementById('daySel').value;
+    if (!day) return;
+    document.getElementById('printPeriod').textContent = day;
+    filtered = allOrders.filter(function(o) {
+      var d = (o.created_at || '').substring(0,10);
+      return d === day && o.status !== 'cancelado' && (!bizId || o.business_id == bizId);
+    });
+  } else {
+    var month  = parseInt(document.getElementById('monthSel').value);
+    var year   = parseInt(document.getElementById('yearSel').value);
+    document.getElementById('printPeriod').textContent = months[month-1] + ' ' + year;
+    filtered = allOrders.filter(function(o) {
+      var d = new Date(o.created_at);
+      return d.getMonth()+1 === month && d.getFullYear() === year && o.status !== 'cancelado' && (!bizId || o.business_id == bizId);
+    });
+  }
 
-  // Filter orders by month/year and status
-  var filtered = allOrders.filter(function(o) {
-    var d = new Date(o.created_at);
-    var matchPeriod = d.getMonth()+1 === month && d.getFullYear() === year;
-    var matchBiz    = !bizId || o.business_id == bizId;
-    var notCanceled = o.status !== 'cancelado';
-    return matchPeriod && matchBiz && notCanceled;
-  });
+  document.getElementById('printDate').textContent = new Date().toLocaleDateString('es-GT');
 
   // Group by business
   var grouped = {};
