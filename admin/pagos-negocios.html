@@ -204,7 +204,8 @@ async function loadReport() {
     Object.values(byRep).forEach(function(rep) {
       var repSubtotal = rep.items.reduce(function(s,d){ return s + parseFloat(d.subtotal||0); }, 0);
       var repDelivery = rep.items.reduce(function(s,d){ return s + parseFloat(d.delivery_fee||0); }, 0);
-      var repTotal = repSubtotal + repDelivery;
+      var repFee = rep.items.reduce(function(s,d){ return s + parseFloat(d.service_fee||0); }, 0);
+      var repTotal = repSubtotal + repDelivery - repFee;
       totalRepGlobal += repTotal;
 
       repHtml += '<div class="pago-card">' +
@@ -216,7 +217,7 @@ async function loadReport() {
       rep.items.forEach(function(d) {
         repHtml += '<div class="orden-row">' +
           '<div><div style="font-weight:600">#'+esc(d.order_number)+'</div><div style="color:var(--muted);font-size:.75rem">'+esc(d.client_name)+' · '+esc(d.business_name)+'</div></div>' +
-          '<div style="text-align:right"><div style="font-weight:700">'+money(parseFloat(d.subtotal)+parseFloat(d.delivery_fee))+'</div><div style="font-size:.72rem;color:var(--muted)">Prod: '+money(d.subtotal)+' · Del: '+money(d.delivery_fee)+'</div></div>' +
+          '<div style="text-align:right"><div style="font-weight:700">'+money(parseFloat(d.subtotal)+parseFloat(d.delivery_fee)-parseFloat(d.service_fee))+'</div><div style="font-size:.72rem;color:var(--muted)">Prod: '+money(d.subtotal)+' · Del: '+money(d.delivery_fee)+' · Fee: -'+money(d.service_fee)+'</div></div>' +
         '</div>';
       });
       repHtml += '</div>' +
