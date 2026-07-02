@@ -155,7 +155,7 @@ async function loadCustomDay() {
   if (!res?.success) return;
   var d = res.data;
   document.getElementById('statEntregas').textContent = d.total_entregas || 0;
-  document.getElementById('statDelivery').textContent = 'Q' + parseFloat(d.total_delivery || 0).toFixed(2);
+  document.getElementById('statTotal').textContent    = 'Q' + parseFloat(d.total_delivery || 0).toFixed(2);
   document.getElementById('statGanancia').textContent = 'Q' + parseFloat(d.ganancia_neta || 0).toFixed(2);
   document.getElementById('statCobrado').textContent  = 'Q' + parseFloat(d.total_cobrado || 0).toFixed(2);
   document.getElementById('statPeriodo').textContent  = '📅 ' + date;
