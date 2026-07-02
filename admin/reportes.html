@@ -193,9 +193,11 @@ function loadReport() {
   var totalServiceFee= filtered.reduce(function(s,o){ return s + parseFloat(o.service_fee||0); }, 0);
   var totalDelivery  = filtered.reduce(function(s,o){ return s + parseFloat(o.delivery_fee||0); }, 0);
 
+  var periodo = document.getElementById('printPeriod').textContent;
+
   // Render summary
   document.getElementById('reportSummary').innerHTML = `
-    <h3>Resumen — ${monthName} ${year}</h3>
+    <h3>Resumen — ${periodo}</h3>
     <div class="report-summary-grid">
       <div class="report-summary-item"><div class="label">Pedidos procesados</div><div class="value">${totalOrders}</div></div>
       <div class="report-summary-item"><div class="label">Negocios activos</div><div class="value">${Object.keys(grouped).length}</div></div>
@@ -218,7 +220,7 @@ function loadReport() {
       var bizSubtotal  = orders.reduce(function(s,o){ return s + parseFloat(o.subtotal||0); }, 0);
       var deliveryCount= orders.filter(function(o){ return o.delivery_type==='delivery'; }).length;
       var whatsappMsg  = encodeURIComponent(
-        '🧾 *Reporte NuevaExpress — ' + monthName + ' ' + year + '*\n' +
+        '🧾 *Reporte NuevaExpress — ' + periodo + '*\n' +
         '📌 Negocio: *' + data.name + '*\n\n' +
         '📦 Total de pedidos: ' + orders.length + '\n' +
         '🛵 Con delivery: ' + deliveryCount + '\n\n' +
@@ -264,7 +266,7 @@ function loadReport() {
 
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px" class="no-print">
             <a href="https://wa.me/?text=${whatsappMsg}" target="_blank" class="btn-primary" style="padding:8px 16px;font-size:.85rem;background:linear-gradient(135deg,#25d366,#128c7e)">💬 Enviar por WhatsApp</a>
-            <button onclick="printBiz('${esc(data.name)}','${monthName} ${year}','${bid}')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">🖨️ Imprimir</button>
+            <button onclick="printBiz('${esc(data.name)}','${periodo}','${bid}')" class="btn-ghost" style="padding:8px 16px;font-size:.85rem">🖨️ Imprimir</button>
           </div>
 
           <div class="report-orders-list" id="biz-${bid}">
