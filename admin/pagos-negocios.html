@@ -71,6 +71,17 @@
     <div id="loadingEl" style="display:none;text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></div>
     <div id="noData" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin pedidos entregados en esta fecha.</div>
     <div id="reportEl"></div>
+
+    <!-- Liquidación repartidores -->
+    <div id="repSection" style="display:none;margin-top:28px">
+      <h2 style="font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:14px">🛵 Liquidación de repartidores</h2>
+      <div id="repBar" style="background:linear-gradient(135deg,#0f3460,#2d3a6e);border-radius:var(--radius);padding:18px;margin-bottom:16px;color:white">
+        <div style="font-size:.78rem;opacity:.7;margin-bottom:4px">Total a recibir de repartidores</div>
+        <div id="repTotalGlobal" style="font-size:1.8rem;font-weight:800">Q0.00</div>
+        <div id="repSubLine" style="font-size:.75rem;opacity:.6;margin-top:3px"></div>
+      </div>
+      <div id="repEl"></div>
+    </div>
   </main>
 </div>
 
@@ -175,6 +186,51 @@ async function loadReport() {
   document.getElementById('totalDia').textContent = money(totalDia);
   document.getElementById('resumenNegocios').textContent = Object.keys(byBiz).length + ' negocio(s) · '+orders.length+' pedido(s)';
   document.getElementById('summaryBar').style.display = 'block';
+
+  // Liquidación de repartidores
+  var repRes = await fetch('/api/admin/deliveries?date='+date, { headers: { Authorization: 'Bearer '+getToken() } });
+  var repData = await repRes.json();
+  var deliveries = repData.data || [];
+
+  if (deliveries.length) {
+    var byRep = {};
+    deliveries.forEach(function(d) {
+      if (!byRep[d.repartidor_id]) byRep[d.repartidor_id] = { name: d.repartidor_name, items: [] };
+      byRep[d.repartidor_id].items.push(d);
+    });
+
+    var totalRepGlobal = 0;
+    var repHtml = '';
+    Object.values(byRep).forEach(function(rep) {
+      var repSubtotal = rep.items.reduce(function(s,d){ return s + parseFloat(d.subtotal||0); }, 0);
+      var repDelivery = rep.items.reduce(function(s,d){ return s + parseFloat(d.delivery_fee||0); }, 0);
+      var repTotal = repSubtotal + repDelivery;
+      totalRepGlobal += repTotal;
+
+      repHtml += '<div class="pago-card">' +
+        '<div class="pago-header">' +
+          '<div><div class="pago-biz">🛵 '+esc(rep.name)+'</div><div class="pago-sub">'+rep.items.length+' entrega(s)</div></div>' +
+          '<div style="text-align:right"><div class="pago-total">'+money(repTotal)+'</div><div class="pago-sub">A entregar</div></div>' +
+        '</div>' +
+        '<div>';
+      rep.items.forEach(function(d) {
+        repHtml += '<div class="orden-row">' +
+          '<div><div style="font-weight:600">#'+esc(d.order_number)+'</div><div style="color:var(--muted);font-size:.75rem">'+esc(d.client_name)+' · '+esc(d.business_name)+'</div></div>' +
+          '<div style="text-align:right"><div style="font-weight:700">'+money(parseFloat(d.subtotal)+parseFloat(d.delivery_fee))+'</div><div style="font-size:.72rem;color:var(--muted)">Prod: '+money(d.subtotal)+' · Del: '+money(d.delivery_fee)+'</div></div>' +
+        '</div>';
+      });
+      repHtml += '</div>' +
+        '<div class="total-row"><span>💳 '+esc(rep.name)+' debe entregar</span><span style="color:var(--blue);font-size:1.1rem">'+money(repTotal)+'</span></div>' +
+      '</div>';
+    });
+
+    document.getElementById('repTotalGlobal').textContent = money(totalRepGlobal);
+    document.getElementById('repSubLine').textContent = Object.keys(byRep).length + ' repartidor(es) · ' + deliveries.length + ' entrega(s)';
+    document.getElementById('repEl').innerHTML = repHtml;
+    document.getElementById('repSection').style.display = 'block';
+  } else {
+    document.getElementById('repSection').style.display = 'none';
+  }
 }
 
 function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }

@@ -363,6 +363,7 @@ try {
 
             // POST /api/admin/reset-data — limpiar datos de prueba
             if ($action === 'reset-data' && $method === 'POST') { $ctrl->resetData($body); break; }
+            if ($action === 'deliveries' && $method === 'GET') { $ctrl->deliveries(); break; }
 
             switch ($action) {
                 case 'dashboard':  $ctrl->dashboard();  break;

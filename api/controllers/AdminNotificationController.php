@@ -34,6 +34,26 @@ class AdminController {
         Response::success($businesses);
     }
 
+    public function deliveries(): void {
+        AuthMiddleware::requireRole('admin');
+        $date = $_GET['date'] ?? date('Y-m-d');
+        $stmt = $this->db->prepare("
+            SELECT d.id, d.status, d.delivered_at,
+                   o.order_number, o.subtotal, o.delivery_fee, o.service_fee, o.total, o.status as order_status,
+                   u.id as repartidor_id, u.name as repartidor_name,
+                   b.name as business_name, c.name as client_name
+            FROM deliveries d
+            JOIN orders o ON o.id = d.order_id
+            JOIN users u ON u.id = d.repartidor_id
+            JOIN businesses b ON b.id = o.business_id
+            JOIN users c ON c.id = o.client_id
+            WHERE DATE(o.created_at) = ? AND d.repartidor_id IS NOT NULL AND d.status = 'entregado'
+            ORDER BY u.name, o.created_at
+        ");
+        $stmt->execute([$date]);
+        Response::success($stmt->fetchAll());
+    }
+
     public function orders(): void {
         AuthMiddleware::requireRole('admin');
         $date = $_GET['date'] ?? null;
