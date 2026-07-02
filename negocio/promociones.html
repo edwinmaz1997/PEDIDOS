@@ -400,11 +400,14 @@ function renderProductSelector(selected, filtered) {
         var isSelected = document.getElementById('opt-'+p.id)?.classList.contains('selected') ||
                          (selected && selected.find && selected.find(function(s){ return s.product_id == p.id; }));
         var promoVal = isSelected && document.getElementById('promo-price-'+p.id) ? document.getElementById('promo-price-'+p.id).value : '';
-        var precioNormal = p._isService
-          ? (p.price > 0 && p.price_to > 0 ? 'Q'+p.price.toFixed(2)+' – Q'+p.price_to.toFixed(2) : p.price > 0 ? 'Q'+p.price.toFixed(2) : 'Sin precio definido')
-          : 'Q' + parseFloat(p.price).toFixed(2);
-        return '<div class="item-option' + (isSelected?' selected':'') + '" id="opt-'+p.id+'" onclick="toggleProduct('+p.id+','+p.price+')">' +
-          '<input type="checkbox" ' + (isSelected?'checked':'') + ' onclick="event.stopPropagation();toggleProduct('+p.id+','+p.price+')">' +
+        var precioNormal = p.has_variants && p.variants && p.variants.length
+          ? 'Desde Q' + parseFloat(p.variants[0].price).toFixed(2)
+          : p._isService
+            ? (p.price > 0 && p.price_to > 0 ? 'Q'+p.price.toFixed(2)+' – Q'+p.price_to.toFixed(2) : p.price > 0 ? 'Q'+p.price.toFixed(2) : 'Sin precio definido')
+            : (p.price ? 'Q' + parseFloat(p.price).toFixed(2) : 'Sin precio definido');
+        var basePrice = p.has_variants && p.variants && p.variants.length ? p.variants[0].price : (p.price || 0);
+        return '<div class="item-option' + (isSelected?' selected':'') + '" id="opt-'+p.id+'" onclick="toggleProduct('+p.id+','+basePrice+')">' +
+          '<input type="checkbox" ' + (isSelected?'checked':'') + ' onclick="event.stopPropagation();toggleProduct('+p.id+','+basePrice+')">' +
           '<div class="item-info">' +
             '<div class="item-name">' + APP.esc(p.name) + '</div>' +
             '<div class="item-price">Precio normal: ' + precioNormal + '</div>' +
