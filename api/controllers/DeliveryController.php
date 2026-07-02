@@ -238,6 +238,9 @@ class DeliveryController {
             } elseif ($period === 'month') {
                 $from = $now->format('Y-m-01');
                 $to   = $today;
+            } elseif ($period === 'custom' && !empty($_GET['date'])) {
+                $from = $_GET['date'];
+                $to   = $_GET['date'];
             } else {
                 $from = $today;
                 $to   = $today;

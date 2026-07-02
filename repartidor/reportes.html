@@ -63,10 +63,12 @@
     </div>
 
     <!-- Selector de periodo -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
       <button class="period-btn active" onclick="changePeriod('today', this)">Hoy</button>
       <button class="period-btn" onclick="changePeriod('week', this)">Esta semana</button>
       <button class="period-btn" onclick="changePeriod('month', this)">Este mes</button>
+      <button class="period-btn" id="btnCustomDay" onclick="changePeriod('custom', this)">📅 Día específico</button>
+      <input type="date" id="customDayInput" style="display:none;padding:8px 12px;border:1.5px solid var(--border);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.82rem" onchange="loadCustomDay()">
     </div>
 
     <!-- Tarjetas de resumen -->
@@ -131,6 +133,43 @@ document.getElementById('sidebarUser').textContent = usr.name || 'Repartidor';
 function changePeriod(period, btn) {
   currentPeriod = period;
   document.querySelectorAll('.period-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var customInput = document.getElementById('customDayInput');
+  if (period === 'custom') {
+    customInput.style.display = 'block';
+    if (!customInput.value) {
+      var now = new Date();
+      customInput.value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+    }
+    loadCustomDay();
+  } else {
+    customInput.style.display = 'none';
+    loadStats();
+  }
+}
+
+async function loadCustomDay() {
+  var date = document.getElementById('customDayInput').value;
+  if (!date) return;
+  var res = await APP.get('/deliveries/stats?period=custom&date=' + date);
+  if (!res?.success) return;
+  var d = res.data;
+  document.getElementById('statEntregas').textContent = d.total_entregas || 0;
+  document.getElementById('statDelivery').textContent = 'Q' + parseFloat(d.total_delivery || 0).toFixed(2);
+  document.getElementById('statGanancia').textContent = 'Q' + parseFloat(d.ganancia_neta || 0).toFixed(2);
+  document.getElementById('statCobrado').textContent  = 'Q' + parseFloat(d.total_cobrado || 0).toFixed(2);
+  document.getElementById('statPeriodo').textContent  = '📅 ' + date;
+  if (!d.entregas?.length) {
+    document.getElementById('deliveriesList').innerHTML = '<div class="empty-state"><p>Sin entregas en este día.</p></div>';
+    return;
+  }
+  document.getElementById('deliveriesList').innerHTML = d.entregas.map(function(e) {
+    return '<div class="delivery-item">' +
+      '<div class="delivery-info"><div class="delivery-num">' + e.order_number + '</div><div class="delivery-addr">' + (e.negocio||'') + '</div></div>' +
+      '<div class="delivery-fee"><div class="total">Q' + parseFloat(e.total_cobrado||0).toFixed(2) + '</div><div class="ganancia">+Q' + parseFloat(e.mi_ganancia||0).toFixed(2) + ' tuyo</div></div>' +
+    '</div>';
+  }).join('');
+}
   btn.classList.add('active');
   loadStats();
 }
