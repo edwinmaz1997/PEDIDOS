@@ -170,8 +170,23 @@ async function loadCustomDay() {
     '</div>';
   }).join('');
 }
-  btn.classList.add('active');
-  loadStats();
+
+function changePeriod(period, btn) {
+  currentPeriod = period;
+  document.querySelectorAll('.period-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var customInput = document.getElementById('customDayInput');
+  if (period === 'custom') {
+    customInput.style.display = 'block';
+    if (!customInput.value) {
+      var now = new Date();
+      customInput.value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+    }
+    loadCustomDay();
+  } else {
+    customInput.style.display = 'none';
+    loadStats();
+  }
 }
 
 async function loadStats() {
