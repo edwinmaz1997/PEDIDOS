@@ -196,15 +196,28 @@ function loadReport() {
 
   var periodo = document.getElementById('printPeriod').textContent;
 
-  // Render summary
+  // Render summary — 3 bloques
   document.getElementById('reportSummary').innerHTML = `
-    <h3>Resumen — ${periodo}</h3>
-    <div class="report-summary-grid">
-      <div class="report-summary-item"><div class="label">Pedidos procesados</div><div class="value">${totalOrders}</div></div>
-      <div class="report-summary-item"><div class="label">Subtotal productos</div><div class="value">Q${totalSubtotal.toFixed(2)}</div></div>
-      <div class="report-summary-item"><div class="label">Delivery cobrado</div><div class="value">Q${totalDelivery.toFixed(2)}</div></div>
-      <div class="report-summary-item"><div class="label">Fees NuevaExpress</div><div class="value">Q${totalServiceFee.toFixed(2)}</div></div>
-      <div class="report-summary-item"><div class="label">Total cobrado clientes</div><div class="value">Q${totalRevenue.toFixed(2)}</div></div>
+    <h3>Resumen — ${periodo} · ${totalOrders} pedido${totalOrders!==1?'s':''}</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:12px">
+      <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:18px">
+        <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:6px">🏪 Total negocios</div>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--navy)">Q${totalSubtotal.toFixed(2)}</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Subtotal productos vendidos</div>
+      </div>
+      <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:18px">
+        <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:6px">🛵 Total deliveries</div>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--navy)">Q${totalDelivery.toFixed(2)}</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Cobrado al cliente por envío</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:var(--radius);padding:18px;color:white">
+        <div style="font-size:.75rem;opacity:.7;text-transform:uppercase;margin-bottom:6px">💰 Gran total</div>
+        <div style="font-size:1.6rem;font-weight:800">Q${(totalSubtotal+totalDelivery).toFixed(2)}</div>
+        <div style="font-size:.75rem;opacity:.6;margin-top:4px">Negocios + Deliveries</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:.8rem;color:#166534">
+      💡 Fees NuevaExpress (Q3 × ${totalOrders} pedidos): <strong>Q${totalServiceFee.toFixed(2)}</strong>
     </div>`;
 
   // Render per business
