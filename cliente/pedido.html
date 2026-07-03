@@ -166,9 +166,9 @@
 
 
         <div class="delivery-toggle" id="deliveryToggle">
-          <button class="delivery-btn active" onclick="setDelivery('pickup',this)">🏃 Recoger</button>
+          <button class="delivery-btn active" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
           <button class="delivery-btn" id="dineInBtn" style="display:none" onclick="setDelivery('dine_in',this)">🍽️ Comer aquí</button>
-          <button class="delivery-btn" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
+          <button class="delivery-btn" onclick="setDelivery('pickup',this)">🏃 Recoger</button>
         </div>
         <!-- Formulario Comer aquí -->
         <div id="dineInForm" style="display:none;margin-top:10px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:var(--radius-sm);padding:14px">
@@ -269,7 +269,7 @@ const fromPromo    = params.get('from_promo') === '1';
 let business    = null;
 let cart        = {};
 let customItems = [];
-let deliveryType = 'pickup';
+let deliveryType = 'delivery';
 let promoOverrides = {}; // precios promocionales por product_id
 
 const SERVICE_FEE = 3;
@@ -303,7 +303,9 @@ async function init() {
     const data = await res.json();
     if (!data.success) { window.location.href = '/'; return; }
     business = data.data;
-    renderBizInfo();
+    // Delivery activo por defecto
+    document.getElementById('deliveryAddressWrap').style.display = 'block';
+    loadSavedAddress();
     renderProducts();
 
     // ── Verificar horario ──────────────────────────────────
