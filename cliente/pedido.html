@@ -1145,6 +1145,7 @@ function getGPSLocation() {
     var link    = document.getElementById('deliveryMapLink');
     if (window._gpsMapsUrlPending) {
       window._gpsMapsUrl = window._gpsMapsUrlPending;
+      window._gpsMapsUrlPending = null;
       link.href = window._gpsMapsUrl;
       preview.style.display = 'block';
     }
@@ -1155,7 +1156,7 @@ function previewDeliveryMap() {
   var val = document.getElementById('deliveryAddress').value.trim();
   var preview = document.getElementById('deliveryMapPreview');
   var link    = document.getElementById('deliveryMapLink');
-  window._gpsMapsUrl = null; // el usuario editó manualmente, descartar GPS exacto
+  if (!window._gpsMapsUrlPending) window._gpsMapsUrl = null; // el usuario editó manualmente, descartar GPS exacto
   invalidateDeliveryCalc();
   if (!val) { preview.style.display = 'none'; return; }
 
