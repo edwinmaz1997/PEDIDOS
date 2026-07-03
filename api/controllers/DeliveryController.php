@@ -24,7 +24,7 @@ class DeliveryController {
             JOIN users u ON o.client_id = u.id
             WHERE (
               (d.status = 'disponible' AND o.status NOT IN ('entregado','cancelado'))
-              OR d.repartidor_id = ?
+              OR (d.repartidor_id = ? AND o.status NOT IN ('cancelado'))
             )
             ORDER BY d.id DESC
         ");

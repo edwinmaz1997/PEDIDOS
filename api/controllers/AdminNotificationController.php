@@ -16,7 +16,7 @@ class AdminController {
             'orders_today'     => $this->db->query("SELECT COUNT(*) FROM orders WHERE DATE(created_at)=CURDATE()")->fetchColumn(),
             'revenue_today'    => $this->db->query("SELECT COALESCE(SUM(service_fee),0) FROM orders WHERE DATE(created_at)=CURDATE() AND status NOT IN ('cancelado')")->fetchColumn(),
             'pending_orders'   => $this->db->query("SELECT COUNT(*) FROM orders WHERE status='pendiente'")->fetchColumn(),
-            'available_deliveries' => $this->db->query("SELECT COUNT(*) FROM deliveries WHERE status='disponible'")->fetchColumn(),
+            'available_deliveries' => $this->db->query("SELECT COUNT(*) FROM deliveries d JOIN orders o ON o.id = d.order_id WHERE d.status='disponible' AND o.status NOT IN ('cancelado','entregado')")->fetchColumn(),
         ];
         $recentOrders = $this->db->query("SELECT o.*, b.name as business_name, u.name as client_name FROM orders o JOIN businesses b ON o.business_id=b.id JOIN users u ON o.client_id=u.id ORDER BY o.created_at DESC LIMIT 200")->fetchAll();
         Response::success(['stats' => $stats, 'recent_orders' => $recentOrders]);
