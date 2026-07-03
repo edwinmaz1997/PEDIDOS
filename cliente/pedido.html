@@ -1105,26 +1105,26 @@ function getGPSForField(fieldId, statusId) {
       if (fieldId === 'pickupAddress') {
         window._pickupMapsUrl = mapsUrl;
         window._pickupGpsJustSet = true;
+        document.getElementById(fieldId).value = mapsUrl;
+        statusEl.textContent = '✅ Ubicación obtenida';
+        setTimeout(function(){ statusEl.style.display = 'none'; }, 3000);
       } else if (fieldId === 'deliveryAddress') {
-        window._gpsMapsUrlPending = mapsUrl;
+        window._gpsMapsUrl = mapsUrl;
+        window._gpsMapsUrlPending = null;
+        document.getElementById(fieldId).value = mapsUrl;
+        statusEl.textContent = '✅ Ubicación obtenida';
+        var preview = document.getElementById('deliveryMapPreview');
+        var link    = document.getElementById('deliveryMapLink');
+        if (preview && link) { link.href = mapsUrl; preview.style.display = 'block'; }
+        setTimeout(function(){ statusEl.style.display = 'none'; }, 3000);
       } else if (fieldId === 'dropoffAddress') {
         window._dropoffMapsUrl = mapsUrl;
         window._dropoffGpsJustSet = true;
-      }
-      statusEl.textContent = 'Buscando dirección...';
-      try {
-        var res  = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&addressdetails=1', { headers: { 'Accept-Language': 'es', 'User-Agent': 'NuevaExpress/1.0' } });
-        var data = await res.json();
-        var addr = data.display_name || (lat.toFixed(6) + ', ' + lng.toFixed(6));
-        var parts = addr.split(',');
-        var short = parts.slice(0, Math.min(4, parts.length)).join(',').trim();
-        document.getElementById(fieldId).value = short;
+        document.getElementById(fieldId).value = mapsUrl;
         statusEl.textContent = '✅ Ubicación obtenida';
-      } catch(e) {
-        document.getElementById(fieldId).value = lat.toFixed(6) + ', ' + lng.toFixed(6);
-        statusEl.textContent = '✅ Coordenadas obtenidas';
+        setTimeout(function(){ statusEl.style.display = 'none'; }, 3000);
       }
-      setTimeout(function(){ statusEl.style.display = 'none'; }, 3000);
+      return;
     },
     function(err) {
       var msgs = { 1: 'Permiso denegado.', 2: 'No se pudo obtener ubicación.', 3: 'Tiempo agotado.' };
