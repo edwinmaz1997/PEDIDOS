@@ -303,6 +303,7 @@ async function init() {
     const data = await res.json();
     if (!data.success) { window.location.href = '/'; return; }
     business = data.data;
+    renderBizInfo();
     // Delivery activo por defecto
     document.getElementById('deliveryAddressWrap').style.display = 'block';
     loadSavedAddress();
