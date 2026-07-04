@@ -122,7 +122,7 @@ function applyFilters() {
       <td>${esc(o.order_number)}</td>
       <td>${esc(o.client_name)}</td>
       <td>${esc(o.business_name)}</td>
-      <td>Q${parseFloat(o.total).toFixed(2)}</td>
+      <td>Q${(parseFloat(o.total)-parseFloat(o.service_fee||0)).toFixed(2)}</td>
       <td>${o.delivery_type==='delivery'?'🛵 Delivery':o.delivery_type==='dine_in'?'🍽️ En negocio':'🏃 Recoger'}</td>
       <td><span class="badge ${statusBadge[o.status]||''}">${statusLabels[o.status]||o.status}</span></td>
       <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</td>
@@ -146,7 +146,7 @@ function renderRecentOrders() {
       <td>${esc(o.order_number)}</td>
       <td>${esc(o.client_name)}</td>
       <td>${esc(o.business_name)}</td>
-      <td>Q${parseFloat(o.total).toFixed(2)}</td>
+      <td>Q${(parseFloat(o.total)-parseFloat(o.service_fee||0)).toFixed(2)}</td>
       <td>${o.delivery_type==='delivery'?'🛵 Delivery':'🏃 Recoger'}</td>
       <td><span class="badge ${statusBadge[o.status]||''}">${statusLabels[o.status]||o.status}</span></td>
       <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</td>
