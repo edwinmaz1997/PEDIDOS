@@ -125,6 +125,7 @@ async function loadReport() {
   // Filtrar solo pedidos entregados de ese día
   var orders = (data.data || []).filter(function(o) {
     if (o.status !== 'entregado' && o.status !== 'listo') return false;
+    if (o.delivery_type !== 'delivery') return false;
     var d = (o.updated_at || o.created_at || '').substring(0, 10);
     return d === date;
   });
