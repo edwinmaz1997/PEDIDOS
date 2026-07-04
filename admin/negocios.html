@@ -285,7 +285,7 @@ async function connectAsBiz(userId) {
   if (!confirm('¿Iniciar sesión como este negocio? Se abrirá en una nueva pestaña.')) return;
   var res = await fetch('/api/admin/impersonate', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() },
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
     body: JSON.stringify({ user_id: userId })
   });
   var data = await res.json();
