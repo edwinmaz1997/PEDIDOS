@@ -137,6 +137,12 @@
           <button onclick="setDateRange('month')" class="btn-ghost" style="padding:8px 14px;font-size:.82rem">Este mes</button>
           <button onclick="exportDiario()" class="btn-ghost" style="padding:8px 14px;font-size:.82rem">📥 Exportar CSV</button>
         </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+          <button onclick="setTypeFilter('all',this)" id="tf_all" class="btn-ghost" style="padding:7px 14px;font-size:.82rem;background:var(--blue);color:white;border-color:var(--blue)">Todos</button>
+          <button onclick="setTypeFilter('delivery',this)" id="tf_delivery" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">🛵 Delivery</button>
+          <button onclick="setTypeFilter('pickup',this)" id="tf_pickup" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">🏃 Para recoger</button>
+          <button onclick="setTypeFilter('dine_in',this)" id="tf_dine_in" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">🍽️ Consumo en negocio</button>
+        </div>
       </div>
 
       <div class="metric-grid" id="diarioMetrics">
@@ -451,7 +457,16 @@ async function loadSaldo() {
 function localDate(d) {
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
-function setDateRange(range) {
+var currentTypeFilter = 'all';
+
+function setTypeFilter(type, btn) {
+  currentTypeFilter = type;
+  document.querySelectorAll('[id^="tf_"]').forEach(function(b) {
+    b.style.background = ''; b.style.color = ''; b.style.borderColor = '';
+  });
+  if (btn) { btn.style.background = 'var(--blue)'; btn.style.color = 'white'; btn.style.borderColor = 'var(--blue)'; }
+  loadDiario();
+}
   var today = new Date();
   var from = new Date(today);
   if (range === 'today') {
@@ -479,6 +494,11 @@ async function loadDiario() {
     var d = o.created_at?.substring(0,10) || '';
     return d >= from && d <= to;
   });
+
+  // Filtrar por tipo de pedido
+  if (currentTypeFilter !== 'all') {
+    orders = orders.filter(function(o){ return o.delivery_type === currentTypeFilter; });
+  }
 
   // Metrics
   var totalOrders = orders.length;
