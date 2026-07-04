@@ -283,7 +283,7 @@ function viewBiz(id) { window.open('/negocio.html?id=' + id, '_blank'); }
 
 async function connectAsBiz(userId) {
   if (!confirm('¿Iniciar sesión como este negocio? Se abrirá en una nueva pestaña.')) return;
-  var res = await fetch('/api/admin/impersonate', {
+  var res = await fetch('/api/impersonate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
     body: JSON.stringify({ user_id: userId })
