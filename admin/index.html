@@ -341,8 +341,8 @@ async function viewOrder(id) {
 
   // Totales
   html += '<div style="background:var(--navy);border-radius:10px;padding:14px;color:white">';
-  html += '<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px"><span>Subtotal</span><span>Q'+parseFloat(o.subtotal||0).toFixed(2)+'</span></div>';
-  if (parseFloat(o.delivery_fee||0) > 0) html += '<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px"><span>Delivery</span><span>Q'+parseFloat(o.delivery_fee||0).toFixed(2)+'</span></div>';
+  html += '<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px"><span>Subtotal productos</span><span>Q'+parseFloat(o.subtotal||0).toFixed(2)+'</span></div>';
+  html += '<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px"><span>🛵 Delivery</span><span>Q'+parseFloat(o.delivery_fee||0).toFixed(2)+'</span></div>';
   html += '<div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.2)"><span>Total cliente</span><span>Q'+(parseFloat(o.subtotal||0)+parseFloat(o.delivery_fee||0)).toFixed(2)+'</span></div>';
   html += '</div>';
 
