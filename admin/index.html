@@ -70,7 +70,7 @@
     </div>
     <div class="table-responsive">
       <table class="data-table" id="recentTable">
-        <thead><tr><th>#</th><th>Cliente</th><th>Negocio</th><th>Total</th><th>Tipo</th><th>Estado</th><th>Fecha</th></tr></thead>
+        <thead><tr><th>#</th><th>Cliente</th><th>Negocio</th><th>Total</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
         <tbody id="recentBody"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Cargando...</td></tr></tbody>
       </table>
     </div>
@@ -126,6 +126,7 @@ function applyFilters() {
       <td>${o.delivery_type==='delivery'?'🛵 Delivery':o.delivery_type==='dine_in'?'🍽️ En negocio':'🏃 Recoger'}</td>
       <td><span class="badge ${statusBadge[o.status]||''}">${statusLabels[o.status]||o.status}</span></td>
       <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</td>
+      <td><button onclick="viewOrder(${o.id})" style="padding:5px 10px;font-size:.75rem;background:var(--blue);color:white;border:none;border-radius:6px;cursor:pointer">👁 Ver</button></td>
     </tr>`;
   }).join('');
   document.getElementById('recentBody').innerHTML = rows || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Sin pedidos</td></tr>';
@@ -150,6 +151,7 @@ function renderRecentOrders() {
       <td>${o.delivery_type==='delivery'?'🛵 Delivery':'🏃 Recoger'}</td>
       <td><span class="badge ${statusBadge[o.status]||''}">${statusLabels[o.status]||o.status}</span></td>
       <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</td>
+      <td><button onclick="viewOrder(${o.id})" style="padding:5px 10px;font-size:.75rem;background:var(--blue);color:white;border:none;border-radius:6px;cursor:pointer">👁 Ver</button></td>
     </tr>`;
   }).join('');
   document.getElementById('recentBody').innerHTML = rows || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Sin pedidos</td></tr>';
@@ -265,6 +267,88 @@ function toggleSidebar() {
     </div>
   </div>
 </div>
+
+<!-- Modal detalle pedido admin -->
+<div id="orderModal" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;padding:16px">
+  <div style="background:white;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:white;z-index:1">
+      <div id="omTitle" style="font-weight:700;font-size:.95rem"></div>
+      <button onclick="document.getElementById('orderModal').style.display='none'" style="background:var(--off-white);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>
+    </div>
+    <div id="omBody" style="padding:20px"></div>
+  </div>
+</div>
+
+<script>
+async function viewOrder(id) {
+  document.getElementById('orderModal').style.display = 'flex';
+  document.getElementById('omTitle').textContent = 'Cargando...';
+  document.getElementById('omBody').innerHTML = '<div style="text-align:center;padding:30px"><div class="spinner" style="margin:auto"></div></div>';
+  var res = await fetch('/api/orders/' + id, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+  var data = await res.json();
+  if (!data.success) { document.getElementById('omBody').innerHTML = '<p style="color:var(--danger)">Error al cargar el pedido</p>'; return; }
+  var o = data.data;
+  document.getElementById('omTitle').textContent = '📋 ' + o.order_number;
+
+  var typeLabel = o.delivery_type === 'delivery' ? '🛵 Delivery' : o.delivery_type === 'dine_in' ? '🍽️ Consumo en negocio' : '🏃 Para recoger';
+  var statusLabels = {pendiente:'⏳ Pendiente',aceptado:'✅ Aceptado',en_preparacion:'👨‍🍳 En preparación',listo:'📦 Listo',en_camino:'🛵 En camino',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
+
+  var html = '';
+
+  // Info general
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">';
+  html += '<div style="background:var(--off-white);border-radius:8px;padding:10px"><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Estado</div><div style="font-weight:700;margin-top:2px">' + (statusLabels[o.status]||o.status) + '</div></div>';
+  html += '<div style="background:var(--off-white);border-radius:8px;padding:10px"><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Tipo</div><div style="font-weight:700;margin-top:2px">' + typeLabel + '</div></div>';
+  html += '<div style="background:var(--off-white);border-radius:8px;padding:10px"><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Negocio</div><div style="font-weight:700;margin-top:2px">' + esc(o.business_name||'') + '</div></div>';
+  html += '<div style="background:var(--off-white);border-radius:8px;padding:10px"><div style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Fecha</div><div style="font-weight:700;margin-top:2px;font-size:.82rem">' + new Date(o.created_at).toLocaleString('es-GT') + '</div></div>';
+  html += '</div>';
+
+  // Cliente
+  html += '<div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">';
+  html += '<div style="font-weight:700;font-size:.85rem;margin-bottom:8px">👤 Cliente</div>';
+  html += '<div style="font-size:.88rem">' + esc(o.client_name||'') + '</div>';
+  if (o.client_phone) html += '<div style="font-size:.82rem;color:var(--muted)"><a href="tel:'+o.client_phone+'">📞 '+o.client_phone+'</a></div>';
+  if (o.delivery_address) html += '<div style="font-size:.82rem;color:var(--muted);margin-top:4px">📍 '+esc(o.delivery_address)+'</div>';
+  if (o.dine_in_persons) html += '<div style="font-size:.82rem;color:#16a34a;margin-top:4px">👥 '+o.dine_in_persons+' persona(s) · 🕐 '+o.dine_in_time+'</div>';
+  if (o.notes) html += '<div style="font-size:.82rem;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:6px 10px;margin-top:6px">📝 '+esc(o.notes)+'</div>';
+  html += '</div>';
+
+  // Productos
+  html += '<div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">';
+  html += '<div style="font-weight:700;font-size:.85rem;margin-bottom:8px">🛍️ Productos</div>';
+  (o.items||[]).forEach(function(item) {
+    var basePrice = parseFloat(item.unit_price||0);
+    var extrasTotal = 0;
+    var notesHtml = '';
+    if (item.notes) {
+      var compMatch = item.notes.match(/Complementos: ([^|]+)/);
+      if (compMatch) notesHtml += '<div style="font-size:.75rem;color:#16a34a">🍓 '+compMatch[1].trim()+'</div>';
+      var extrasMatch = item.notes.match(/Extras: (.+)$/);
+      if (extrasMatch) {
+        extrasMatch[1].split(', ').forEach(function(ep) {
+          var m = ep.match(/^(.+?)\s+\+Q([\d.]+)$/);
+          if (m) { extrasTotal += parseFloat(m[2]); notesHtml += '<div style="font-size:.75rem;color:var(--accent)">➕ '+m[1]+' +Q'+parseFloat(m[2]).toFixed(2)+'</div>'; }
+        });
+        basePrice -= extrasTotal;
+      }
+    }
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid #f3f4f6">';
+    html += '<div><div style="font-size:.88rem;font-weight:500">'+esc(item.product_name)+' ×'+item.quantity+'</div>'+notesHtml+'</div>';
+    html += '<div style="font-weight:700;font-size:.88rem">Q'+((basePrice+extrasTotal)*item.quantity).toFixed(2)+'</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // Totales
+  html += '<div style="background:var(--navy);border-radius:10px;padding:14px;color:white">';
+  html += '<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px"><span>Subtotal</span><span>Q'+parseFloat(o.subtotal||0).toFixed(2)+'</span></div>';
+  if (parseFloat(o.delivery_fee||0) > 0) html += '<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px"><span>Delivery</span><span>Q'+parseFloat(o.delivery_fee||0).toFixed(2)+'</span></div>';
+  html += '<div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.2)"><span>Total cliente</span><span>Q'+(parseFloat(o.subtotal||0)+parseFloat(o.delivery_fee||0)).toFixed(2)+'</span></div>';
+  html += '</div>';
+
+  document.getElementById('omBody').innerHTML = html;
+}
+</script>
 
 </body>
 </html>
