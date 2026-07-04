@@ -291,8 +291,7 @@ async function connectAsBiz(userId) {
   var data = await res.json();
   if (!data.success) { alert('Error: ' + (data.message || 'No se pudo conectar')); return; }
   var token = data.data.token;
-  var user  = encodeURIComponent(JSON.stringify(data.data.user));
-  window.open('/negocio/index.html#tk=' + token + '&us=' + user, '_blank');
+  window.open('/negocio/index.html#tk=' + token, '_blank');
 }
 
 async function deleteBiz(id, name) {
