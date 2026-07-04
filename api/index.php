@@ -272,6 +272,24 @@ try {
             }
             break;
 
+        case 'impersonate':
+            if ($method !== 'POST') Response::error('Método no permitido', 405);
+            AuthMiddleware::requireRole('admin');
+            $targetId = (int)($body['user_id'] ?? 0);
+            if (!$targetId) Response::error('user_id requerido', 400);
+            $db = Database::connect();
+            $stmt = $db->prepare("SELECT u.*, r.name as role FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = ? AND u.is_active = 1 LIMIT 1");
+            $stmt->execute([$targetId]);
+            $user = $stmt->fetch();
+            if (!$user) Response::error('Usuario no encontrado', 404);
+            $token = bin2hex(random_bytes(32));
+            $expires = date('Y-m-d H:i:s', time() + 28800);
+            $db->prepare("INSERT INTO user_sessions (user_id, token, ip_address, user_agent, expires_at) VALUES (?,?,?,?,?)")
+               ->execute([$user['id'], $token, $_SERVER['REMOTE_ADDR'] ?? '', 'Admin-Impersonate', $expires]);
+            $userPayload = ['id' => $user['id'], 'name' => $user['name'], 'email' => $user['email'], 'role' => $user['role'], 'role_id' => $user['role_id'], 'phone' => $user['phone'] ?? ''];
+            Response::success(['token' => $token, 'user' => $userPayload]);
+            break;
+
         case 'admin':
             $ctrl     = new AdminController();
             $userCtrl = new UserController();
