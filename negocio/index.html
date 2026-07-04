@@ -108,8 +108,8 @@ const API = '/api';
 })();
 const user  = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
 var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
-console.log('role check:', adminUser.role, 'token:', !!localStorage.getItem('nuevaexpress_token'));
-if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'negocio') window.location.href = '/cliente/login.html';
+if (!localStorage.getItem('nuevaexpress_token')) window.location.href = '/cliente/login.html';
+if (adminUser.role && adminUser.role !== 'negocio' && adminUser.role !== 'admin') window.location.href = '/cliente/login.html';
 document.getElementById('sidebarUser').textContent = user.name || 'Mi Negocio';
 
 // Validar negocio y adaptar sidebar
