@@ -1,0 +1,496 @@
+================================================================================
+  NUEVAEXPRESS — DOCUMENTACIÓN TÉCNICA COMPLETA
+  Plataforma de delivery para Nueva Concepción, Escuintla, Guatemala
+  URL: https://nuevaexpress.com
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+1. STACK TECNOLÓGICO
+────────────────────────────────────────────────────────────────────────────────
+
+Frontend:
+  - HTML5 + CSS3 + JavaScript vanilla (sin frameworks)
+  - PWA (Progressive Web App) — instalable en móvil
+  - Google Fonts: Syne (títulos) + DM Sans (texto)
+
+Backend:
+  - PHP 7.4 con PDO
+  - Arquitectura MVC manual
+  - JWT para autenticación
+  - API REST centralizada en api/index.php
+
+Base de datos:
+  - MySQL (cPanel compartido)
+  - Host: localhost
+  - BD: estudiocero_pedidos
+  - Usuario: estudiocero_pedidos
+
+Servicios externos:
+  - OneSignal — push notifications (App ID: 36b01031-83d9-4f66-bad8-3c32478f9fb2)
+  - PHPMailer — correos transaccionales (SMTP)
+  - Google Maps — links de ubicación en entregas
+  - GitHub Actions — CI/CD deploy automático por FTP
+
+Hosting:
+  - cPanel compartido: estudiocero.com.gt
+  - FTP: ftp.estudiocero.com.gt (usuario: deploy@nuevaexpress.com)
+  - Repositorio: github.com/edwinmaz1997/PEDIDOS.git (privado, rama master)
+
+────────────────────────────────────────────────────────────────────────────────
+2. ESTRUCTURA DE CARPETAS Y ARCHIVOS
+────────────────────────────────────────────────────────────────────────────────
+
+/
+├── index.html                  Directorio público de negocios (página principal)
+├── nosotros.html               Página "Acerca de"
+├── terminos.html               Términos y condiciones
+├── negocio.html                Landing de negocio individual (pública)
+├── 404.html                    Página de error 404
+├── favicon.ico                 Ícono del sitio
+├── manifest.json               Manifest PWA (nombre, íconos, colores)
+├── sw.js                       Service Worker principal (caché offline)
+├── OneSignalSDKWorker.js       Service Worker de OneSignal (push)
+├── OneSignalSDK.sw.js          SDK auxiliar OneSignal
+├── restablecer-contrasena.html Página pública para restablecer contraseña
+├── .htaccess                   Reglas Apache (rewrite, CORS, seguridad)
+│                               ⚠️ NO se sube por FTP — se gestiona manual
+│
+├── admin/                      Panel de Administrador
+│   ├── index.html              Dashboard: métricas, pedidos recientes, stats
+│   ├── negocios.html           Lista de negocios (aprobar/desactivar)
+│   ├── nuevo-negocio.html      Crear negocio desde el admin
+│   ├── editar-negocio.html     Editar datos de un negocio
+│   ├── usuarios.html           Lista de usuarios (clientes, repartidores)
+│   ├── editar-usuario.html     Editar datos de un usuario
+│   ├── pedidos.html            Lista de todos los pedidos del sistema
+│   ├── categorias.html         CRUD de categorías de negocios
+│   ├── zonas-entrega.html      Gestión de zonas de delivery
+│   ├── buscar.html             Buscador global de pedidos/usuarios
+│   ├── reportes.html           Reportes mensuales/diarios por negocio
+│                               (subtotal negocios, deliveries, fees)
+│   ├── pagos-negocios.html     Liquidación diaria: cuánto transferir a
+│                               cada negocio y cuánto recibir de repartidores
+│   └── avisos.html             Enviar notificaciones masivas a todos los negocios
+│
+├── cliente/                    Panel del Cliente
+│   ├── login.html              Login (email + contraseña)
+│   ├── register.html           Registro (3 pasos: datos, verificación email, PWA)
+│   ├── olvide-contrasena.html  Solicitar reset de contraseña
+│   ├── index.html              Mis pedidos (historial con desglose de items)
+│   ├── pedido.html             Hacer pedido a un negocio:
+│                               - Tabs por categorías de producto
+│                               - Carrito persistente
+│                               - Modal "Personalizar" (complementos + extras)
+│                               - Tipos: Recoger / Comer aquí / Delivery
+│                               - Boleta opcional (negocio 5)
+│   ├── pedido-detalle.html     Detalle del pedido + chat con negocio
+│   ├── perfil.html             Datos personales, dirección, contraseña
+│   ├── promociones.html        Ver promociones activas de negocios
+│   └── reportes.html           Reportes del cliente (gastos, negocios visitados)
+│
+├── negocio/                    Panel del Negocio
+│   ├── crear-negocio.html      Registro inicial del negocio (post-signup)
+│   ├── index.html              Panel principal: pedidos en tiempo real,
+│                               aceptar/rechazar, timer de preparación,
+│                               marcar listo, asignar repartidor
+│   ├── pedido-detalle.html     Detalle del pedido + chat con cliente
+│                               + editar precios + boleta
+│   ├── perfil.html             Datos del negocio, horarios, delivery, logo
+│   ├── productos.html          CRUD de productos con:
+│                               - Categorías, fotos, precio
+│                               - Variantes (ej: tamaños)
+│                               - Complementos 1/2/3 (obligatorios, gratis)
+│                               - Extras (opcionales, con costo)
+│   ├── promociones.html        Crear/editar promociones con:
+│                               - Productos con precio especial
+│                               - Imagen, fechas y horarios
+│                               - Activar/desactivar (renotifica clientes)
+│   ├── reportes.html           Ventas diarias del negocio
+│   ├── servicios.html          (Módulo de servicios adicionales)
+│   └── zonas-entrega.html      Zonas donde el negocio hace delivery
+│
+├── repartidor/                 Panel del Repartidor
+│   ├── index.html              Panel principal: deliveries disponibles,
+│                               tomar entrega, marcar recogido/entregado,
+│                               auto-open desde notificación (?delivery_id=X)
+│   ├── perfil.html             Datos del repartidor
+│   └── reportes.html           Mis reportes: entregas, delivery cobrado,
+│                               ganancia (50% del delivery), filtros:
+│                               Hoy / Esta semana / Este mes / Día específico
+│
+├── assets/
+│   ├── css/
+│   │   └── main.css            Estilos globales: variables CSS, componentes,
+│   │                           navbar, sidebar, cards, modales, responsive
+│   ├── js/
+│   │   ├── app.js              Helper global: APP.get/post/put/del,
+│   │                           APP.upload, APP.esc, APP.toast, APP.logout
+│   │                           Inicializa sesión desde hash #tk=TOKEN
+│   │   └── pwa.js              OneSignal SDK init, login con userId/tags,
+│   │                           Sistema de campanita de notificaciones:
+│   │                           - Badge con contador de no leídas
+│   │                           - Drawer desde la derecha con animación
+│   │                           - Polling cada 10s
+│   │                           - Marcar leídas / borrar todo
+│   │                           - Click navega a URL de la notificación
+│   └── img/
+│       ├── logo.jpg            Logo principal NuevaExpress
+│       ├── icon-192.png        Ícono PWA 192x192
+│       ├── icon-512.png        Ícono PWA 512x512
+│       └── placeholder.svg     Imagen por defecto para negocios sin foto
+│
+├── api/
+│   ├── index.php               Router central de la API REST
+│   │                           Maneja CORS, JWT auth, routing por case/switch
+│   │                           ⚠️ Métodos críticos que no actualizan por FTP
+│   │                           se implementan directamente aquí
+│   ├── config/
+│   │   ├── config.php          ⚠️ NO está en git (servidor únicamente)
+│   │   │                       Contiene: DB_HOST, DB_NAME, DB_USER, DB_PASS,
+│   │   │                       JWT_SECRET, SERVICE_FEE (Q3), ONESIGNAL_API_KEY
+│   │   ├── config.example.php  Plantilla de configuración
+│   │   └── database.php        Conexión PDO singleton
+│   │
+│   ├── controllers/
+│   │   ├── AdminNotificationController.php
+│   │   │   (clase: AdminController)
+│   │   │   - orders()          GET /api/admin/orders?date=YYYY-MM-DD
+│   │   │   - deliveries()      GET /api/admin/deliveries?date=YYYY-MM-DD
+│   │   │   - businesses()      GET /api/admin/businesses
+│   │   │   - users()           GET/PUT/DELETE /api/admin/users
+│   │   │   - stats()           GET /api/admin/stats (dashboard)
+│   │   │   - deleteOrder()     DELETE /api/admin/orders/{id}
+│   │   │   - sendAviso()       POST /api/admin/avisos (notifica todos negocios)
+│   │   │   - getAvisos()       GET /api/admin/avisos (historial)
+│   │   │   - resetData()       POST /api/admin/reset-data
+│   │   │
+│   │   ├── AuthController.php
+│   │   │   - login()           POST /api/auth/login
+│   │   │   - register()        POST /api/auth/register
+│   │   │   - verifyEmail()     POST /api/auth/verify-email
+│   │   │   - resendCode()      POST /api/auth/resend-code
+│   │   │   - profile()         GET/PUT /api/auth/profile
+│   │   │   - changePassword()  PUT /api/auth/password
+│   │   │
+│   │   ├── BusinessController.php
+│   │   │   - index()           GET /api/businesses (directorio público)
+│   │   │   - show()            GET /api/businesses/{id}
+│   │   │   - store()           POST /api/businesses
+│   │   │   - update()          PUT /api/businesses/{id}
+│   │   │   - mine()            GET /api/businesses/mine
+│   │   │   - getAllProducts()   Trae productos+variantes+extras+complementos
+│   │   │   - calcDelivery()    POST /api/businesses/{id}/calc-delivery
+│   │   │   - updateStatus()    PUT /api/businesses/{id}/status (abrir/cerrar)
+│   │   │
+│   │   ├── DeliveryController.php
+│   │   │   - index()           GET /api/deliveries (lista para repartidor)
+│   │   │   - claim()           POST /api/deliveries/{id}/claim (tomar entrega)
+│   │   │   - release()         POST /api/deliveries/{id}/release (liberar)
+│   │   │   - updateStatus()    PUT /api/deliveries/{id}/status
+│   │   │                       (asignado→recogido→entregado)
+│   │   │   - stats()           GET /api/deliveries/stats?period=today|week|month|custom&date=
+│   │   │
+│   │   ├── OrderController.php
+│   │   │   - index()           GET /api/orders (mis pedidos)
+│   │   │   - show()            GET /api/orders/{id}
+│   │   │   - store()           POST /api/orders (crear pedido)
+│   │   │                       Envía email al negocio + notificación push
+│   │   │   - businessRespond() PUT /api/orders/{id}/respond (aceptar/rechazar)
+│   │   │   - updateStatus()    PUT /api/orders/{id}/status
+│   │   │   - updateTotal()     PUT /api/orders/{id}/total
+│   │   │   - notifyRepartidores() Notifica a todos los repartidores activos
+│   │   │
+│   │   ├── OrderMessageController.php
+│   │   │   - index()           GET /api/orders/{id}/messages
+│   │   │   - store()           POST /api/orders/{id}/messages
+│   │   │                       Notifica al otro partido (cliente↔negocio↔repartidor)
+│   │   │                       Inserta en tabla notifications
+│   │   │   - updateTotal()     PUT /api/orders/{id}/total (desde chat)
+│   │   │
+│   │   ├── ProductController.php
+│   │   │   - index()           GET /api/products (productos del negocio)
+│   │   │   - store()           POST /api/products
+│   │   │   - update()          PUT /api/products/{id}
+│   │   │   - destroy()         DELETE /api/products/{id}
+│   │   │   - saveVariants()    Guarda variantes en product_variants
+│   │   │   - saveExtras()      Guarda extras en product_extras
+│   │   │   - saveComplements() Guarda complementos en product_complements (1/2/3)
+│   │   │
+│   │   ├── PromotionController.php
+│   │   │   - index()           GET /api/promotions (vigentes para clientes)
+│   │   │   - mine()            GET /api/promotions/mine (del negocio)
+│   │   │   - show()            GET /api/promotions/{id}
+│   │   │   - store()           POST /api/promotions (crea + notifica clientes)
+│   │   │   - update()          PUT /api/promotions/{id} (edita, renotifica si notify=1)
+│   │   │   - destroy()         DELETE /api/promotions/{id}
+│   │   │   - notifyClients()   Notifica a TODOS los clientes activos
+│   │   │
+│   │   ├── UserController.php
+│   │   │   - CRUD de usuarios
+│   │   │
+│   │   ├── CategoryController.php
+│   │   │   - CRUD de categorías de negocios
+│   │   │
+│   │   ├── ProductCategoryController.php
+│   │   │   - CRUD de categorías de productos por negocio
+│   │   │
+│   │   ├── DeliveryZoneController.php
+│   │   │   - CRUD de zonas de entrega
+│   │   │
+│   │   ├── PhotoController.php
+│   │   │   - Subida de fotos de negocios
+│   │   │
+│   │   ├── PasswordResetController.php
+│   │   │   - Solicitar y confirmar reset de contraseña
+│   │   │
+│   │   └── BusinessServiceController.php
+│   │       - Servicios adicionales del negocio
+│   │
+│   ├── middleware/
+│   │   └── AuthMiddleware.php
+│   │       - authenticate()    Valida JWT del header Authorization
+│   │       - requireRole()     Valida rol específico (admin/negocio/cliente/repartidor)
+│   │
+│   ├── helpers/
+│   │   ├── Response.php        Respuestas JSON estandarizadas (success/error)
+│   │   ├── Security.php        Sanitización de inputs, validaciones
+│   │   ├── Mailer.php          Correos: verificación, pedido aceptado/listo/
+│   │   │                       entregado/en camino, nuevo pedido al negocio
+│   │   │                       sendGeneric() para correos personalizados
+│   │   ├── PushNotification.php send() y sendToMany() via OneSignal REST API
+│   │   └── GeoHelper.php       Cálculo de distancias para delivery
+│   │
+│   ├── libs/
+│   │   └── PHPMailer/          Librería PHPMailer (SMTP)
+│   │
+│   └── cron/
+│       └── reminders.php       Script de recordatorios (cron cPanel)
+│
+└── database/
+    └── schema.sql              Esquema completo de la base de datos
+
+────────────────────────────────────────────────────────────────────────────────
+3. BASE DE DATOS — TABLAS
+────────────────────────────────────────────────────────────────────────────────
+
+roles                   Roles del sistema (admin, negocio, cliente, repartidor)
+users                   Usuarios (todos los roles)
+user_sessions           Sesiones JWT activas
+rate_limits             Límites de peticiones por IP
+email_verifications     Códigos de verificación de email al registrarse
+password_resets         Tokens de reset de contraseña
+
+business_categories     Categorías de negocios (restaurante, farmacia, etc.)
+businesses              Negocios registrados
+  Campos clave: name, description, logo, cover_photo, phone, whatsapp,
+                opening_hours (JSON), accepts_delivery, allows_dine_in,
+                delivery_fee, min_order_delivery, is_active, is_verified,
+                business_type, allows_dine_in, user_id (dueño)
+business_photos         Fotos adicionales del negocio
+business_services       Servicios especiales del negocio
+business_delivery_zones Relación negocio ↔ zona de entrega
+
+product_categories      Categorías de productos por negocio (con ícono/color)
+products_services       Productos del negocio
+  Campos clave: name, description, price, photo, is_available,
+                has_variants, requires_boleta,
+                has_complements, complements_required, complement1_name,
+                has_complements2, complements2_required, complement2_name,
+                has_complements3, complements3_required, complement3_name
+product_variants        Variantes de producto (ej: tamaño pequeño/grande con precio)
+product_complements     Opciones del grupo complemento 1 (obligatorio, gratis)
+product_complements2    Opciones del grupo complemento 2
+product_complements3    Opciones del grupo complemento 3
+product_extras          Extras opcionales con costo adicional
+
+orders                  Pedidos
+  Campos clave: order_number, client_id, business_id, delivery_type
+                (pickup/delivery/dine_in), delivery_address, notes,
+                subtotal, service_fee (Q3 fijo), delivery_fee, total,
+                status (pendiente/aceptado/en_preparacion/listo/
+                        en_camino/entregado/cancelado),
+                estimated_time, preparation_started_at,
+                dine_in_persons, dine_in_time, boleta_url, from_promo
+order_items             Items del pedido (product_id, name, qty, price, notes)
+                        notes contiene: "Complemento: X | Extras: Y +Q5.00"
+order_status_log        Historial de cambios de estado del pedido
+order_messages          Chat entre cliente y negocio por pedido
+
+deliveries              Entregas asignadas a repartidores
+  Campos clave: order_id, repartidor_id, status
+                (disponible/asignado/recogido/entregado),
+                assigned_at, delivered_at
+delivery_zones          Zonas de entrega disponibles
+
+promotions              Promociones de negocios
+  Campos clave: business_id, title, description, image_url,
+                starts_at, ends_at (DATETIME), is_active
+promotion_items         Productos incluidos en la promoción con precio especial
+
+notifications           Notificaciones del sistema (campanita)
+  Campos clave: user_id, type, title, message, data (JSON con url),
+                is_read, created_at
+admin_avisos            Historial de avisos masivos del admin a negocios
+  Campos clave: title, description, recipient_count, created_by
+
+reviews                 Reseñas de clientes (módulo futuro)
+
+────────────────────────────────────────────────────────────────────────────────
+4. LÓGICA DE NEGOCIO
+────────────────────────────────────────────────────────────────────────────────
+
+SERVICE FEE (Q3 por pedido):
+  - Lo cobra NuevaExpress de forma oculta al cliente
+  - Incluido en o.total pero invisible en el frontend del cliente
+  - Los negocios lo pagan a fin de mes (reportes lo detallan)
+
+DELIVERY:
+  - El delivery_fee va íntegro al repartidor
+  - El repartidor recibe 50% del delivery como ganancia propia
+  - El otro 50% es para NuevaExpress (modelo configurable)
+  - El repartidor entrega al admin: subtotal + delivery_fee total
+  - El admin transfiere al negocio solo el subtotal
+
+TIPOS DE PEDIDO:
+  - pickup:   Cliente recoge en el negocio (sin delivery_fee)
+  - delivery: Repartidor lleva al cliente (con delivery_fee)
+  - dine_in:  Comer en el negocio (con hora de llegada y personas)
+
+FLUJO DE PEDIDO DELIVERY:
+  1. Cliente crea pedido → negocio recibe notificación push + email
+  2. Negocio acepta → cliente recibe push + timer de preparación
+  3. Negocio marca "Listo" → repartidores reciben notificación
+  4. Repartidor toma la entrega → cliente y negocio notificados
+  5. Repartidor marca "Recogido" → en camino
+  6. Repartidor marca "Entregado" → pedido completado
+
+COMPLEMENTOS (productos):
+  - Hasta 3 grupos independientes por producto
+  - Cada grupo tiene: nombre personalizable, cantidad mínima obligatoria
+  - Son gratuitos (no afectan el precio)
+  - El cliente usa contadores (+/-) con límite por grupo
+
+EXTRAS (productos):
+  - Opcionales, el cliente puede no elegir ninguno
+  - Tienen costo adicional que se suma al precio base
+  - Se muestran en el desglose del pedido como líneas separadas
+
+PROMOCIONES:
+  - Activas entre starts_at y ends_at (DATETIME con hora)
+  - Al publicar o activar → notificación push a todos los clientes
+  - El cliente ve el precio especial y puede pedir con ese precio
+
+────────────────────────────────────────────────────────────────────────────────
+5. SISTEMA DE NOTIFICACIONES
+────────────────────────────────────────────────────────────────────────────────
+
+PUSH (OneSignal):
+  - Todos los usuarios se registran con su user_id en OneSignal
+  - Tags: role, name
+  - Se envían en eventos: nuevo pedido, aceptado, listo, mensaje chat,
+    repartidor asignado, entregado, promociones, avisos admin
+
+CAMPANITA (in-app):
+  - Tabla: notifications
+  - Polling cada 10 segundos desde pwa.js
+  - Badge rojo con contador en el sidebar
+  - Drawer desde la derecha con lista de notificaciones
+  - Al hacer click: marca leída + navega a la URL del evento
+  - Botones: marcar todas leídas / borrar todo
+
+CORREOS (PHPMailer/SMTP):
+  - Registro: código de verificación de 6 dígitos
+  - Pedido aceptado: tiempo estimado
+  - Pedido listo para recoger
+  - Pedido en camino
+  - Pedido entregado
+  - Nuevo pedido al negocio (email automático al dueño del negocio)
+  - Reset de contraseña
+
+────────────────────────────────────────────────────────────────────────────────
+6. DEPLOY Y CI/CD
+────────────────────────────────────────────────────────────────────────────────
+
+Flujo:
+  git push origin master
+    → GitHub Actions (.github/workflows/deploy.yml)
+    → FTP Deploy a ftp.estudiocero.com.gt
+    → Servidor: /home/estudiocero/nuevaexpress.com/
+
+Archivos EXCLUIDOS del deploy (se gestionan manualmente en cPanel):
+  - .htaccess (raíz)
+  - api/.htaccess
+  - api/config/config.php (credenciales)
+  - uploads/ (fotos subidas por usuarios)
+
+⚠️ BUG CONOCIDO:
+  AdminNotificationController.php NO actualiza por FTP.
+  Los métodos nuevos de este archivo deben implementarse directamente
+  en api/index.php para que tomen efecto en producción.
+
+────────────────────────────────────────────────────────────────────────────────
+7. CREDENCIALES Y CONFIGURACIÓN (SOLO PARA REFERENCIA INTERNA)
+────────────────────────────────────────────────────────────────────────────────
+
+Base de datos:
+  Host:     localhost
+  BD:       estudiocero_pedidos
+  Usuario:  estudiocero_pedidos
+
+OneSignal:
+  App ID:   36b01031-83d9-4f66-bad8-3c32478f9fb2
+  SDK:      v16 (página y service worker)
+
+SERVICE_FEE: Q3.00 por pedido
+
+Cuenta bancaria NuevaExpress (para boletas):
+  Banco Industrial — Cuenta 1550773 — Edwin Mazariegos
+
+────────────────────────────────────────────────────────────────────────────────
+8. ROLES DE USUARIO
+────────────────────────────────────────────────────────────────────────────────
+
+admin (role_id: 1)
+  - Acceso total al sistema
+  - Dashboard, reportes, gestión de negocios/usuarios
+  - Avisos masivos, pagos a negocios, liquidación repartidores
+
+negocio (role_id: 2)
+  - Solo puede gestionar su propio negocio
+  - Panel de pedidos en tiempo real
+  - Productos, promociones, reportes de ventas
+
+cliente (role_id: 3)
+  - Hacer pedidos, ver historial
+  - Chat con negocio, ver promociones
+  - Perfil con dirección guardada
+
+repartidor (role_id: 4)
+  - Ver deliveries disponibles y tomarlos
+  - Actualizar estado: recogido → entregado
+  - Reportes de ganancias con filtro por día
+
+────────────────────────────────────────────────────────────────────────────────
+9. NOTAS IMPORTANTES PARA DESARROLLO FUTURO
+────────────────────────────────────────────────────────────────────────────────
+
+1. El campo o.total = subtotal + service_fee + delivery_fee
+   - Lo que va al negocio: subtotal (sin fee ni delivery)
+   - Lo que va al repartidor: subtotal + delivery_fee
+   - Lo que retiene NuevaExpress: service_fee (Q3) + 50% delivery
+
+2. Los complementos se guardan en notes del order_item con formato:
+   "Complemento: fresa, banano | Aderezo: ranch | Extras: helado +Q5.00"
+
+3. Las fechas de promociones son DATETIME (no DATE) para soportar horarios
+
+4. El repartidor ve solo entregas con status='disponible' o las suyas
+
+5. Módulo de doble check en mensajes (leído) — pendiente de implementar
+
+6. Foto de perfil para cliente y repartidor — pendiente de implementar
+
+================================================================================
+  Documento generado: Julio 2026
+  Desarrollado con Claude (Anthropic) — github.com/edwinmaz1997/PEDIDOS
+================================================================================

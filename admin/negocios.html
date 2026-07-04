@@ -223,6 +223,7 @@ function renderTable(list) {
         </button>
         <button class="icon-btn" onclick="editBiz(${b.id})" title="Editar">✏️</button>
         <button class="icon-btn" onclick="viewBiz(${b.id})" title="Ver">👁</button>
+        <button class="icon-btn" onclick="connectAsBiz(${b.user_id})" title="Conectar como negocio" style="background:#e0f2fe;border-color:#7dd3fc;font-size:.75rem;padding:4px 8px;width:auto;border-radius:6px">🔗 Conectar</button>
         <button class="icon-btn ${b.is_verified?'':'success'}" onclick="toggleVerify(${b.id}, ${b.is_verified})">
           ${b.is_verified?'✓':'✓'}
         </button>
@@ -279,6 +280,20 @@ async function toggleVerify(id, current) {
 
 function editBiz(id) { window.location.href = 'editar-negocio.html?id=' + id; }
 function viewBiz(id) { window.open('/negocio.html?id=' + id, '_blank'); }
+
+async function connectAsBiz(userId) {
+  if (!confirm('¿Iniciar sesión como este negocio? Se abrirá en una nueva pestaña.')) return;
+  var res = await fetch('/api/admin/impersonate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() },
+    body: JSON.stringify({ user_id: userId })
+  });
+  var data = await res.json();
+  if (!data.success) { alert('Error: ' + (data.message || 'No se pudo conectar')); return; }
+  var token = data.data.token;
+  var user  = encodeURIComponent(JSON.stringify(data.data.user));
+  window.open('/negocio/index.html#tk=' + token + '&us=' + user, '_blank');
+}
 
 async function deleteBiz(id, name) {
   if (!confirm('¿Eliminar "' + name + '"? Esta acción no se puede deshacer.')) return;
