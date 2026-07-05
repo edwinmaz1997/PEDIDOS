@@ -56,8 +56,16 @@
         <p>Ventas netas a transferir (sin delivery ni fee)</p>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <input type="date" id="datePicker" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
-        <button onclick="loadReport()" class="btn-primary" style="padding:9px 18px">Ver pagos</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label style="font-size:.85rem;font-weight:600">Desde:</label>
+          <input type="date" id="dateFrom" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+          <label style="font-size:.85rem;font-weight:600">Hasta:</label>
+          <input type="date" id="dateTo" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+          <button onclick="setQuick('today')" class="btn-ghost" style="padding:9px 14px">Hoy</button>
+          <button onclick="setQuick('week')" class="btn-ghost" style="padding:9px 14px">Semana</button>
+          <button onclick="setQuick('month')" class="btn-ghost" style="padding:9px 14px">Mes</button>
+          <button onclick="loadReport()" class="btn-primary" style="padding:9px 18px">Ver pagos</button>
+        </div>
       </div>
     </div>
 
@@ -103,31 +111,44 @@ function money(v){ return 'Q'+parseFloat(v||0).toFixed(2); }
 function esc(s){ var d=document.createElement('div');d.textContent=s;return d.innerHTML; }
 
 // Set default date = today
-var dp = document.getElementById('datePicker');
 var now = new Date();
-dp.value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+var todayStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+document.getElementById('dateFrom').value = todayStr;
+document.getElementById('dateTo').value = todayStr;
+
+function setQuick(range) {
+  var today = new Date();
+  var from = new Date(today);
+  if (range === 'week') { from.setDate(today.getDate() - today.getDay()); }
+  else if (range === 'month') { from.setDate(1); }
+  var fmt = function(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+  document.getElementById('dateFrom').value = fmt(from);
+  document.getElementById('dateTo').value = fmt(today);
+  loadReport();
+}
 
 async function loadReport() {
-  var date = document.getElementById('datePicker').value;
-  if (!date) return;
+  var dateFrom = document.getElementById('dateFrom').value;
+  var dateTo   = document.getElementById('dateTo').value;
+  if (!dateFrom || !dateTo) return;
 
   document.getElementById('reportEl').innerHTML = '';
   document.getElementById('summaryBar').style.display = 'none';
   document.getElementById('noData').style.display = 'none';
   document.getElementById('loadingEl').style.display = 'block';
 
-  var res = await fetch('/api/admin/orders?date='+date, { headers: { Authorization: 'Bearer '+getToken() } });
+  var res = await fetch('/api/admin/orders?date='+dateFrom, { headers: { Authorization: 'Bearer '+getToken() } });
   var data = await res.json();
   document.getElementById('loadingEl').style.display = 'none';
 
   if (!data.success) { document.getElementById('noData').style.display = 'block'; return; }
 
-  // Filtrar solo pedidos entregados de ese día
+  // Filtrar solo pedidos de delivery entregados en el rango
   var orders = (data.data || []).filter(function(o) {
     if (o.status !== 'entregado' && o.status !== 'listo') return false;
     if (o.delivery_type !== 'delivery') return false;
     var d = (o.updated_at || o.created_at || '').substring(0, 10);
-    return d === date;
+    return d >= dateFrom && d <= dateTo;
   });
 
   if (!orders.length) { document.getElementById('noData').style.display = 'block'; return; }
@@ -189,7 +210,7 @@ async function loadReport() {
   document.getElementById('summaryBar').style.display = 'block';
 
   // Liquidación de repartidores
-  var repRes = await fetch('/api/admin/deliveries?date='+date, { headers: { Authorization: 'Bearer '+getToken() } });
+  var repRes = await fetch('/api/admin/deliveries?date='+dateFrom+'&date_to='+dateTo, { headers: { Authorization: 'Bearer '+getToken() } });
   var repData = await repRes.json();
   var deliveries = repData.data || [];
 

@@ -36,7 +36,8 @@ class AdminController {
 
     public function deliveries(): void {
         AuthMiddleware::requireRole('admin');
-        $date = $_GET['date'] ?? date('Y-m-d');
+        $dateFrom = $_GET['date'] ?? date('Y-m-d');
+        $dateTo   = $_GET['date_to'] ?? $dateFrom;
         $stmt = $this->db->prepare("
             SELECT d.id, d.status, d.delivered_at,
                    o.order_number, o.subtotal, o.delivery_fee, o.service_fee, o.total, o.status as order_status,
@@ -47,10 +48,10 @@ class AdminController {
             JOIN users u ON u.id = d.repartidor_id
             JOIN businesses b ON b.id = o.business_id
             JOIN users c ON c.id = o.client_id
-            WHERE DATE(o.created_at) = ? AND d.repartidor_id IS NOT NULL AND d.status = 'entregado'
+            WHERE DATE(o.created_at) BETWEEN ? AND ? AND d.repartidor_id IS NOT NULL AND d.status = 'entregado'
             ORDER BY u.name, o.created_at
         ");
-        $stmt->execute([$date]);
+        $stmt->execute([$dateFrom, $dateTo]);
         Response::success($stmt->fetchAll());
     }
 
