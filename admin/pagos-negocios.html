@@ -152,7 +152,7 @@ async function loadReport() {
   document.getElementById('noData').style.display = 'none';
   document.getElementById('loadingEl').style.display = 'block';
 
-  var res = await fetch('/api/admin/orders?date='+dateFrom, { headers: { Authorization: 'Bearer '+getToken() } });
+  var res = await fetch('/api/admin/orders', { headers: { Authorization: 'Bearer '+getToken() } });
   var data = await res.json();
   document.getElementById('loadingEl').style.display = 'none';
 
