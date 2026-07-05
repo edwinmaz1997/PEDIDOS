@@ -64,6 +64,9 @@
           <button onclick="setQuick('today')" class="btn-ghost" style="padding:9px 14px">Hoy</button>
           <button onclick="setQuick('week')" class="btn-ghost" style="padding:9px 14px">Semana</button>
           <button onclick="setQuick('month')" class="btn-ghost" style="padding:9px 14px">Mes</button>
+          <select id="bizFilter" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;background:white">
+            <option value="">Todos los negocios</option>
+          </select>
           <button onclick="loadReport()" class="btn-primary" style="padding:9px 18px">Ver pagos</button>
         </div>
       </div>
@@ -116,6 +119,18 @@ var todayStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-
 document.getElementById('dateFrom').value = todayStr;
 document.getElementById('dateTo').value = todayStr;
 
+// Cargar negocios en el select
+fetch('/api/admin/businesses', { headers: { Authorization: 'Bearer '+getToken() } })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    var sel = document.getElementById('bizFilter');
+    (d.data||[]).forEach(function(b) {
+      var opt = document.createElement('option');
+      opt.value = b.id; opt.textContent = b.name;
+      sel.appendChild(opt);
+    });
+  });
+
 function setQuick(range) {
   var today = new Date();
   var from = new Date(today);
@@ -143,10 +158,13 @@ async function loadReport() {
 
   if (!data.success) { document.getElementById('noData').style.display = 'block'; return; }
 
+  var bizId = document.getElementById('bizFilter').value;
+
   // Filtrar solo pedidos de delivery entregados en el rango
   var orders = (data.data || []).filter(function(o) {
     if (o.status !== 'entregado' && o.status !== 'listo') return false;
     if (o.delivery_type !== 'delivery') return false;
+    if (bizId && o.business_id != bizId) return false;
     var d = (o.updated_at || o.created_at || '').substring(0, 10);
     return d >= dateFrom && d <= dateTo;
   });
