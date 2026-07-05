@@ -33,6 +33,16 @@
 .filter-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
 .filter-tab { padding:7px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; cursor:pointer; font-size:.85rem; font-family:'DM Sans',sans-serif; transition:var(--transition); }
 .filter-tab.active { background:var(--charcoal); color:white; border-color:var(--charcoal); }
+#promoCarousel::-webkit-scrollbar{display:none}
+.promo-slide{flex-shrink:0;width:210px;border-radius:14px;overflow:hidden;scroll-snap-align:start;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.12);transition:transform .2s;background:#1a1a2e}
+.promo-slide:hover{transform:translateY(-2px)}
+.promo-slide-img{width:100%;height:110px;object-fit:cover;display:block}
+.promo-slide-nophoto{width:100%;height:110px;background:linear-gradient(135deg,#F5C518,#FF8C42);display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.promo-slide-body{padding:10px 12px}
+.promo-slide-biz{font-size:.68rem;color:rgba(255,255,255,.6);margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.promo-slide-biz img{width:18px;height:18px;border-radius:50%;object-fit:cover}
+.promo-slide-title{font-weight:700;font-size:.82rem;color:white;line-height:1.3;margin-bottom:5px}
+.promo-slide-badge{background:rgba(255,255,255,.15);color:white;font-size:.68rem;padding:2px 8px;border-radius:20px;display:inline-block}
 </style>
 </head>
 <body>
@@ -57,6 +67,16 @@
 
   <!-- Main -->
   <main class="main-content">
+
+    <!-- Carrusel de Promociones -->
+    <div id="promoCarouselWrap" style="display:none;margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-weight:700;font-size:.95rem;color:var(--navy)">🏷️ Promociones activas</div>
+        <a href="promociones.html" style="font-size:.8rem;color:var(--blue);text-decoration:none">Ver todas →</a>
+      </div>
+      <div id="promoCarousel" style="display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none"></div>
+    </div>
+
     <div class="page-header">
       <h1>Mis Pedidos</h1>
       <p>Historial y estado de tus pedidos</p>
@@ -265,7 +285,33 @@ function reorder(businessId, items, deliveryType, deliveryAddress) {
   window.location.href = '/cliente/pedido.html?business=' + businessId + '&reorder=1';
 }
 
+async function loadPromos() {
+  try {
+    var res = await fetch(API + '/promotions', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+    var data = await res.json();
+    var promos = data.data || [];
+    if (!promos.length) return;
+    var carousel = document.getElementById('promoCarousel');
+    carousel.innerHTML = promos.map(function(p) {
+      var photoHtml = p.image_url ? '<img src="'+p.image_url+'" class="promo-slide-img">' : '<div class="promo-slide-nophoto">🏷️</div>';
+      var bizLogo = p.business_logo ? '<img src="'+p.business_logo+'">' : '';
+      var minPrice = (p.items||[]).reduce(function(mn,i){ return Math.min(mn, parseFloat(i.promo_price||0)); }, Infinity);
+      var priceLabel = isFinite(minPrice) && minPrice > 0 ? 'Desde Q'+minPrice.toFixed(2) : '¡Oferta especial!';
+      return '<div class="promo-slide" onclick="window.location.href=\'promociones.html\'">' +
+        photoHtml +
+        '<div class="promo-slide-body">' +
+          '<div class="promo-slide-biz">'+bizLogo+p.business_name+'</div>' +
+          '<div class="promo-slide-title">'+p.title+'</div>' +
+          '<span class="promo-slide-badge">'+priceLabel+'</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('promoCarouselWrap').style.display = 'block';
+  } catch(e) {}
+}
+
 loadOrders();
+loadPromos();
 // Poll every 30s for status updates
 setInterval(() => loadOrders(document.querySelector('.filter-tab.active')?.dataset?.status || ''), 30000);
 </script>
