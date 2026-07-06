@@ -83,13 +83,18 @@
       <p>Historial y estado de tus pedidos</p>
     </div>
 
-    <div class="filter-tabs">
-      <button class="filter-tab active" onclick="loadOrders('', this)">Todos</button>
-      <button class="filter-tab" onclick="loadOrders('pendiente', this)">⏳ Pendientes</button>
-      <button class="filter-tab" onclick="loadOrders('aceptado', this)">✅ Aceptados</button>
-      <button class="filter-tab" onclick="loadOrders('en_preparacion', this)">👨‍🍳 En preparación</button>
-      <button class="filter-tab" onclick="loadOrders('entregado', this)">✔ Entregados</button>
-      <button class="filter-tab" onclick="loadOrders('cancelado', this)">✕ Cancelados</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+      <div style="font-weight:700;font-size:1rem;color:var(--navy);flex:1">Mis Pedidos</div>
+      <select id="statusFilter" onchange="loadOrders(this.value)" style="padding:8px 14px;border:1.5px solid var(--border);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.85rem;background:white;cursor:pointer;outline:none">
+        <option value="">📋 Todos</option>
+        <option value="pendiente">⏳ Pendientes</option>
+        <option value="aceptado">✅ Aceptados</option>
+        <option value="en_preparacion">👨‍🍳 En preparación</option>
+        <option value="listo">📦 Listos</option>
+        <option value="en_camino">🛵 En camino</option>
+        <option value="entregado">✔ Entregados</option>
+        <option value="cancelado">✕ Cancelados</option>
+      </select>
     </div>
 
     <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -128,6 +133,9 @@ var page = 1;
 var perPage = 8;
 
 async function loadOrders(status = '', tabBtn = null) {
+  // Sincronizar dropdown si se llama externamente
+  var sel = document.getElementById('statusFilter');
+  if (sel && sel.value !== status) sel.value = status;
   if (tabBtn) {
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
     tabBtn.classList.add('active');
