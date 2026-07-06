@@ -57,7 +57,7 @@ class AnuncioController {
                 $insStmt->execute([$uid, 'anuncio', '📢 '.$biz['name'], $body['title'], json_encode(['url'=>'/cliente/anuncios.html'])]);
             }
         }
-        Response::success(['id' => $id], 'Anuncio publicado');
+        Response::success(['id' => (int)$id], 'Anuncio publicado');
     }
 
     // PUT /api/anuncios/{id}

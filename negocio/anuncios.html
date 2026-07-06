@@ -198,26 +198,11 @@ async function saveAnuncio() {
   var btn = document.getElementById('saveBtn');
   btn.textContent = 'Guardando...'; btn.disabled = true;
 
-  // Subir imagen si hay una nueva
-  var imageUrl = uploadedImageUrl;
   var imgFile = document.getElementById('f_image').files[0];
-  if (imgFile) {
-    var fakeId = editingId || Date.now();
-    var formData = new FormData();
-    formData.append('image', imgFile);
-    // Subir directamente al endpoint general de imágenes
-    var uploadRes = await fetch('/api/anuncios/'+(editingId||0)+'/imagen', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer '+getToken() },
-      body: formData
-    });
-    var uploadData = await uploadRes.json();
-    if (uploadData.success) imageUrl = uploadData.data.url;
-  }
+  var imageUrl = uploadedImageUrl;
 
+  // Si es nuevo, crear primero sin imagen
   var payload = { title, description: desc, is_active: document.getElementById('f_active').checked ? 1 : 0 };
-  if (imageUrl) payload.image_url = imageUrl;
-
   var url = editingId ? '/api/anuncios/'+editingId : '/api/anuncios';
   var method = editingId ? 'PUT' : 'POST';
 
@@ -227,10 +212,29 @@ async function saveAnuncio() {
     body: JSON.stringify(payload)
   });
   var data = await res.json();
-  btn.textContent = editingId ? 'Guardar cambios' : 'Publicar anuncio'; btn.disabled = false;
 
-  if (data.success) { closeModal(); loadAnuncios(); }
-  else showMsg(data.message||'Error al guardar', true);
+  if (!data.success) {
+    btn.textContent = editingId ? 'Guardar cambios' : 'Publicar anuncio'; btn.disabled = false;
+    showMsg(data.message||'Error al guardar', true); return;
+  }
+
+  var anuncioId = editingId || data.data?.id;
+
+  // Subir imagen si hay una nueva
+  if (imgFile && anuncioId) {
+    var formData = new FormData();
+    formData.append('image', imgFile);
+    var uploadRes = await fetch('/api/anuncios/'+anuncioId+'/imagen', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer '+getToken() },
+      body: formData
+    });
+    var uploadData = await uploadRes.json();
+    if (!uploadData.success) showMsg('Anuncio guardado pero la imagen falló: '+(uploadData.message||''), false);
+  }
+
+  btn.textContent = editingId ? 'Guardar cambios' : 'Publicar anuncio'; btn.disabled = false;
+  closeModal(); loadAnuncios();
 }
 
 async function toggleActive(id, current) {
