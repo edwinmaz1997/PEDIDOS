@@ -221,7 +221,7 @@ function dismissInstall() {
           '</div>' +
           '<div style="padding:20px">' +
             '<div style="font-weight:700;font-size:.88rem;color:#0f172a;margin-bottom:6px">📍 Configura tu ubicación</div>' +
-            '<div style="font-size:.8rem;color:#64748b;line-height:1.6;margin-bottom:12px">Guarda tu ubicación para que el sistema calcule automáticamente el costo de envío sin que tengas que pegar un link cada vez.</div>' +
+            '<div style="font-size:.8rem;color:#64748b;line-height:1.6;margin-bottom:12px">Guarda tu ubicación para poder utilizar el servicio de delivery, que el repartidor encuentre fácilmente tu dirección y que el sistema calcule automáticamente el costo de envío sin que tengas que pegar un link cada vez.</div>' +
             '<div style="font-size:.8rem;color:#0f172a;font-weight:600;margin-bottom:6px">¿Cómo hacerlo?</div>' +
             '<ol style="font-size:.78rem;color:#475569;line-height:1.9;padding-left:18px;margin:0 0 16px">' +
               '<li>Ve a <strong>Mi Perfil</strong></li>' +
