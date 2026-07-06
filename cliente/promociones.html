@@ -109,6 +109,13 @@ async function init() {
   }
   container.innerHTML = allPromos.map(function(p) {
     selectedItems[p.id] = {};
+
+  // Abrir modal si viene ?promo= en la URL
+  var promoParam = new URLSearchParams(window.location.search).get('promo');
+  if (promoParam) {
+    var target = allPromos.find(function(x){ return x.id == promoParam; });
+    if (target) setTimeout(function(){ openPromo(target.id); }, 100);
+  }
     var logo = p.business_logo ? '<img src="'+APP.esc(p.business_logo)+'">' : '<div style="width:26px;height:26px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:.8rem">🏪</div>';
     var imgHtml = p.image_url ? '<img src="'+APP.esc(p.image_url)+'" class="pm-img">' : '<div class="pm-no-img">🏷️</div>';
     var minPrice = (p.items||[]).reduce(function(mn,i){ return Math.min(mn,parseFloat(i.promo_price||0)); }, Infinity);

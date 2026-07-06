@@ -307,7 +307,7 @@ async function loadPromos() {
       var bizLogo = p.business_logo ? '<img src="'+p.business_logo+'">' : '';
       var minPrice = (p.items||[]).reduce(function(mn,i){ return Math.min(mn, parseFloat(i.promo_price||0)); }, Infinity);
       var priceLabel = isFinite(minPrice) && minPrice > 0 ? 'Desde Q'+minPrice.toFixed(2) : '¡Oferta especial!';
-      return '<div class="promo-slide" onclick="window.location.href=\'promociones.html\'">' +
+      return '<div class="promo-slide" onclick="window.location.href=\'promociones.html?promo='+p.id+'\'">' +
         photoHtml +
         '<div class="promo-slide-body">' +
           '<div class="promo-slide-biz">'+bizLogo+p.business_name+'</div>' +
