@@ -101,9 +101,19 @@ class PromotionController {
     }
 
     public function update(int $id, array $body): void {
-        $user  = AuthMiddleware::requireRole('negocio');
-        $biz   = $this->getBiz($user['id']);
-        $promo = $this->getPromo($id, $biz['id']);
+        $user = AuthMiddleware::authenticate();
+        if ($user['role'] === 'admin') {
+            $promo = $this->db->prepare("SELECT * FROM promotions WHERE id=?")->execute([$id]) ? null : null;
+            $stmt = $this->db->prepare("SELECT * FROM promotions WHERE id=?");
+            $stmt->execute([$id]);
+            $promo = $stmt->fetch();
+            if (!$promo) Response::notFound('Promoción no encontrada');
+            $biz = null;
+        } else {
+            AuthMiddleware::requireRole('negocio');
+            $biz   = $this->getBiz($user['id']);
+            $promo = $this->getPromo($id, $biz['id']);
+        }
 
         $isActive = isset($body['is_active']) ? (int)$body['is_active'] : $promo['is_active'];
         $this->db->prepare("UPDATE promotions SET title=?, description=?, starts_at=?, ends_at=?, is_active=?, image_url=COALESCE(?,image_url) WHERE id=?")
@@ -125,8 +135,7 @@ class PromotionController {
             }
         }
 
-        // Renotificar si se activa con notify=1
-        if (!empty($body['notify']) && $isActive) {
+        if (!empty($body['notify']) && $isActive && $biz) {
             $updatedPromo = $this->getPromo($id, $biz['id']);
             $this->notifyClients($biz['name'], $updatedPromo['title'], $updatedPromo['description'], $id);
         }
@@ -136,9 +145,12 @@ class PromotionController {
 
     // DELETE /api/promotions/{id}
     public function destroy(int $id): void {
-        $user = AuthMiddleware::requireRole('negocio');
-        $biz  = $this->getBiz($user['id']);
-        $this->getPromo($id, $biz['id']);
+        $user = AuthMiddleware::authenticate();
+        if ($user['role'] !== 'admin') {
+            AuthMiddleware::requireRole('negocio');
+            $biz = $this->getBiz($user['id']);
+            $this->getPromo($id, $biz['id']);
+        }
         $this->db->prepare("DELETE FROM promotions WHERE id = ?")->execute([$id]);
         Response::success(null, 'Promoción eliminada');
     }
