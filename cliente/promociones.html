@@ -13,23 +13,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.promo-card { background:white; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:16px; }
-.promo-banner { background:linear-gradient(135deg,#F5C518,#FF8C42); padding:20px; color:#1a1a1a; }
-.promo-banner h2 { font-family:'Syne',sans-serif; font-size:1.15rem; font-weight:800; margin-bottom:4px; }
-.promo-banner .biz { font-size:.82rem; opacity:.75; margin-bottom:8px; }
-.promo-banner .desc { font-size:.9rem; line-height:1.6; }
-.promo-body { padding:16px; }
-.promo-items { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
-.promo-item-row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--off-white); border-radius:8px; }
-.item-left { display:flex; align-items:center; gap:10px; }
-.item-check { width:20px; height:20px; border-radius:4px; border:2px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.15s; flex-shrink:0; }
-.item-check.checked { background:var(--blue); border-color:var(--blue); color:white; }
-.item-name { font-size:.9rem; font-weight:600; }
-.item-prices { display:flex; gap:8px; align-items:center; }
-.original { text-decoration:line-through; color:var(--muted); font-size:.82rem; }
-.promo-price { font-weight:700; color:var(--success); font-size:.95rem; }
-.saving { background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:20px; font-size:.72rem; font-weight:700; }
-.dates { font-size:.75rem; color:var(--muted); margin-bottom:12px; }
+.promos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.pm-card{background:white;border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.07);border:1px solid var(--border);transition:transform .15s,box-shadow .15s}
+.pm-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.pm-img{width:100%;height:150px;object-fit:cover;display:block}
+.pm-no-img{width:100%;height:100px;background:linear-gradient(135deg,#F5C518,#FF8C42);display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.pm-body{padding:12px 14px}
+.pm-biz{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.pm-biz img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid var(--border)}
+.pm-biz span{font-size:.75rem;font-weight:600;color:var(--muted)}
+.pm-title{font-weight:700;font-size:.9rem;color:var(--navy);margin-bottom:5px;line-height:1.3}
+.pm-excerpt{font-size:.8rem;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pm-badge{display:inline-block;background:#fef3c7;color:#92400e;font-size:.7rem;padding:2px 8px;border-radius:20px;font-weight:700;margin-top:7px}
+/* Modal */
+.promo-item-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--off-white);border-radius:8px;margin-bottom:8px}
+.item-left{display:flex;align-items:center;gap:10px}
+.item-check{width:20px;height:20px;border-radius:4px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
+.item-check.checked{background:var(--blue);border-color:var(--blue);color:white}
+.item-name{font-size:.88rem;font-weight:600}
+.item-prices{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.original{text-decoration:line-through;color:var(--muted);font-size:.8rem}
+.promo-price{font-weight:700;color:var(--success);font-size:.9rem}
+.saving{background:#d1fae5;color:#065f46;padding:2px 6px;border-radius:20px;font-size:.7rem;font-weight:700}
+@media(max-width:480px){.promos-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -54,12 +60,30 @@
   </aside>
 
   <main class="main-content">
-    <div class="page-header" style="margin-bottom:24px">
+    <div class="page-header" style="margin-bottom:20px">
       <h1>🏷️ Promociones vigentes</h1>
-      <p style="color:var(--muted);margin:0;font-size:.9rem">Ofertas activas de los negocios de Nueva Concepción</p>
+      <p>Ofertas activas de los negocios</p>
     </div>
-    <div id="promoList"><div class="loading-state"><div class="spinner"></div></div></div>
+    <div id="promoList" class="promos-grid"></div>
   </main>
+</div>
+
+<!-- Modal detalle promoción -->
+<div id="promoModal" onclick="if(event.target===this)closeModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:flex-end;justify-content:center">
+  <div style="background:white;border-radius:20px 20px 0 0;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom)">
+    <div style="position:sticky;top:0;background:white;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);z-index:1">
+      <div id="pmBiz" style="display:flex;align-items:center;gap:8px"></div>
+      <button onclick="closeModal()" style="background:var(--off-white);border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.1rem">✕</button>
+    </div>
+    <div id="pmImg"></div>
+    <div style="padding:16px 20px">
+      <div id="pmTitle" style="font-weight:800;font-size:1.1rem;color:var(--navy);margin-bottom:6px"></div>
+      <div id="pmDesc" style="font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:10px"></div>
+      <div id="pmDates" style="font-size:.75rem;color:var(--muted);margin-bottom:14px"></div>
+      <div id="pmItems"></div>
+      <div id="pmAction" style="margin-top:14px"></div>
+    </div>
+  </div>
 </div>
 
 <script src="../assets/js/app.js"></script>
@@ -71,68 +95,85 @@ if(!localStorage.getItem('nuevaexpress_token')) window.location.href='/cliente/l
 document.getElementById('sidebarUser').textContent = user.name||'';
 
 var selectedItems = {};
+var allPromos = [];
+
+function fmtDate(s){if(!s)return '';var p=s.split(' ');var d=p[0].split('-');var t=p[1]?p[1].substring(0,5):'';return d[2]+'/'+d[1]+'/'+d[0]+(t?' '+t:'');}
 
 async function init() {
   var res = await APP.get('/promotions');
-  var promos = res?.data || [];
+  allPromos = res?.data || [];
   var container = document.getElementById('promoList');
-
-  if (!promos.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏷️</div><p>No hay promociones vigentes en este momento.<br>¡Vuelve pronto!</p></div>';
+  if (!allPromos.length) {
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">No hay promociones vigentes en este momento.</div>';
     return;
   }
-
-  container.innerHTML = promos.map(function(p) {
+  container.innerHTML = allPromos.map(function(p) {
     selectedItems[p.id] = {};
-    return '<div class="promo-card">' +
-      (p.image_url ? '<div onclick="openLightbox(this.querySelector(\'img\').src)" style="cursor:zoom-in"><img src="' + p.image_url + '" style="width:100%;height:160px;object-fit:cover;display:block"></div>' : '') +
-      '<div class="promo-banner">' +
-        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
-          (p.business_logo ? '<img src="'+APP.esc(p.business_logo)+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.5);flex-shrink:0">' : '<div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">🏪</div>') +
-          '<div class="biz" style="margin:0">' + APP.esc(p.business_name) + '</div>' +
-        '</div>' +
-        '<h2>' + APP.esc(p.title) + '</h2>' +
-        '<div class="desc">' + APP.esc(p.description) + '</div>' +
+    var logo = p.business_logo ? '<img src="'+APP.esc(p.business_logo)+'">' : '<div style="width:26px;height:26px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:.8rem">🏪</div>';
+    var imgHtml = p.image_url ? '<img src="'+APP.esc(p.image_url)+'" class="pm-img">' : '<div class="pm-no-img">🏷️</div>';
+    var minPrice = (p.items||[]).reduce(function(mn,i){ return Math.min(mn,parseFloat(i.promo_price||0)); }, Infinity);
+    var badge = isFinite(minPrice) && minPrice > 0 ? 'Desde Q'+minPrice.toFixed(2) : '¡Oferta especial!';
+    return '<div class="pm-card" onclick="openPromo('+p.id+')">' +
+      imgHtml +
+      '<div class="pm-body">' +
+        '<div class="pm-biz">'+logo+'<span>'+APP.esc(p.business_name)+'</span></div>' +
+        '<div class="pm-title">'+APP.esc(p.title)+'</div>' +
+        '<div class="pm-excerpt">'+APP.esc(p.description)+'</div>' +
+        '<span class="pm-badge">'+badge+'</span>' +
       '</div>' +
-      '<div class="promo-body">' +
-        '<div class="dates">📅 Válida del ' + (function(s){if(!s)return '';var p=s.split(' ');var d=p[0].split('-');var t=p[1]?p[1].substring(0,5):'';var h=t?parseInt(t.split(':')[0]):0;var m=t?t.split(':')[1]:'';var ampm=h>=12?'PM':'AM';h=h%12||12;return d[2]+'/'+d[1]+'/'+d[0]+(t?' '+h+':'+m+' '+ampm:'');})(p.starts_at) + ' al ' + (function(s){if(!s)return '';var p=s.split(' ');var d=p[0].split('-');var t=p[1]?p[1].substring(0,5):'';var h=t?parseInt(t.split(':')[0]):0;var m=t?t.split(':')[1]:'';var ampm=h>=12?'PM':'AM';h=h%12||12;return d[2]+'/'+d[1]+'/'+d[0]+(t?' '+h+':'+m+' '+ampm:'');})(p.ends_at) + '</div>' +
-        '<div class="promo-items" id="items-'+p.id+'">' +
-          (p.items||[]).map(function(item) {
-            var saving = (parseFloat(item.original_price) - parseFloat(item.promo_price)).toFixed(2);
-            var isService = p.business_type === 'servicios';
-            return '<div class="promo-item-row">' +
-              '<div class="item-left">' +
-                (isService ? '' : '<div class="item-check" id="chk-'+p.id+'-'+item.id+'" onclick="toggleItem(\''+p.id+'\','+JSON.stringify(item).replace(/'/g,"\\'")+')">✓</div>') +
-                '<div class="item-name">' + APP.esc(item.product_name) + '</div>' +
-              '</div>' +
-              '<div class="item-prices">' +
-                '<span class="original">Q' + parseFloat(item.original_price).toFixed(2) + '</span>' +
-                '<span class="promo-price">Q' + parseFloat(item.promo_price).toFixed(2) + '</span>' +
-                '<span class="saving">-Q' + saving + '</span>' +
-              '</div>' +
-            '</div>';
-          }).join('') +
-        '</div>' +
-        (p.business_type === 'servicios' ? (function(){
-            var wa = (p.whatsapp || p.phone || '').replace(/\D/g,'');
-            var msg = encodeURIComponent('Hola ' + p.business_name + '! Vi tu promoción "' + p.title + '" en NuevaExpress y me gustaría más información.');
-            return wa ? '<a href="https://wa.me/'+wa+'?text='+msg+'" target="_blank" class="btn-primary" style="width:100%;justify-content:center;padding:13px;text-decoration:none;display:flex;background:#25D366">💬 Contactar por WhatsApp</a>'
-              : '<div style="text-align:center;padding:12px;color:var(--muted);font-size:.85rem">Contáctanos directamente para aprovechar esta oferta</div>';
-          })()
-          : '<button onclick="pedirPromo(' + p.id + ',' + p.business_id + ')" class="btn-primary" style="width:100%;justify-content:center;padding:13px">🛒 Pedir con estos productos</button>') +
+    '</div>';
+  }).join('');
+}
+
+function openPromo(promoId) {
+  var p = allPromos.find(function(x){ return x.id == promoId; });
+  if (!p) return;
+  selectedItems[p.id] = {};
+
+  var logo = p.business_logo ? '<img src="'+APP.esc(p.business_logo)+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">' : '<div style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center">🏪</div>';
+  document.getElementById('pmBiz').innerHTML = logo + '<span style="font-weight:600;font-size:.85rem">'+APP.esc(p.business_name)+'</span>';
+  document.getElementById('pmImg').innerHTML = p.image_url ? '<img src="'+APP.esc(p.image_url)+'" style="width:100%;max-height:220px;object-fit:cover;display:block">' : '';
+  document.getElementById('pmTitle').textContent = p.title;
+  document.getElementById('pmDesc').textContent = p.description;
+  document.getElementById('pmDates').textContent = '📅 '+fmtDate(p.starts_at)+' → '+fmtDate(p.ends_at);
+
+  var isService = p.business_type === 'servicios';
+  document.getElementById('pmItems').innerHTML = (p.items||[]).map(function(item) {
+    var saving = (parseFloat(item.original_price) - parseFloat(item.promo_price)).toFixed(2);
+    return '<div class="promo-item-row">' +
+      '<div class="item-left">' +
+        (isService ? '' : '<div class="item-check" id="chk-'+p.id+'-'+item.id+'" onclick="toggleItem(\''+p.id+'\','+JSON.stringify(item).replace(/'/g,"\\'")+')" >✓</div>') +
+        '<div class="item-name">'+APP.esc(item.product_name)+'</div>' +
+      '</div>' +
+      '<div class="item-prices">' +
+        '<span class="original">Q'+parseFloat(item.original_price).toFixed(2)+'</span>' +
+        '<span class="promo-price">Q'+parseFloat(item.promo_price).toFixed(2)+'</span>' +
+        '<span class="saving">-Q'+saving+'</span>' +
       '</div>' +
     '</div>';
   }).join('');
 
-  // Marcar todos los items como seleccionados por default
-  promos.forEach(function(p) {
-    (p.items||[]).forEach(function(item) {
-      selectedItems[p.id][item.id] = item;
-      var chk = document.getElementById('chk-'+p.id+'-'+item.id);
-      if (chk) chk.classList.add('checked');
-    });
+  // Marcar items por defecto
+  (p.items||[]).forEach(function(item) {
+    selectedItems[p.id][item.id] = item;
+    var chk = document.getElementById('chk-'+p.id+'-'+item.id);
+    if (chk) chk.classList.add('checked');
   });
+
+  if (isService) {
+    var wa = (p.whatsapp||p.phone||'').replace(/\D/g,'');
+    var msg = encodeURIComponent('Hola '+p.business_name+'! Vi tu promoción "'+p.title+'" en NuevaExpress.');
+    document.getElementById('pmAction').innerHTML = wa
+      ? '<a href="https://wa.me/'+wa+'?text='+msg+'" target="_blank" class="btn-primary" style="width:100%;justify-content:center;padding:13px;text-decoration:none;display:flex;background:#25D366">💬 Contactar por WhatsApp</a>'
+      : '<p style="text-align:center;color:var(--muted);font-size:.85rem">Contáctanos directamente para aprovechar esta oferta</p>';
+  } else {
+    document.getElementById('pmAction').innerHTML = '<button onclick="pedirPromo('+p.id+','+p.business_id+')" class="btn-primary" style="width:100%;justify-content:center;padding:13px">🛒 Pedir con estos productos</button>';
+  }
+
+  document.getElementById('promoModal').style.display = 'flex';
 }
+
+function closeModal() { document.getElementById('promoModal').style.display = 'none'; }
 
 function toggleItem(promoId, item) {
   var chk = document.getElementById('chk-'+promoId+'-'+item.id);
@@ -148,11 +189,7 @@ function toggleItem(promoId, item) {
 function pedirPromo(promoId, businessId) {
   var items = Object.values(selectedItems[promoId] || {});
   if (!items.length) { APP.toast('Selecciona al menos un producto', 'error'); return; }
-
-  // Guardar items en sessionStorage y redirigir al pedido
-  var cartItems = items.map(function(i){
-    return { id: i.product_id, name: i.product_name, price: i.promo_price, qty: 1 };
-  });
+  var cartItems = items.map(function(i){ return { id: i.product_id, name: i.product_name, price: i.promo_price, qty: 1 }; });
   sessionStorage.setItem('promo_cart', JSON.stringify({ business_id: businessId, items: cartItems }));
   window.location.href = '/cliente/pedido.html?business_id=' + businessId + '&from_promo=1';
 }
@@ -161,19 +198,7 @@ function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.
 function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
 
 init();
-function openLightbox(src) {
-  var lb = document.getElementById('imgLightbox');
-  document.getElementById('imgLightboxImg').src = src;
-  lb.style.display = 'flex';
-}
-
 </script>
 <script src="/assets/js/pwa.js"></script>
-
-<!-- Lightbox de imagen -->
-<div id="imgLightbox" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px">
-  <button onclick="document.getElementById('imgLightbox').style.display='none'" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:1.3rem;cursor:pointer;z-index:1">✕</button>
-  <img id="imgLightboxImg" src="" style="max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain">
-</div>
 </body>
 </html>
