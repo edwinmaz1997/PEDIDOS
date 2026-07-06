@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#4A90D9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Promociones — Admin NuevaExpress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.promo-card { background:white; border:1px solid var(--border); border-radius:var(--radius); padding:0; overflow:hidden; margin-bottom:14px; }
+.promo-card-img { width:100%; height:140px; object-fit:cover; display:block; }
+.promo-card-body { padding:16px 20px; }
+.promo-meta { font-size:.75rem; color:var(--muted); margin-top:6px; }
+.badge-active { background:#d1fae5; color:#065f46; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; }
+.badge-inactive { background:#fee2e2; color:#991b1b; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; }
+.badge-scheduled { background:#fef3c7; color:#92400e; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700; }
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+      <div style="color:rgba(255,255,255,.4);font-size:.75rem;margin-top:4px">Administrador</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html">📊 Dashboard</a></li>
+      <li><a href="negocios.html">🏪 Negocios</a></li>
+      <li><a href="usuarios.html">👥 Usuarios</a></li>
+      <li><a href="pedidos.html">📋 Pedidos</a></li>
+      <li><a href="categorias.html">🏷️ Categorías</a></li>
+      <li><a href="zonas-entrega.html">🗺️ Zonas de Entrega</a></li>
+      <li><a href="buscar.html">🔍 Buscador</a></li>
+      <li><a href="reportes.html">📊 Reportes</a></li>
+      <li><a href="promociones.html" class="active">🏷️ Promociones</a></li>
+      <li><a href="pagos-negocios.html">💸 Pagos a negocios</a></li>
+      <li><a href="avisos.html">📢 Avisos</a></li>
+      <li><a href="#" onclick="doLogout()">🚪 Salir</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+      <div class="page-header" style="margin:0">
+        <h1>🏷️ Promociones de negocios</h1>
+        <p>Ver, editar y eliminar las promociones publicadas</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="bizFilter" onchange="loadPromos()" style="padding:8px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;background:white">
+          <option value="">Todos los negocios</option>
+        </select>
+        <select id="statusFilter" onchange="loadPromos()" style="padding:8px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;background:white">
+          <option value="">Todos los estados</option>
+          <option value="active">✅ Vigentes</option>
+          <option value="scheduled">🕐 Programadas</option>
+          <option value="inactive">⛔ Inactivas</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="loadingEl" style="text-align:center;padding:40px"><div class="spinner" style="margin:auto"></div></div>
+    <div id="noData" style="display:none;text-align:center;padding:40px;color:var(--muted)">No hay promociones.</div>
+    <div id="promoList"></div>
+  </main>
+</div>
+
+<!-- Modal editar promoción -->
+<div id="editModal" onclick="if(event.target===this)closeEdit()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;padding:16px">
+  <div style="background:white;border-radius:16px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:white">
+      <div style="font-weight:700">✏️ Editar promoción</div>
+      <button onclick="closeEdit()" style="background:var(--off-white);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:20px">
+      <div class="form-group"><label>Título *</label><input type="text" id="e_title" style="width:100%"></div>
+      <div class="form-group"><label>Descripción *</label><textarea id="e_desc" rows="3" style="width:100%"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group"><label>Fecha inicio</label><input type="date" id="e_start" style="width:100%"></div>
+        <div class="form-group"><label>Hora inicio</label><input type="time" id="e_start_time" style="width:100%"></div>
+        <div class="form-group"><label>Fecha fin</label><input type="date" id="e_end" style="width:100%"></div>
+        <div class="form-group"><label>Hora fin</label><input type="time" id="e_end_time" style="width:100%"></div>
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px">
+        <label class="switch"><input type="checkbox" id="e_active"><span class="slider"></span></label>
+        <span>Activa</span>
+      </div>
+      <div id="editMsg" style="display:none;padding:8px 12px;border-radius:8px;font-size:.85rem;margin-bottom:10px"></div>
+      <button onclick="saveEdit()" class="btn-primary" style="width:100%;justify-content:center;padding:12px">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/app.js"></script>
+<script>
+(function() {
+  var hash = window.location.hash;
+  if (hash && hash.indexOf('tk=') !== -1) {
+    var parts = hash.substring(1).split('&');
+    var tk='', us='';
+    parts.forEach(function(p){ if(p.indexOf('tk=')===0)tk=p.substring(3); if(p.indexOf('us=')===0)us=decodeURIComponent(p.substring(3)); });
+    if(tk){ localStorage.setItem('nuevaexpress_token',tk); if(us)localStorage.setItem('nuevaexpress_user',us); history.replaceState(null,'',window.location.pathname); }
+  }
+})();
+var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
+if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'admin') window.location.href = '/cliente/login.html';
+
+function getToken(){ return localStorage.getItem('nuevaexpress_token'); }
+function esc(s){ var d=document.createElement('div');d.textContent=s||'';return d.innerHTML; }
+function money(v){ return 'Q'+parseFloat(v||0).toFixed(2); }
+
+var allPromos = [];
+var editingId = null;
+
+async function init() {
+  // Cargar negocios para el filtro
+  var bizRes = await fetch('/api/admin/businesses', { headers:{ Authorization:'Bearer '+getToken() } });
+  var bizData = await bizRes.json();
+  var sel = document.getElementById('bizFilter');
+  (bizData.data||[]).forEach(function(b){
+    var opt = document.createElement('option');
+    opt.value = b.id; opt.textContent = b.name;
+    sel.appendChild(opt);
+  });
+  await loadPromos();
+}
+
+async function loadPromos() {
+  document.getElementById('loadingEl').style.display = 'block';
+  document.getElementById('promoList').innerHTML = '';
+  document.getElementById('noData').style.display = 'none';
+
+  var res = await fetch('/api/promotions', { headers:{ Authorization:'Bearer '+getToken() } });
+  var data = await res.json();
+  document.getElementById('loadingEl').style.display = 'none';
+
+  var promos = data.data || [];
+  var bizId = document.getElementById('bizFilter').value;
+  var statusF = document.getElementById('statusFilter').value;
+  var now = new Date();
+
+  promos = promos.filter(function(p) {
+    if (bizId && p.business_id != bizId) return false;
+    if (statusF) {
+      var start = new Date(p.starts_at.replace(' ','T'));
+      var end   = new Date(p.ends_at.replace(' ','T'));
+      var status = !p.is_active ? 'inactive' : start > now ? 'scheduled' : end < now ? 'inactive' : 'active';
+      if (status !== statusF) return false;
+    }
+    return true;
+  });
+
+  if (!promos.length) { document.getElementById('noData').style.display = 'block'; return; }
+
+  allPromos = promos;
+
+  var html = promos.map(function(p) {
+    var now2 = new Date();
+    var start = new Date(p.starts_at.replace(' ','T'));
+    var end   = new Date(p.ends_at.replace(' ','T'));
+    var status = !p.is_active ? 'inactive' : start > now2 ? 'scheduled' : end < now2 ? 'inactive' : 'active';
+    var badge = status === 'active' ? '<span class="badge-active">✅ Vigente</span>'
+              : status === 'scheduled' ? '<span class="badge-scheduled">🕐 Programada</span>'
+              : '<span class="badge-inactive">⛔ Inactiva</span>';
+
+    var fmtDate = function(s){ if(!s)return ''; var p=s.split(' '); var d=p[0].split('-'); var t=p[1]?p[1].substring(0,5):''; return d[2]+'/'+d[1]+'/'+d[0]+(t?' '+t:''); };
+
+    return '<div class="promo-card">' +
+      (p.image_url ? '<img src="'+esc(p.image_url)+'" class="promo-card-img" onclick="openLightbox(\''+esc(p.image_url)+'\')" style="cursor:zoom-in">' : '') +
+      '<div class="promo-card-body">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">' +
+          '<div>' +
+            '<div style="font-weight:700;font-size:.95rem">'+esc(p.title)+'</div>' +
+            '<div style="font-size:.78rem;color:var(--muted);margin-top:2px">🏪 '+esc(p.business_name)+'</div>' +
+          '</div>' +
+          badge +
+        '</div>' +
+        '<div style="font-size:.83rem;color:var(--muted);margin-bottom:8px">'+esc(p.description)+'</div>' +
+        '<div class="promo-meta">📅 '+fmtDate(p.starts_at)+' → '+fmtDate(p.ends_at)+'</div>' +
+        (p.items&&p.items.length ? '<div class="promo-meta" style="margin-top:4px">🛍️ '+p.items.map(function(i){ return esc(i.product_name)+' — Q'+parseFloat(i.promo_price).toFixed(2); }).join(' · ')+'</div>' : '') +
+        '<div style="display:flex;gap:8px;margin-top:12px">' +
+          '<button onclick="openEdit('+p.id+')" style="padding:7px 14px;font-size:.82rem;background:none;border:1.5px solid var(--blue);color:var(--blue);border-radius:var(--radius-sm);cursor:pointer">✏️ Editar</button>' +
+          '<button onclick="toggleActive('+p.id+','+p.is_active+')" style="padding:7px 14px;font-size:.82rem;background:none;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer">'+(p.is_active?'⛔ Desactivar':'✅ Activar')+'</button>' +
+          '<button onclick="deletePromo('+p.id+')" style="padding:7px 14px;font-size:.82rem;background:none;border:1.5px solid var(--danger);color:var(--danger);border-radius:var(--radius-sm);cursor:pointer">🗑️ Eliminar</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('promoList').innerHTML = html;
+}
+
+function openEdit(id) {
+  var p = allPromos.find(function(x){ return x.id == id; });
+  if (!p) return;
+  editingId = id;
+  document.getElementById('e_title').value = p.title || '';
+  document.getElementById('e_desc').value = p.description || '';
+  var sp = (p.starts_at||'').split(' ');
+  var ep = (p.ends_at||'').split(' ');
+  document.getElementById('e_start').value = sp[0] || '';
+  document.getElementById('e_start_time').value = sp[1]?.substring(0,5) || '00:00';
+  document.getElementById('e_end').value = ep[0] || '';
+  document.getElementById('e_end_time').value = ep[1]?.substring(0,5) || '23:59';
+  document.getElementById('e_active').checked = !!p.is_active;
+  document.getElementById('editMsg').style.display = 'none';
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
+
+async function saveEdit() {
+  var payload = {
+    title: document.getElementById('e_title').value.trim(),
+    description: document.getElementById('e_desc').value.trim(),
+    starts_at: document.getElementById('e_start').value + ' ' + (document.getElementById('e_start_time').value||'00:00') + ':00',
+    ends_at:   document.getElementById('e_end').value   + ' ' + (document.getElementById('e_end_time').value||'23:59')  + ':00',
+    is_active: document.getElementById('e_active').checked ? 1 : 0
+  };
+  var msg = document.getElementById('editMsg');
+  if (!payload.title || !payload.description) {
+    msg.textContent = 'Título y descripción son requeridos';
+    msg.style.background='#fdf0f0'; msg.style.color='var(--danger)'; msg.style.display='block'; return;
+  }
+  var res = await fetch('/api/promotions/'+editingId, {
+    method:'PUT',
+    headers:{ 'Content-Type':'application/json', Authorization:'Bearer '+getToken() },
+    body: JSON.stringify(payload)
+  });
+  var data = await res.json();
+  if (data.success) { closeEdit(); loadPromos(); }
+  else { msg.textContent = data.message||'Error'; msg.style.background='#fdf0f0'; msg.style.color='var(--danger)'; msg.style.display='block'; }
+}
+
+async function toggleActive(id, current) {
+  var res = await fetch('/api/promotions/'+id, {
+    method:'PUT',
+    headers:{ 'Content-Type':'application/json', Authorization:'Bearer '+getToken() },
+    body: JSON.stringify({ is_active: current ? 0 : 1 })
+  });
+  var data = await res.json();
+  if (data.success) loadPromos();
+  else alert(data.message||'Error');
+}
+
+async function deletePromo(id) {
+  if (!confirm('¿Eliminar esta promoción? No se puede deshacer.')) return;
+  var res = await fetch('/api/promotions/'+id, {
+    method:'DELETE',
+    headers:{ Authorization:'Bearer '+getToken() }
+  });
+  var data = await res.json();
+  if (data.success) loadPromos();
+  else alert(data.message||'Error');
+}
+
+// Lightbox
+function openLightbox(src) {
+  var d = document.createElement('div');
+  d.onclick = function(){ document.body.removeChild(d); };
+  d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  d.innerHTML = '<button onclick="document.body.removeChild(this.parentNode)" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:1.3rem;cursor:pointer">✕</button><img src="'+src+'" style="max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain">';
+  document.body.appendChild(d);
+}
+
+function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
+function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
+
+init();
+</script>
+<script src="/assets/js/pwa.js"></script>
+</body>
+</html>
