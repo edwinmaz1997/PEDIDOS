@@ -20,7 +20,7 @@ class AuthMiddleware {
         $stmt->execute([$token]);
         $user = $stmt->fetch();
 
-        if (!$user) Response::unauthorized('Sesión inválida o expirada');
+        if (!$user) Response::unauthorized('Sesión inválida o expirada. Para corregirlo, cierra sesión e inicia sesión nuevamente.');
         if (!$user['is_active']) Response::forbidden('Cuenta desactivada');
 
         $db->prepare("UPDATE user_sessions SET expires_at = DATE_ADD(NOW(), INTERVAL ? SECOND) WHERE token = ?")
