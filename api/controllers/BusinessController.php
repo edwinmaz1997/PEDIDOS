@@ -346,7 +346,7 @@ class BusinessController {
         // Coordenadas del destino
         $clientCoords = GeoHelper::extractCoords($clientMapsUrl);
         if (!$clientCoords) {
-            Response::error('No se pudo determinar la ubicación de entrega desde el link proporcionado. Verifica que sea un link válido de Google Maps.', 422);
+            Response::error('No se pudo determinar la ubicación de entrega. Puedes pegar un link de Google Maps en el campo, usar el botón 📍 para obtener tu ubicación GPS, o guardar tu ubicación en tu Perfil → Ubicación de Google Maps para que aparezca automáticamente.', 422);
         }
 
         $distanceKm = GeoHelper::distanceKm(
