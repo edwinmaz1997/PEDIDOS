@@ -85,6 +85,19 @@ try {
     switch ($resource) {
 
         // ── PROMOTIONS ────────────────────────────────────────
+        case 'anuncios':
+            require_once __DIR__ . '/controllers/AnuncioController.php';
+            $ac = new AnuncioController();
+            $anuncioId = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
+            $subAction = $parts[1] ?? null;
+            if ($subAction === 'mine' && $method === 'GET')                   { $ac->mine(); break; }
+            if (!$anuncioId && $method === 'GET')                             { $ac->index(); break; }
+            if (!$anuncioId && $method === 'POST')                            { $ac->store($body); break; }
+            if ($anuncioId && $method === 'PUT')                              { $ac->update($anuncioId, $body); break; }
+            if ($anuncioId && $method === 'DELETE')                           { $ac->destroy($anuncioId); break; }
+            if ($anuncioId && $parts[2] === 'imagen' && $method === 'POST')  { $ac->uploadImage($anuncioId); break; }
+            break;
+
         case 'promotions':
             $pc = new PromotionController();
             $promoId = isset($parts[1]) && is_numeric($parts[1]) ? (int)$parts[1] : null;
