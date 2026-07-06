@@ -204,40 +204,40 @@ function dismissInstall() {
     // Botón de configuraciones importantes — solo para clientes
     var currentUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
     if (currentUser.role === 'cliente') {
-    var cfgWrap = document.createElement('div');
-    cfgWrap.style.cssText = 'position:relative;margin-top:10px';
-    cfgWrap.innerHTML =
-      '<button id="nx-cfg-btn" onclick="window._nxToggleCfg()" style="background:rgba(255,255,255,.12);border:none;border-radius:20px;color:rgba(255,255,255,.8);padding:5px 12px;cursor:pointer;font-size:.72rem;font-family:inherit;display:flex;align-items:center;gap:5px">⚙️ Configuraciones <span style="font-size:.6rem">▼</span></button>' +
-      '<div id="nx-cfg-panel" style="display:none;position:absolute;left:0;top:36px;background:white;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.2);width:260px;z-index:600;padding:0;overflow:hidden">' +
-        '<div style="background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:12px 16px;color:white;font-weight:700;font-size:.85rem">⚙️ Configuraciones importantes</div>' +
-        '<div style="padding:14px 16px">' +
-          '<div style="font-weight:700;font-size:.82rem;color:#0f172a;margin-bottom:6px">📍 Configura tu ubicación</div>' +
-          '<div style="font-size:.78rem;color:#64748b;line-height:1.6;margin-bottom:10px">Para que el sistema calcule automáticamente el costo de envío sin que tengas que pegar un link cada vez, guarda tu ubicación de Google Maps en tu perfil.</div>' +
-          '<div style="font-size:.78rem;color:#0f172a;font-weight:600;margin-bottom:6px">Cómo hacerlo:</div>' +
-          '<ol style="font-size:.76rem;color:#475569;line-height:1.8;padding-left:18px;margin:0 0 12px">' +
-            '<li>Ve a <strong>Mi Perfil</strong></li>' +
-            '<li>Busca la sección <strong>Ubicación de Google Maps</strong></li>' +
-            '<li>Toca el botón <strong>📍 Usar GPS</strong> para capturar tu ubicación automáticamente</li>' +
-            '<li>Presiona <strong>Guardar cambios</strong></li>' +
-          '</ol>' +
-          '<a href="/cliente/perfil.html" style="display:block;text-align:center;background:var(--blue,#4A90D9);color:white;padding:9px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none">Ir a Mi Perfil →</a>' +
-        '</div>' +
-      '</div>';
-    sidebarLogo.appendChild(cfgWrap);
+      var cfgBtn = document.createElement('button');
+      cfgBtn.style.cssText = 'background:rgba(255,255,255,.12);border:none;border-radius:20px;color:rgba(255,255,255,.8);padding:5px 12px;cursor:pointer;font-size:.72rem;font-family:inherit;display:flex;align-items:center;gap:5px;margin-top:10px';
+      cfgBtn.innerHTML = '⚙️ Configuraciones <span style="font-size:.6rem">▼</span>';
+      sidebarLogo.appendChild(cfgBtn);
 
-    window._nxToggleCfg = function() {
-      var panel = document.getElementById('nx-cfg-panel');
-      if (!panel) return;
-      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    };
-    // Cerrar al hacer click fuera
-    document.addEventListener('click', function(e) {
-      var btn = document.getElementById('nx-cfg-btn');
-      var panel = document.getElementById('nx-cfg-panel');
-      if (panel && btn && !btn.contains(e.target) && !panel.contains(e.target)) {
-        panel.style.display = 'none';
-      }
-    });
+      var cfgModal = document.createElement('div');
+      cfgModal.id = 'nx-cfg-modal';
+      cfgModal.onclick = function(e){ if(e.target===this) this.style.display='none'; };
+      cfgModal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;align-items:center;justify-content:center;padding:20px';
+      cfgModal.innerHTML =
+        '<div style="background:white;border-radius:16px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">' +
+          '<div style="background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">' +
+            '<span style="color:white;font-weight:700;font-size:.88rem">⚙️ Configuraciones importantes</span>' +
+            '<button onclick="document.getElementById(\'nx-cfg-modal\').style.display=\'none\'" style="background:rgba(255,255,255,.15);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>' +
+          '</div>' +
+          '<div style="padding:20px">' +
+            '<div style="font-weight:700;font-size:.88rem;color:#0f172a;margin-bottom:6px">📍 Configura tu ubicación</div>' +
+            '<div style="font-size:.8rem;color:#64748b;line-height:1.6;margin-bottom:12px">Guarda tu ubicación para que el sistema calcule automáticamente el costo de envío sin que tengas que pegar un link cada vez.</div>' +
+            '<div style="font-size:.8rem;color:#0f172a;font-weight:600;margin-bottom:6px">¿Cómo hacerlo?</div>' +
+            '<ol style="font-size:.78rem;color:#475569;line-height:1.9;padding-left:18px;margin:0 0 16px">' +
+              '<li>Ve a <strong>Mi Perfil</strong></li>' +
+              '<li>Busca <strong>Ubicación de Google Maps</strong></li>' +
+              '<li>Toca <strong>📍 Usar GPS</strong></li>' +
+              '<li>Presiona <strong>Guardar cambios</strong></li>' +
+            '</ol>' +
+            '<a href="/cliente/perfil.html" onclick="document.getElementById(\'nx-cfg-modal\').style.display=\'none\'" style="display:block;text-align:center;background:#4A90D9;color:white;padding:11px;border-radius:10px;font-size:.85rem;font-weight:700;text-decoration:none">Ir a Mi Perfil →</a>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(cfgModal);
+
+      cfgBtn.onclick = function() {
+        var m = document.getElementById('nx-cfg-modal');
+        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+      };
     } // end if cliente
 
     // Panel
