@@ -360,7 +360,7 @@ function dismissInstall() {
 })();
 // ── Sistema de actualización de app ─────────────────────────
 (function() {
-  var APP_VERSION = '1.0.7'; // Incrementar en cada deploy importante
+  var APP_VERSION = '1.0.8'; // Incrementar en cada deploy importante
   var stored = localStorage.getItem('nx_app_version');
 
   function forceUpdateFn() {
@@ -393,6 +393,21 @@ function dismissInstall() {
       btn.style.fontWeight = '400';
       btn.textContent = '🔄 Actualizar app';
     }
+  }
+
+  // Escuchar mensaje del SW cuando hay nueva versión
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'SW_UPDATED') {
+        localStorage.removeItem('nx_app_version');
+        var btn = document.getElementById('updateAppBtn');
+        if (btn) {
+          btn.style.color = '#ef4444';
+          btn.style.fontWeight = '700';
+          btn.textContent = '🔴 Actualizar app';
+        }
+      }
+    });
   }
 
   if (document.readyState === 'loading') {
