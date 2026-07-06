@@ -38,9 +38,9 @@
       <li><a href="index.html">📋 Mis Pedidos</a></li>
       <li><a href="/index.html">🏪 Directorio</a></li>
       <li><a href="promociones.html">🏷️ Promociones</a></li>
-      <li><a href="perfil.html" class="active">👤 Mi Perfil</a></li>
       <li><a href="reportes.html">📊 Mis Reportes</a></li>
-      <li><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
+      <li><a href="perfil.html" class="active">👤 Mi Perfil</a></li>
+      <li style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.15)"><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
     </ul>
   </aside>
 
@@ -101,6 +101,9 @@
 
       <div class="form-group">
         <label>Ubicación en Google Maps <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:.8rem;color:#1e40af;line-height:1.7">
+          ⚙️ <strong>¿Por qué es importante?</strong> Guarda tu ubicación para poder utilizar el servicio de delivery, que el repartidor encuentre fácilmente tu dirección y que el sistema calcule el costo de envío automáticamente sin tener que pegar un link cada vez.
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
           <a href="https://www.google.com/maps" target="_blank"
              onclick="setTimeout(function(){ var i=document.getElementById('f_maps_url'); if(i) i.placeholder='Pega aquí el link...'; }, 500)"

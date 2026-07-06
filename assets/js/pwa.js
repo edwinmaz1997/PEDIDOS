@@ -201,43 +201,17 @@ function dismissInstall() {
     bell.onmouseleave = function(){ this.style.background='rgba(255,255,255,.12)'; };
     sidebarLogo.appendChild(bell);
 
-    // Botón de configuraciones importantes — solo para clientes
+    // Ícono de perfil a la par de la campanita — solo para clientes
     var currentUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
     if (currentUser.role === 'cliente') {
-      var cfgBtn = document.createElement('button');
-      cfgBtn.style.cssText = 'background:rgba(255,255,255,.12);border:none;border-radius:20px;color:rgba(255,255,255,.8);padding:5px 12px;cursor:pointer;font-size:.72rem;font-family:inherit;display:flex;align-items:center;gap:5px;margin-top:10px';
-      cfgBtn.innerHTML = '⚙️ Configuraciones <span style="font-size:.6rem">▼</span>';
-      sidebarLogo.appendChild(cfgBtn);
-
-      var cfgModal = document.createElement('div');
-      cfgModal.id = 'nx-cfg-modal';
-      cfgModal.onclick = function(e){ if(e.target===this) this.style.display='none'; };
-      cfgModal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;align-items:center;justify-content:center;padding:20px';
-      cfgModal.innerHTML =
-        '<div style="background:white;border-radius:16px;width:100%;max-width:380px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)">' +
-          '<div style="background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">' +
-            '<span style="color:white;font-weight:700;font-size:.88rem">⚙️ Configuraciones importantes</span>' +
-            '<button onclick="document.getElementById(\'nx-cfg-modal\').style.display=\'none\'" style="background:rgba(255,255,255,.15);border:none;color:white;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>' +
-          '</div>' +
-          '<div style="padding:20px">' +
-            '<div style="font-weight:700;font-size:.88rem;color:#0f172a;margin-bottom:6px">📍 Configura tu ubicación</div>' +
-            '<div style="font-size:.8rem;color:#64748b;line-height:1.6;margin-bottom:12px">Guarda tu ubicación para poder utilizar el servicio de delivery, que el repartidor encuentre fácilmente tu dirección y que el sistema calcule automáticamente el costo de envío sin que tengas que pegar un link cada vez.</div>' +
-            '<div style="font-size:.8rem;color:#0f172a;font-weight:600;margin-bottom:6px">¿Cómo hacerlo?</div>' +
-            '<ol style="font-size:.78rem;color:#475569;line-height:1.9;padding-left:18px;margin:0 0 16px">' +
-              '<li>Ve a <strong>Mi Perfil</strong></li>' +
-              '<li>Busca <strong>Ubicación de Google Maps</strong></li>' +
-              '<li>Toca <strong>📍 Usar GPS</strong></li>' +
-              '<li>Presiona <strong>Guardar cambios</strong></li>' +
-            '</ol>' +
-            '<a href="/cliente/perfil.html" onclick="document.getElementById(\'nx-cfg-modal\').style.display=\'none\'" style="display:block;text-align:center;background:#4A90D9;color:white;padding:11px;border-radius:10px;font-size:.85rem;font-weight:700;text-decoration:none">Ir a Mi Perfil →</a>' +
-          '</div>' +
-        '</div>';
-      document.body.appendChild(cfgModal);
-
-      cfgBtn.onclick = function() {
-        var m = document.getElementById('nx-cfg-modal');
-        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
-      };
+      var profileBtn = document.createElement('a');
+      profileBtn.href = '/cliente/perfil.html';
+      profileBtn.title = 'Mi Perfil';
+      profileBtn.style.cssText = 'background:rgba(255,255,255,.12);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-top:10px;text-decoration:none;flex-shrink:0;transition:.2s';
+      profileBtn.innerHTML = '👤';
+      profileBtn.onmouseenter = function(){ this.style.background='rgba(255,255,255,.2)'; };
+      profileBtn.onmouseleave = function(){ this.style.background='rgba(255,255,255,.12)'; };
+      sidebarLogo.appendChild(profileBtn);
     } // end if cliente
 
     // Panel
