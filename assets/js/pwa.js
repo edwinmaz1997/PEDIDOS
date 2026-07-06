@@ -358,3 +358,46 @@ function dismissInstall() {
     startPolling();
   }
 })();
+// ── Sistema de actualización de app ─────────────────────────
+(function() {
+  var APP_VERSION = '1.0.7'; // Incrementar en cada deploy importante
+  var stored = localStorage.getItem('nx_app_version');
+
+  function forceUpdateFn() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        regs.forEach(function(r){ r.unregister(); });
+      });
+    }
+    // Limpiar cache del navegador
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        names.forEach(function(n){ caches.delete(n); });
+      });
+    }
+    localStorage.setItem('nx_app_version', APP_VERSION);
+    window.location.reload(true);
+  }
+  window.forceUpdate = forceUpdateFn;
+
+  // Marcar botón en rojo si hay versión nueva
+  function checkVersion() {
+    var btn = document.getElementById('updateAppBtn');
+    if (!btn) return;
+    if (!stored || stored !== APP_VERSION) {
+      btn.style.color = '#ef4444';
+      btn.style.fontWeight = '700';
+      btn.textContent = '🔴 Actualizar app';
+    } else {
+      btn.style.color = 'rgba(255,255,255,.5)';
+      btn.style.fontWeight = '400';
+      btn.textContent = '🔄 Actualizar app';
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkVersion);
+  } else {
+    setTimeout(checkVersion, 600);
+  }
+})();

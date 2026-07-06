@@ -40,7 +40,8 @@
       <li><a href="promociones.html">🏷️ Promociones</a></li>
       <li><a href="reportes.html">📊 Mis Reportes</a></li>
       <li><a href="perfil.html" class="active">👤 Mi Perfil</a></li>
-      <li style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.15)"><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
+      <li><a href="#" id="updateAppBtn" onclick="forceUpdate()" style="color:rgba(255,255,255,.5);font-size:.82rem">🔄 Actualizar app</a></li>
+      <li style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.15)"><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
     </ul>
   </aside>
 
@@ -275,6 +276,7 @@ function handleInstall() {
   document.getElementById('iosInstallGuide').style.display = 'block';
 }
 
+function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
 function toggleSidebar() {
   var sidebar = document.querySelector('.sidebar');
   var overlay = document.getElementById('sidebarOverlay');
