@@ -69,8 +69,8 @@
 </div>
 
 <!-- Modal detalle promoción -->
-<div id="promoModal" onclick="if(event.target===this)closeModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:flex-end;justify-content:center">
-  <div style="background:white;border-radius:20px 20px 0 0;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom)">
+<div id="promoModal" onclick="if(event.target===this)closeModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center;padding:16px">
+  <div style="background:white;border-radius:20px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom)">
     <div style="position:sticky;top:0;background:white;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);z-index:1">
       <div id="pmBiz" style="display:flex;align-items:center;gap:8px"></div>
       <button onclick="closeModal()" style="background:var(--off-white);border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.1rem">✕</button>
@@ -132,7 +132,7 @@ function openPromo(promoId) {
 
   var logo = p.business_logo ? '<img src="'+APP.esc(p.business_logo)+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">' : '<div style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center">🏪</div>';
   document.getElementById('pmBiz').innerHTML = logo + '<span style="font-weight:600;font-size:.85rem">'+APP.esc(p.business_name)+'</span>';
-  document.getElementById('pmImg').innerHTML = p.image_url ? '<img src="'+APP.esc(p.image_url)+'" style="width:100%;max-height:220px;object-fit:cover;display:block">' : '';
+  document.getElementById('pmImg').innerHTML = p.image_url ? '<img src="'+APP.esc(p.image_url)+'" onclick="openLightbox(\''+APP.esc(p.image_url)+'\')" style="width:100%;max-height:220px;object-fit:cover;display:block;cursor:zoom-in">' : '';
   document.getElementById('pmTitle').textContent = p.title;
   document.getElementById('pmDesc').textContent = p.description;
   document.getElementById('pmDates').textContent = '📅 '+fmtDate(p.starts_at)+' → '+fmtDate(p.ends_at);
@@ -197,8 +197,18 @@ function pedirPromo(promoId, businessId) {
 function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
 function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
 
+function openLightbox(src) {
+  var d = document.getElementById('nx-lightbox');
+  document.getElementById('nx-lightbox-img').src = src;
+  d.style.display = 'flex';
+}
+
 init();
 </script>
+<div id="nx-lightbox" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;padding:16px">
+  <button onclick="document.getElementById('nx-lightbox').style.display='none'" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:1.3rem;cursor:pointer">✕</button>
+  <img id="nx-lightbox-img" style="max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain">
+</div>
 <script src="/assets/js/pwa.js"></script>
 </body>
 </html>
