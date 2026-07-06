@@ -191,27 +191,32 @@ function dismissInstall() {
     var sidebarLogo = document.querySelector('.sidebar-logo');
     if (!sidebarLogo || document.getElementById('nx-bell')) return;
 
+    // Fila de íconos: campanita + perfil (si es cliente)
+    var iconRow = document.createElement('div');
+    iconRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:10px';
+    sidebarLogo.appendChild(iconRow);
+
     // Campanita
     var bell = document.createElement('button');
     bell.id = 'nx-bell';
     bell.onclick = togglePanel;
     bell.innerHTML = '<span style="font-size:1.1rem">🔔</span><span id="nx-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#ef4444;color:white;font-size:.6rem;font-weight:700;min-width:18px;height:18px;border-radius:20px;align-items:center;justify-content:center;padding:0 4px;border:2px solid #1a1a2e">0</span>';
-    bell.style.cssText = 'position:relative;background:rgba(255,255,255,.12);border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:10px;transition:.2s;flex-shrink:0';
+    bell.style.cssText = 'position:relative;background:rgba(255,255,255,.12);border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0';
     bell.onmouseenter = function(){ this.style.background='rgba(255,255,255,.2)'; };
     bell.onmouseleave = function(){ this.style.background='rgba(255,255,255,.12)'; };
-    sidebarLogo.appendChild(bell);
+    iconRow.appendChild(bell);
 
-    // Ícono de perfil a la par de la campanita — solo para clientes
+    // Ícono de perfil — solo para clientes
     var currentUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
     if (currentUser.role === 'cliente') {
       var profileBtn = document.createElement('a');
       profileBtn.href = '/cliente/perfil.html';
       profileBtn.title = 'Mi Perfil';
-      profileBtn.style.cssText = 'background:rgba(255,255,255,.12);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-top:10px;text-decoration:none;flex-shrink:0;transition:.2s';
+      profileBtn.style.cssText = 'background:rgba(255,255,255,.12);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;text-decoration:none;flex-shrink:0;transition:.2s';
       profileBtn.innerHTML = '👤';
       profileBtn.onmouseenter = function(){ this.style.background='rgba(255,255,255,.2)'; };
       profileBtn.onmouseleave = function(){ this.style.background='rgba(255,255,255,.12)'; };
-      sidebarLogo.appendChild(profileBtn);
+      iconRow.appendChild(profileBtn);
     } // end if cliente
 
     // Panel
