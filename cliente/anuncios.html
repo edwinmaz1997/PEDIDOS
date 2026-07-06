@@ -13,11 +13,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
-.anuncio-card{background:white;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.anuncio-img{width:100%;height:180px;object-fit:cover;display:block;cursor:zoom-in}
-.anuncio-body{padding:16px}
-.anuncio-biz{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.anuncio-biz img{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--border)}
+.anuncios-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.an-card{background:white;border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.07);border:1px solid var(--border);transition:transform .15s,box-shadow .15s}
+.an-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.an-img{width:100%;height:150px;object-fit:cover;display:block}
+.an-no-img{width:100%;height:100px;background:linear-gradient(135deg,#1a1a2e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.an-body{padding:12px 14px}
+.an-biz{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.an-biz img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid var(--border)}
+.an-biz span{font-size:.75rem;font-weight:600;color:var(--muted)}
+.an-title{font-weight:700;font-size:.9rem;color:var(--navy);margin-bottom:5px;line-height:1.3}
+.an-excerpt{font-size:.8rem;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.an-date{font-size:.72rem;color:var(--muted);margin-top:8px}
+@media(max-width:480px){.anuncios-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -46,16 +54,26 @@
       <h1>📢 Anuncios</h1>
       <p>Novedades de tus negocios favoritos</p>
     </div>
-
     <div id="loadingEl" style="text-align:center;padding:40px"><div class="spinner" style="margin:auto"></div></div>
-    <div id="noData" style="display:none;text-align:center;padding:40px;color:var(--muted)">No hay anuncios disponibles por el momento.</div>
-    <div id="anuncioList"></div>
+    <div id="noData" style="display:none;text-align:center;padding:40px;color:var(--muted)">No hay anuncios disponibles.</div>
+    <div class="anuncios-grid" id="anuncioList"></div>
   </main>
 </div>
 
-<!-- Lightbox -->
-<div id="lightbox" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center;padding:16px">
-  <img id="lightboxImg" style="max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain">
+<!-- Modal detalle -->
+<div id="detailModal" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:flex-end;justify-content:center;padding:0">
+  <div style="background:white;border-radius:20px 20px 0 0;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom)">
+    <div style="position:sticky;top:0;background:white;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);z-index:1">
+      <div id="dmBiz" style="display:flex;align-items:center;gap:8px"></div>
+      <button onclick="document.getElementById('detailModal').style.display='none'" style="background:var(--off-white);border:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.1rem">✕</button>
+    </div>
+    <div id="dmImg"></div>
+    <div style="padding:18px 20px">
+      <div id="dmTitle" style="font-weight:800;font-size:1.1rem;color:var(--navy);margin-bottom:10px;line-height:1.3"></div>
+      <div id="dmDesc" style="font-size:.9rem;color:var(--charcoal);line-height:1.7;white-space:pre-wrap"></div>
+      <div id="dmDate" style="font-size:.75rem;color:var(--muted);margin-top:14px"></div>
+    </div>
+  </div>
 </div>
 
 <script src="../assets/js/app.js"></script>
@@ -75,25 +93,37 @@ async function loadAnuncios() {
   var list = data.data || [];
   if (!list.length){ document.getElementById('noData').style.display='block'; return; }
   document.getElementById('anuncioList').innerHTML = list.map(function(a){
-    var date = new Date(a.created_at).toLocaleDateString('es-GT',{day:'2-digit',month:'long',year:'numeric'});
-    return '<div class="anuncio-card">' +
-      (a.image_url ? '<img src="'+esc(a.image_url)+'" class="anuncio-img" onclick="openLightbox(\''+esc(a.image_url)+'\')">' : '') +
-      '<div class="anuncio-body">' +
-        '<div class="anuncio-biz">' +
-          (a.business_logo ? '<img src="'+esc(a.business_logo)+'">' : '<div style="width:32px;height:32px;border-radius:50%;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1rem">🏪</div>') +
-          '<span style="font-weight:600;font-size:.82rem">'+esc(a.business_name)+'</span>' +
-        '</div>' +
-        '<div style="font-weight:700;font-size:1rem;margin-bottom:6px">'+esc(a.title)+'</div>' +
-        '<div style="font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:8px">'+esc(a.description)+'</div>' +
-        '<div style="font-size:.75rem;color:var(--muted)">📅 '+date+'</div>' +
+    var date = new Date(a.created_at).toLocaleDateString('es-GT',{day:'2-digit',month:'short',year:'numeric'});
+    var logo = a.business_logo ? '<img src="'+esc(a.business_logo)+'">' : '<div style="width:26px;height:26px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:.8rem">🏪</div>';
+    var imgHtml = a.image_url ? '<img src="'+esc(a.image_url)+'" class="an-img">' : '<div class="an-no-img">📢</div>';
+    var dataAttr = 'data-id="'+a.id+'" data-title="'+esc(a.title)+'" data-desc="'+esc(a.description)+'" data-biz="'+esc(a.business_name)+'" data-logo="'+esc(a.business_logo||'')+'" data-img="'+esc(a.image_url||'')+'" data-date="'+date+'"';
+    return '<div class="an-card" '+dataAttr+' onclick="openDetail(this)">' +
+      imgHtml +
+      '<div class="an-body">' +
+        '<div class="an-biz">'+logo+'<span>'+esc(a.business_name)+'</span></div>' +
+        '<div class="an-title">'+esc(a.title)+'</div>' +
+        '<div class="an-excerpt">'+esc(a.description)+'</div>' +
+        '<div class="an-date">'+date+'</div>' +
       '</div>' +
     '</div>';
   }).join('');
 }
 
-function openLightbox(src) {
-  document.getElementById('lightboxImg').src = src;
-  document.getElementById('lightbox').style.display = 'flex';
+function openDetail(el) {
+  var title = el.dataset.title;
+  var desc  = el.dataset.desc;
+  var biz   = el.dataset.biz;
+  var logo  = el.dataset.logo;
+  var img   = el.dataset.img;
+  var date  = el.dataset.date;
+
+  var logoHtml = logo ? '<img src="'+esc(logo)+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">' : '<div style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center">🏪</div>';
+  document.getElementById('dmBiz').innerHTML = logoHtml + '<span style="font-weight:600;font-size:.85rem">'+esc(biz)+'</span>';
+  document.getElementById('dmImg').innerHTML = img ? '<img src="'+esc(img)+'" style="width:100%;max-height:260px;object-fit:cover;display:block">' : '';
+  document.getElementById('dmTitle').textContent = title;
+  document.getElementById('dmDesc').textContent = desc;
+  document.getElementById('dmDate').textContent = '📅 '+date;
+  document.getElementById('detailModal').style.display = 'flex';
 }
 
 loadAnuncios();
