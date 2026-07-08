@@ -341,7 +341,11 @@ class OrderController {
             $prepStarted = date('Y-m-d H:i:s', $clientTs);
             $this->db->prepare("UPDATE orders SET status=?, preparation_started_at=? WHERE id=?")->execute([$status, $prepStarted, $id]);
         } else {
-            $this->db->prepare("UPDATE orders SET status=? WHERE id=?")->execute([$status, $id]);
+            if ($status === 'cancelado' && !empty($body['cancel_reason'])) {
+                $this->db->prepare("UPDATE orders SET status=?, cancel_reason=? WHERE id=?")->execute([$status, $body['cancel_reason'], $id]);
+            } else {
+                $this->db->prepare("UPDATE orders SET status=? WHERE id=?")->execute([$status, $id]);
+            }
         }
         $this->logStatus($id, $status, $body['message'] ?? null, $user['id']);
 

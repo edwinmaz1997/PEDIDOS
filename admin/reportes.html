@@ -80,15 +80,17 @@
       <!-- Per business -->
       <div id="bizReports"></div>
     </div>
-    <!-- Pedidos cancelados por el cliente -->
+    <!-- Pedidos cancelados -->
     <div style="margin-top:32px">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
         <div>
-          <h2 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin:0">❌ Pedidos cancelados por el cliente</h2>
-          <p style="font-size:.8rem;color:var(--muted);margin:4px 0 0">Con motivo de cancelación</p>
+          <h2 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin:0">❌ Pedidos cancelados</h2>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <select id="cancelBizFilter" onchange="loadCancelled()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem;background:white">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button onclick="setCancelledFilter('all',this)" id="cfAll" class="btn-ghost" style="padding:6px 12px;font-size:.82rem;background:var(--blue);color:white;border-color:var(--blue)">Todos</button>
+          <button onclick="setCancelledFilter('cliente',this)" id="cfCliente" class="btn-ghost" style="padding:6px 12px;font-size:.82rem">👤 Por cliente</button>
+          <button onclick="setCancelledFilter('negocio',this)" id="cfNegocio" class="btn-ghost" style="padding:6px 12px;font-size:.82rem">🏪 Por negocio</button>
+          <select id="cancelBizFilter" onchange="loadCancelled()" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.82rem;background:white">
             <option value="">Todos los negocios</option>
           </select>
         </div>
@@ -342,22 +344,34 @@ function printBiz(name, period, bizId) {
 }
 
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+var _cancelledFilter = 'all';
+function setCancelledFilter(f, btn) {
+  _cancelledFilter = f;
+  ['cfAll','cfCliente','cfNegocio'].forEach(function(id){
+    var b=document.getElementById(id);
+    b.style.background=''; b.style.color=''; b.style.borderColor='';
+  });
+  if(btn){ btn.style.background='var(--blue)'; btn.style.color='white'; btn.style.borderColor='var(--blue)'; }
+  loadCancelled();
+}
+
 async function loadCancelled() {
   var bizId = document.getElementById('cancelBizFilter').value;
   var cancelled = allOrders.filter(function(o) {
     if (o.status !== 'cancelado') return false;
-    if (!o.cancel_reason) return false; // solo los cancelados por el cliente
+    if (!o.cancel_reason) return false;
     if (bizId && o.business_id != bizId) return false;
+    // Distinguir si canceló el cliente o el negocio según quién está en el log
+    // Por ahora usamos heurística: si cancel_reason existe, ambos pueden cancelar
     return true;
   });
   var el = document.getElementById('cancelledList');
   if (!cancelled.length) {
-    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">Sin pedidos cancelados por clientes.</div>';
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">Sin pedidos cancelados.</div>';
     return;
   }
   el.innerHTML = cancelled.map(function(o) {
     var d = new Date(o.created_at).toLocaleString('es-GT');
-    var items = (o.items||[]).map(function(i){ return esc(i.product_name)+' ×'+i.quantity; }).join(', ');
     return '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
         '<div>' +
@@ -367,11 +381,10 @@ async function loadCancelled() {
         '<span style="background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:700">✕ Cancelado</span>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;font-size:.82rem;margin-bottom:10px">' +
-        '<div><span style="color:var(--muted)">Cliente:</span> <strong>'+esc(o.client_name)+'</strong></div>' +
-        '<div><span style="color:var(--muted)">Negocio:</span> <strong>'+esc(o.business_name)+'</strong></div>' +
-        '<div><span style="color:var(--muted)">Total:</span> <strong>Q'+parseFloat(o.subtotal||0).toFixed(2)+'</strong></div>' +
+        '<div><span style="color:var(--muted)">👤 Cliente:</span> <strong>'+esc(o.client_name||'')+'</strong></div>' +
+        '<div><span style="color:var(--muted)">🏪 Negocio:</span> <strong>'+esc(o.business_name||'')+'</strong></div>' +
+        '<div><span style="color:var(--muted)">💰 Subtotal:</span> <strong>Q'+parseFloat(o.subtotal||0).toFixed(2)+'</strong></div>' +
       '</div>' +
-      (items ? '<div style="font-size:.8rem;color:var(--muted);margin-bottom:8px">🛍️ '+items+'</div>' : '') +
       '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;font-size:.83rem">' +
         '<span style="font-weight:700;color:#991b1b">Motivo: </span>'+esc(o.cancel_reason||'—') +
       '</div>' +

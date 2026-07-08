@@ -65,6 +65,9 @@
           <div class="detail-card" id="actionsCard">
             <h3>Acciones</h3>
             <div id="actionButtons"></div>
+            <div id="cancelReasonDisplay" style="display:none;margin-top:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;font-size:.83rem">
+              <span style="font-weight:700;color:#991b1b">Motivo de cancelación: </span><span id="cancelReasonText"></span>
+            </div>
           </div>
 
           <!-- Edit total per line -->
@@ -206,7 +209,7 @@ function renderActions() {
       btns += '<span style="font-size:.82rem;color:var(--muted);font-style:italic">⏳ Esperando al repartidor</span>';
     }
     if (s !== 'cancelado' && s !== 'entregado') {
-      btns += '<button class="status-btn" onclick="advanceStatus(\'cancelado\')" style="background:#fdf0f0;color:var(--danger);border:1px solid #f5c2c2">✕ Cancelar</button>';
+      btns += '<button class="status-btn" onclick="cancelWithReason()" style="background:#fdf0f0;color:var(--danger);border:1px solid #f5c2c2">✕ Cancelar</button>';
     }
     btns += '</div>';
   }
@@ -219,7 +222,14 @@ var editableLines = [];
 function initTotalEdit() {
   var s = order.status;
   var card = document.getElementById('editTotalCard');
-  if (['cancelado','entregado'].includes(s)) { card.style.display='none'; return; }
+  if (['cancelado','entregado'].includes(s)) {
+    card.style.display='none';
+    if (s === 'cancelado' && order.cancel_reason) {
+      document.getElementById('cancelReasonDisplay').style.display = 'block';
+      document.getElementById('cancelReasonText').textContent = order.cancel_reason;
+    }
+    return;
+  }
   // Initialize lines from order items
   editableLines = (order.items||[]).map(function(i) {
     return {
@@ -386,6 +396,23 @@ async function respond(action) {
   else APP.toast(res.message||'Error','error');
 }
 
+function cancelWithReason() {
+  document.getElementById('cancelReasonNeg').value = '';
+  document.getElementById('cancelModalNeg').style.display = 'flex';
+}
+async function confirmCancelNeg() {
+  var reason = document.getElementById('cancelReasonNeg').value.trim();
+  if (!reason) { APP.toast('Debes indicar el motivo', 'error'); return; }
+  var res = await fetch('/api/orders/'+orderId+'/status', {
+    method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+    body: JSON.stringify({ status: 'cancelado', cancel_reason: reason })
+  }).then(function(r){ return r.json(); });
+  if (res.success) {
+    document.getElementById('cancelModalNeg').style.display = 'none';
+    APP.toast('Pedido cancelado'); order.status='cancelado'; order.cancel_reason=reason; renderActions();
+  } else APP.toast(res.message||'Error','error');
+}
+
 async function advanceStatus(status) {
   var res = await fetch('/api/orders/'+orderId+'/status', {
     method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
@@ -532,5 +559,23 @@ document.addEventListener('visibilitychange', function() {
 })();
 
 </script>
+
+<!-- Modal cancelar pedido negocio -->
+<div id="cancelModalNeg" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;padding:20px">
+  <div style="background:white;border-radius:16px;width:100%;max-width:420px;overflow:hidden">
+    <div style="background:#fef2f2;padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-weight:700;color:#991b1b">❌ Cancelar pedido</div>
+      <button onclick="document.getElementById('cancelModalNeg').style.display='none'" style="background:rgba(0,0,0,.08);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:20px">
+      <p style="font-size:.88rem;color:#333;margin-bottom:12px">Indica el motivo (el cliente lo podrá ver):</p>
+      <textarea id="cancelReasonNeg" placeholder="Escribe el motivo..." rows="3" style="width:100%;padding:10px;border:1.5px solid #d1d5db;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;resize:none;box-sizing:border-box"></textarea>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button onclick="document.getElementById('cancelModalNeg').style.display='none'" style="flex:1;padding:11px;border:1.5px solid #d1d5db;background:white;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600">Volver</button>
+        <button onclick="confirmCancelNeg()" style="flex:1;padding:11px;background:#dc2626;color:white;border:none;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700">Cancelar pedido</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
