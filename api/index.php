@@ -85,6 +85,25 @@ try {
     switch ($resource) {
 
         // ── PROMOTIONS ────────────────────────────────────────
+        case 'expand-url':
+            if ($method !== 'POST') Response::error('Método no permitido', 405);
+            AuthMiddleware::authenticate();
+            $shortUrl = $body['url'] ?? '';
+            if (!filter_var($shortUrl, FILTER_VALIDATE_URL)) Response::error('URL inválida', 422);
+            $ch = curl_init($shortUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Mobile Safari/537.36');
+            curl_exec($ch);
+            $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+            curl_close($ch);
+            Response::success(['url' => $finalUrl ?: $shortUrl]);
+            break;
+
         case 'anuncios':
             require_once __DIR__ . '/controllers/AnuncioController.php';
             $ac = new AnuncioController();

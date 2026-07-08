@@ -1211,6 +1211,25 @@ async function calculateDeliveryFee() {
   var result = document.getElementById('deliveryCalcResult');
   var mapsUrl = getClientMapsUrlForDelivery();
 
+  // Intentar expandir links cortos en el frontend
+  if (mapsUrl && (mapsUrl.includes('goo.gl') || mapsUrl.includes('maps.app'))) {
+    btn.textContent = '⏳ Procesando link...'; btn.disabled = true;
+    try {
+      var expandRes = await fetch('/api/expand-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
+        body: JSON.stringify({ url: mapsUrl })
+      });
+      var expandData = await expandRes.json();
+      if (expandData.success && expandData.data.url) {
+        mapsUrl = expandData.data.url;
+        document.getElementById('deliveryAddress').value = mapsUrl;
+        window._gpsMapsUrl = mapsUrl;
+      }
+    } catch(e) {}
+    btn.textContent = '📏 Calcular costo de envío'; btn.disabled = false;
+  }
+
   if (!mapsUrl) {
     result.style.display = 'block';
     result.style.background = '#fdf0f0';
