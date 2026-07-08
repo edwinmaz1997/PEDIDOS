@@ -269,6 +269,9 @@ try {
             // /orders/{id}/respond
             if ($orderId2 && $orderSub === 'respond') { $ctrl->businessRespond($orderId2, $body); break; }
 
+            // /orders/{id}/cancel (cliente cancela pedido pendiente)
+            if ($orderId2 && $orderSub === 'cancel' && $method === 'POST') { $ctrl->cancelByClient($orderId2, $body); break; }
+
             // /orders/{id}/status
             if ($orderId2 && $orderSub === 'status') { $ctrl->updateStatus($orderId2, $body); break; }
 

@@ -296,6 +296,32 @@ class OrderController {
     }
 
     // PUT /api/orders/{id}/status  (negocio or repartidor updates status)
+    public function cancelByClient(int $id, array $body): void {
+        $user  = AuthMiddleware::requireRole('cliente');
+        $reason = trim($body['reason'] ?? '');
+        if (!$reason) Response::error('Debes indicar el motivo de cancelación', 422);
+
+        $stmt = $this->db->prepare("SELECT * FROM orders WHERE id = ? AND client_id = ?");
+        $stmt->execute([$id, $user['id']]);
+        $order = $stmt->fetch();
+        if (!$order) Response::notFound('Pedido no encontrado');
+        if ($order['status'] !== 'pendiente') Response::error('Solo puedes cancelar pedidos que están pendientes de aceptación', 400);
+
+        $this->db->prepare("UPDATE orders SET status='cancelado', cancel_reason=? WHERE id=?")
+                 ->execute([$reason, $id]);
+        $this->logStatus($id, 'cancelado', 'Cancelado por el cliente: ' . $reason, $user['id']);
+
+        // Notificar al negocio
+        $bizStmt = $this->db->prepare("SELECT b.user_id, b.name FROM businesses b WHERE b.id = ?");
+        $bizStmt->execute([$order['business_id']]);
+        $biz = $bizStmt->fetch();
+        if ($biz) {
+            $this->notify($biz['user_id'], 'order_cancelled', '❌ Pedido cancelado', "El pedido #{$order['order_number']} fue cancelado por el cliente. Motivo: {$reason}", '/negocio/index.html');
+        }
+
+        Response::success(null, 'Pedido cancelado');
+    }
+
     public function updateStatus(int $id, array $body): void {
         $user   = AuthMiddleware::requireRole(['negocio', 'repartidor', 'admin']);
         $order  = $this->findOrder($id);
