@@ -340,6 +340,14 @@ async function viewOrder(id) {
   });
   html += '</div>';
 
+  // Motivo cancelación
+  if (o.status === 'cancelado' && o.cancel_reason) {
+    html += '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;margin-bottom:10px">';
+    html += '<div style="font-size:.75rem;font-weight:700;color:#991b1b;margin-bottom:4px">❌ Motivo de cancelación</div>';
+    html += '<div style="font-size:.85rem;color:#7f1d1d">'+esc(o.cancel_reason)+'</div>';
+    html += '</div>';
+  }
+
   // Totales
   html += '<div style="background:var(--off-white);border:1px solid var(--border);border-radius:10px;padding:14px;color:var(--charcoal)">';
   html += '<div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px"><span>Subtotal productos</span><span>Q'+parseFloat(o.subtotal||0).toFixed(2)+'</span></div>';
