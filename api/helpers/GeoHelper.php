@@ -123,7 +123,8 @@ class GeoHelper {
      *   0    - 4   km => Q15
      *   4.01 - 6   km => Q20
      *   6.01 - 8   km => Q25
-     *   8.01 - 12  km => Q30
+     *   8.01 - 10  km => Q30
+     *   10.01 - 12 km => Q35
      *   > 12 km       => fuera de cobertura (null)
      *
      * @return float|null tarifa en Q, o null si está fuera de cobertura
@@ -132,7 +133,8 @@ class GeoHelper {
         if ($km <= 4)    return 15.00;
         if ($km <= 6)    return 20.00;
         if ($km <= 8)    return 25.00;
-        if ($km <= 12)   return 30.00;
+        if ($km <= 10)   return 30.00;
+        if ($km <= 12)   return 35.00;
         return null; // fuera de cobertura
     }
 }
