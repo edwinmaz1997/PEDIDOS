@@ -57,23 +57,43 @@ class GeoHelper {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 8);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Mobile Safari/537.36');
         curl_setopt($ch, CURLOPT_NOBODY, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept-Language: es-GT,es;q=0.9']);
 
-        $body = curl_exec($ch);
+        $body     = curl_exec($ch);
         $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
         curl_close($ch);
 
-        // Si la URL final ya tiene coordenadas, usarla
         if ($finalUrl && $finalUrl !== $shortUrl) {
-            return $finalUrl;
+            // Si la URL final ya tiene coordenadas, usarla directamente
+            if (preg_match('/@(-?\d+\.\d+),(-?\d+\.\d+)/', $finalUrl) ||
+                preg_match('/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/', $finalUrl) ||
+                preg_match('/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/', $finalUrl)) {
+                return $finalUrl;
+            }
         }
 
-        // Algunos links cortos devuelven un HTML con un meta-refresh o el link real en el body
-        if ($body && preg_match('/content="0;url=([^"]+)"/i', $body, $m)) {
-            return html_entity_decode($m[1]);
+        // Buscar coordenadas en el body del HTML (Google Maps embed patterns)
+        if ($body) {
+            // Patrón !3dLAT!4dLNG en el HTML
+            if (preg_match('/!3d(-?\d+\.\d{4,})!4d(-?\d+\.\d{4,})/', $body, $m)) {
+                return 'https://www.google.com/maps?q=' . $m[1] . ',' . $m[2];
+            }
+            // Patrón @LAT,LNG en el HTML
+            if (preg_match('/@(-?\d+\.\d{4,}),(-?\d+\.\d{4,})/', $body, $m)) {
+                return 'https://www.google.com/maps?q=' . $m[1] . ',' . $m[2];
+            }
+            // Patrón "center":"LAT,LNG" en JSON del HTML
+            if (preg_match('/"center":"(-?\d+\.\d+),(-?\d+\.\d+)"/', $body, $m)) {
+                return 'https://www.google.com/maps?q=' . $m[1] . ',' . $m[2];
+            }
+            // meta refresh
+            if (preg_match('/content="0;url=([^"]+)"/i', $body, $m)) {
+                return html_entity_decode($m[1]);
+            }
         }
 
         return $finalUrl ?: null;
