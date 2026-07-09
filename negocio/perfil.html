@@ -103,7 +103,11 @@
         </div>
         <div>
           <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem" id="bizNameDisplay">Mi Negocio</div>
-          <div style="color:var(--muted);font-size:.85rem" id="bizSlugDisplay"></div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:2px">🔗 Copia el link para compartirle a tus clientes</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <div style="color:var(--primary);font-size:.85rem;font-weight:600" id="bizSlugDisplay"></div>
+            <button onclick="copySlugLink()" id="copySlugBtn" title="Copiar link" style="background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:6px;font-size:.8rem;color:var(--muted)">📋</button>
+          </div>
           <div style="margin-top:6px"><span class="badge" id="bizStatusBadge"></span></div>
         </div>
       </div>
@@ -389,6 +393,7 @@ function fillForm() {
   const e = id => document.getElementById(id);
   e('bizNameDisplay').textContent = biz.name;
   e('bizSlugDisplay').textContent = 'nuevaexpress.com/' + biz.slug;
+  e('copySlugBtn').dataset.url = 'https://nuevaexpress.com/' + biz.slug;
   e('bizStatusBadge').textContent = biz.is_active ? '✅ Activo' : '⏸ Inactivo';
   e('bizStatusBadge').className = 'badge ' + (biz.is_active ? 'badge-done' : 'badge-cancel');
   e('f_name').value = biz.name || '';
@@ -655,6 +660,18 @@ function toggleSidebar() {
   var overlay = document.getElementById('sidebarOverlay');
   if (sidebar) sidebar.classList.toggle('open');
   if (overlay) overlay.classList.toggle('open');
+}
+function copySlugLink() {
+  const btn = document.getElementById("copySlugBtn");
+  const url = btn.dataset.url;
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = "✅";
+    setTimeout(() => { btn.textContent = "📋"; }, 2000);
+  }).catch(() => {
+    btn.textContent = "✅";
+    setTimeout(() => { btn.textContent = "📋"; }, 2000);
+  });
 }
 </script>
 
