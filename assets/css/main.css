@@ -710,3 +710,49 @@ body.dark-mode [style*="background:#e3f2fd"] { background: #1a2535 !important; }
 body.dark-mode [style*="background:#fff8e1"] { background: #2a2310 !important; }
 body.dark-mode [style*="background:#e8f5e9"] { background: #0f2318 !important; }
 body.dark-mode [style*="background:var(--off-white)"] { background: var(--off-white) !important; }
+
+/* ── Modo oscuro — textos y fondos inline ── */
+body.dark-mode .page-header h1,
+body.dark-mode .page-header p,
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4,
+body.dark-mode p, body.dark-mode label,
+body.dark-mode .form-group label,
+body.dark-mode td, body.dark-mode th,
+body.dark-mode li, body.dark-mode span:not(.badge):not([style*="color:#"]):not([style*="color: #"]) { color: var(--ink); }
+body.dark-mode strong { color: var(--ink); }
+body.dark-mode .report-table td, body.dark-mode .report-table th { color: var(--ink); }
+body.dark-mode [style*="color:#333"],
+body.dark-mode [style*="color: #333"],
+body.dark-mode [style*="color:#374151"],
+body.dark-mode [style*="color:#4b5563"],
+body.dark-mode [style*="color:#666"],
+body.dark-mode [style*="color:#888"],
+body.dark-mode [style*="color:#6b7280"] { color: var(--muted) !important; }
+body.dark-mode [style*="color:#0369a1"],
+body.dark-mode [style*="color:#1e40af"],
+body.dark-mode [style*="color:#3b82f6"] { color: #60a5fa !important; }
+body.dark-mode [style*="color:#15803d"],
+body.dark-mode [style*="color:#166534"],
+body.dark-mode [style*="color:#16a34a"] { color: #4ade80 !important; }
+body.dark-mode [style*="color:#991b1b"],
+body.dark-mode [style*="color:#7f1d1d"],
+body.dark-mode [style*="color:#e74c3c"],
+body.dark-mode [style*="color:#c0392b"] { color: #f87171 !important; }
+body.dark-mode [style*="color:#78350f"],
+body.dark-mode [style*="color:#92400e"],
+body.dark-mode [style*="color:#854d0e"],
+body.dark-mode [style*="color:#b45309"] { color: #fbbf24 !important; }
+body.dark-mode [style*="background:#f1f5f9"],
+body.dark-mode [style*="background: #f1f5f9"] { background: var(--off-white) !important; }
+body.dark-mode [style*="background:white"],
+body.dark-mode [style*="background: white"],
+body.dark-mode [style*="background:#fff"],
+body.dark-mode [style*="background: #fff"] { background: var(--white) !important; color: var(--ink) !important; }
+body.dark-mode .modal-content,
+body.dark-mode [style*="border-radius:20px"][style*="background:white"],
+body.dark-mode [style*="border-radius:20px"][style*="background: white"] { background: var(--white) !important; color: var(--ink) !important; }
+body.dark-mode .pm-badge { background: #3d2e00; color: #fbbf24; }
+body.dark-mode .saving { background: #0f2e1a; color: #4ade80; }
+body.dark-mode .promo-item-row { background: var(--off-white); }
+body.dark-mode .chat-bubble { background: var(--off-white) !important; color: var(--ink) !important; }
+body.dark-mode .chat-msg.mine .chat-bubble { background: var(--blue) !important; color: white !important; }
