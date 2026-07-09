@@ -135,6 +135,7 @@ class GeoHelper {
         if ($km <= 8)    return 25.00;
         if ($km <= 10)   return 30.00;
         if ($km <= 12)   return 35.00;
+        if ($km <= 14)   return 40.00;
         return null; // fuera de cobertura
     }
 }
