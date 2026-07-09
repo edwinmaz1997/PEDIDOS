@@ -548,18 +548,19 @@ async function loadDiario() {
     html += '</div>';
 
     html += '<div style="overflow-x:auto"><table class="report-table"><thead><tr>' +
-      '<th>#Pedido</th><th>Cliente</th><th>Tipo</th><th>Subtotal</th><th>Estado</th>' +
+      '<th style="white-space:nowrap">Hora</th><th style="white-space:nowrap">#Pedido</th><th>Cliente</th><th>Tipo</th><th style="white-space:nowrap">Subtotal</th><th>Estado</th>' +
       '</tr></thead><tbody>';
 
     dayOrders.forEach(function(o){
       var time = o.created_at ? new Date(o.created_at).toLocaleTimeString('es-GT',{hour:'2-digit',minute:'2-digit'}) : '';
       var statusLabels = {pendiente:'⏳ Pendiente',aceptado:'✅ Aceptado',en_preparacion:'👨‍🍳 Prep.',listo:'📦 Listo',en_camino:'🛵 En camino',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
       html += '<tr>' +
-        '<td style="font-weight:600;font-size:.82rem">' + esc(o.order_number) + '<br><span style="color:var(--muted);font-weight:400">' + time + '</span></td>' +
+        '<td style="white-space:nowrap;color:var(--muted);font-size:.82rem">' + time + '</td>' +
+        '<td style="font-weight:600;font-size:.82rem;white-space:nowrap">' + esc(o.order_number) + '</td>' +
         '<td style="font-size:.85rem">' + esc(o.client_name) + '</td>' +
-        '<td>' + (o.delivery_type==='delivery'?'🛵':o.delivery_type==='dine_in'?'🍽️':'🏃') + '</td>' +
-        '<td><strong>' + money(o.subtotal) + '</strong></td>' +
-        '<td style="font-size:.8rem">' + (statusLabels[o.status]||o.status) + '</td>' +
+        '<td style="white-space:nowrap">' + (o.delivery_type==='delivery'?'🛵 Delivery':o.delivery_type==='dine_in'?'🍽️ Negocio':'🏃 Recoger') + '</td>' +
+        '<td style="white-space:nowrap"><strong>' + money(o.subtotal) + '</strong></td>' +
+        '<td style="font-size:.8rem;white-space:nowrap">' + (statusLabels[o.status]||o.status) + '</td>' +
       '</tr>';
     });
     html += '</tbody></table></div></div>';
