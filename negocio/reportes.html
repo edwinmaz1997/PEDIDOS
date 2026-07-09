@@ -535,37 +535,38 @@ async function loadDiario() {
     byDay[day].push(o);
   });
 
-  var html = '';
+  var statusLabels = {pendiente:'⏳ Pendiente',aceptado:'✅ Aceptado',en_preparacion:'👨‍🍳 Prep.',listo:'📦 Listo',en_camino:'🛵 En camino',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
+  var html = '<div style="overflow-x:auto"><table class="report-table" style="table-layout:fixed;width:100%"><colgroup>' +
+    '<col style="width:60px"><col style="width:100px"><col style="min-width:120px"><col style="width:90px"><col style="width:80px"><col style="width:110px">' +
+    '</colgroup><thead><tr>' +
+    '<th style="white-space:nowrap">Hora</th><th style="white-space:nowrap">#Pedido</th><th>Cliente</th><th>Tipo</th><th style="white-space:nowrap">Subtotal</th><th>Estado</th>' +
+    '</tr></thead><tbody>';
+
   Object.keys(byDay).sort().reverse().forEach(function(day){
     var dayOrders = byDay[day];
     var dayTotal = dayOrders.reduce(function(s,o){ return s + parseFloat(o.subtotal||0); }, 0);
     var dayFee   = dayOrders.length * SERVICE_FEE;
 
-    html += '<div style="margin-bottom:20px">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:2px solid var(--border);margin-bottom:8px">';
-    html += '<strong>📅 ' + day + '</strong>';
-    html += '<span style="font-size:.85rem">' + dayOrders.length + ' pedidos · <strong style="color:var(--blue)">' + money(dayTotal) + '</strong> · Neto: <strong style="color:var(--green)">' + money(dayTotal-dayFee) + '</strong></span>';
-    html += '</div>';
-
-    html += '<div style="overflow-x:auto"><table class="report-table"><thead><tr>' +
-      '<th style="white-space:nowrap">Hora</th><th style="white-space:nowrap">#Pedido</th><th>Cliente</th><th>Tipo</th><th style="white-space:nowrap">Subtotal</th><th>Estado</th>' +
-      '</tr></thead><tbody>';
+    html += '<tr><td colspan="6" style="background:var(--off-white);padding:8px 12px;font-weight:700;font-size:.82rem;border-bottom:2px solid var(--border)">' +
+      '📅 ' + day + ' &nbsp;·&nbsp; ' + dayOrders.length + ' pedidos &nbsp;·&nbsp; ' +
+      '<span style="color:var(--blue)">' + money(dayTotal) + '</span>' +
+      ' &nbsp;·&nbsp; Neto: <span style="color:var(--green)">' + money(dayTotal-dayFee) + '</span>' +
+      '</td></tr>';
 
     dayOrders.forEach(function(o){
       var time = o.created_at ? new Date(o.created_at).toLocaleTimeString('es-GT',{hour:'2-digit',minute:'2-digit'}) : '';
-      var statusLabels = {pendiente:'⏳ Pendiente',aceptado:'✅ Aceptado',en_preparacion:'👨‍🍳 Prep.',listo:'📦 Listo',en_camino:'🛵 En camino',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
       html += '<tr>' +
         '<td style="white-space:nowrap;color:var(--muted);font-size:.82rem">' + time + '</td>' +
-        '<td style="font-weight:600;font-size:.82rem;white-space:nowrap">' + esc(o.order_number) + '</td>' +
-        '<td style="font-size:.85rem">' + esc(o.client_name) + '</td>' +
-        '<td style="white-space:nowrap">' + (o.delivery_type==='delivery'?'🛵 Delivery':o.delivery_type==='dine_in'?'🍽️ Negocio':'🏃 Recoger') + '</td>' +
+        '<td style="font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(o.order_number) + '</td>' +
+        '<td style="font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(o.client_name) + '</td>' +
+        '<td style="white-space:nowrap;font-size:.82rem">' + (o.delivery_type==='delivery'?'🛵 Delivery':o.delivery_type==='dine_in'?'🍽️ Negocio':'🏃 Recoger') + '</td>' +
         '<td style="white-space:nowrap"><strong>' + money(o.subtotal) + '</strong></td>' +
         '<td style="font-size:.8rem;white-space:nowrap">' + (statusLabels[o.status]||o.status) + '</td>' +
       '</tr>';
     });
-    html += '</tbody></table></div></div>';
   });
 
+  html += '</tbody></table></div>';
   document.getElementById('diarioTable').innerHTML = html;
 
   // Products sold in period
