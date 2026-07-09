@@ -123,6 +123,17 @@
         <div><strong>🤖 Android:</strong><ol style="padding-left:16px;line-height:2;margin-top:2px"><li>Toca los <strong>3 puntos ⋮</strong></li><li>Toca <strong>"Instalar aplicación"</strong></li></ol></div>
         <button onclick="document.getElementById('iosInstallGuide').style.display='none'" style="margin-top:8px;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);font-size:.78rem;cursor:pointer">Cerrar</button>
       </div>
+      <div style="background:#e3f2fd;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-weight:600;font-size:.9rem">🌙 Modo oscuro</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Cambia la apariencia de la aplicación</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:48px;height:26px;cursor:pointer">
+          <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode(this.checked)" style="opacity:0;width:0;height:0;position:absolute">
+          <span style="position:absolute;inset:0;background:var(--border);border-radius:26px;transition:.3s" id="darkModeSlider"></span>
+          <span style="position:absolute;left:3px;top:3px;width:20px;height:20px;background:white;border-radius:50%;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.3)" id="darkModeKnob"></span>
+        </label>
+      </div>
       <div style="background:#e3f2fd;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
         <div><div style="font-weight:600;font-size:.9rem">🔔 Notificaciones push</div><div style="font-size:.78rem;color:var(--muted);margin-top:2px">Recibe avisos de pedidos en tiempo real</div></div>
         <button onclick="requestNotificationPermission()" class="btn-primary" style="padding:9px 18px;font-size:.85rem;white-space:nowrap">Activar notificaciones</button>

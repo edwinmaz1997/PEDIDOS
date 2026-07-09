@@ -149,3 +149,22 @@ function togglePw(id) {
   if (inp.type === 'password') { inp.type = 'text'; if(btn) btn.textContent = '🙈'; }
   else { inp.type = 'password'; if(btn) btn.textContent = '👁️'; }
 }
+
+// ── Modo oscuro ──────────────────────────────────────────────
+function toggleDarkMode(on) {
+  document.body.classList.toggle('dark-mode', on);
+  localStorage.setItem('ne_dark_mode', on ? '1' : '0');
+  var slider = document.getElementById('darkModeSlider');
+  var knob   = document.getElementById('darkModeKnob');
+  if (slider) slider.style.background = on ? 'var(--blue)' : 'var(--border)';
+  if (knob)   knob.style.transform    = on ? 'translateX(22px)' : 'translateX(0)';
+}
+
+function initDarkMode() {
+  var on = localStorage.getItem('ne_dark_mode') === '1';
+  if (on) toggleDarkMode(true);
+  var toggle = document.getElementById('darkModeToggle');
+  if (toggle) toggle.checked = on;
+}
+
+document.addEventListener('DOMContentLoaded', initDarkMode);
