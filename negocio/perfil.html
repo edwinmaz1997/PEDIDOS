@@ -388,7 +388,7 @@ async function init() {
 function fillForm() {
   const e = id => document.getElementById(id);
   e('bizNameDisplay').textContent = biz.name;
-  e('bizSlugDisplay').textContent = 'nuevaexpress.com/#' + biz.slug;
+  e('bizSlugDisplay').textContent = 'nuevaexpress.com/' + biz.slug;
   e('bizStatusBadge').textContent = biz.is_active ? '✅ Activo' : '⏸ Inactivo';
   e('bizStatusBadge').className = 'badge ' + (biz.is_active ? 'badge-done' : 'badge-cancel');
   e('f_name').value = biz.name || '';
