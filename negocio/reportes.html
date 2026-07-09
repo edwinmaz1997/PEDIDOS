@@ -536,10 +536,8 @@ async function loadDiario() {
   });
 
   var statusLabels = {pendiente:'⏳ Pendiente',aceptado:'✅ Aceptado',en_preparacion:'👨‍🍳 Prep.',listo:'📦 Listo',en_camino:'🛵 En camino',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
-  var html = '<div style="overflow-x:auto"><table class="report-table" style="table-layout:fixed;width:100%"><colgroup>' +
-    '<col style="width:60px"><col style="width:100px"><col style="min-width:120px"><col style="width:90px"><col style="width:80px"><col style="width:110px">' +
-    '</colgroup><thead><tr>' +
-    '<th style="white-space:nowrap">Hora</th><th style="white-space:nowrap">#Pedido</th><th>Cliente</th><th>Tipo</th><th style="white-space:nowrap">Subtotal</th><th>Estado</th>' +
+  var html = '<div style="overflow-x:auto"><table class="report-table" style="table-layout:auto;min-width:600px"><thead><tr>' +
+    '<th style="white-space:nowrap;width:60px">Hora</th><th style="white-space:nowrap;width:130px">#Pedido</th><th style="width:180px">Cliente</th><th style="white-space:nowrap;width:110px">Tipo</th><th style="white-space:nowrap;width:90px">Subtotal</th><th style="white-space:nowrap;width:130px">Estado</th>' +
     '</tr></thead><tbody>';
 
   Object.keys(byDay).sort().reverse().forEach(function(day){
@@ -557,8 +555,8 @@ async function loadDiario() {
       var time = o.created_at ? new Date(o.created_at).toLocaleTimeString('es-GT',{hour:'2-digit',minute:'2-digit'}) : '';
       html += '<tr>' +
         '<td style="white-space:nowrap;color:var(--muted);font-size:.82rem">' + time + '</td>' +
-        '<td style="font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(o.order_number) + '</td>' +
-        '<td style="font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(o.client_name) + '</td>' +
+        '<td style="font-weight:600;font-size:.82rem;white-space:nowrap">' + esc(o.order_number) + '</td>' +
+        '<td style="font-size:.85rem;white-space:nowrap">' + esc(o.client_name) + '</td>' +
         '<td style="white-space:nowrap;font-size:.82rem">' + (o.delivery_type==='delivery'?'🛵 Delivery':o.delivery_type==='dine_in'?'🍽️ Negocio':'🏃 Recoger') + '</td>' +
         '<td style="white-space:nowrap"><strong>' + money(o.subtotal) + '</strong></td>' +
         '<td style="font-size:.8rem;white-space:nowrap">' + (statusLabels[o.status]||o.status) + '</td>' +
