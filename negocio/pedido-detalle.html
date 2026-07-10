@@ -87,9 +87,7 @@
             <h3>Productos del pedido</h3>
             <div id="itemsList"></div>
             <div style="margin-top:12px">
-              <div class="fee-row"><span>Subtotal</span><span id="subtotalVal">—</span></div>
-              <div class="fee-row" id="deliveryFeeRow" style="display:none"><span>Delivery</span><span id="deliveryFeeVal">—</span></div>
-              <div class="total-final"><span>Total cobrado al cliente</span><span id="totalVal" style="color:var(--blue)">—</span></div>
+              <div class="fee-row"><span>Total productos</span><span id="subtotalVal">—</span></div>
               <div class="fee-row" style="margin-top:6px"><span style="color:var(--success);font-weight:600">Tu ingreso neto</span><span id="netIncomeVal" style="color:var(--success);font-weight:700">—</span></div>
             </div>
           </div>
@@ -365,11 +363,8 @@ function renderItems() {
   var del = parseFloat(order.delivery_fee||0);
   var sub = parseFloat(order.subtotal||0);
   document.getElementById('subtotalVal').textContent  = 'Q'+sub.toFixed(2);
-  document.getElementById('totalVal').textContent     = 'Q'+(sub+del).toFixed(2);
   document.getElementById('netIncomeVal').textContent = 'Q'+(sub-svc).toFixed(2);
   if (del > 0) {
-    document.getElementById('deliveryFeeRow').style.display='flex';
-    document.getElementById('deliveryFeeVal').textContent='Q'+del.toFixed(2);
   }
 }
 
