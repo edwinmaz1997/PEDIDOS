@@ -67,6 +67,7 @@
           <option value="day">Por día</option>
           <option value="today">Hoy</option>
           <option value="week">Esta semana</option>
+          <option value="range">Rango de fechas</option>
         </select>
         <div id="monthFilters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
           <select id="monthSel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white"></select>
@@ -74,6 +75,12 @@
         </div>
         <div id="dayFilters" style="display:none">
           <input type="date" id="daySel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+        </div>
+        <div id="rangeFilters" style="display:none;gap:8px;align-items:center;flex-wrap:wrap" id="rangeFilters">
+          <input type="date" id="rangeFrom" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+          <span style="color:var(--muted);font-size:.85rem">hasta</span>
+          <input type="date" id="rangeTo" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+          <button onclick="loadReport()" class="btn-primary" style="padding:9px 16px;font-size:.88rem">Aplicar</button>
         </div>
         <select id="bizFilter" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white;max-width:200px">
           <option value="">Todos los negocios</option>
@@ -198,13 +205,21 @@ async function init() {
 
 function toggleMode() {
   var mode = document.getElementById('modeFilter').value;
-  document.getElementById('monthFilters').style.display = mode === 'month' ? 'flex' : 'none';
-  document.getElementById('dayFilters').style.display   = mode === 'day'   ? 'block' : 'none';
+  document.getElementById('monthFilters').style.display  = mode === 'month' ? 'flex'  : 'none';
+  document.getElementById('dayFilters').style.display    = mode === 'day'   ? 'block' : 'none';
+  document.getElementById('rangeFilters').style.display  = mode === 'range' ? 'flex'  : 'none';
   if (mode === 'day' && !document.getElementById('daySel').value) {
     var now = new Date();
     document.getElementById('daySel').value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
   }
-  loadReport();
+  if (mode === 'range' && !document.getElementById('rangeFrom').value) {
+    var now = new Date();
+    var fmt = function(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+    var from = new Date(now); from.setDate(now.getDate()-6);
+    document.getElementById('rangeFrom').value = fmt(from);
+    document.getElementById('rangeTo').value   = fmt(now);
+  }
+  if (mode !== 'range') loadReport();
 }
 
 function loadReport() {
@@ -238,6 +253,15 @@ function loadReport() {
     filtered = allOrders.filter(function(o) {
       var d = (o.created_at || '').substring(0,10);
       return d === day && o.status !== 'cancelado' && (!bizId || o.business_id == bizId);
+    });
+  } else if (mode === 'range') {
+    var from = document.getElementById('rangeFrom').value;
+    var to   = document.getElementById('rangeTo').value;
+    if (!from || !to) return;
+    document.getElementById('printPeriod').textContent = from + ' → ' + to;
+    filtered = allOrders.filter(function(o) {
+      var d = (o.created_at || '').substring(0,10);
+      return d >= from && d <= to && o.status !== 'cancelado' && (!bizId || o.business_id == bizId);
     });
   } else {
     var month  = parseInt(document.getElementById('monthSel').value);
