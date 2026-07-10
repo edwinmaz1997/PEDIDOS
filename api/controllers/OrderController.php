@@ -460,11 +460,25 @@ class OrderController {
     }
 
     private function notifyRepartidores(string $title, string $message): void {
-        $stmt = $this->db->prepare("SELECT id FROM users WHERE role_id = 4 AND is_active = 1");
+        $stmt = $this->db->prepare("SELECT id, email, name FROM users WHERE role_id = 4 AND is_active = 1");
         $stmt->execute();
-        $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        error_log('notifyRepartidores — encontrados: ' . count($ids) . ' — ids: ' . implode(',', $ids));
-        if (empty($ids)) return;
+        $repartidores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        error_log('notifyRepartidores — encontrados: ' . count($repartidores));
+        if (empty($repartidores)) return;
+        $ids = array_column($repartidores, 'id');
         PushNotification::sendToMany($ids, $title, $message, '/repartidor/index.html');
+        foreach ($repartidores as $rep) {
+            if (empty($rep['email'])) continue;
+            try {
+                Mailer::sendGeneric(
+                    $rep['email'],
+                    $rep['name'],
+                    '🛵 Nuevo pedido disponible — NuevaExpress',
+                    Mailer::buildRepartidorAlert($rep['name'], $message)
+                );
+            } catch (\Exception $e) {
+                error_log('Email repartidor error: ' . $e->getMessage());
+            }
+        }
     }
 }

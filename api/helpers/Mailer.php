@@ -162,6 +162,18 @@ HTML;
         );
     }
 
+    // ── Alerta de pedido disponible para repartidor ─────────
+    public static function buildRepartidorAlert(string $name, string $detail): string {
+        $body = "
+            <div style='background:#fefce8;border-left:4px solid #f59e0b;border-radius:8px;padding:16px;margin-bottom:16px'>
+                <strong style='color:#b45309'>🛵 Hay un nuevo pedido de delivery disponible</strong>
+            </div>
+            <p style='color:#444;font-size:.9rem'>{$detail}</p>
+            <p style='color:#666;font-size:.88rem;margin-top:12px'>Ingresa a la app para tomarlo antes que otro repartidor.</p>";
+
+        return self::template($name, '🛵', '¡Nuevo pedido disponible!', $body, 'Ver pedidos disponibles', 'https://nuevaexpress.com/repartidor/index.html');
+    }
+
     // ── Verificación (existente) ──────────────────────────────
     public static function sendVerificationCode(string $toEmail, string $toName, string $code): bool {
         $body = "
