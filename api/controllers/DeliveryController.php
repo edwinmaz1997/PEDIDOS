@@ -250,9 +250,10 @@ class DeliveryController {
                 SELECT COUNT(*) as total_entregas,
                        COALESCE(SUM(o.delivery_fee),0) as total_delivery,
                        COALESCE(SUM(o.delivery_fee*0.5),0) as ganancia_neta,
-                       COALESCE(SUM(o.subtotal + o.delivery_fee),0) as total_cobrado
+                       COALESCE(SUM(CASE WHEN b.cash_on_delivery=1 THEN o.delivery_fee ELSE o.subtotal + o.delivery_fee END),0) as total_cobrado
                 FROM deliveries d
                 JOIN orders o ON d.order_id=o.id
+                JOIN businesses b ON o.business_id=b.id
                 WHERE d.repartidor_id=? AND d.status='entregado'
                   AND DATE(d.delivered_at) BETWEEN ? AND ?
             ");
@@ -262,7 +263,8 @@ class DeliveryController {
             $dStmt = $this->db->prepare("
                 SELECT d.id, d.delivered_at as updated_at, o.order_number, o.delivery_fee,
                        ROUND(o.delivery_fee*0.5,2) as mi_ganancia,
-                       ROUND(o.subtotal + o.delivery_fee,2) as total_cobrado,
+                       ROUND(CASE WHEN b.cash_on_delivery=1 THEN o.delivery_fee ELSE o.subtotal + o.delivery_fee END,2) as total_cobrado,
+                       b.cash_on_delivery,
                        o.delivery_address, b.name as negocio
                 FROM deliveries d
                 JOIN orders o ON d.order_id=o.id

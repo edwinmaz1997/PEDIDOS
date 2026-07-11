@@ -561,11 +561,11 @@ function openDetail(id) {
   var subtotal    = parseFloat(d.subtotal||0);
   var deliveryFee = parseFloat(d.delivery_fee||0);
   var cashOnDelivery = d.cash_on_delivery == 1;
-  var totalCollect = cashOnDelivery ? deliveryFee : (subtotal + deliveryFee);
+  var totalCollect = subtotal + deliveryFee;
 
   document.getElementById('dTotalCollect').textContent  = 'Q' + totalCollect.toFixed(2);
   document.getElementById('dTotalBreakdown').textContent = cashOnDelivery
-    ? 'Solo delivery — el negocio cobra los productos'
+    ? 'Q' + subtotal.toFixed(2) + ' productos (cobrados al negocio) + Q' + deliveryFee.toFixed(2) + ' delivery'
     : 'Q' + subtotal.toFixed(2) + ' productos + Q' + deliveryFee.toFixed(2) + ' delivery';
 
   // Client phone — only show if repartidor has claimed this delivery
