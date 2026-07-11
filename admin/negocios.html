@@ -211,6 +211,7 @@ function renderTable(list) {
       <div class="biz-badges">
         <span class="badge ${b.is_active?'badge-done':'badge-cancel'}">${b.is_active?'Activo':'Inactivo'}</span>
         ${b.accepts_delivery ? '<span class="badge badge-delivery">🛵</span>' : ''}
+        ${b.cash_on_delivery ? '<span class="badge" style="background:#fff8e1;color:#b45309">💵 Pago en efectivo</span>' : ''}
       </div>
       <div class="biz-order-btns">
         <button onclick="moveUp(${b.id}, ${b.sort_order||0})" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem">▲</button>
@@ -226,6 +227,9 @@ function renderTable(list) {
         <button class="icon-btn" onclick="connectAsBiz(${b.user_id})" title="Conectar como negocio" style="background:#e0f2fe;border-color:#7dd3fc;font-size:.75rem;padding:4px 8px;width:auto;border-radius:6px">🔗 Conectar</button>
         <button class="icon-btn ${b.is_verified?'':'success'}" onclick="toggleVerify(${b.id}, ${b.is_verified})">
           ${b.is_verified?'✓':'✓'}
+        </button>
+        <button class="icon-btn" onclick="toggleCashOnDelivery(${b.id}, ${b.cash_on_delivery})" title="${b.cash_on_delivery?'Desactivar pago en efectivo':'Activar pago en efectivo'}" style="${b.cash_on_delivery?'background:#fff8e1;border-color:#f59e0b;':''}font-size:.75rem;padding:4px 8px;width:auto;border-radius:6px">
+          💵
         </button>
         <button class="icon-btn ${b.is_active?'danger':''}" onclick="toggleActive(${b.id}, ${b.is_active})">
           ${b.is_active?'⏸':'▶'}
@@ -275,6 +279,12 @@ async function moveDown(id, currentOrder) {
 async function toggleVerify(id, current) {
   const res = await APP.put(`/businesses/${id}`, { is_verified: current ? 0 : 1 });
   if (res?.success) { APP.toast(current ? 'Verificación removida' : 'Negocio verificado ⭐'); init(); }
+  else APP.toast('Error', 'error');
+}
+
+async function toggleCashOnDelivery(id, current) {
+  const res = await APP.put(`/businesses/${id}`, { cash_on_delivery: current ? 0 : 1 });
+  if (res?.success) { APP.toast(current ? 'Pago en efectivo desactivado' : '💵 Pago en efectivo activado'); init(); }
   else APP.toast('Error', 'error');
 }
 

@@ -16,7 +16,7 @@ class DeliveryController {
                    o.notes, o.delivery_type, o.status as order_status,
                    o.created_at, o.estimated_time, o.accepted_at, o.preparation_started_at,
                    UNIX_TIMESTAMP(o.preparation_started_at) as prep_ts,
-                   b.name as business_name, b.address as pickup_address, b.phone as business_phone, b.google_maps_url as business_maps_url, b.business_type,
+                   b.name as business_name, b.address as pickup_address, b.phone as business_phone, b.google_maps_url as business_maps_url, b.business_type, b.cash_on_delivery,
                    u.name as client_name, u.phone as client_phone, u.house_description as client_house_description
             FROM deliveries d
             JOIN orders o ON d.order_id = o.id
