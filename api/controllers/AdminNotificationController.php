@@ -42,7 +42,7 @@ class AdminController {
             SELECT d.id, d.status, d.delivered_at,
                    o.order_number, o.subtotal, o.delivery_fee, o.service_fee, o.total, o.status as order_status,
                    u.id as repartidor_id, u.name as repartidor_name,
-                   b.name as business_name, c.name as client_name
+                   b.name as business_name, b.cash_on_delivery, c.name as client_name
             FROM deliveries d
             JOIN orders o ON o.id = d.order_id
             JOIN users u ON u.id = d.repartidor_id

@@ -449,9 +449,10 @@ async function loadRepTab() {
   var totalGlobal = 0;
   var html = '';
   Object.values(byRep).forEach(function(rep){
-    var sub=rep.items.reduce(function(s,d){ return s+parseFloat(d.subtotal||0); },0);
-    var del=rep.items.reduce(function(s,d){ return s+parseFloat(d.delivery_fee||0); },0);
-    var total=sub+del;
+    var total=rep.items.reduce(function(s,d){
+      var sub=parseFloat(d.subtotal||0), del=parseFloat(d.delivery_fee||0);
+      return s + (d.cash_on_delivery==1 ? del : sub+del);
+    },0);
     totalGlobal+=total;
     html+='<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
@@ -459,9 +460,12 @@ async function loadRepTab() {
         '<div style="font-size:1.1rem;font-weight:800;color:var(--blue)">Q'+total.toFixed(2)+'</div>'+
       '</div>'+
       rep.items.map(function(d){
+        var sub=parseFloat(d.subtotal||0), del=parseFloat(d.delivery_fee||0);
+        var cobrado = d.cash_on_delivery==1 ? del : sub+del;
+        var label = d.cash_on_delivery==1 ? '<span style="font-size:.72rem;background:#fff8e1;color:#b45309;border-radius:4px;padding:1px 5px;margin-left:4px">💵 ef.</span>' : '';
         return '<div style="display:flex;justify-content:space-between;font-size:.82rem;padding:6px 0;border-bottom:1px solid #f3f4f6">'+
-          '<div><strong>#'+esc(d.order_number)+'</strong> · '+esc(d.client_name)+'</div>'+
-          '<div>Q'+(parseFloat(d.subtotal)+parseFloat(d.delivery_fee)).toFixed(2)+'</div>'+
+          '<div><strong>#'+esc(d.order_number)+'</strong> · '+esc(d.client_name)+label+'</div>'+
+          '<div>Q'+cobrado.toFixed(2)+'</div>'+
         '</div>';
       }).join('')+
       '<div style="display:flex;justify-content:space-between;font-weight:700;margin-top:8px;font-size:.88rem">'+
