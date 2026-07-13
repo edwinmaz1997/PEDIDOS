@@ -50,6 +50,10 @@ class GeoHelper {
      * Sigue la redirección de un link corto de Google Maps (maps.app.goo.gl)
      * y devuelve la URL final expandida.
      */
+    public static function resolveShortUrlPublic(string $shortUrl): ?string {
+        return self::resolveShortUrl($shortUrl);
+    }
+
     private static function resolveShortUrl(string $shortUrl): ?string {
         if (!filter_var($shortUrl, FILTER_VALIDATE_URL)) return null;
 

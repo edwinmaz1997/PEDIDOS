@@ -288,6 +288,18 @@ try {
             break;
 
         // ── DELIVERIES ───────────────────────────────────────
+        case 'geo':
+            AuthMiddleware::authenticate();
+            if ($action === 'resolve-url' && $method === 'GET') {
+                $url = trim($_GET['url'] ?? '');
+                if (!$url) Response::error('url requerida', 400);
+                require_once __DIR__ . '/helpers/GeoHelper.php';
+                $resolved = GeoHelper::resolveShortUrlPublic($url);
+                Response::success(['resolved_url' => $resolved ?: $url]);
+            }
+            Response::notFound();
+            break;
+
         case 'deliveries':
             $ctrl = new DeliveryController();
             if ($method === 'GET'  && $action === 'stats')                  { $ctrl->stats(); break; }

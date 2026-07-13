@@ -119,7 +119,7 @@ class UserController {
     }
 
     public function searchClients(): void {
-        AuthMiddleware::requireRole('negocio');
+        AuthMiddleware::requireRole(['negocio','admin']);
         $q = trim($_GET['q'] ?? '');
         if (strlen($q) < 2) { Response::success([]); return; }
         $like = '%' . $q . '%';
