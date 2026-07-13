@@ -215,6 +215,7 @@ try {
             }
             if ($action === 'search')       { $ctrl->search();                          break; }
             if ($action === 'by-category')  { $ctrl->byCategory((int)($parts[2]??0));   break; }
+            if ($action === 'mine' && isset($parts[2]) && $parts[2] === 'products' && $method === 'GET') { $ctrl->mineProducts(); break; }
             if ($action === 'mine')         { $ctrl->mine();                             break; }
             if ($method === 'GET'    && !$id)    $ctrl->index();
             elseif ($method === 'GET'    && $id) $ctrl->show($id);
@@ -265,6 +266,9 @@ try {
 
             // /orders/{id}/total
             if ($orderId2 && $orderSub === 'total' && $method === 'PUT') { $msgCtrl->updateTotal($orderId2, $body); break; }
+
+            // /orders/by-negocio
+            if ($parts[1] === 'by-negocio' && $method === 'POST') { $ctrl->storeByNegocio($body); break; }
 
             // /orders/{id}/respond
             if ($orderId2 && $orderSub === 'respond') { $ctrl->businessRespond($orderId2, $body); break; }
@@ -333,6 +337,9 @@ try {
                 $ctrl->assignBusiness($body['business_id'] ?? 0, $body['user_id'] ?? 0);
                 break;
             }
+            // /api/admin/users/search-clients — negocio busca clientes
+            if ($action === 'users' && isset($parts[2]) && $parts[2] === 'search-clients' && $method === 'GET') { $userCtrl->searchClients(); break; }
+
             // /api/admin/users/{id} — subAction holds the id when action is a word
             $adminUserId = null;
             if ($action === 'users' && isset($parts[2]) && is_numeric($parts[2])) {

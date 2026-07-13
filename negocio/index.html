@@ -58,6 +58,12 @@
       <p id="bizNameHeader">Gestiona tus pedidos entrantes</p>
     </div>
 
+    <div id="btnCrearPedidoWrap" style="display:none;margin-bottom:16px">
+      <button onclick="abrirModalCrearPedido()" class="btn-primary" style="display:flex;align-items:center;gap:8px;padding:10px 20px;font-size:.9rem">
+        ➕ Crear pedido delivery
+      </button>
+    </div>
+
     <div class="stats-grid" id="statsGrid">
       <div class="stat-card" style="cursor:pointer" onclick="loadOrders('',document.querySelector('.tab-btn:last-of-type'))"><div class="stat-label">Pedidos hoy</div><div class="stat-value" id="statToday">—</div></div>
       <div class="stat-card" style="cursor:pointer" onclick="loadOrders('pendiente',document.querySelectorAll('.tab-btn')[0])"><div class="stat-label">Pendientes</div><div class="stat-value" id="statPending" style="color:var(--warning)">—</div></div>
@@ -85,6 +91,62 @@
     <div id="ordersContainer"><div class="loading-state"><div class="spinner"></div></div></div>
     <div class="pagination" id="pagination"></div>
   </main>
+</div>
+
+<!-- Modal crear pedido por negocio -->
+<div id="modalCrearPedido" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;overflow-y:auto;padding:20px">
+  <div style="background:white;border-radius:var(--radius);max-width:560px;margin:0 auto;padding:24px;position:relative">
+    <button onclick="cerrarModalCrearPedido()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted)">×</button>
+    <h2 style="font-size:1.1rem;font-weight:700;margin:0 0 20px">➕ Crear pedido delivery</h2>
+
+    <!-- Paso 1: Cliente -->
+    <div style="margin-bottom:16px">
+      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">CLIENTE</label>
+      <input type="text" id="cpClientSearch" placeholder="Buscar por nombre o teléfono..." oninput="buscarCliente(this.value)"
+        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+      <div id="cpClientResults" style="border:1px solid var(--border);border-radius:var(--radius-sm);margin-top:4px;display:none;max-height:160px;overflow-y:auto;background:white;box-shadow:0 4px 12px rgba(0,0,0,.1)"></div>
+      <div id="cpClientSelected" style="display:none;background:#e8f5e9;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:.88rem;display:flex;align-items:center;justify-content:space-between"></div>
+    </div>
+
+    <!-- Paso 2: Productos -->
+    <div style="margin-bottom:16px">
+      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">PRODUCTOS</label>
+      <div id="cpProductList" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>
+      <div id="cpCartItems" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;min-height:40px;font-size:.85rem"></div>
+    </div>
+
+    <!-- Paso 3: Dirección -->
+    <div style="margin-bottom:16px">
+      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">DIRECCIÓN DE ENTREGA</label>
+      <div id="cpClientAddresses" style="margin-bottom:8px"></div>
+      <input type="text" id="cpCustomAddress" placeholder="O escribe una dirección personalizada..."
+        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+    </div>
+
+    <!-- Delivery fee -->
+    <div style="margin-bottom:16px;background:var(--off-white);border-radius:8px;padding:12px 16px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:.88rem;color:var(--muted)">Tarifa de delivery:</span>
+        <input type="number" id="cpDeliveryFee" min="0" step="5" value="15"
+          style="width:80px;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.9rem">
+        <span style="font-size:.82rem;color:var(--muted)">Q</span>
+      </div>
+    </div>
+
+    <!-- Nota -->
+    <div style="margin-bottom:20px">
+      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">NOTA (opcional)</label>
+      <textarea id="cpNotes" rows="2" placeholder="Instrucciones especiales..."
+        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical;box-sizing:border-box"></textarea>
+    </div>
+
+    <!-- Total -->
+    <div id="cpResumen" style="display:none;background:#e3f2fd;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.88rem"></div>
+
+    <button onclick="confirmarCrearPedido()" class="btn-primary" style="width:100%;padding:13px;font-size:.95rem;justify-content:center">
+      ✅ Crear pedido
+    </button>
+  </div>
 </div>
 
 <script>
@@ -136,6 +198,10 @@ document.getElementById('sidebarUser').textContent = user.name || 'Mi Negocio';
     }
 
     const biz = data.data;
+
+    if (biz.id === 5) {
+      document.getElementById('btnCrearPedidoWrap').style.display = 'block';
+    }
 
     if (!biz.is_active) {
       // Negocio pendiente de aprobación — mostrar pantalla de espera
@@ -520,6 +586,160 @@ setInterval(async function() {
     }
   } catch(e) {}
 }, 8000);
+
+// ── Crear pedido por negocio ─────────────────────────────────
+var cpCart = [];
+var cpSelectedClient = null;
+var cpProducts = [];
+
+async function abrirModalCrearPedido() {
+  cpCart = []; cpSelectedClient = null;
+  document.getElementById('cpClientSearch').value = '';
+  document.getElementById('cpClientResults').style.display = 'none';
+  document.getElementById('cpClientSelected').style.display = 'none';
+  document.getElementById('cpClientAddresses').innerHTML = '';
+  document.getElementById('cpCustomAddress').value = '';
+  document.getElementById('cpNotes').value = '';
+  document.getElementById('cpResumen').style.display = 'none';
+  document.getElementById('cpDeliveryFee').value = '15';
+  document.getElementById('modalCrearPedido').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  await cargarProductosCP();
+}
+
+function cerrarModalCrearPedido() {
+  document.getElementById('modalCrearPedido').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function cargarProductosCP() {
+  const res = await APP.get('/businesses/mine/products');
+  cpProducts = res?.data || [];
+  const el = document.getElementById('cpProductList');
+  el.innerHTML = cpProducts.map(p =>
+    `<button onclick="agregarAlCarrito(${p.id})" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;background:white;cursor:pointer;font-size:.8rem;font-family:'DM Sans',sans-serif">
+      ${APP.esc(p.name)} — Q${parseFloat(p.price).toFixed(2)}
+    </button>`
+  ).join('');
+}
+
+function agregarAlCarrito(productId) {
+  const p = cpProducts.find(x => x.id === productId);
+  if (!p) return;
+  const ex = cpCart.find(x => x.product_id === productId);
+  if (ex) ex.quantity++;
+  else cpCart.push({product_id:p.id, name:p.name, price:parseFloat(p.price), quantity:1});
+  renderCarritoCP();
+}
+
+function renderCarritoCP() {
+  const el = document.getElementById('cpCartItems');
+  if (!cpCart.length) { el.innerHTML = '<span style="color:var(--muted)">Sin productos aún</span>'; actualizarResumenCP(); return; }
+  el.innerHTML = cpCart.map((item,i) =>
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6">
+      <span>${APP.esc(item.name)}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onclick="cambiarCantidadCP(${i},-1)" style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:white;cursor:pointer;font-size:.9rem">−</button>
+        <span style="font-weight:700;min-width:16px;text-align:center">${item.quantity}</span>
+        <button onclick="cambiarCantidadCP(${i},1)" style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:white;cursor:pointer;font-size:.9rem">+</button>
+        <span style="color:var(--muted);min-width:60px;text-align:right">Q${(item.price*item.quantity).toFixed(2)}</span>
+      </div>
+    </div>`
+  ).join('');
+  actualizarResumenCP();
+}
+
+function cambiarCantidadCP(i, delta) {
+  cpCart[i].quantity += delta;
+  if (cpCart[i].quantity <= 0) cpCart.splice(i, 1);
+  renderCarritoCP();
+}
+
+function actualizarResumenCP() {
+  if (!cpCart.length) { document.getElementById('cpResumen').style.display='none'; return; }
+  const sub = cpCart.reduce((s,x)=>s+x.price*x.quantity,0);
+  const del = parseFloat(document.getElementById('cpDeliveryFee').value||0);
+  document.getElementById('cpResumen').style.display = 'block';
+  document.getElementById('cpResumen').innerHTML =
+    `<div style="display:flex;justify-content:space-between"><span>Subtotal</span><strong>Q${sub.toFixed(2)}</strong></div>
+     <div style="display:flex;justify-content:space-between"><span>Delivery</span><strong>Q${del.toFixed(2)}</strong></div>
+     <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:700;margin-top:6px;border-top:1px solid #bbdefb;padding-top:6px"><span>Total cliente</span><strong style="color:var(--blue)">Q${(sub+del).toFixed(2)}</strong></div>`;
+}
+
+document.getElementById('cpDeliveryFee').addEventListener('input', actualizarResumenCP);
+
+var cpSearchTimeout = null;
+function buscarCliente(q) {
+  clearTimeout(cpSearchTimeout);
+  if (q.length < 2) { document.getElementById('cpClientResults').style.display='none'; return; }
+  cpSearchTimeout = setTimeout(async function(){
+    const res = await APP.get('/admin/users/search-clients?q='+encodeURIComponent(q));
+    const users = res?.data || [];
+    const el = document.getElementById('cpClientResults');
+    if (!users.length) { el.innerHTML='<div style="padding:10px;color:var(--muted);font-size:.85rem">Sin resultados</div>'; el.style.display='block'; return; }
+    el.innerHTML = users.slice(0,8).map(u=>
+      `<div onclick="seleccionarClienteCP(${u.id},'${APP.esc(u.name)}','${APP.esc(u.phone||'')}','${APP.esc(u.delivery_address||'')}')"
+        style="padding:10px 14px;cursor:pointer;font-size:.88rem;border-bottom:1px solid #f3f4f6"
+        onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
+        <strong>${APP.esc(u.name)}</strong> ${u.phone?'· '+APP.esc(u.phone):''}
+      </div>`
+    ).join('');
+    el.style.display = 'block';
+  }, 350);
+}
+
+function seleccionarClienteCP(id, name, phone, address) {
+  cpSelectedClient = {id, name, phone, address};
+  document.getElementById('cpClientResults').style.display = 'none';
+  document.getElementById('cpClientSearch').value = name;
+  const sel = document.getElementById('cpClientSelected');
+  sel.style.display = 'flex';
+  sel.innerHTML = `<span>✅ <strong>${APP.esc(name)}</strong>${phone?' · '+APP.esc(phone):''}</span><button onclick="limpiarClienteCP()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem">×</button>`;
+  // Show saved address if any
+  const addrEl = document.getElementById('cpClientAddresses');
+  if (address) {
+    addrEl.innerHTML = `<button onclick="usarDireccionCliente('${APP.esc(address)}')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-size:.82rem;width:100%;text-align:left">
+      📍 Usar dirección guardada: <strong>${APP.esc(address)}</strong>
+    </button>`;
+  } else {
+    addrEl.innerHTML = '';
+  }
+}
+
+function usarDireccionCliente(addr) {
+  document.getElementById('cpCustomAddress').value = addr;
+}
+
+function limpiarClienteCP() {
+  cpSelectedClient = null;
+  document.getElementById('cpClientSearch').value = '';
+  document.getElementById('cpClientSelected').style.display = 'none';
+  document.getElementById('cpClientAddresses').innerHTML = '';
+}
+
+async function confirmarCrearPedido() {
+  if (!cpSelectedClient) { APP.toast('Selecciona un cliente', 'error'); return; }
+  if (!cpCart.length)    { APP.toast('Agrega al menos un producto', 'error'); return; }
+  const addr = document.getElementById('cpCustomAddress').value.trim();
+  if (!addr) { APP.toast('Ingresa la dirección de entrega', 'error'); return; }
+
+  const payload = {
+    client_id:        cpSelectedClient.id,
+    delivery_address: addr,
+    delivery_fee:     parseFloat(document.getElementById('cpDeliveryFee').value||15),
+    notes:            document.getElementById('cpNotes').value,
+    items:            cpCart.map(x=>({product_id:x.product_id, name:x.name, price:x.price, quantity:x.quantity}))
+  };
+
+  const res = await APP.post('/orders/by-negocio', payload);
+  if (res?.success) {
+    APP.toast('✅ Pedido #'+res.data.order_number+' creado y notificando repartidores');
+    cerrarModalCrearPedido();
+    loadOrders('aceptado', document.querySelectorAll('.tab-btn')[1]);
+  } else {
+    APP.toast(res?.message || 'Error al crear pedido', 'error');
+  }
+}
 </script>
 </body>
 </html>

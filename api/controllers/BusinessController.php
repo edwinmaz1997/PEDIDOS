@@ -61,6 +61,16 @@ class BusinessController {
         Response::success($biz);
     }
 
+    public function mineProducts(): void {
+        $user = AuthMiddleware::requireRole('negocio');
+        $stmt = $this->db->prepare("SELECT id FROM businesses WHERE user_id = ? AND is_active = 1 LIMIT 1");
+        $stmt->execute([$user['id']]);
+        $biz = $stmt->fetch();
+        if (!$biz) Response::notFound('Negocio no encontrado');
+        $products = $this->getAllProducts($biz['id']);
+        Response::success($products);
+    }
+
     public function show(int $id): void {
         $stmt = $this->db->prepare("
             SELECT b.*, bc.name as category_name, bc.icon as category_icon,

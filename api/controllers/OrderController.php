@@ -227,6 +227,102 @@ class OrderController {
         ], 'Pedido creado exitosamente', 201);
     }
 
+    // POST /api/orders/by-negocio  (negocio creates order on behalf of client)
+    public function storeByNegocio(array $body): void {
+        $user = AuthMiddleware::requireRole('negocio');
+
+        // Get business
+        $bizStmt = $this->db->prepare("SELECT * FROM businesses WHERE user_id = ? AND is_active = 1 LIMIT 1");
+        $bizStmt->execute([$user['id']]);
+        $business = $bizStmt->fetch();
+        if (!$business) Response::error('Negocio no encontrado', 404);
+
+        $clientId     = (int)($body['client_id'] ?? 0);
+        $deliveryType = 'delivery';
+        $notes        = Security::sanitize($body['notes'] ?? '');
+        $items        = $body['items'] ?? [];
+        $deliveryFee  = isset($body['delivery_fee']) ? (float)$body['delivery_fee'] : (float)$business['delivery_fee'];
+        $deliveryAddr = Security::sanitize($body['delivery_address'] ?? '');
+        $deliveryLat  = $body['delivery_lat'] ?? null;
+        $deliveryLng  = $body['delivery_lng'] ?? null;
+
+        if (!$clientId) Response::error('Cliente requerido', 400);
+        if (empty($items)) Response::error('Agrega al menos un producto', 400);
+        if (!$deliveryAddr) Response::error('Dirección de entrega requerida', 400);
+
+        // Verify client exists
+        $cStmt = $this->db->prepare("SELECT id, name FROM users WHERE id = ? AND role_id = 3 AND is_active = 1 LIMIT 1");
+        $cStmt->execute([$clientId]);
+        if (!$cStmt->fetch()) Response::error('Cliente no encontrado', 404);
+
+        // Build items & subtotal
+        $serviceFee = SERVICE_FEE;
+        $subtotal   = 0;
+        $orderItems = [];
+        foreach ($items as $item) {
+            $productId = isset($item['product_id']) ? (int)$item['product_id'] : null;
+            $quantity  = max(1, (int)($item['quantity'] ?? 1));
+            $unitPrice = null;
+            $productName = Security::sanitize($item['name'] ?? '');
+            if ($productId) {
+                $pStmt = $this->db->prepare("SELECT * FROM products_services WHERE id = ? AND business_id = ? AND is_available = 1");
+                $pStmt->execute([$productId, $business['id']]);
+                $product = $pStmt->fetch();
+                if ($product) {
+                    $productName = $product['name'];
+                    $unitPrice   = (float)$product['price'];
+                }
+            }
+            if ($unitPrice === null && isset($item['price'])) $unitPrice = (float)$item['price'];
+            if (!$unitPrice) continue;
+            $subtotal += $unitPrice * $quantity;
+            $orderItems[] = ['product_id'=>$productId,'product_name'=>$productName,'quantity'=>$quantity,'unit_price'=>$unitPrice,'notes'=>Security::sanitize($item['notes']??'')];
+        }
+        if (empty($orderItems)) Response::error('No se pudieron calcular los productos', 400);
+
+        $total = $subtotal + $serviceFee + $deliveryFee;
+        $orderNumber = 'PED-' . strtoupper(substr(uniqid(), -8));
+
+        $stmt = $this->db->prepare("
+            INSERT INTO orders
+                (order_number, client_id, business_id, delivery_type, delivery_address, delivery_lat, delivery_lng, notes,
+                 subtotal, service_fee, delivery_fee, total, status)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,'aceptado')
+        ");
+        $stmt->execute([
+            $orderNumber, $clientId, $business['id'], $deliveryType,
+            $deliveryAddr, $deliveryLat, $deliveryLng, $notes,
+            $subtotal, $serviceFee, $deliveryFee, $total
+        ]);
+        $orderId = $this->db->lastInsertId();
+
+        foreach ($orderItems as $item) {
+            $this->db->prepare("INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, notes) VALUES (?,?,?,?,?,?)")
+                ->execute([$orderId, $item['product_id'], $item['product_name'], $item['quantity'], $item['unit_price'], $item['notes']]);
+        }
+
+        $this->logStatus($orderId, 'aceptado', 'Pedido creado por el negocio', $user['id']);
+
+        // Create delivery record and notify repartidores
+        try {
+            $this->db->prepare("INSERT INTO deliveries (order_id, status) VALUES (?, 'disponible')")->execute([$orderId]);
+            $this->notifyRepartidores("🛵 Pedido disponible para tomar", "Pedido #{$orderNumber} listo para ser tomado");
+        } catch (\Exception $e) {
+            error_log('Delivery notify error: ' . $e->getMessage());
+        }
+
+        // Notify client
+        $this->notify($clientId, 'order_update', '📦 Pedido en camino', "Tu pedido #{$orderNumber} ha sido creado y está buscando repartidor", '/cliente/mis-pedidos.html');
+
+        Response::success([
+            'order_id'     => $orderId,
+            'order_number' => $orderNumber,
+            'subtotal'     => $subtotal,
+            'delivery_fee' => $deliveryFee,
+            'total'        => $subtotal + $deliveryFee,
+        ], 'Pedido creado exitosamente', 201);
+    }
+
     // PUT /api/orders/{id}/respond  (negocio responds)
     public function businessRespond(int $id, array $body): void {
         $user  = AuthMiddleware::requireRole('negocio');
