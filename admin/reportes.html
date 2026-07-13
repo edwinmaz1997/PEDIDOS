@@ -55,6 +55,7 @@
       <button onclick="showTab('tab-ventas',this)" id="btn-tab-ventas" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;color:var(--blue);border-bottom:2px solid var(--blue);margin-bottom:-2px">📊 Ventas</button>
       <button onclick="showTab('tab-cancelados',this)" id="btn-tab-cancelados" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;color:var(--muted)">❌ Cancelados</button>
       <button onclick="showTab('tab-repartidores',this)" id="btn-tab-repartidores" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;color:var(--muted)">🛵 Repartidores</button>
+      <button onclick="showTab('tab-pago-rep',this)" id="btn-tab-pago-rep" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;color:var(--muted)">💳 Pago a repartidores</button>
     </div>
 
     <!-- Tab ventas -->
@@ -134,6 +135,21 @@
       </div>
       <div id="repTabContent"><div style="text-align:center;padding:30px;color:var(--muted)">Selecciona una fecha y toca Ver.</div></div>
     </div><!-- /tab-repartidores -->
+
+    <!-- Tab pago a repartidores -->
+    <div id="tab-pago-rep" style="display:none">
+      <div style="margin-bottom:16px">
+        <h2 style="font-size:1.1rem;font-weight:700;color:var(--navy);margin:0 0 4px">💳 Pago a repartidores</h2>
+        <p style="font-size:.8rem;color:var(--muted);margin:0">Resumen de entregas y ganancias por repartidor en un rango de fechas.</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+        <input type="date" id="pagoRepFrom" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+        <span style="color:var(--muted);font-size:.85rem">hasta</span>
+        <input type="date" id="pagoRepTo" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+        <button onclick="loadPagoRep()" class="btn-primary" style="padding:9px 18px">Ver</button>
+      </div>
+      <div id="pagoRepContent"><div style="text-align:center;padding:30px;color:var(--muted)">Selecciona un rango de fechas y toca Ver.</div></div>
+    </div><!-- /tab-pago-rep -->
 
   </main>
 </div>
@@ -417,11 +433,79 @@ function printBiz(name, period, bizId) {
 }
 
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+async function loadPagoRep() {
+  var from = document.getElementById('pagoRepFrom').value;
+  var to   = document.getElementById('pagoRepTo').value;
+  var el   = document.getElementById('pagoRepContent');
+  if (!from || !to) return;
+  el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">Cargando...</div>';
+  var res = await fetch('/api/admin/deliveries?date='+from+'&date_to='+to, { headers:{ Authorization:'Bearer '+getToken() } });
+  var data = await res.json();
+  var deliveries = data.data || [];
+  if (!deliveries.length) { el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)">Sin entregas en este período.</div>'; return; }
+
+  var byRep = {};
+  deliveries.forEach(function(d){
+    if(!byRep[d.repartidor_id]) byRep[d.repartidor_id]={name:d.repartidor_name,items:[]};
+    byRep[d.repartidor_id].items.push(d);
+  });
+
+  var totalGanancia = 0;
+  var html = '';
+  Object.values(byRep).forEach(function(rep){
+    var entregas = rep.items.length;
+    var ganancia = rep.items.reduce(function(s,d){ return s+parseFloat(d.delivery_fee||0)*0.5; },0);
+    totalGanancia += ganancia;
+    html += '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'+
+        '<div style="font-weight:700;font-size:1rem">🛵 '+esc(rep.name)+'</div>'+
+        '<div style="text-align:right">'+
+          '<div style="font-size:1.1rem;font-weight:800;color:var(--green)">Q'+ganancia.toFixed(2)+'</div>'+
+          '<div style="font-size:.75rem;color:var(--muted)">ganancia</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:16px;font-size:.85rem;color:var(--muted);margin-bottom:12px">'+
+        '<span>📦 '+entregas+' entregas</span>'+
+        '<span>💰 Q'+(rep.items.reduce(function(s,d){return s+parseFloat(d.delivery_fee||0);},0)).toFixed(2)+' en delivery fees</span>'+
+      '</div>'+
+      '<table style="width:100%;border-collapse:collapse;font-size:.8rem">'+
+        '<thead><tr style="border-bottom:2px solid var(--border)">'+
+          '<th style="text-align:left;padding:4px 8px;color:var(--muted);font-weight:600">Fecha</th>'+
+          '<th style="text-align:left;padding:4px 8px;color:var(--muted);font-weight:600">#Pedido</th>'+
+          '<th style="text-align:left;padding:4px 8px;color:var(--muted);font-weight:600">Negocio</th>'+
+          '<th style="text-align:right;padding:4px 8px;color:var(--muted);font-weight:600">Delivery</th>'+
+          '<th style="text-align:right;padding:4px 8px;color:var(--muted);font-weight:600">Su ganancia</th>'+
+        '</tr></thead><tbody>'+
+        rep.items.map(function(d){
+          var fecha = d.delivered_at ? d.delivered_at.substring(0,10) : '';
+          var fee   = parseFloat(d.delivery_fee||0);
+          return '<tr style="border-bottom:1px solid #f3f4f6">'+
+            '<td style="padding:5px 8px;white-space:nowrap">'+fecha+'</td>'+
+            '<td style="padding:5px 8px;font-weight:600">#'+esc(d.order_number)+'</td>'+
+            '<td style="padding:5px 8px">'+esc(d.business_name)+'</td>'+
+            '<td style="padding:5px 8px;text-align:right">Q'+fee.toFixed(2)+'</td>'+
+            '<td style="padding:5px 8px;text-align:right;color:var(--green);font-weight:700">Q'+(fee*0.5).toFixed(2)+'</td>'+
+          '</tr>';
+        }).join('')+
+        '</tbody></table>'+
+      '<div style="display:flex;justify-content:space-between;font-weight:700;margin-top:10px;padding-top:8px;border-top:2px solid var(--border);font-size:.9rem">'+
+        '<span>Total a pagar</span><span style="color:var(--green)">Q'+ganancia.toFixed(2)+'</span>'+
+      '</div>'+
+    '</div>';
+  });
+
+  el.innerHTML='<div style="background:linear-gradient(135deg,#064e3b,#065f46);border-radius:var(--radius);padding:16px;color:white;margin-bottom:16px">'+
+    '<div style="font-size:.78rem;opacity:.7;margin-bottom:4px">Total a pagar — '+from+' → '+to+'</div>'+
+    '<div style="font-size:1.8rem;font-weight:800">Q'+totalGanancia.toFixed(2)+'</div>'+
+    '<div style="font-size:.75rem;opacity:.6;margin-top:3px">'+Object.keys(byRep).length+' repartidor(es) · '+deliveries.length+' entrega(s)</div>'+
+  '</div>'+html;
+}
+
 function showTab(id, btn) {
-  ['tab-ventas','tab-cancelados','tab-repartidores'].forEach(function(t){
+  ['tab-ventas','tab-cancelados','tab-repartidores','tab-pago-rep'].forEach(function(t){
     document.getElementById(t).style.display = t===id ? 'block' : 'none';
   });
-  ['btn-tab-ventas','btn-tab-cancelados','btn-tab-repartidores'].forEach(function(b){
+  ['btn-tab-ventas','btn-tab-cancelados','btn-tab-repartidores','btn-tab-pago-rep'].forEach(function(b){
     var el=document.getElementById(b);
     el.style.color='var(--muted)'; el.style.fontWeight='600'; el.style.borderBottom='none';
   });
@@ -431,6 +515,15 @@ function showTab(id, btn) {
     var now=new Date();
     var d=document.getElementById('repDate');
     if(!d.value) d.value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  }
+  if(id==='tab-pago-rep') {
+    var now=new Date();
+    var fmt=function(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+    if(!document.getElementById('pagoRepFrom').value){
+      var from=new Date(now); from.setDate(now.getDate()-6);
+      document.getElementById('pagoRepFrom').value=fmt(from);
+      document.getElementById('pagoRepTo').value=fmt(now);
+    }
   }
 }
 
