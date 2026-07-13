@@ -43,6 +43,11 @@ class GeoHelper {
             return ['lat' => (float)$m[1], 'lng' => (float)$m[2]];
         }
 
+        // Patrón 4: coordenadas plain text "lat,lng"
+        if (preg_match('/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/', $url, $m)) {
+            return ['lat' => (float)$m[1], 'lng' => (float)$m[2]];
+        }
+
         return null;
     }
 

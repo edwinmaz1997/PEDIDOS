@@ -178,7 +178,7 @@
       <input type="text" id="cpMapsUrl" placeholder="Pega el link de Google Maps del cliente..."
         oninput="calcularDeliveryCP()"
         style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
-      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Pega el link largo de Google Maps del cliente (no el link corto maps.app.goo.gl)</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Pega el link de Google Maps o escribe las coordenadas (ej: 14.6349,-90.5069)</div>
     </div>
 
     <!-- Delivery fee calculado -->
@@ -664,7 +664,12 @@ async function abrirModalCrearPedido() {
   document.getElementById('cpResumen').style.display = 'none';
   document.getElementById('modalCrearPedido').style.display = 'block';
   document.body.style.overflow = 'hidden';
-  await cargarProductosCP();
+  // Load products
+  try {
+    var pr = await fetch(API+'/businesses/mine/products', {headers:{Authorization:'Bearer '+cpToken()}});
+    var pres = await pr.json();
+    cpProducts = pres?.data || [];
+  } catch(e) { cpProducts = []; }
 }
 
 function cerrarModalCrearPedido() {
@@ -921,22 +926,15 @@ function buscarCliente(q) {
   }, 350);
 }
 
-function seleccionarClienteCP(id, name, phone, address) {
-  cpSelectedClient = {id:id, name:name, phone:phone, address:address};
+function seleccionarClienteCP(id, name, phone) {
+  cpSelectedClient = {id:id, name:name, phone:phone};
   document.getElementById('cpClientResults').style.display = 'none';
   document.getElementById('cpClientSearch').value = name;
   const sel = document.getElementById('cpClientSelected');
   sel.style.display = 'flex';
   sel.innerHTML = '<span>✅ <strong>'+cpEsc(name)+'</strong>'+(phone?' · '+cpEsc(phone):'')+
     '</span><button onclick="limpiarClienteCP()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem">×</button>';
-  const addrEl = document.getElementById('cpClientAddresses');
-  if (address) {
-    var safeAddr = (address||'').replace(/'/g,"\'");
-    addrEl.innerHTML = '<button onclick="usarMapsCliente(\'' + safeAddr + '\')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-size:.82rem;width:100%;text-align:left">'+
-      '📍 Usar ubicación guardada del cliente</button>';
-  } else {
-    addrEl.innerHTML = '';
-  }
+  document.getElementById('cpClientAddresses').innerHTML = '';
 }
 
 function usarMapsCliente(url) {
