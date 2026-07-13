@@ -312,7 +312,7 @@ class OrderController {
         }
 
         // Notify client
-        $this->notify($clientId, 'order_update', '🛒 Nuevo pedido', "Tu pedido #{$orderNumber} ha sido registrado por el negocio.", '/cliente/mis-pedidos.html');
+        $this->notify($clientId, 'order_update', '🛒 Nuevo pedido', "Tu pedido #{$orderNumber} ha sido registrado por el negocio.", '/cliente/index.html');
 
         Response::success([
             'order_id'     => $orderId,
