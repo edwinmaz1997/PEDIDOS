@@ -115,21 +115,20 @@
       <div id="cpCartItems" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;min-height:40px;font-size:.85rem"></div>
     </div>
 
-    <!-- Paso 3: Dirección -->
+    <!-- Paso 3: Ubicación -->
     <div style="margin-bottom:16px">
-      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">DIRECCIÓN DE ENTREGA</label>
+      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">UBICACIÓN DEL CLIENTE (Google Maps)</label>
       <div id="cpClientAddresses" style="margin-bottom:8px"></div>
-      <input type="text" id="cpCustomAddress" placeholder="O escribe una dirección personalizada..."
+      <input type="text" id="cpMapsUrl" placeholder="Pega el link de Google Maps del cliente..."
+        oninput="calcularDeliveryCP()"
         style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
     </div>
 
-    <!-- Delivery fee -->
+    <!-- Delivery fee calculado -->
     <div style="margin-bottom:16px;background:var(--off-white);border-radius:8px;padding:12px 16px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:.88rem;color:var(--muted)">Tarifa de delivery:</span>
-        <input type="number" id="cpDeliveryFee" min="0" step="5" value="15"
-          style="width:80px;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.9rem">
-        <span style="font-size:.82rem;color:var(--muted)">Q</span>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:.88rem;color:var(--muted)">Costo de delivery:</span>
+        <span id="cpDeliveryFeeDisplay" style="font-weight:700;font-size:.95rem;color:var(--blue)">—</span>
       </div>
     </div>
 
@@ -200,6 +199,7 @@ document.getElementById('sidebarUser').textContent = user.name || 'Mi Negocio';
     const biz = data.data;
 
     if (biz.id === 5) {
+      cpBizId = biz.id;
       document.getElementById('btnCrearPedidoWrap').style.display = 'block';
     }
 
@@ -591,17 +591,28 @@ setInterval(async function() {
 var cpCart = [];
 var cpSelectedClient = null;
 var cpProducts = [];
+var cpBizId = null;
+var cpCalculatedFee = 0;
+
+function cpToken() { return localStorage.getItem('nuevaexpress_token'); }
+function cpEsc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function cpToast(msg, type) {
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:'+(type==='error'?'#ef4444':'#10b981')+';color:white;padding:10px 20px;border-radius:8px;z-index:99999;font-size:.9rem;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+  t.textContent=msg; document.body.appendChild(t);
+  setTimeout(function(){t.remove();},3000);
+}
 
 async function abrirModalCrearPedido() {
-  cpCart = []; cpSelectedClient = null;
+  cpCart = []; cpSelectedClient = null; cpCalculatedFee = 0;
   document.getElementById('cpClientSearch').value = '';
   document.getElementById('cpClientResults').style.display = 'none';
   document.getElementById('cpClientSelected').style.display = 'none';
   document.getElementById('cpClientAddresses').innerHTML = '';
-  document.getElementById('cpCustomAddress').value = '';
+  document.getElementById('cpMapsUrl').value = '';
+  document.getElementById('cpDeliveryFeeDisplay').textContent = '—';
   document.getElementById('cpNotes').value = '';
   document.getElementById('cpResumen').style.display = 'none';
-  document.getElementById('cpDeliveryFee').value = '15';
   document.getElementById('modalCrearPedido').style.display = 'block';
   document.body.style.overflow = 'hidden';
   await cargarProductosCP();
@@ -613,20 +624,22 @@ function cerrarModalCrearPedido() {
 }
 
 async function cargarProductosCP() {
-  const res = await APP.get('/businesses/mine/products');
+  const r = await fetch(API+'/businesses/mine/products', {headers:{Authorization:'Bearer '+cpToken()}});
+  const res = await r.json();
   cpProducts = res?.data || [];
   const el = document.getElementById('cpProductList');
+  if (!cpProducts.length) { el.innerHTML='<span style="color:var(--muted);font-size:.85rem">Sin productos disponibles</span>'; return; }
   el.innerHTML = cpProducts.map(p =>
-    `<button onclick="agregarAlCarrito(${p.id})" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;background:white;cursor:pointer;font-size:.8rem;font-family:'DM Sans',sans-serif">
-      ${APP.esc(p.name)} — Q${parseFloat(p.price).toFixed(2)}
-    </button>`
+    '<button onclick="agregarAlCarrito('+p.id+')" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;background:white;cursor:pointer;font-size:.8rem;font-family:'DM Sans',sans-serif">'+
+      cpEsc(p.name)+' — Q'+parseFloat(p.price).toFixed(2)+
+    '</button>'
   ).join('');
 }
 
 function agregarAlCarrito(productId) {
-  const p = cpProducts.find(x => x.id === productId);
+  const p = cpProducts.find(function(x){return x.id===productId;});
   if (!p) return;
-  const ex = cpCart.find(x => x.product_id === productId);
+  const ex = cpCart.find(function(x){return x.product_id===productId;});
   if (ex) ex.quantity++;
   else cpCart.push({product_id:p.id, name:p.name, price:parseFloat(p.price), quantity:1});
   renderCarritoCP();
@@ -634,18 +647,17 @@ function agregarAlCarrito(productId) {
 
 function renderCarritoCP() {
   const el = document.getElementById('cpCartItems');
-  if (!cpCart.length) { el.innerHTML = '<span style="color:var(--muted)">Sin productos aún</span>'; actualizarResumenCP(); return; }
-  el.innerHTML = cpCart.map((item,i) =>
-    `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6">
-      <span>${APP.esc(item.name)}</span>
-      <div style="display:flex;align-items:center;gap:8px">
-        <button onclick="cambiarCantidadCP(${i},-1)" style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:white;cursor:pointer;font-size:.9rem">−</button>
-        <span style="font-weight:700;min-width:16px;text-align:center">${item.quantity}</span>
-        <button onclick="cambiarCantidadCP(${i},1)" style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:white;cursor:pointer;font-size:.9rem">+</button>
-        <span style="color:var(--muted);min-width:60px;text-align:right">Q${(item.price*item.quantity).toFixed(2)}</span>
-      </div>
-    </div>`
-  ).join('');
+  if (!cpCart.length) { el.innerHTML='<span style="color:var(--muted)">Sin productos aún</span>'; actualizarResumenCP(); return; }
+  el.innerHTML = cpCart.map(function(item,i){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f3f4f6">'+
+      '<span>'+cpEsc(item.name)+'</span>'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+        '<button onclick="cambiarCantidadCP('+i+',-1)" style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:white;cursor:pointer;font-size:.9rem">−</button>'+
+        '<span style="font-weight:700;min-width:16px;text-align:center">'+item.quantity+'</span>'+
+        '<button onclick="cambiarCantidadCP('+i+',1)" style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:white;cursor:pointer;font-size:.9rem">+</button>'+
+        '<span style="color:var(--muted);min-width:60px;text-align:right">Q'+(item.price*item.quantity).toFixed(2)+'</span>'+
+      '</div></div>';
+  }).join('');
   actualizarResumenCP();
 }
 
@@ -656,58 +668,57 @@ function cambiarCantidadCP(i, delta) {
 }
 
 function actualizarResumenCP() {
-  if (!cpCart.length) { document.getElementById('cpResumen').style.display='none'; return; }
-  const sub = cpCart.reduce((s,x)=>s+x.price*x.quantity,0);
-  const del = parseFloat(document.getElementById('cpDeliveryFee').value||0);
-  document.getElementById('cpResumen').style.display = 'block';
-  document.getElementById('cpResumen').innerHTML =
-    `<div style="display:flex;justify-content:space-between"><span>Subtotal</span><strong>Q${sub.toFixed(2)}</strong></div>
-     <div style="display:flex;justify-content:space-between"><span>Delivery</span><strong>Q${del.toFixed(2)}</strong></div>
-     <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:700;margin-top:6px;border-top:1px solid #bbdefb;padding-top:6px"><span>Total cliente</span><strong style="color:var(--blue)">Q${(sub+del).toFixed(2)}</strong></div>`;
+  const resEl = document.getElementById('cpResumen');
+  if (!cpCart.length || !cpCalculatedFee) { resEl.style.display='none'; return; }
+  const sub = cpCart.reduce(function(s,x){return s+x.price*x.quantity;},0);
+  resEl.style.display = 'block';
+  resEl.innerHTML =
+    '<div style="display:flex;justify-content:space-between"><span>Subtotal</span><strong>Q'+sub.toFixed(2)+'</strong></div>'+
+    '<div style="display:flex;justify-content:space-between"><span>Delivery</span><strong>Q'+cpCalculatedFee.toFixed(2)+'</strong></div>'+
+    '<div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:700;margin-top:6px;border-top:1px solid #bbdefb;padding-top:6px"><span>Total cliente</span><strong style="color:var(--blue)">Q'+(sub+cpCalculatedFee).toFixed(2)+'</strong></div>';
 }
-
-document.getElementById('cpDeliveryFee').addEventListener('input', actualizarResumenCP);
 
 var cpSearchTimeout = null;
 function buscarCliente(q) {
   clearTimeout(cpSearchTimeout);
   if (q.length < 2) { document.getElementById('cpClientResults').style.display='none'; return; }
   cpSearchTimeout = setTimeout(async function(){
-    const res = await APP.get('/admin/users/search-clients?q='+encodeURIComponent(q));
+    const r = await fetch(API+'/admin/users/search-clients?q='+encodeURIComponent(q), {headers:{Authorization:'Bearer '+cpToken()}});
+    const res = await r.json();
     const users = res?.data || [];
     const el = document.getElementById('cpClientResults');
     if (!users.length) { el.innerHTML='<div style="padding:10px;color:var(--muted);font-size:.85rem">Sin resultados</div>'; el.style.display='block'; return; }
-    el.innerHTML = users.slice(0,8).map(u=>
-      `<div onclick="seleccionarClienteCP(${u.id},'${APP.esc(u.name)}','${APP.esc(u.phone||'')}','${APP.esc(u.delivery_address||'')}')"
-        style="padding:10px 14px;cursor:pointer;font-size:.88rem;border-bottom:1px solid #f3f4f6"
-        onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
-        <strong>${APP.esc(u.name)}</strong> ${u.phone?'· '+APP.esc(u.phone):''}
-      </div>`
-    ).join('');
+    el.innerHTML = users.slice(0,8).map(function(u){
+      return '<div onclick="seleccionarClienteCP('+u.id+',''+cpEsc(u.name)+'',''+cpEsc(u.phone||'')+'',''+cpEsc(u.delivery_address||'')+'')" '+
+        'style="padding:10px 14px;cursor:pointer;font-size:.88rem;border-bottom:1px solid #f3f4f6" '+
+        'onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">'+
+        '<strong>'+cpEsc(u.name)+'</strong>'+(u.phone?' · '+cpEsc(u.phone):'')+
+      '</div>';
+    }).join('');
     el.style.display = 'block';
   }, 350);
 }
 
 function seleccionarClienteCP(id, name, phone, address) {
-  cpSelectedClient = {id, name, phone, address};
+  cpSelectedClient = {id:id, name:name, phone:phone, address:address};
   document.getElementById('cpClientResults').style.display = 'none';
   document.getElementById('cpClientSearch').value = name;
   const sel = document.getElementById('cpClientSelected');
   sel.style.display = 'flex';
-  sel.innerHTML = `<span>✅ <strong>${APP.esc(name)}</strong>${phone?' · '+APP.esc(phone):''}</span><button onclick="limpiarClienteCP()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem">×</button>`;
-  // Show saved address if any
+  sel.innerHTML = '<span>✅ <strong>'+cpEsc(name)+'</strong>'+(phone?' · '+cpEsc(phone):'')+
+    '</span><button onclick="limpiarClienteCP()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem">×</button>';
   const addrEl = document.getElementById('cpClientAddresses');
   if (address) {
-    addrEl.innerHTML = `<button onclick="usarDireccionCliente('${APP.esc(address)}')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-size:.82rem;width:100%;text-align:left">
-      📍 Usar dirección guardada: <strong>${APP.esc(address)}</strong>
-    </button>`;
+    addrEl.innerHTML = '<button onclick="usarMapsCliente(''+cpEsc(address)+'')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-size:.82rem;width:100%;text-align:left">'+
+      '📍 Usar ubicación guardada del cliente</button>';
   } else {
     addrEl.innerHTML = '';
   }
 }
 
-function usarDireccionCliente(addr) {
-  document.getElementById('cpCustomAddress').value = addr;
+function usarMapsCliente(url) {
+  document.getElementById('cpMapsUrl').value = url;
+  calcularDeliveryCP();
 }
 
 function limpiarClienteCP() {
@@ -717,27 +728,62 @@ function limpiarClienteCP() {
   document.getElementById('cpClientAddresses').innerHTML = '';
 }
 
+var cpCalcTimeout = null;
+async function calcularDeliveryCP() {
+  clearTimeout(cpCalcTimeout);
+  cpCalcTimeout = setTimeout(async function(){
+    const mapsUrl = document.getElementById('cpMapsUrl').value.trim();
+    if (!mapsUrl || !cpBizId) return;
+    document.getElementById('cpDeliveryFeeDisplay').textContent = 'Calculando...';
+    try {
+      const r = await fetch(API+'/businesses/'+cpBizId+'/calculate-delivery', {
+        method:'POST',
+        headers:{'Content-Type':'application/json', Authorization:'Bearer '+cpToken()},
+        body: JSON.stringify({client_maps_url: mapsUrl})
+      });
+      const res = await r.json();
+      if (res?.success && res.data?.fee !== undefined && res.data.fee !== null) {
+        cpCalculatedFee = parseFloat(res.data.fee);
+        document.getElementById('cpDeliveryFeeDisplay').textContent = 'Q'+cpCalculatedFee.toFixed(2)+' ('+res.data.distance_km.toFixed(1)+' km)';
+        actualizarResumenCP();
+      } else {
+        cpCalculatedFee = 0;
+        document.getElementById('cpDeliveryFeeDisplay').textContent = res?.message || 'Fuera de cobertura';
+        document.getElementById('cpResumen').style.display = 'none';
+      }
+    } catch(e) {
+      document.getElementById('cpDeliveryFeeDisplay').textContent = 'Error al calcular';
+    }
+  }, 600);
+}
+
 async function confirmarCrearPedido() {
-  if (!cpSelectedClient) { APP.toast('Selecciona un cliente', 'error'); return; }
-  if (!cpCart.length)    { APP.toast('Agrega al menos un producto', 'error'); return; }
-  const addr = document.getElementById('cpCustomAddress').value.trim();
-  if (!addr) { APP.toast('Ingresa la dirección de entrega', 'error'); return; }
+  if (!cpSelectedClient) { cpToast('Selecciona un cliente','error'); return; }
+  if (!cpCart.length)    { cpToast('Agrega al menos un producto','error'); return; }
+  const mapsUrl = document.getElementById('cpMapsUrl').value.trim();
+  if (!mapsUrl)          { cpToast('Ingresa el link de Google Maps','error'); return; }
+  if (!cpCalculatedFee)  { cpToast('Calcula el costo de delivery primero','error'); return; }
 
   const payload = {
     client_id:        cpSelectedClient.id,
-    delivery_address: addr,
-    delivery_fee:     parseFloat(document.getElementById('cpDeliveryFee').value||15),
+    delivery_address: mapsUrl,
+    delivery_fee:     cpCalculatedFee,
     notes:            document.getElementById('cpNotes').value,
-    items:            cpCart.map(x=>({product_id:x.product_id, name:x.name, price:x.price, quantity:x.quantity}))
+    items:            cpCart.map(function(x){return {product_id:x.product_id, name:x.name, price:x.price, quantity:x.quantity};})
   };
 
-  const res = await APP.post('/orders/by-negocio', payload);
+  const r = await fetch(API+'/orders/by-negocio', {
+    method:'POST',
+    headers:{'Content-Type':'application/json', Authorization:'Bearer '+cpToken()},
+    body: JSON.stringify(payload)
+  });
+  const res = await r.json();
   if (res?.success) {
-    APP.toast('✅ Pedido #'+res.data.order_number+' creado y notificando repartidores');
+    cpToast('✅ Pedido #'+res.data.order_number+' creado');
     cerrarModalCrearPedido();
     loadOrders('aceptado', document.querySelectorAll('.tab-btn')[1]);
   } else {
-    APP.toast(res?.message || 'Error al crear pedido', 'error');
+    cpToast(res?.message || 'Error al crear pedido','error');
   }
 }
 </script>
