@@ -146,8 +146,8 @@
 </div>
 
 <!-- Modal crear pedido por negocio -->
-<div id="modalCrearPedido" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;overflow-y:auto;padding:20px">
-  <div style="background:white;border-radius:var(--radius);max-width:560px;margin:0 auto;padding:24px;position:relative">
+<div id="modalCrearPedido" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;overflow-y:auto;padding:20px;display:none;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:var(--radius);max-width:560px;width:100%;margin:auto;padding:24px;position:relative;max-height:90vh;overflow-y:auto">
     <button onclick="cerrarModalCrearPedido()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted)">×</button>
     <h2 style="font-size:1.1rem;font-weight:700;margin:0 0 20px">➕ Crear pedido delivery</h2>
 
@@ -671,7 +671,7 @@ async function abrirModalCrearPedido() {
   document.getElementById('cpDeliveryFeeDisplay').textContent = '—';
   document.getElementById('cpNotes').value = '';
   document.getElementById('cpResumen').style.display = 'none';
-  document.getElementById('modalCrearPedido').style.display = 'block';
+  document.getElementById('modalCrearPedido').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   // Load products
   try {
