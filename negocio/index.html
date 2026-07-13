@@ -662,10 +662,12 @@ function buscarCliente(q) {
     const el = document.getElementById('cpClientResults');
     if (!users.length) { el.innerHTML='<div style="padding:10px;color:var(--muted);font-size:.85rem">Sin resultados</div>'; el.style.display='block'; return; }
     el.innerHTML = users.slice(0,8).map(function(u){
-      return '<div onclick="seleccionarClienteCP('+u.id+',''+cpEsc(u.name)+'',''+cpEsc(u.phone||'')+'',''+cpEsc(u.delivery_address||'')+'')" '+
-        'style="padding:10px 14px;cursor:pointer;font-size:.88rem;border-bottom:1px solid #f3f4f6" '+
-        'onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">'+
-        '<strong>'+cpEsc(u.name)+'</strong>'+(u.phone?' · '+cpEsc(u.phone):'')+
+      var nm = (u.name||'').replace(/'/g,"\'");
+      var ph = (u.phone||'').replace(/'/g,"\'");
+      var ad = (u.delivery_address||'').replace(/'/g,"\'");
+      return '<div onclick="seleccionarClienteCP('+u.id+',\''+nm+'\',\''+ph+'\',\''+ad+'\')" '+
+        'style="padding:10px 14px;cursor:pointer;font-size:.88rem;border-bottom:1px solid #f3f4f6">'+
+        '<strong>'+cpEsc(u.name)+'</strong>'+(u.phone?' &middot; '+cpEsc(u.phone):'')+
       '</div>';
     }).join('');
     el.style.display = 'block';
