@@ -118,7 +118,6 @@ class UserController {
         Response::success(null, 'Usuario eliminado');
     }
 
-}
     public function searchClients(): void {
         AuthMiddleware::requireRole('negocio');
         $q = trim($_GET['q'] ?? '');
@@ -134,3 +133,5 @@ class UserController {
         $stmt->execute([$like, $like, $like]);
         Response::success($stmt->fetchAll());
     }
+
+}
