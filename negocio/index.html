@@ -201,7 +201,7 @@
 
     <div id="cpResumen" style="display:none;background:#e3f2fd;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:.88rem"></div>
 
-    <button onclick="confirmarCrearPedido()" class="btn-primary" style="width:100%;padding:13px;font-size:.95rem;justify-content:center">
+    <button id="btnConfirmarPedido" onclick="confirmarCrearPedido()" class="btn-primary" style="width:100%;padding:13px;font-size:.95rem;justify-content:center">
       ✅ Crear pedido
     </button>
   </div>
@@ -1266,7 +1266,7 @@ async function confirmarCrearPedido() {
   if (!cpCalculatedFee)  { cpToast('Calcula el costo de delivery primero','error'); return; }
 
   cpCreando = true;
-  var btn = document.querySelector('#modalCrearPedido .btn-primary:last-of-type');
+  var btn = document.getElementById('btnConfirmarPedido');
   if (btn) { btn.disabled = true; btn.textContent = 'Creando...'; }
 
   try {
