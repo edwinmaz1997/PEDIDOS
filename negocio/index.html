@@ -1256,33 +1256,46 @@ async function calcularDeliveryCP() {
   }, 800);
 }
 
+var cpCreando = false;
 async function confirmarCrearPedido() {
+  if (cpCreando) return;
   if (!cpSelectedClient) { cpToast('Selecciona un cliente','error'); return; }
   if (!Object.keys(cpCartMap).length) { cpToast('Agrega al menos un producto','error'); return; }
   const mapsUrl = document.getElementById('cpMapsUrl').value.trim();
   if (!mapsUrl)          { cpToast('Ingresa el link de Google Maps','error'); return; }
   if (!cpCalculatedFee)  { cpToast('Calcula el costo de delivery primero','error'); return; }
 
-  var payload = {
-    client_id:        cpSelectedClient.id,
-    delivery_address: mapsUrl,
-    delivery_fee:     cpCalculatedFee,
-    notes:            document.getElementById('cpNotes').value,
-    items:            Object.values(cpCartMap).map(function(x){return {product_id:x.product_id||x.id, name:x.name, price:x.price, quantity:x.qty||1, notes:x.notes||''}})
-  };
+  cpCreando = true;
+  var btn = document.querySelector('#modalCrearPedido .btn-primary:last-of-type');
+  if (btn) { btn.disabled = true; btn.textContent = 'Creando...'; }
 
-  const r = await fetch(API+'/orders/by-negocio', {
-    method:'POST',
-    headers:{'Content-Type':'application/json', Authorization:'Bearer '+cpToken()},
-    body: JSON.stringify(payload)
-  });
-  const res = await r.json();
-  if (res?.success) {
-    cpToast('✅ Pedido #'+res.data.order_number+' creado');
-    cerrarModalCrearPedido();
-    loadOrders('aceptado', document.querySelectorAll('.tab-btn')[1]);
-  } else {
-    cpToast(res?.message || 'Error al crear pedido','error');
+  try {
+    var payload = {
+      client_id:        cpSelectedClient.id,
+      delivery_address: mapsUrl,
+      delivery_fee:     cpCalculatedFee,
+      notes:            document.getElementById('cpNotes').value,
+      items:            Object.values(cpCartMap).map(function(x){return {product_id:x.product_id||x.id, name:x.name, price:x.price, quantity:x.qty||1, notes:x.notes||''}})
+    };
+
+    const r = await fetch(API+'/orders/by-negocio', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', Authorization:'Bearer '+cpToken()},
+      body: JSON.stringify(payload)
+    });
+    const res = await r.json();
+    if (res?.success) {
+      cpToast('✅ Pedido #'+res.data.order_number+' creado');
+      cerrarModalCrearPedido();
+      loadOrders('pendiente', document.querySelectorAll('.tab-btn')[0]);
+    } else {
+      cpToast(res?.message || 'Error al crear pedido','error');
+    }
+  } catch(e) {
+    cpToast('Error de conexión','error');
+  } finally {
+    cpCreando = false;
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Crear pedido'; }
   }
 }
 </script>
