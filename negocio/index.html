@@ -603,7 +603,7 @@ async function cargarProductosCP() {
   const el = document.getElementById('cpProductList');
   if (!cpProducts.length) { el.innerHTML='<span style="color:var(--muted);font-size:.85rem">Sin productos disponibles</span>'; return; }
   el.innerHTML = cpProducts.map(p =>
-    '<button onclick="agregarAlCarrito('+p.id+')" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;background:white;cursor:pointer;font-size:.8rem;font-family:'DM Sans',sans-serif">'+
+    '<button onclick="agregarAlCarrito('+p.id+')" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;background:white;cursor:pointer;font-size:.8rem;font-family:sans-serif">'+
       cpEsc(p.name)+' — Q'+parseFloat(p.price).toFixed(2)+
     '</button>'
   ).join('');
