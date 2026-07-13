@@ -1131,33 +1131,76 @@ async function cpCalcularConCoords(lat, lng) {
   }
 }
 
+// Extraer coordenadas de URL larga de Google Maps en el frontend
+function cpExtractCoordsFromUrl(url) {
+  var m;
+  m = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (m) return {lat: parseFloat(m[1]), lng: parseFloat(m[2])};
+  m = url.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (m) return {lat: parseFloat(m[1]), lng: parseFloat(m[2])};
+  m = url.match(/!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/);
+  if (m) return {lat: parseFloat(m[1]), lng: parseFloat(m[2])};
+  m = url.match(/^(-?\d+\.?\d*),(-?\d+\.?\d*)$/);
+  if (m) return {lat: parseFloat(m[1]), lng: parseFloat(m[2])};
+  return null;
+}
+
 var cpCalcTimeout = null;
 async function calcularDeliveryCP() {
   clearTimeout(cpCalcTimeout);
   cpCalcTimeout = setTimeout(async function(){
-    var mapsUrl = document.getElementById('cpMapsUrl').value.trim();
-    if (!mapsUrl || !cpBizId) return;
+    var input = document.getElementById('cpMapsUrl').value.trim();
+    if (!input || !cpBizId) return;
     document.getElementById('cpDeliveryFeeDisplay').textContent = 'Calculando...';
     try {
-      const r = await fetch(API+'/businesses/'+cpBizId+'/calculate-delivery', {
+      var payload = {client_maps_url: input};
+
+      // Si es link corto, intentar resolver en backend
+      if (input.includes('goo.gl') || input.includes('maps.app')) {
+        try {
+          var rr = await fetch(API+'/geo/resolve-url?url='+encodeURIComponent(input), {headers:{Authorization:'Bearer '+cpToken()}});
+          var rres = await rr.json();
+          if (rres?.data?.resolved_url) {
+            input = rres.data.resolved_url;
+            payload.client_maps_url = input;
+          }
+        } catch(e) {}
+      }
+
+      // Intentar extraer coords en el frontend
+      var coords = cpExtractCoordsFromUrl(input);
+      if (coords) {
+        payload.client_lat = coords.lat;
+        payload.client_lng = coords.lng;
+      }
+
+      var r = await fetch(API+'/businesses/'+cpBizId+'/calculate-delivery', {
         method:'POST',
         headers:{'Content-Type':'application/json', Authorization:'Bearer '+cpToken()},
-        body: JSON.stringify({client_maps_url: mapsUrl})
+        body: JSON.stringify(payload)
       });
-      const res = await r.json();
-      if (res?.success && res.data?.fee !== undefined && res.data.fee !== null) {
-        cpCalculatedFee = parseFloat(res.data.fee);
-        document.getElementById('cpDeliveryFeeDisplay').textContent = 'Q'+cpCalculatedFee.toFixed(2)+' ('+res.data.distance_km.toFixed(1)+' km)';
-        actualizarResumenCP();
+      var res = await r.json();
+      if (res?.success) {
+        var fee = res.data?.delivery_fee ?? res.data?.fee;
+        var km  = res.data?.distance_km;
+        if (fee !== null && fee !== undefined) {
+          cpCalculatedFee = parseFloat(fee);
+          document.getElementById('cpDeliveryFeeDisplay').textContent = 'Q'+cpCalculatedFee.toFixed(2)+(km?' ('+parseFloat(km).toFixed(1)+' km)':'');
+          actualizarResumenCP();
+        } else {
+          cpCalculatedFee = 0;
+          document.getElementById('cpDeliveryFeeDisplay').textContent = res.data?.message || 'Fuera de cobertura';
+          document.getElementById('cpResumen').style.display = 'none';
+        }
       } else {
         cpCalculatedFee = 0;
-        document.getElementById('cpDeliveryFeeDisplay').textContent = res?.message || 'No se pudo calcular — verifica el link';
+        document.getElementById('cpDeliveryFeeDisplay').textContent = res?.message || 'No se pudo calcular';
         document.getElementById('cpResumen').style.display = 'none';
       }
     } catch(e) {
       document.getElementById('cpDeliveryFeeDisplay').textContent = 'Error al calcular';
     }
-  }, 600);
+  }, 800);
 }
 
 async function confirmarCrearPedido() {
