@@ -684,7 +684,8 @@ function seleccionarClienteCP(id, name, phone, address) {
     '</span><button onclick="limpiarClienteCP()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem">×</button>';
   const addrEl = document.getElementById('cpClientAddresses');
   if (address) {
-    addrEl.innerHTML = '<button onclick="usarMapsCliente(''+cpEsc(address)+'')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-size:.82rem;width:100%;text-align:left">'+
+    var safeAddr = (address||'').replace(/'/g,"\'");
+    addrEl.innerHTML = '<button onclick="usarMapsCliente(\'' + safeAddr + '\')" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-size:.82rem;width:100%;text-align:left">'+
       '📍 Usar ubicación guardada del cliente</button>';
   } else {
     addrEl.innerHTML = '';
