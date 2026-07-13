@@ -274,10 +274,8 @@ document.getElementById('sidebarUser').textContent = user.name || 'Mi Negocio';
 
     const biz = data.data;
 
-    if (biz.id === 5) {
-      cpBizId = biz.id;
-      document.getElementById('btnCrearPedidoWrap').style.display = 'block';
-    }
+    cpBizId = biz.id;
+    document.getElementById('btnCrearPedidoWrap').style.display = 'block';
 
     if (!biz.is_active) {
       // Negocio pendiente de aprobación — mostrar pantalla de espera
