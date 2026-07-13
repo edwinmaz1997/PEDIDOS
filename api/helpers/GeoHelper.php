@@ -78,9 +78,23 @@ class GeoHelper {
             'Connection: keep-alive',
         ]);
 
+        // Also capture redirect headers
+        $redirectUrl = null;
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, function($ch2, $header) use (&$redirectUrl) {
+            if (stripos($header, 'Location:') === 0) {
+                $redirectUrl = trim(substr($header, 9));
+            }
+            return strlen($header);
+        });
+
         $body     = curl_exec($ch);
         $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
         curl_close($ch);
+
+        // Use redirect URL if final URL didn't change but we got a Location header
+        if ($redirectUrl && (!$finalUrl || $finalUrl === $shortUrl)) {
+            $finalUrl = $redirectUrl;
+        }
 
         if ($finalUrl && $finalUrl !== $shortUrl) {
             // Si la URL final ya tiene coordenadas, usarla directamente

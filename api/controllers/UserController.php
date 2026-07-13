@@ -125,7 +125,7 @@ class UserController {
             if (strlen($q) < 2) { Response::success([]); return; }
             $like = '%' . $q . '%';
             $stmt = $this->db->prepare("
-                SELECT id, name, phone, email
+                SELECT id, name, phone, email, google_maps_url
                 FROM users
                 WHERE role_id = 3 AND is_active = 1
                   AND (name LIKE ? OR phone LIKE ? OR email LIKE ?)
