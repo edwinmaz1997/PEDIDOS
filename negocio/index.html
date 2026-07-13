@@ -658,7 +658,7 @@ async function abrirModalCrearPedido() {
   document.getElementById('cpClientResults').style.display = 'none';
   document.getElementById('cpClientSelected').style.display = 'none';
   var addrEl = document.getElementById('cpClientAddresses');
-  if (cpSelectedClient.mapsUrl) {
+  if (cpSelectedClient && cpSelectedClient.mapsUrl) {
     addrEl.innerHTML = '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;cursor:pointer;margin-bottom:6px">'+
       '<input type="checkbox" id="cpUsarUbicacionCliente" checked onchange="cpToggleUbicacionCliente(this.checked)" style="width:18px;height:18px;accent-color:#16a34a">'+
       '<span style="font-size:.85rem;color:#166534;font-weight:600">📍 Usar ubicación guardada del cliente</span>'+
@@ -1086,7 +1086,7 @@ function seleccionarClienteCP(id, name, phone, mapsUrl) {
   sel.innerHTML = '<span>✅ <strong>'+cpEsc(name)+'</strong>'+(phone?' · '+cpEsc(phone):'')+
     '</span><button onclick="limpiarClienteCP()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem">×</button>';
   var addrEl = document.getElementById('cpClientAddresses');
-  if (cpSelectedClient.mapsUrl) {
+  if (cpSelectedClient && cpSelectedClient.mapsUrl) {
     addrEl.innerHTML = '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;cursor:pointer;margin-bottom:6px">'+
       '<input type="checkbox" id="cpUsarUbicacionCliente" checked onchange="cpToggleUbicacionCliente(this.checked)" style="width:18px;height:18px;accent-color:#16a34a">'+
       '<span style="font-size:.85rem;color:#166534;font-weight:600">📍 Usar ubicación guardada del cliente</span>'+
@@ -1107,7 +1107,7 @@ function limpiarClienteCP() {
   document.getElementById('cpClientSearch').value = '';
   document.getElementById('cpClientSelected').style.display = 'none';
   var addrEl = document.getElementById('cpClientAddresses');
-  if (cpSelectedClient.mapsUrl) {
+  if (cpSelectedClient && cpSelectedClient.mapsUrl) {
     addrEl.innerHTML = '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;cursor:pointer;margin-bottom:6px">'+
       '<input type="checkbox" id="cpUsarUbicacionCliente" checked onchange="cpToggleUbicacionCliente(this.checked)" style="width:18px;height:18px;accent-color:#16a34a">'+
       '<span style="font-size:.85rem;color:#166534;font-weight:600">📍 Usar ubicación guardada del cliente</span>'+
