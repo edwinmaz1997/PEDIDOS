@@ -93,6 +93,58 @@
   </main>
 </div>
 
+<!-- Customize Modal (extras/complementos) -->
+<div id="customizeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10001;align-items:center;justify-content:center;padding:16px">
+  <div style="background:white;border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <span style="font-weight:700;font-size:.95rem;color:var(--navy)">🎨 Personalizar</span>
+      <button onclick="document.getElementById('customizeModal').style.display='none'" style="background:var(--off-white);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      <div id="cm_photo" style="width:64px;height:64px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1.6rem"></div>
+      <div style="flex:1"><div id="cm_name" style="font-weight:700;font-size:.95rem"></div><div id="cm_desc" style="font-size:.75rem;color:var(--muted);margin-top:2px"></div><div id="cm_price" style="font-weight:700;color:var(--blue);margin-top:4px"></div></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px">
+      <div id="cm_complements_section" style="display:none;margin-bottom:8px"><div id="cm_complements" style="display:flex;flex-direction:column;gap:6px"></div></div>
+      <div id="cm_extras_section" style="display:none">
+        <details><summary style="font-size:.85rem;font-weight:700;color:var(--navy);cursor:pointer;padding:8px 0;list-style:none;display:flex;align-items:center;justify-content:space-between">➕ Extras disponibles <span style="font-size:.7rem;color:var(--muted)">▼</span></summary>
+        <div id="cm_extras" style="display:flex;flex-direction:column;gap:6px;margin-top:8px"></div></details>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:.9rem;color:var(--muted)">Total:</div>
+      <div id="cm_total" style="font-size:1.1rem;font-weight:800;color:var(--blue)">Q0.00</div>
+    </div>
+    <button onclick="cpAddCustomizedToCart()" class="btn-primary" style="width:100%;justify-content:center;padding:12px">🛒 Agregar</button>
+    <button onclick="document.getElementById('customizeModal').style.display='none'" style="width:100%;margin-top:6px;padding:10px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem">Cancelar</button>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div id="productModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center;padding:16px">
+  <div style="background:white;border-radius:20px;width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="padding:18px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h2 style="font-size:1.1rem;font-family:'Syne',sans-serif">🛍️ Seleccionar productos</h2>
+        <button onclick="cpCloseProductModal()" style="background:var(--off-white);border:none;width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      </div>
+      <input type="text" id="prodSearch" placeholder="🔍 Buscar producto..." oninput="cpRenderProductModal()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;margin-bottom:10px">
+      <div id="prodCatTabs" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none"></div>
+    </div>
+    <div id="prodList" style="overflow-y:auto;flex:1;padding:0"></div>
+    <div style="padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0;background:white;border-radius:0 0 20px 20px">
+      <button onclick="cpCloseProductModal()" class="btn-primary" style="width:100%;padding:14px;font-size:1rem;justify-content:center;border-radius:12px">✓ Listo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div id="cpProductLightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10002;align-items:center;justify-content:center;flex-direction:column;gap:12px" onclick="cpCloseProductPhoto()">
+  <img id="cpProductLightboxImg" src="" style="max-width:92vw;max-height:80vh;object-fit:contain;border-radius:12px">
+  <div id="cpProductLightboxName" style="color:white;font-weight:600;font-size:1rem;text-align:center;padding:0 20px"></div>
+  <button onclick="cpCloseProductPhoto()" style="position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;font-size:1.4rem;width:40px;height:40px;border-radius:50%;cursor:pointer">✕</button>
+</div>
+
 <!-- Modal crear pedido por negocio -->
 <div id="modalCrearPedido" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;overflow-y:auto;padding:20px">
   <div style="background:white;border-radius:var(--radius);max-width:560px;margin:0 auto;padding:24px;position:relative">
@@ -111,20 +163,22 @@
     <!-- Paso 2: Productos -->
     <div style="margin-bottom:16px">
       <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">PRODUCTOS</label>
-      <div id="cpProductList"></div>
+      <div id="cpProductList">
+        <button onclick="cpOpenProductModal()" class="btn-primary" style="width:100%;padding:14px;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:8px">
+          🛍️ Ver productos
+        </button>
+        <div id="cpCartSummary" style="margin-top:8px"></div>
+      </div>
     </div>
 
     <!-- Paso 3: Ubicación -->
     <div style="margin-bottom:16px">
       <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">UBICACIÓN DEL CLIENTE (Google Maps)</label>
       <div id="cpClientAddresses" style="margin-bottom:8px"></div>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="cpMapsUrl" placeholder="Pega el link de Google Maps del cliente..."
-          oninput="calcularDeliveryCP()"
-          style="flex:1;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
-        <button onclick="cpUsarGPS()" title="Usar ubicación GPS" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:white;cursor:pointer;font-size:1rem;white-space:nowrap">📍</button>
-      </div>
-      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Pega el link de Google Maps o toca 📍 para usar GPS</div>
+      <input type="text" id="cpMapsUrl" placeholder="Pega el link de Google Maps del cliente..."
+        oninput="calcularDeliveryCP()"
+        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Pega el link largo de Google Maps del cliente (no el link corto maps.app.goo.gl)</div>
     </div>
 
     <!-- Delivery fee calculado -->
@@ -599,7 +653,7 @@ document.addEventListener("DOMContentLoaded", function(){
 });
 
 async function abrirModalCrearPedido() {
-  cpCart = []; cpSelectedClient = null; cpCalculatedFee = 0;
+  cpCart = []; cpCartMap = {}; cpSelectedClient = null; cpCalculatedFee = 0;
   document.getElementById('cpClientSearch').value = '';
   document.getElementById('cpClientResults').style.display = 'none';
   document.getElementById('cpClientSelected').style.display = 'none';
@@ -618,90 +672,177 @@ function cerrarModalCrearPedido() {
   document.body.style.overflow = '';
 }
 
-async function cargarProductosCP() {
-  const r = await fetch(API+'/businesses/mine/products', {headers:{Authorization:'Bearer '+cpToken()}});
-  const res = await r.json();
-  cpProducts = res?.data || [];
-  renderListaProductosCP();
+
+// ── Modal de productos para crear pedido (negocio) ──────────
+var cpCartMap = {};
+var cpActiveProdCat = null;
+var cpProductMap = {};
+var _cpCustomizeProductId = null;
+
+function cpOpenProductModal() {
+  // Build product lookup
+  products = cpProducts || [];
+  products.forEach(function(p){ cpProductMap[p.id] = { name: p.name, price: parseFloat(p.price||0), has_variants: p.has_variants, variants: p.variants||[] }; });
+  var pm = document.getElementById('productModal'); pm.style.display = 'flex'; pm.style.alignItems = 'center';
+  document.body.style.overflow = 'hidden';
+  cpRenderProductModal();
 }
 
-function renderListaProductosCP() {
-  const el = document.getElementById('cpProductList');
-  if (!cpProducts.length) { el.innerHTML='<span style="color:var(--muted);font-size:.85rem">Sin productos disponibles</span>'; return; }
-  el.innerHTML = '<button onclick="abrirSelectorProductosCP()" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:white;cursor:pointer;font-size:.9rem;font-family:sans-serif;text-align:left">'+
-    '🛍️ Seleccionar productos ('+cpProducts.length+' disponibles)</button>'+
-    '<div id="cpCartSummary" style="margin-top:8px"></div>';
-}
-
-function cerrarSelectorProductosCP() {
-  document.getElementById('cpProdSelectorModal').style.display = 'none';
-  cpActualizarCartSummary();
+function cpCloseProductModal() {
+  document.getElementById('productModal').style.display = 'none';
+  document.body.style.overflow = '';
+  cpUpdateCartSummary();
   actualizarResumenCP();
 }
 
-function abrirSelectorProductosCP() {
-  // Build category map
+function cpRenderProductModal(searchQ, catId) {
+  products = cpProducts || [];
+  var q = (searchQ || document.getElementById('prodSearch')?.value || '').toLowerCase();
+  var cat = catId !== undefined ? catId : cpActiveProdCat;
+
+  // Build categories from products
   var catMap = {};
-  cpProducts.forEach(function(p){ if(p.category_id) catMap[p.category_id]={name:p.category_name||'—',icon:p.category_icon||'🏷️'}; });
+  products.forEach(function(p){
+    if(p.category_id) catMap[p.category_id] = {name:p.category_name||'—', icon:p.category_icon||'🏷️'};
+  });
 
-  var tabs = '<button onclick="cpFilterCat(null)" style="padding:6px 14px;border-radius:20px;border:1.5px solid var(--blue);background:var(--blue);color:white;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap">🏷️ Todas</button>';
+  // Category tabs
+  var catTabs = '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat===null?'var(--blue)':'var(--border)')+';background:'+(cat===null?'var(--blue)':'white')+';color:'+(cat===null?'white':'var(--ink)')+';font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="cpFilterProdCat(null,this)">🏷️ Todas</button>';
   Object.entries(catMap).forEach(function(e){
-    tabs += '<button onclick="cpFilterCat('+e[0]+')" style="padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;color:var(--ink);font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap">'+e[1].icon+' '+cpEsc(e[1].name)+'</button>';
+    catTabs += '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat==e[0]?'var(--blue)':'var(--border)')+';background:'+(cat==e[0]?'var(--blue)':'white')+';color:'+(cat==e[0]?'white':'var(--ink)')+';font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="cpFilterProdCat('+e[0]+',this)">'+(e[1].icon)+' '+esc(e[1].name)+'</button>';
+  });
+  document.getElementById('prodCatTabs').innerHTML = catTabs;
+
+  // Filter products
+  var filtered = products.filter(function(p){
+    var mQ = !q || p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q);
+    var mC = cat === null || p.category_id == cat;
+    return mQ && mC && p.is_available;
   });
 
-  document.getElementById('cpProdSelectorModal').style.display = 'flex';
-  document.getElementById('cpProdCatTabs').innerHTML = tabs;
-  cpRenderProdSelector(null);
-}
-
-var cpActiveCat = null;
-function cpFilterCat(cat) {
-  cpActiveCat = cat;
-  // Update tab styles
-  var btns = document.getElementById('cpProdCatTabs').querySelectorAll('button');
-  btns.forEach(function(b,i){
-    var isActive = (cat===null && i===0) || (cat!==null && b.textContent.trim() && b.getAttribute('onclick') && b.getAttribute('onclick').includes('cpFilterCat('+cat+')'));
-    b.style.background = isActive ? 'var(--blue)' : 'white';
-    b.style.color = isActive ? 'white' : 'var(--ink)';
-    b.style.borderColor = isActive ? 'var(--blue)' : 'var(--border)';
-  });
-  cpRenderProdSelector(cat);
-}
-
-function cpRenderProdSelector(cat) {
-  var filtered = cpProducts.filter(function(p){ return cat===null || p.category_id==cat; });
   var html = filtered.map(function(p){
-    var qty = (cpCart.find(function(x){return x.product_id===p.id;})||{}).quantity||0;
-    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6">'+
-      (p.photo?'<img src="'+cpEsc(p.photo)+'" style="width:56px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0">':'<div style="width:56px;height:56px;border-radius:8px;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0">'+(p.category_icon||'🍽️')+'</div>')+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="font-weight:700;font-size:.88rem">'+cpEsc(p.name)+'</div>'+
-        '<div style="font-weight:700;color:var(--blue);font-size:.85rem">Q'+parseFloat(p.price).toFixed(2)+'</div>'+
-      '</div>'+
-      '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'+
-        '<button onclick="cambiarCantidadCP2('+p.id+',-1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:white;font-size:1rem;cursor:pointer;font-weight:700">−</button>'+
-        '<span style="font-weight:700;min-width:18px;text-align:center" id="cpqty-'+p.id+'">'+qty+'</span>'+
-        '<button onclick="cambiarCantidadCP2('+p.id+',1)" style="width:30px;height:30px;border-radius:50%;border:none;background:var(--blue);color:white;font-size:1rem;cursor:pointer;font-weight:700">+</button>'+
-      '</div>'+
+    var qty = cpCartMap[p.id]?.qty || 0;
+    var inCart = qty > 0;
+    var hasVariants = p.has_variants && p.variants && p.variants.length > 0;
+    var hasExtras = (p.extras && p.extras.length > 0) || (p.has_complements && p.complements && p.complements.length > 0) || (p.has_complements2 && p.complements2 && p.complements2.length > 0) || (p.has_complements3 && p.complements3 && p.complements3.length > 0);
+    var selectedVariant = cpCartMap[p.id]?.variant || null;
+    var displayPrice = hasVariants
+      ? (selectedVariant ? 'Q' + parseFloat(selectedVariant.price).toFixed(2) : 'Desde Q' + parseFloat(p.variants[0].price).toFixed(2))
+      : (p.price ? 'Q' + parseFloat(p.price).toFixed(2) : '');
+
+    return '<div id="pp-'+p.id+'" data-pid="'+p.id+'" data-price="'+(p.price||0)+'" data-name="'+esc(p.name)+'" style="padding:12px 16px;border-bottom:1px solid var(--border);background:'+(inCart?'#f0f7ff':'white')+';transition:.15s">' +
+      '<div style="display:flex;align-items:center;gap:12px">' +
+        (p.photo
+          ? '<img src="'+esc(p.photo)+'" alt="'+esc(p.name)+'" style="width:72px;height:72px;object-fit:cover;border-radius:10px;flex-shrink:0;cursor:zoom-in" onclick="cpOpenProductPhoto(\''+esc(p.photo)+'\',\''+esc(p.name)+'\')">'
+          : '<div style="width:72px;height:72px;border-radius:10px;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0">'+(p.category_icon||'🍽️')+'</div>') +
+        '<div style="flex:1;min-width:0">' +
+          (p.category_name?'<div style="font-size:.7rem;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em">'+(p.category_icon||'🏷️')+' '+esc(p.category_name)+'</div>':'') +
+          '<div style="font-weight:700;font-size:.92rem;line-height:1.3">'+esc(p.name)+'</div>' +
+          '<div style="font-weight:700;color:var(--blue);margin-top:4px;font-size:.9rem" id="price-'+p.id+'">'+displayPrice+'</div>' +
+        '</div>' +
+        (hasExtras
+          ? '<button onclick="cpOpenCustomizeModal('+p.id+')" style="padding:8px 14px;border-radius:20px;border:none;background:var(--accent);color:white;font-size:.82rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">🎨 Personalizar</button>'
+          : '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
+            '<button onclick="cpChangeQty('+p.id+',-1)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:white;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">−</button>' +
+            '<span id="qty-'+p.id+'" style="font-weight:700;min-width:20px;text-align:center;font-size:.95rem">'+qty+'</span>' +
+            '<button onclick="cpChangeQty('+p.id+',1)" style="width:32px;height:32px;border-radius:50%;border:none;background:var(--blue);color:white;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">+</button>' +
+          '</div>') +
+      '</div>' +
+      // Selector de variantes
+      (hasVariants ? '<div style="margin-top:10px;padding-left:84px">' +
+        '<div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;font-weight:600">Selecciona una opción:</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+          p.variants.map(function(v) {
+            var isSelected = selectedVariant && selectedVariant.id === v.id;
+            return '<button onclick="cpSelectVariant('+p.id+','+JSON.stringify(v).replace(/"/g,"'")+')" style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(isSelected?'var(--blue)':'var(--border)')+';background:'+(isSelected?'var(--blue)':'white')+';color:'+(isSelected?'white':'var(--charcoal)')+';font-size:.8rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif" id="var-'+p.id+'-'+v.id+'">'+esc(v.name)+' — Q'+parseFloat(v.price).toFixed(2)+'</button>';
+          }).join('') +
+        '</div>' +
+      '</div>' : '') +
+      (p.description?'<div style="font-size:.8rem;color:var(--muted);margin-top:8px;line-height:1.5;padding-left:84px">'+esc(p.description)+'</div>':'') +
     '</div>';
   }).join('');
-  document.getElementById('cpProdSelectorList').innerHTML = html || '<p style="color:var(--muted);text-align:center;padding:20px">Sin productos en esta categoría</p>';
+
+  document.getElementById('prodList').innerHTML = html || '<p style="color:var(--muted);text-align:center;padding:20px">Sin productos</p>';
 }
 
-function cambiarCantidadCP2(productId, delta) {
-  var p = cpProducts.find(function(x){return x.id===productId;});
+function cpFilterProdCat(catId, btn) {
+  cpActiveProdCat = catId;
+  cpRenderProductModal();
+}
+
+function cpSelectVariant(productId, variant) {
+  var p = products.find(function(x){ return x.id === productId; });
   if (!p) return;
-  var ex = cpCart.find(function(x){return x.product_id===productId;});
-  if (ex) {
-    ex.quantity += delta;
-    if (ex.quantity <= 0) cpCart.splice(cpCart.indexOf(ex),1);
-  } else if (delta > 0) {
-    cpCart.push({product_id:p.id, name:p.name, price:parseFloat(p.price), quantity:1});
+  // Quitar selección anterior
+  if (p.variants) p.variants.forEach(function(v) {
+    var btn = document.getElementById('var-'+productId+'-'+v.id);
+    if (btn) { btn.style.background = 'white'; btn.style.color = 'var(--charcoal)'; btn.style.borderColor = 'var(--border)'; }
+  });
+  // Marcar seleccionada
+  var selBtn = document.getElementById('var-'+productId+'-'+variant.id);
+  if (selBtn) { selBtn.style.background = 'var(--blue)'; selBtn.style.color = 'white'; selBtn.style.borderColor = 'var(--blue)'; }
+  // Actualizar precio mostrado
+  var priceEl = document.getElementById('price-'+productId);
+  if (priceEl) priceEl.textContent = 'Q' + parseFloat(variant.price).toFixed(2);
+  // Guardar variante en el cart
+  if (!cpCartMap[productId]) cpCartMap[productId] = { name: p.name, price: parseFloat(variant.price), qty: 1, variant: variant };
+  else { cpCartMap[productId].price = parseFloat(variant.price); cpCartMap[productId].variant = variant; if (!cpCartMap[productId].qty) cpCartMap[productId].qty = 1; }
+  // Actualizar nombre con variante
+  cpCartMap[productId].name = p.name + ' (' + variant.name + ')';
+  // Actualizar qty display
+  var qEl = document.getElementById('qty-'+productId);
+  if (qEl) qEl.textContent = cpCartMap[productId].qty;
+  var ppEl = document.getElementById('pp-'+productId);
+  if (ppEl) { ppEl.style.background = '#f0f7ff'; }
+  cpUpdateCartSummary();
+}
+
+function cpChangeQty(id, delta) {
+  var pm = cpProductMap[id] || {};
+  var p = products.find(function(x){ return x.id === id; });
+  // Si tiene variantes y no hay una seleccionada, pedir que seleccione
+  if (p?.has_variants && p?.variants?.length && delta > 0 && !cpCartMap[id]?.variant) {
+    var t2 = document.createElement('div');
+    t2.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#c0392b;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999';
+    t2.textContent = 'Selecciona una opción primero';
+    document.body.appendChild(t2);
+    setTimeout(function(){ t2.remove(); }, 2500);
+    return;
   }
-  var qtyEl = document.getElementById('cpqty-'+productId);
-  if (qtyEl) qtyEl.textContent = (cpCart.find(function(x){return x.product_id===productId;})||{}).quantity||0;
+  var price = (cpCartMap[id]?.price || pm.price || 0);
+  if (!cpCartMap[id]) cpCartMap[id] = { name: pm.name || '', price: price, qty: 0 };
+  cpCartMap[id].qty = Math.max(0, cpCartMap[id].qty + delta);
+  if (cpCartMap[id].qty === 0) delete cpCartMap[id];
+  var qEl = document.getElementById('qty-'+id);
+  if (qEl) qEl.textContent = cpCartMap[id]?.qty || 0;
+  var ppEl = document.getElementById('pp-'+id);
+  if (ppEl) {
+    ppEl.style.borderColor = cpCartMap[id]?.qty ? 'var(--blue)' : '';
+    ppEl.style.background  = cpCartMap[id]?.qty ? '#f0f7ff' : '';
+  }
+  cpUpdateCartSummary();
+}
+
+function cpUpdateCartSummary() {
+  var el = document.getElementById('cpCartSummary');
+  if (el) {
+    var items = Object.values(cpCartMap);
+    if (!items.length) { el.innerHTML=''; return; }
+    var sub = items.reduce(function(s,x){return s+(x.price||0)*(x.qty||1);},0);
+    el.innerHTML = '<div style="background:#e3f2fd;border-radius:8px;padding:8px 12px;font-size:.85rem">'+
+      items.map(function(x){return cpEsc(x.name)+(x.qty>1?' ×'+x.qty:'');}).join(' · ')+
+      ' — <strong>Q'+sub.toFixed(2)+'</strong></div>';
+  }
   actualizarResumenCP();
-  cpActualizarCartSummary();
+}
+
+function cpOpenProductPhoto(src, name) {
+  var lb = document.getElementById('cpProductLightbox');
+  if (lb) { lb.style.display='flex'; document.getElementById('cpProductLightboxImg').src=src; document.getElementById('cpProductLightboxName').textContent=name; }
+}
+function cpCloseProductPhoto() {
+  var lb = document.getElementById('cpProductLightbox');
+  if (lb) lb.style.display='none';
 }
 
 function cpActualizarCartSummary() {
@@ -747,8 +888,9 @@ function cambiarCantidadCP(i, delta) {
 
 function actualizarResumenCP() {
   const resEl = document.getElementById('cpResumen');
-  if (!cpCart.length || !cpCalculatedFee) { resEl.style.display='none'; return; }
-  const sub = cpCart.reduce(function(s,x){return s+x.price*x.quantity;},0);
+  var items = Object.values(cpCartMap);
+  if (!items.length || !cpCalculatedFee) { resEl.style.display='none'; return; }
+  var sub = items.reduce(function(s,x){return s+(x.price||0)*(x.qty||1);},0);
   resEl.style.display = 'block';
   resEl.innerHTML =
     '<div style="display:flex;justify-content:space-between"><span>Subtotal</span><strong>Q'+sub.toFixed(2)+'</strong></div>'+
@@ -880,7 +1022,7 @@ async function calcularDeliveryCP() {
 
 async function confirmarCrearPedido() {
   if (!cpSelectedClient) { cpToast('Selecciona un cliente','error'); return; }
-  if (!cpCart.length)    { cpToast('Agrega al menos un producto — toca Seleccionar productos','error'); return; }
+  if (!Object.keys(cpCartMap).length) { cpToast('Agrega al menos un producto','error'); return; }
   const mapsUrl = document.getElementById('cpMapsUrl').value.trim();
   if (!mapsUrl)          { cpToast('Ingresa el link de Google Maps','error'); return; }
   if (!cpCalculatedFee)  { cpToast('Calcula el costo de delivery primero','error'); return; }
@@ -890,7 +1032,7 @@ async function confirmarCrearPedido() {
     delivery_address: mapsUrl,
     delivery_fee:     cpCalculatedFee,
     notes:            document.getElementById('cpNotes').value,
-    items:            cpCart.map(function(x){return {product_id:x.product_id, name:x.name, price:x.price, quantity:x.quantity};})
+    items:            Object.values(cpCartMap).map(function(x){return {product_id:x.product_id||x.id, name:x.name, price:x.price, quantity:x.qty||1, notes:x.notes||''}})
   };
 
   const r = await fetch(API+'/orders/by-negocio', {
