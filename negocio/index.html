@@ -1106,6 +1106,13 @@ function limpiarClienteCP() {
   cpSelectedClient = null;
   document.getElementById('cpClientSearch').value = '';
   document.getElementById('cpClientSelected').style.display = 'none';
+  document.getElementById('cpClientAddresses').innerHTML = '';
+  var mapsInput = document.getElementById('cpMapsUrl');
+  mapsInput.value = '';
+  mapsInput.disabled = false;
+  cpCalculatedFee = 0;
+  document.getElementById('cpDeliveryFeeDisplay').textContent = '—';
+  document.getElementById('cpResumen').style.display = 'none';
   var addrEl = document.getElementById('cpClientAddresses');
   if (cpSelectedClient && cpSelectedClient.mapsUrl) {
     addrEl.innerHTML = '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;cursor:pointer;margin-bottom:6px">'+
