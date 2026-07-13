@@ -175,10 +175,10 @@
     <div style="margin-bottom:16px">
       <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">UBICACIÓN DEL CLIENTE (Google Maps)</label>
       <div id="cpClientAddresses" style="margin-bottom:8px"></div>
-      <input type="text" id="cpMapsUrl" placeholder="Pega el link de Google Maps del cliente..."
+      <input type="text" id="cpMapsUrl" placeholder="Coordenadas (14.6349,-90.5069) o link largo de Google Maps..."
         oninput="calcularDeliveryCP()"
         style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
-      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Pega el link de Google Maps o escribe las coordenadas (ej: 14.6349,-90.5069)</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Para links cortos (maps.app.goo.gl): pide al cliente que guarde su ubicación en su perfil y úsala con el check de arriba. O escribe coordenadas: 14.6349,-90.5069</div>
     </div>
 
     <!-- Delivery fee calculado -->
@@ -657,7 +657,16 @@ async function abrirModalCrearPedido() {
   document.getElementById('cpClientSearch').value = '';
   document.getElementById('cpClientResults').style.display = 'none';
   document.getElementById('cpClientSelected').style.display = 'none';
-  document.getElementById('cpClientAddresses').innerHTML = '';
+  var addrEl = document.getElementById('cpClientAddresses');
+  if (cpSelectedClient.mapsUrl) {
+    addrEl.innerHTML = '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;cursor:pointer;margin-bottom:6px">'+
+      '<input type="checkbox" id="cpUsarUbicacionCliente" checked onchange="cpToggleUbicacionCliente(this.checked)" style="width:18px;height:18px;accent-color:#16a34a">'+
+      '<span style="font-size:.85rem;color:#166534;font-weight:600">📍 Usar ubicación guardada del cliente</span>'+
+    '</label>';
+    cpToggleUbicacionCliente(true);
+  } else {
+    addrEl.innerHTML = '<div style="font-size:.8rem;color:var(--muted);padding:4px 0">Este cliente no tiene ubicación guardada — ingresa el link manualmente.</div>';
+  }
   document.getElementById('cpMapsUrl').value = '';
   document.getElementById('cpDeliveryFeeDisplay').textContent = '—';
   document.getElementById('cpNotes').value = '';
@@ -1058,8 +1067,8 @@ function buscarCliente(q) {
     el.innerHTML = users.slice(0,8).map(function(u){
       var nm = (u.name||'').replace(/'/g,"\'");
       var ph = (u.phone||'').replace(/'/g,"\'");
-      var ad = (u.delivery_address||'').replace(/'/g,"\'");
-      return '<div onclick="seleccionarClienteCP('+u.id+',\''+nm+'\',\''+ph+'\',\''+ad+'\')" '+
+      var mp = (u.google_maps_url||'').replace(/'/g,"\'");
+      return '<div onclick="seleccionarClienteCP('+u.id+',\''+nm+'\',\''+ph+'\',\''+mp+'\')" '+
         'style="padding:10px 14px;cursor:pointer;font-size:.88rem;border-bottom:1px solid #f3f4f6">'+
         '<strong>'+cpEsc(u.name)+'</strong>'+(u.phone?' &middot; '+cpEsc(u.phone):'')+
       '</div>';
@@ -1076,7 +1085,16 @@ function seleccionarClienteCP(id, name, phone, mapsUrl) {
   sel.style.display = 'flex';
   sel.innerHTML = '<span>✅ <strong>'+cpEsc(name)+'</strong>'+(phone?' · '+cpEsc(phone):'')+
     '</span><button onclick="limpiarClienteCP()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem">×</button>';
-  document.getElementById('cpClientAddresses').innerHTML = '';
+  var addrEl = document.getElementById('cpClientAddresses');
+  if (cpSelectedClient.mapsUrl) {
+    addrEl.innerHTML = '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;cursor:pointer;margin-bottom:6px">'+
+      '<input type="checkbox" id="cpUsarUbicacionCliente" checked onchange="cpToggleUbicacionCliente(this.checked)" style="width:18px;height:18px;accent-color:#16a34a">'+
+      '<span style="font-size:.85rem;color:#166534;font-weight:600">📍 Usar ubicación guardada del cliente</span>'+
+    '</label>';
+    cpToggleUbicacionCliente(true);
+  } else {
+    addrEl.innerHTML = '<div style="font-size:.8rem;color:var(--muted);padding:4px 0">Este cliente no tiene ubicación guardada — ingresa el link manualmente.</div>';
+  }
 }
 
 function usarMapsCliente(url) {
@@ -1088,7 +1106,16 @@ function limpiarClienteCP() {
   cpSelectedClient = null;
   document.getElementById('cpClientSearch').value = '';
   document.getElementById('cpClientSelected').style.display = 'none';
-  document.getElementById('cpClientAddresses').innerHTML = '';
+  var addrEl = document.getElementById('cpClientAddresses');
+  if (cpSelectedClient.mapsUrl) {
+    addrEl.innerHTML = '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;cursor:pointer;margin-bottom:6px">'+
+      '<input type="checkbox" id="cpUsarUbicacionCliente" checked onchange="cpToggleUbicacionCliente(this.checked)" style="width:18px;height:18px;accent-color:#16a34a">'+
+      '<span style="font-size:.85rem;color:#166534;font-weight:600">📍 Usar ubicación guardada del cliente</span>'+
+    '</label>';
+    cpToggleUbicacionCliente(true);
+  } else {
+    addrEl.innerHTML = '<div style="font-size:.8rem;color:var(--muted);padding:4px 0">Este cliente no tiene ubicación guardada — ingresa el link manualmente.</div>';
+  }
 }
 
 var cpClientLat = null, cpClientLng = null;
