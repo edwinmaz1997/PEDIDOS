@@ -305,14 +305,7 @@ class OrderController {
 
         $this->logStatus($orderId, 'pendiente', 'Pedido creado por el negocio', $user['id']);
 
-        // Create delivery record
-        try {
-            $this->db->prepare("INSERT INTO deliveries (order_id, status) VALUES (?, 'disponible')")->execute([$orderId]);
-        } catch (\Exception $e) {
-            error_log('Delivery insert error: ' . $e->getMessage());
-        }
-
-        // Respond immediately before sending notifications
+        // Respond immediately
         Response::success([
             'order_id'     => $orderId,
             'order_number' => $orderNumber,
@@ -321,14 +314,8 @@ class OrderController {
             'total'        => $subtotal + $deliveryFee,
         ], 'Pedido creado exitosamente', 201);
 
-        // Send notifications after response (if server supports it)
+        // Notify client after response
         if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
-
-        try {
-            $this->notifyRepartidores("🛵 Pedido disponible para tomar", "Pedido #{$orderNumber} listo para ser tomado");
-        } catch (\Exception $e) {
-            error_log('notifyRepartidores error: ' . $e->getMessage());
-        }
         try {
             $this->notify($clientId, 'order_update', '🛒 Nuevo pedido', "Tu pedido #{$orderNumber} ha sido registrado por el negocio.", '/cliente/pedido-detalle.html?id='.$orderId);
         } catch (\Exception $e) {
