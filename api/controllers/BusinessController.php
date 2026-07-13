@@ -354,9 +354,15 @@ class BusinessController {
         }
 
         // Coordenadas del destino
-        $clientCoords = GeoHelper::extractCoords($clientMapsUrl);
+        // Si el frontend ya envía lat/lng directas, usarlas
+        $clientCoords = null;
+        if (isset($body['client_lat']) && isset($body['client_lng'])) {
+            $clientCoords = ['lat' => (float)$body['client_lat'], 'lng' => (float)$body['client_lng']];
+        } else {
+            $clientCoords = GeoHelper::extractCoords($clientMapsUrl);
+        }
         if (!$clientCoords) {
-            Response::error('No se pudo determinar la ubicación de entrega. Puedes pegar un link de Google Maps en el campo, usar el botón 📍 para obtener tu ubicación GPS, o guardar tu ubicación en tu Perfil → Ubicación de Google Maps para que aparezca automáticamente.', 422);
+            Response::error('No se pudo determinar la ubicación de entrega. Usa el botón 📍 para obtener tu ubicación GPS, o pega un link largo de Google Maps (no el link corto maps.app.goo.gl).', 422);
         }
 
         $distanceKm = GeoHelper::distanceKm(

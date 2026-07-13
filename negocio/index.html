@@ -118,9 +118,13 @@
     <div style="margin-bottom:16px">
       <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">UBICACIÓN DEL CLIENTE (Google Maps)</label>
       <div id="cpClientAddresses" style="margin-bottom:8px"></div>
-      <input type="text" id="cpMapsUrl" placeholder="Pega el link de Google Maps del cliente..."
-        oninput="calcularDeliveryCP()"
-        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+      <div style="display:flex;gap:8px">
+        <input type="text" id="cpMapsUrl" placeholder="Pega el link de Google Maps del cliente..."
+          oninput="calcularDeliveryCP()"
+          style="flex:1;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+        <button onclick="cpUsarGPS()" title="Usar ubicación GPS" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:white;cursor:pointer;font-size:1rem;white-space:nowrap">📍</button>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Pega el link de Google Maps o toca 📍 para usar GPS</div>
     </div>
 
     <!-- Delivery fee calculado -->
@@ -805,29 +809,44 @@ function limpiarClienteCP() {
   document.getElementById('cpClientAddresses').innerHTML = '';
 }
 
-// Extrae lat,lng de una URL de Google Maps expandida
-function cpExtractCoords(url) {
-  var m;
-  m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (m) return {lat: parseFloat(m[1]), lng: parseFloat(m[2])};
-  m = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (m) return {lat: parseFloat(m[1]), lng: parseFloat(m[2])};
-  m = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-  if (m) return {lat: parseFloat(m[1]), lng: parseFloat(m[2])};
-  return null;
+var cpClientLat = null, cpClientLng = null;
+
+function cpUsarGPS() {
+  if (!navigator.geolocation) { cpToast('GPS no disponible en este dispositivo','error'); return; }
+  document.getElementById('cpDeliveryFeeDisplay').textContent = 'Obteniendo ubicación...';
+  navigator.geolocation.getCurrentPosition(function(pos){
+    cpClientLat = pos.coords.latitude;
+    cpClientLng = pos.coords.longitude;
+    document.getElementById('cpMapsUrl').value = 'https://www.google.com/maps?q='+cpClientLat+','+cpClientLng;
+    cpCalcularConCoords(cpClientLat, cpClientLng);
+  }, function(){
+    cpToast('No se pudo obtener la ubicación GPS','error');
+    document.getElementById('cpDeliveryFeeDisplay').textContent = '—';
+  });
 }
 
-// Resuelve link corto de Google Maps siguiendo la redirección en el frontend
-async function cpResolveUrl(url) {
-  if (!url.includes('goo.gl') && !url.includes('maps.app')) return url;
+async function cpCalcularConCoords(lat, lng) {
+  if (!cpBizId) return;
+  document.getElementById('cpDeliveryFeeDisplay').textContent = 'Calculando...';
   try {
-    // Usar un proxy de resolución de redirecciones (no-cors no funciona, usamos endpoint propio)
-    const r = await fetch(API+'/geo/resolve-url?url='+encodeURIComponent(url), {
-      headers:{Authorization:'Bearer '+cpToken()}
+    const r = await fetch(API+'/businesses/'+cpBizId+'/calculate-delivery', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', Authorization:'Bearer '+cpToken()},
+      body: JSON.stringify({client_maps_url:'https://www.google.com/maps?q='+lat+','+lng, client_lat:lat, client_lng:lng})
     });
     const res = await r.json();
-    return res?.data?.resolved_url || url;
-  } catch(e) { return url; }
+    if (res?.success && res.data?.fee !== undefined && res.data.fee !== null) {
+      cpCalculatedFee = parseFloat(res.data.fee);
+      document.getElementById('cpDeliveryFeeDisplay').textContent = 'Q'+cpCalculatedFee.toFixed(2)+' ('+res.data.distance_km.toFixed(1)+' km)';
+      actualizarResumenCP();
+    } else {
+      cpCalculatedFee = 0;
+      document.getElementById('cpDeliveryFeeDisplay').textContent = res?.message || 'Fuera de cobertura';
+      document.getElementById('cpResumen').style.display = 'none';
+    }
+  } catch(e) {
+    document.getElementById('cpDeliveryFeeDisplay').textContent = 'Error al calcular';
+  }
 }
 
 var cpCalcTimeout = null;
@@ -838,10 +857,6 @@ async function calcularDeliveryCP() {
     if (!mapsUrl || !cpBizId) return;
     document.getElementById('cpDeliveryFeeDisplay').textContent = 'Calculando...';
     try {
-      // Resolver link corto si es necesario
-      if (mapsUrl.includes('goo.gl') || mapsUrl.includes('maps.app')) {
-        mapsUrl = await cpResolveUrl(mapsUrl);
-      }
       const r = await fetch(API+'/businesses/'+cpBizId+'/calculate-delivery', {
         method:'POST',
         headers:{'Content-Type':'application/json', Authorization:'Bearer '+cpToken()},
@@ -854,7 +869,7 @@ async function calcularDeliveryCP() {
         actualizarResumenCP();
       } else {
         cpCalculatedFee = 0;
-        document.getElementById('cpDeliveryFeeDisplay').textContent = res?.message || 'Fuera de cobertura';
+        document.getElementById('cpDeliveryFeeDisplay').textContent = res?.message || 'No se pudo calcular — verifica el link';
         document.getElementById('cpResumen').style.display = 'none';
       }
     } catch(e) {
