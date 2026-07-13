@@ -287,7 +287,7 @@ class OrderController {
             INSERT INTO orders
                 (order_number, client_id, business_id, delivery_type, delivery_address, delivery_lat, delivery_lng, notes,
                  subtotal, service_fee, delivery_fee, total, status)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,'aceptado')
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,'pendiente')
         ");
         $stmt->execute([
             $orderNumber, $clientId, $business['id'], $deliveryType,
@@ -301,7 +301,7 @@ class OrderController {
                 ->execute([$orderId, $item['product_id'], $item['product_name'], $item['quantity'], $item['unit_price'], $item['notes']]);
         }
 
-        $this->logStatus($orderId, 'aceptado', 'Pedido creado por el negocio', $user['id']);
+        $this->logStatus($orderId, 'pendiente', 'Pedido creado por el negocio', $user['id']);
 
         // Create delivery record and notify repartidores
         try {
