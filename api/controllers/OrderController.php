@@ -285,13 +285,13 @@ class OrderController {
 
         $stmt = $this->db->prepare("
             INSERT INTO orders
-                (order_number, client_id, business_id, delivery_type, delivery_address, delivery_lat, delivery_lng, notes,
+                (order_number, client_id, business_id, delivery_type, delivery_address, notes,
                  subtotal, service_fee, delivery_fee, total, status)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,'pendiente')
+            VALUES (?,?,?,?,?,?,?,?,?,?,'pendiente')
         ");
         $stmt->execute([
             $orderNumber, $clientId, $business['id'], $deliveryType,
-            $deliveryAddr, $deliveryLat, $deliveryLng, $notes,
+            $deliveryAddr, $notes,
             $subtotal, $serviceFee, $deliveryFee, $total
         ]);
         $orderId = $this->db->lastInsertId();
