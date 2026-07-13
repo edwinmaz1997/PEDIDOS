@@ -59,7 +59,7 @@
     </div>
 
     <div id="btnCrearPedidoWrap" style="display:none;margin-bottom:16px">
-      <button onclick="abrirModalCrearPedido()" class="btn-primary" style="display:flex;align-items:center;gap:8px;padding:10px 20px;font-size:.9rem">
+      <button id="btnAbrirCrearPedido" class="btn-primary" style="display:flex;align-items:center;gap:8px;padding:10px 20px;font-size:.9rem">
         ➕ Crear pedido delivery
       </button>
     </div>
@@ -554,39 +554,7 @@ function toggleSidebar() {
 }
 </script>
 
-<script src="/assets/js/pwa.js"></script>
 <script>
-var lastPendingCount = null;
-setInterval(async function() {
-  try {
-    var token = localStorage.getItem('nuevaexpress_token');
-    // Contar pendientes para notificar
-    var res = await fetch('/api/orders?status=pendiente&all=1', { headers: { 'Authorization': 'Bearer ' + token } });
-    var data = await res.json();
-    if (!data.success) return;
-    var pendingNow = (data.data?.orders || []).length;
-    if (lastPendingCount !== null && pendingNow > lastPendingCount) {
-      var diff = pendingNow - lastPendingCount;
-      var msg = '🔔 ' + diff + ' nuevo' + (diff>1?'s':'') + ' pedido' + (diff>1?'s':'') + ' pendiente' + (diff>1?'s':'');
-      if (typeof APP !== 'undefined') APP.toast(msg, 'success');
-    }
-    lastPendingCount = pendingNow;
-    // Reload silencioso — saltar si está en Entregados hoy (tiene filtro especial de fecha)
-    if (document.querySelector('.tab-btn:nth-child(6)')?.classList.contains('active')) return;
-    var status = currentStatus;
-    var qs = status ? '?status=' + status + '&all=1' : '?all=1';
-    var silentRes = await fetch('/api/orders' + qs, { headers: { 'Authorization': 'Bearer ' + token } });
-    var silentData = await silentRes.json();
-    if (silentData.success) {
-      allOrders = silentData.data?.orders || [];
-      filteredOrders = allOrders.slice();
-      page = 1;
-      refreshStats();
-      renderOrders();
-    }
-  } catch(e) {}
-}, 8000);
-
 // ── Crear pedido por negocio ─────────────────────────────────
 var cpCart = [];
 var cpSelectedClient = null;
@@ -602,6 +570,11 @@ function cpToast(msg, type) {
   t.textContent=msg; document.body.appendChild(t);
   setTimeout(function(){t.remove();},3000);
 }
+
+document.addEventListener("DOMContentLoaded", function(){
+  var btn = document.getElementById("btnAbrirCrearPedido");
+  if (btn) btn.addEventListener("click", abrirModalCrearPedido);
+});
 
 async function abrirModalCrearPedido() {
   cpCart = []; cpSelectedClient = null; cpCalculatedFee = 0;
@@ -786,6 +759,41 @@ async function confirmarCrearPedido() {
     cpToast(res?.message || 'Error al crear pedido','error');
   }
 }
+</script>
+
+<script src="/assets/js/pwa.js"></script>
+<script>
+var lastPendingCount = null;
+setInterval(async function() {
+  try {
+    var token = localStorage.getItem('nuevaexpress_token');
+    // Contar pendientes para notificar
+    var res = await fetch('/api/orders?status=pendiente&all=1', { headers: { 'Authorization': 'Bearer ' + token } });
+    var data = await res.json();
+    if (!data.success) return;
+    var pendingNow = (data.data?.orders || []).length;
+    if (lastPendingCount !== null && pendingNow > lastPendingCount) {
+      var diff = pendingNow - lastPendingCount;
+      var msg = '🔔 ' + diff + ' nuevo' + (diff>1?'s':'') + ' pedido' + (diff>1?'s':'') + ' pendiente' + (diff>1?'s':'');
+      if (typeof APP !== 'undefined') APP.toast(msg, 'success');
+    }
+    lastPendingCount = pendingNow;
+    // Reload silencioso — saltar si está en Entregados hoy (tiene filtro especial de fecha)
+    if (document.querySelector('.tab-btn:nth-child(6)')?.classList.contains('active')) return;
+    var status = currentStatus;
+    var qs = status ? '?status=' + status + '&all=1' : '?all=1';
+    var silentRes = await fetch('/api/orders' + qs, { headers: { 'Authorization': 'Bearer ' + token } });
+    var silentData = await silentRes.json();
+    if (silentData.success) {
+      allOrders = silentData.data?.orders || [];
+      filteredOrders = allOrders.slice();
+      page = 1;
+      refreshStats();
+      renderOrders();
+    }
+  } catch(e) {}
+}, 8000);
+
 </script>
 </body>
 </html>
