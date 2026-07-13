@@ -189,6 +189,13 @@
       </div>
     </div>
 
+    <!-- Teléfono -->
+    <div style="margin-bottom:16px">
+      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">TELÉFONO DEL CLIENTE</label>
+      <input type="tel" id="cpClientPhone" placeholder="Número de teléfono..."
+        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+    </div>
+
     <!-- Nota -->
     <div style="margin-bottom:20px">
       <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">NOTA (opcional)</label>
@@ -670,6 +677,7 @@ async function abrirModalCrearPedido() {
   document.getElementById('cpMapsUrl').value = '';
   document.getElementById('cpDeliveryFeeDisplay').textContent = '—';
   document.getElementById('cpNotes').value = '';
+  document.getElementById('cpClientPhone').value = '';
   document.getElementById('cpResumen').style.display = 'none';
   document.getElementById('modalCrearPedido').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -1079,6 +1087,8 @@ function buscarCliente(q) {
 
 function seleccionarClienteCP(id, name, phone, mapsUrl) {
   cpSelectedClient = {id:id, name:name, phone:phone, mapsUrl:mapsUrl||''};
+  var phoneEl = document.getElementById('cpClientPhone');
+  if (phoneEl) phoneEl.value = phone || '';
   document.getElementById('cpClientResults').style.display = 'none';
   document.getElementById('cpClientSearch').value = name;
   const sel = document.getElementById('cpClientSelected');
@@ -1107,6 +1117,7 @@ function limpiarClienteCP() {
   document.getElementById('cpClientSearch').value = '';
   document.getElementById('cpClientSelected').style.display = 'none';
   document.getElementById('cpClientAddresses').innerHTML = '';
+  document.getElementById('cpClientPhone').value = '';
   var mapsInput = document.getElementById('cpMapsUrl');
   mapsInput.value = '';
   mapsInput.disabled = false;
@@ -1281,6 +1292,7 @@ async function confirmarCrearPedido() {
       client_id:        cpSelectedClient.id,
       delivery_address: mapsUrl,
       delivery_fee:     cpCalculatedFee,
+      phone:            document.getElementById('cpClientPhone').value,
       notes:            document.getElementById('cpNotes').value,
       items:            Object.values(cpCartMap).map(function(x){return {product_id:x.product_id||x.id, name:x.name, price:x.price, quantity:x.qty||1, notes:x.notes||''}})
     };

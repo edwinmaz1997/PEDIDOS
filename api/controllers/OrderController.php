@@ -240,6 +240,8 @@ class OrderController {
         $clientId     = (int)($body['client_id'] ?? 0);
         $deliveryType = 'delivery';
         $notes        = Security::sanitize($body['notes'] ?? '');
+        $clientPhone  = Security::sanitize($body['phone'] ?? '');
+        if ($clientPhone) $notes = ($notes ? $notes . ' | ' : '') . 'Tel: ' . $clientPhone;
         $items        = $body['items'] ?? [];
         $deliveryFee  = isset($body['delivery_fee']) ? (float)$body['delivery_fee'] : (float)$business['delivery_fee'];
         $deliveryAddr = Security::sanitize($body['delivery_address'] ?? '');
