@@ -366,7 +366,10 @@ function startRepartidorTimers() {
 function renderCard(d) {
   var isMine = d.repartidor_id == user.id;
   var bizAddr = d.pickup_address || d.business_name || '—';
-  var delivAddr = d.delivery_address || 'Sin dirección';
+  var delivAddr = d.delivery_address || '';
+  var delivAddrIsUrl = delivAddr.startsWith('http') || /^-?\d+\.\d+,-?\d+\.\d+$/.test(delivAddr);
+  var delivMapsHref = delivAddrIsUrl && delivAddr.startsWith('http') ? delivAddr : 'https://www.google.com/maps/search/'+encodeURIComponent(delivAddr||'');
+  var delivAddrDisplay = delivAddrIsUrl ? '<a href="'+delivMapsHref+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#e3f2fd;border-radius:20px;color:#1565c0;font-size:.78rem;font-weight:600;text-decoration:none">📍 Ver en mapa</a>' : esc(delivAddr||'Sin dirección');
 
   return '<div class="delivery-card">' +
     '<div class="delivery-header">' +
@@ -389,7 +392,7 @@ function renderCard(d) {
         '<div class="route-dot dropoff"></div>' +
         '<div class="route-info"><div class="route-label">Entregar en</div>' +
           '<div class="route-name">'+esc(d.client_name||'Cliente')+'</div>' +
-          '<div class="route-addr">'+esc(delivAddr)+'</div>' +
+          '<div class="route-addr">'+delivAddrDisplay+'</div>' +
         '</div>' +
       '</div>' +
     '</div>' +
