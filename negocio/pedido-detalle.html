@@ -369,20 +369,22 @@ function renderItems() {
 }
 
 function renderClientInfo() {
+  var addrHtml = '';
+  if (order.delivery_type === 'delivery') {
+    var addr = order.delivery_address || '';
+    var isUrl = addr.startsWith('http');
+    var mapsHref = isUrl ? addr : 'https://www.google.com/maps/search/'+encodeURIComponent(addr);
+    addrHtml = '<div style="font-size:.85rem;color:var(--muted);margin-top:6px">🛵 Delivery</div>'+
+      (addr ? '<a href="'+mapsHref+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:6px 12px;background:#e3f2fd;border-radius:20px;color:#1565c0;font-size:.82rem;font-weight:600;text-decoration:none">📍 Ver en mapa</a>' : '');
+  } else if (order.delivery_type === 'dine_in') {
+    addrHtml = '<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:10px 14px;margin-top:8px;font-size:.85rem">🍽️ <strong>Consumo en el negocio</strong><br>👥 '+(order.dine_in_persons||1)+' persona(s) · 🕐 Llegada: <strong>'+esc(order.dine_in_time||'')+'</strong></div>';
+  } else {
+    addrHtml = '<div style="font-size:.85rem;color:var(--muted);margin-top:6px">🏃 Recoger en negocio</div>';
+  }
   document.getElementById('clientInfo').innerHTML =
     '<div style="font-weight:600">' + esc(order.client_name||'') + '</div>' +
     (order.client_phone ? '<a href="tel:'+esc(order.client_phone)+'" style="color:var(--blue);font-size:.9rem">📞 '+esc(order.client_phone)+'</a><br>' : '') +
-    (order.delivery_type==='delivery' ?
-      order.delivery_type==='delivery' ? (function(){
-        var addr = order.delivery_address || '';
-        var isUrl = addr.startsWith('http');
-        var mapsHref = isUrl ? addr : 'https://www.google.com/maps/search/'+encodeURIComponent(addr);
-        return '<div style="font-size:.85rem;color:var(--muted);margin-top:6px">🛵 Delivery</div>'+
-          (addr ? '<a href="'+mapsHref+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:6px 12px;background:#e3f2fd;border-radius:20px;color:#1565c0;font-size:.82rem;font-weight:600;text-decoration:none">📍 Ver en mapa</a>' : '');
-      })() :
-      order.delivery_type==='dine_in' ?
-      '<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:10px 14px;margin-top:8px;font-size:.85rem">🍽️ <strong>Consumo en el negocio</strong><br>👥 '+(order.dine_in_persons||1)+' persona(s) · 🕐 Llegada: <strong>'+esc(order.dine_in_time||'')+'</strong></div>' :
-      '<div style="font-size:.85rem;color:var(--muted);margin-top:6px">🏃 Recoger en negocio</div>') +
+    addrHtml +
     '<div style="font-size:.8rem;color:var(--muted);margin-top:4px">'+new Date(order.created_at).toLocaleString('es-GT')+'</div>';
 }
 
