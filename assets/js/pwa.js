@@ -217,6 +217,18 @@ function dismissInstall() {
       profileBtn.onmouseenter = function(){ this.style.background='rgba(255,255,255,.2)'; };
       profileBtn.onmouseleave = function(){ this.style.background='rgba(255,255,255,.12)'; };
       iconRow.appendChild(profileBtn);
+
+      // Ícono de Facebook — solo para clientes
+      var fbBtn = document.createElement('a');
+      fbBtn.href = 'https://www.facebook.com/share/18Fbqca6CW/';
+      fbBtn.target = '_blank';
+      fbBtn.rel = 'noopener';
+      fbBtn.title = 'Facebook NuevaExpress';
+      fbBtn.style.cssText = 'background:#1877F2;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:700;color:white;text-decoration:none;flex-shrink:0;transition:.2s';
+      fbBtn.innerHTML = 'f';
+      fbBtn.onmouseenter = function(){ this.style.background='#1558b0'; };
+      fbBtn.onmouseleave = function(){ this.style.background='#1877F2'; };
+      iconRow.appendChild(fbBtn);
     } // end if cliente
 
     // Panel
