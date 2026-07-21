@@ -162,6 +162,19 @@ HTML;
         );
     }
 
+    // ── Notificación admin — delivery aceptado ───────────────
+    public static function buildAdminDeliveryAlert(string $orderNumber, string $business, string $client, string $total): string {
+        $body = "
+            <table style='width:100%;border-collapse:collapse;font-size:.9rem;margin-bottom:16px'>
+                <tr><td style='padding:8px 0;color:#666;border-bottom:1px solid #f3f4f6'>Pedido</td><td style='font-weight:700;border-bottom:1px solid #f3f4f6'>#".htmlspecialchars($orderNumber)."</td></tr>
+                <tr><td style='padding:8px 0;color:#666;border-bottom:1px solid #f3f4f6'>Negocio</td><td style='font-weight:700;border-bottom:1px solid #f3f4f6'>".htmlspecialchars($business)."</td></tr>
+                <tr><td style='padding:8px 0;color:#666;border-bottom:1px solid #f3f4f6'>Cliente</td><td style='font-weight:700;border-bottom:1px solid #f3f4f6'>".htmlspecialchars($client)."</td></tr>
+                <tr><td style='padding:8px 0;color:#666'>Total</td><td style='font-weight:700;color:#2563eb'>Q".htmlspecialchars($total)."</td></tr>
+            </table>
+            <p style='color:#666;font-size:.88rem'>Un repartidor será asignado pronto.</p>";
+        return self::template('Edwin', '🛵', 'Nuevo delivery aceptado', $body, 'Ver en admin', 'https://nuevaexpress.com/admin/index.html');
+    }
+
     // ── Alerta de pedido disponible para repartidor ─────────
     public static function buildRepartidorAlert(string $name, string $detail): string {
         $body = "

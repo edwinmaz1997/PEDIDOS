@@ -384,6 +384,24 @@ class OrderController {
                     (int)$estTime
                 );
             }
+            // Email al admin cuando se acepta un pedido delivery
+            if ($action === 'aceptar' && $order['delivery_type'] === 'delivery') {
+                $total = number_format((float)($order['total'] ?? 0), 2);
+                $adminBody = "
+                    <p>Se ha aceptado un nuevo pedido de delivery:</p>
+                    <table style='width:100%;border-collapse:collapse;font-size:.9rem'>
+                        <tr><td style='padding:6px 0;color:#666'>Pedido</td><td style='font-weight:700'>#{$order['order_number']}</td></tr>
+                        <tr><td style='padding:6px 0;color:#666'>Negocio</td><td style='font-weight:700'>{$order['business_name']}</td></tr>
+                        <tr><td style='padding:6px 0;color:#666'>Cliente</td><td style='font-weight:700'>{$order['client_name']}</td></tr>
+                        <tr><td style='padding:6px 0;color:#666'>Total</td><td style='font-weight:700;color:#2563eb'>Q{$total}</td></tr>
+                    </table>";
+                Mailer::sendGeneric(
+                    'edwinmmazariegos@gmail.com',
+                    'Edwin',
+                    '🛵 Nuevo delivery aceptado — #' . $order['order_number'],
+                    Mailer::buildRepartidorAlert('Edwin', "Pedido #{$order['order_number']} de {$order['business_name']} para {$order['client_name']} — Q{$total}")
+                );
+            }
         } catch (\Exception $e) {
             error_log("notify client error: " . $e->getMessage());
         }
