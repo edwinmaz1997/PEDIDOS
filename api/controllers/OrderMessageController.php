@@ -120,22 +120,23 @@ class OrderMessageController {
         $total       = $subtotal + $serviceFee + $deliveryFee;
         $clientTotal = $subtotal + $deliveryFee; // lo que ve el cliente
 
+        $lines   = $body['lines']   ?? [];
+        $detail  = $body['detail']  ?? '';
+
         $this->db->prepare("UPDATE orders SET subtotal = ?, total = ? WHERE id = ?")
                  ->execute([$subtotal, $total, $orderId]);
 
-        // Actualizar unit_price en order_items con los precios asignados por el negocio
+        // Actualizar order_items con los precios y productos del negocio
         if (!empty($lines)) {
-            // Obtener items actuales del pedido
-            $itemStmt = $this->db->prepare("SELECT id, product_name FROM order_items WHERE order_id = ? ORDER BY id ASC");
-            $itemStmt->execute([$orderId]);
-            $dbItems = $itemStmt->fetchAll();
-            foreach ($lines as $i => $line) {
+            // Borrar items actuales y reinsertarlos
+            $this->db->prepare("DELETE FROM order_items WHERE order_id = ?")->execute([$orderId]);
+            foreach ($lines as $line) {
+                $lineName  = Security::sanitize($line['name']  ?? '');
                 $linePrice = (float)($line['price'] ?? 0);
-                $lineQty   = (int)($line['qty'] ?? 1);
-                if (isset($dbItems[$i]) && $linePrice > 0) {
-                    $this->db->prepare("UPDATE order_items SET unit_price = ?, quantity = ? WHERE id = ?")
-                             ->execute([$linePrice, $lineQty, $dbItems[$i]['id']]);
-                }
+                $lineQty   = max(1, (int)($line['qty'] ?? 1));
+                if (!$lineName) continue;
+                $this->db->prepare("INSERT INTO order_items (order_id, product_name, quantity, unit_price) VALUES (?,?,?,?)")
+                         ->execute([$orderId, $lineName, $lineQty, $linePrice]);
             }
         }
 
@@ -143,10 +144,7 @@ class OrderMessageController {
         $this->notify($order['client_id'], 'total_updated', '💰 Total actualizado',
             "El negocio actualizó el total de tu pedido #{$order['order_number']} a Q" . number_format($clientTotal, 2), '/cliente/pedido-detalle.html?id='.$orderId);
 
-        // Send system message
         // Build itemized message
-        $lines   = $body['lines']   ?? [];
-        $detail  = $body['detail']  ?? '';
         $msg     = "💰 *Desglose del pedido:*
 ";
         if (!empty($lines)) {
