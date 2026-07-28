@@ -166,7 +166,7 @@
 
 
         <div class="delivery-toggle" id="deliveryToggle">
-          <button class="delivery-btn active" id="deliveryBtn" onclick="setDelivery('delivery',this)" style="display:none">🛵 Delivery</button>
+          <button class="delivery-btn active" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
           <button class="delivery-btn" id="dineInBtn" style="display:none" onclick="setDelivery('dine_in',this)">🍽️ Comer aquí</button>
           <button class="delivery-btn" onclick="setDelivery('pickup',this)">🏃 Recoger</button>
         </div>
@@ -269,7 +269,7 @@ const fromPromo    = params.get('from_promo') === '1';
 let business    = null;
 let cart        = {};
 let customItems = [];
-let deliveryType = 'pickup';
+let deliveryType = 'delivery';
 let promoOverrides = {}; // precios promocionales por product_id
 
 const SERVICE_FEE = 3;
