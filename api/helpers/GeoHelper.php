@@ -159,7 +159,7 @@ class GeoHelper {
      * @return float|null tarifa en Q, o null si está fuera de cobertura
      */
     public static function feeForDistance(float $km): ?float {
-        if ($km <= 4)    return 15.00;
+        if ($km <= 3)    return 15.00;
         if ($km <= 6)    return 20.00;
         if ($km <= 8)    return 25.00;
         if ($km <= 10)   return 30.00;
