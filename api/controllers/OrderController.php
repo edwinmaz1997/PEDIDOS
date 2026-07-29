@@ -272,7 +272,10 @@ class OrderController {
                 $product = $pStmt->fetch();
                 if ($product) {
                     $productName = $product['name'];
-                    $unitPrice   = (float)$product['price'];
+                    // Use frontend price if it includes extras (higher than base)
+                    $basePrice   = (float)$product['price'];
+                    $frontPrice  = isset($item['price']) ? (float)$item['price'] : 0;
+                    $unitPrice   = $frontPrice > $basePrice ? $frontPrice : $basePrice;
                 }
             }
             if ($unitPrice === null && isset($item['price'])) $unitPrice = (float)$item['price'];
