@@ -977,6 +977,9 @@ function cpAddCustomizedToCart() {
   if (!cpCartMap[cartKey]) {
     cpCartMap[cartKey] = { product_id: p.id, name: p.name + label, price: totalPrice, qty: 1, extras: selectedExtras, notes: notes };
   } else { cpCartMap[cartKey].qty += 1; }
+  // Remove base entry if exists (without extras) to avoid duplicate
+  if (cpCartMap[p.id]) delete cpCartMap[p.id];
+
   var ppEl = document.getElementById('pp-'+p.id);
   if (ppEl) ppEl.style.background = '#f0f7ff';
   document.getElementById('customizeModal').style.display = 'none';
