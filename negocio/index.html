@@ -1346,10 +1346,12 @@ setInterval(async function() {
     var silentRes = await fetch('/api/orders' + qs, { headers: { 'Authorization': 'Bearer ' + token } });
     var silentData = await silentRes.json();
     if (silentData.success) {
+      var prevPage = page;
       allOrders = silentData.data?.orders || [];
       filteredOrders = allOrders.slice();
-      page = 1;
       refreshStats();
+      renderOrders();
+      page = prevPage;
       renderOrders();
     }
   } catch(e) {}
