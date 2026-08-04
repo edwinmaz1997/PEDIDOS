@@ -395,6 +395,10 @@ class OrderController {
             error_log("notify client error: " . $e->getMessage());
         }
 
+        // Responder inmediatamente antes de notificaciones lentas
+        Response::success(null, 'Respuesta enviada');
+        if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
+
         // Email y WhatsApp al admin — independiente del notify del cliente
         if ($action === 'aceptar' && $order['delivery_type'] === 'delivery') {
             $total = number_format((float)($order['total'] ?? 0), 2);
@@ -433,7 +437,6 @@ class OrderController {
             }
         }
 
-        Response::success(null, 'Respuesta enviada');
     }
 
     // PUT /api/orders/{id}/status  (negocio or repartidor updates status)
