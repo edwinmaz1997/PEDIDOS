@@ -395,11 +395,7 @@ class OrderController {
             error_log("notify client error: " . $e->getMessage());
         }
 
-        // Responder inmediatamente antes de notificaciones lentas
-        Response::success(null, 'Respuesta enviada');
-        if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
-
-        // Email y WhatsApp al admin — independiente del notify del cliente
+        // Email y WhatsApp al admin
         if ($action === 'aceptar' && $order['delivery_type'] === 'delivery') {
             $total = number_format((float)($order['total'] ?? 0), 2);
             try {
@@ -427,7 +423,7 @@ class OrderController {
                 $waUrl = 'https://api.callmebot.com/whatsapp.php?phone=50231586340&apikey=9804050&text=' . $waMsg;
                 $ch = curl_init($waUrl);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 5);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                 $waResult = curl_exec($ch);
                 curl_close($ch);
@@ -437,6 +433,7 @@ class OrderController {
             }
         }
 
+        Response::success(null, 'Respuesta enviada');
     }
 
     // PUT /api/orders/{id}/status  (negocio or repartidor updates status)
