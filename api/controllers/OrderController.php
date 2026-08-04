@@ -379,31 +379,36 @@ class OrderController {
 
             // Email al cliente cuando es aceptado
             if ($action === 'aceptar' && !empty($order['client_email'])) {
-                Mailer::orderAccepted(
-                    $order['client_email'],
-                    $order['client_name'],
-                    $order['order_number'],
-                    $order['business_name'],
-                    (int)$estTime
-                );
-            }
-            // Email al admin cuando se acepta un pedido delivery
-            if ($action === 'aceptar' && $order['delivery_type'] === 'delivery') {
-                $total = number_format((float)($order['total'] ?? 0), 2);
                 try {
-                    $sent = Mailer::sendGeneric(
-                        'edwinmmazariegos@gmail.com',
-                        'Edwin',
-                        '🛵 Nuevo delivery aceptado — #' . $order['order_number'],
-                        Mailer::buildAdminDeliveryAlert($order['order_number'], $order['business_name'], $order['client_name'], $total)
+                    Mailer::orderAccepted(
+                        $order['client_email'],
+                        $order['client_name'],
+                        $order['order_number'],
+                        $order['business_name'],
+                        (int)$estTime
                     );
-                    error_log('Admin delivery email ' . ($sent ? 'SENT' : 'FAILED') . ' for ' . $order['order_number']);
                 } catch (\Exception $e) {
-                    error_log('Admin delivery email ERROR for ' . $order['order_number'] . ': ' . $e->getMessage());
+                    error_log('Client email error: ' . $e->getMessage());
                 }
             }
         } catch (\Exception $e) {
             error_log("notify client error: " . $e->getMessage());
+        }
+
+        // Email al admin — independiente del notify del cliente
+        if ($action === 'aceptar' && $order['delivery_type'] === 'delivery') {
+            $total = number_format((float)($order['total'] ?? 0), 2);
+            try {
+                $sent = Mailer::sendGeneric(
+                    'edwinmmazariegos@gmail.com',
+                    'Edwin',
+                    '🛵 Nuevo delivery aceptado — #' . $order['order_number'],
+                    Mailer::buildAdminDeliveryAlert($order['order_number'], $order['business_name'], $order['client_name'], $total)
+                );
+                error_log('Admin delivery email ' . ($sent ? 'SENT' : 'FAILED') . ' for ' . $order['order_number']);
+            } catch (\Exception $e) {
+                error_log('Admin delivery email ERROR for ' . $order['order_number'] . ': ' . $e->getMessage());
+            }
         }
 
         Response::success(null, 'Respuesta enviada');
