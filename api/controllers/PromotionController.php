@@ -116,7 +116,7 @@ class PromotionController {
         }
 
         $isActive = isset($body['is_active']) ? (int)$body['is_active'] : $promo['is_active'];
-        $this->db->prepare("UPDATE promotions SET title=?, description=?, starts_at=?, ends_at=?, is_active=?, image_url=COALESCE(?,image_url) WHERE id=?")
+        $this->db->prepare("UPDATE promotions SET title=?, description=?, starts_at=?, ends_at=?, is_active=?, image_url=COALESCE(?,image_url), video_url=COALESCE(?,video_url) WHERE id=?")
                  ->execute([
                      $body['title']       ?? $promo['title'],
                      $body['description'] ?? $promo['description'],

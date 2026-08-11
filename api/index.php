@@ -504,8 +504,15 @@ try {
         case 'upload':
             if ($method !== 'POST') Response::error('Método no permitido', 405);
             AuthMiddleware::authenticate();
-            $file   = $_FILES['image'] ?? null;
             $folder = Security::sanitize($_POST['folder'] ?? 'general');
+            // Video upload
+            if (!empty($_FILES['video'])) {
+                $url = Security::saveVideo($_FILES['video'], $folder);
+                if (!$url) Response::error('Error al guardar el video (max 10MB, MP4/MOV/WEBM)');
+                Response::success(['url' => $url]);
+            }
+            // Image upload
+            $file = $_FILES['image'] ?? null;
             if (!$file) Response::error('No se recibió ningún archivo');
             $url = Security::saveImage($file, $folder);
             if (!$url) Response::error('Error al guardar la imagen');

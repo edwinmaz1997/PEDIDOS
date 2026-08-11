@@ -112,6 +112,22 @@ class Security {
         return ['valid' => true, 'mime' => $mime];
     }
 
+    public static function saveVideo($file, $folder = 'general') {
+        $allowed = ['video/mp4' => 'mp4', 'video/quicktime' => 'mov', 'video/webm' => 'webm'];
+        $mime = mime_content_type($file['tmp_name']);
+        if (!isset($allowed[$mime])) return false;
+        if ($file['size'] > 10 * 1024 * 1024) return false;
+        $ext = $allowed[$mime];
+        $uploadDir = UPLOAD_DIR . $folder . '/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+        $filename = self::generateToken(32) . '.' . $ext;
+        $destination = $uploadDir . $filename;
+        if (move_uploaded_file($file['tmp_name'], $destination)) {
+            return UPLOAD_URL . $folder . '/' . $filename;
+        }
+        return false;
+    }
+
     public static function saveImage($file, $folder = 'general') {
         $validation = self::validateImage($file);
         if (!$validation['valid']) return false;

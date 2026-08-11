@@ -99,6 +99,17 @@
       </label>
     </div>
     <div class="form-group">
+      <label>Video <span style="font-weight:400;color:var(--muted)">(opcional — max 10MB, MP4/MOV/WEBM)</span></label>
+      <div id="promoVideoPreview" style="display:none;margin-bottom:8px;position:relative;border-radius:10px;overflow:hidden">
+        <video id="promoVideoPreviewEl" controls style="width:100%;max-height:180px;object-fit:cover;display:block;border-radius:10px"></video>
+        <button type="button" onclick="clearPromoVideo()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:white;border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:1rem;line-height:1">×</button>
+      </div>
+      <label for="p_video" style="display:flex;align-items:center;gap:8px;padding:10px 14px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:.85rem;color:var(--muted);background:#fafafa" id="promoVideoLabel">
+        🎬 Toca para subir un video
+        <input type="file" id="p_video" accept="video/mp4,video/quicktime,video/webm" style="display:none" onchange="previewPromoVideo(this)">
+      </label>
+    </div>
+    <div class="form-group">
       <label>Descripción * <span style="font-weight:400;color:var(--muted)">(esto le llegará a los clientes)</span></label>
       <textarea id="p_desc" rows="3" placeholder="Hoy tu combo de alitas a Q125, precio normal Q150..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical"></textarea>
     </div>
@@ -243,7 +254,8 @@ function renderPromos(promos) {
     var statusLabel = status==='active' ? '✅ Vigente' : status==='scheduled' ? '⏳ Programada' : '❌ Inactiva';
     var statusClass = 'badge-' + status;
     return '<div class="promo-card">' +
-      (p.image_url ? '<div onclick="openLightbox(\''+APP.esc(p.image_url)+'\')" style="display:block;margin-bottom:12px;cursor:zoom-in;border-radius:10px;overflow:hidden"><img src="'+APP.esc(p.image_url)+'" style="width:100%;height:220px;object-fit:cover;display:block"></div>' : '') +
+      (p.video_url ? '<div style="margin-bottom:12px;border-radius:10px;overflow:hidden"><video src="'+APP.esc(p.video_url)+'" controls playsinline style="width:100%;max-height:220px;object-fit:cover;display:block"></video></div>' :
+       p.image_url ? '<div onclick="openLightbox(\''+APP.esc(p.image_url)+'\'')" style="display:block;margin-bottom:12px;cursor:zoom-in;border-radius:10px;overflow:hidden"><img src="'+APP.esc(p.image_url)+'" style="width:100%;height:220px;object-fit:cover;display:block"></div>' : '') +
       '<div class="promo-header">' +
         '<div>' +
           '<h3>' + APP.esc(p.title) + '</h3>' +
@@ -517,6 +529,27 @@ function previewPromoImage(input) {
     document.getElementById('promoImageLabel').style.display = 'none';
   };
   reader.readAsDataURL(input.files[0]);
+}
+
+function previewPromoVideo(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 10 * 1024 * 1024) {
+    alert('El video no puede superar 10MB');
+    input.value = '';
+    return;
+  }
+  var url = URL.createObjectURL(file);
+  document.getElementById('promoVideoPreviewEl').src = url;
+  document.getElementById('promoVideoPreview').style.display = 'block';
+  document.getElementById('promoVideoLabel').style.display = 'none';
+}
+
+function clearPromoVideo() {
+  document.getElementById('p_video').value = '';
+  document.getElementById('promoVideoPreviewEl').src = '';
+  document.getElementById('promoVideoPreview').style.display = 'none';
+  document.getElementById('promoVideoLabel').style.display = 'flex';
 }
 
 function clearPromoImage() {
