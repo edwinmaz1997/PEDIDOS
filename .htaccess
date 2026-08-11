@@ -16,6 +16,13 @@
     Header set Access-Control-Allow-Origin "*"
 </Files>
 
+# Tipos MIME para video
+<IfModule mod_mime.c>
+    AddType video/mp4  .mp4
+    AddType video/webm .webm
+    AddType video/quicktime .mov
+</IfModule>
+
 Options -Indexes
 RewriteEngine On
 
