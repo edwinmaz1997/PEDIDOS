@@ -331,7 +331,7 @@ async function loadPromos() {
     if (!promos.length) return;
     var carousel = document.getElementById('promoCarousel');
     carousel.innerHTML = promos.map(function(p) {
-      var photoHtml = p.image_url ? '<img src="'+p.image_url+'" class="promo-slide-img">' : '<div class="promo-slide-nophoto">🏷️</div>';
+      var photoHtml = p.video_url ? '<video src="'+ p.video_url +'" class="promo-slide-img" muted playsinline style="height:110px;width:100%;object-fit:cover"></video>' : p.image_url ? '<img src="'+p.image_url+'" class="promo-slide-img">': '<div class="promo-slide-nophoto">🏷️</div>';
       var bizLogo = p.business_logo ? '<img src="'+p.business_logo+'">' : '';
       var minPrice = (p.items||[]).reduce(function(mn,i){ return Math.min(mn, parseFloat(i.promo_price||0)); }, Infinity);
       var priceLabel = isFinite(minPrice) && minPrice > 0 ? 'Desde Q'+minPrice.toFixed(2) : '¡Oferta especial!';
