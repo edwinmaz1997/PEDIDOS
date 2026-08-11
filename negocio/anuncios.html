@@ -69,11 +69,17 @@
           <img id="imgPreview" style="width:100%;height:140px;object-fit:cover;border-radius:10px">
           <button onclick="removeImage()" style="margin-top:6px;background:none;border:1px solid var(--danger);color:var(--danger);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:.8rem">✕ Quitar foto</button>
         </div>
-        <label id="imgLabel" style="display:flex;align-items:center;justify-content:center;height:90px;border:2px dashed var(--border);border-radius:10px;cursor:pointer;color:var(--muted);font-size:.85rem;flex-direction:column;gap:6px">
-          📷 Toca para subir foto
-          <input type="file" id="f_image" accept="image/*" style="display:none" onchange="previewImg(this)">
-          <input type="file" id="f_video" accept="video/mp4,video/mov,video/webm" style="display:none" onchange="previewVideo(this)">
-        </label>
+        <div style="display:flex;gap:8px;flex-direction:column">
+          <label id="imgLabel" style="display:flex;align-items:center;justify-content:center;height:70px;border:2px dashed var(--border);border-radius:10px;cursor:pointer;color:var(--muted);font-size:.85rem;flex-direction:column;gap:4px">
+            📷 Subir imagen
+            <input type="file" id="f_image" accept="image/*" style="display:none" onchange="previewImg(this)">
+          </label>
+          <label style="display:flex;align-items:center;justify-content:center;height:70px;border:2px dashed var(--border);border-radius:10px;cursor:pointer;color:var(--muted);font-size:.85rem;flex-direction:column;gap:4px">
+            🎬 Subir video (max 10MB)
+            <input type="file" id="f_video" accept="video/mp4,video/mov,video/webm" style="display:none" onchange="previewVideo(this)">
+          </label>
+          <div id="videoPreview" style="margin-top:4px"></div>
+        </div>
       </div>
       <div class="form-group" style="display:flex;align-items:center;gap:10px">
         <label class="switch"><input type="checkbox" id="f_active" checked><span class="slider"></span></label>
