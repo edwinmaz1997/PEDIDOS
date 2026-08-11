@@ -124,6 +124,7 @@ class PromotionController {
                      $body['ends_at']     ?? $promo['ends_at'],
                      $isActive,
                      $body['image_url']   ?? null,
+                     $body['video_url']   ?? null,
                      $id
                  ]);
 
