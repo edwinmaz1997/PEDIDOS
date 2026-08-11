@@ -254,8 +254,7 @@ function renderPromos(promos) {
     var statusLabel = status==='active' ? '✅ Vigente' : status==='scheduled' ? '⏳ Programada' : '❌ Inactiva';
     var statusClass = 'badge-' + status;
     return '<div class="promo-card">' +
-      (p.video_url ? '<div style="margin-bottom:12px;border-radius:10px;overflow:hidden"><video src="'+APP.esc(p.video_url)+'" controls playsinline style="width:100%;max-height:220px;object-fit:cover;display:block"></video></div>' :
-       p.image_url ? '<div onclick="openLightbox(\''+APP.esc(p.image_url)+'\'')" style="display:block;margin-bottom:12px;cursor:zoom-in;border-radius:10px;overflow:hidden"><img src="'+APP.esc(p.image_url)+'" style="width:100%;height:220px;object-fit:cover;display:block"></div>' : '') +
+      (p.video_url ? '<div style="margin-bottom:12px;border-radius:10px;overflow:hidden"><video src="'+APP.esc(p.video_url)+'" controls playsinline style="width:100%;max-height:220px;object-fit:cover;display:block"></video></div>' : p.image_url ? '<div data-lb="'+APP.esc(p.image_url)+'" class="promo-lb-trigger" style="display:block;margin-bottom:12px;cursor:zoom-in;border-radius:10px;overflow:hidden"><img src="'+APP.esc(p.image_url)+'" style="width:100%;height:220px;object-fit:cover;display:block"></div>' : '') +
       '<div class="promo-header">' +
         '<div>' +
           '<h3>' + APP.esc(p.title) + '</h3>' +
@@ -639,6 +638,15 @@ function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.
 function toggleSidebar(){ var s=document.querySelector('.sidebar');var o=document.getElementById('sidebarOverlay');if(s)s.classList.toggle('open');if(o)o.classList.toggle('open'); }
 
 init();
+
+// Lightbox handler for promo images
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('.promo-lb-trigger');
+  if (!el) return;
+  var lb = document.getElementById('imgLightbox');
+  var img = document.getElementById('imgLightboxImg');
+  if (lb && img) { img.src = el.dataset.lb; lb.style.display = 'flex'; }
+});
 </script>
 <script src="/assets/js/pwa.js"></script>
 
