@@ -117,7 +117,9 @@ async function init() {
     if (target) setTimeout(function(){ openPromo(target.id); }, 100);
   }
     var logo = p.business_logo ? '<img src="'+APP.esc(p.business_logo)+'">' : '<div style="width:26px;height:26px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:.8rem">🏪</div>';
-    var imgHtml = p.image_url ? '<img src="'+APP.esc(p.image_url)+'" class="pm-img">' : '<div class="pm-no-img">🏷️</div>';
+    var imgHtml = p.video_url
+      ? '<video src="'+APP.esc(p.video_url)+'" class="pm-img" muted playsinline style="object-fit:cover"></video>'
+      : p.image_url ? '<img src="'+APP.esc(p.image_url)+'" class="pm-img">' : '<div class="pm-no-img">🏷️</div>';
     var minPrice = (p.items||[]).reduce(function(mn,i){ return Math.min(mn,parseFloat(i.promo_price||0)); }, Infinity);
     var badge = isFinite(minPrice) && minPrice > 0 ? 'Desde Q'+minPrice.toFixed(2) : '¡Oferta especial!';
     return '<div class="pm-card" onclick="openPromo('+p.id+')">' +
@@ -139,7 +141,9 @@ function openPromo(promoId) {
 
   var logo = p.business_logo ? '<img src="'+APP.esc(p.business_logo)+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">' : '<div style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center">🏪</div>';
   document.getElementById('pmBiz').innerHTML = logo + '<span style="font-weight:600;font-size:.85rem">'+APP.esc(p.business_name)+'</span>';
-  document.getElementById('pmImg').innerHTML = p.image_url ? '<img src="'+APP.esc(p.image_url)+'" onclick="openLightbox(\''+APP.esc(p.image_url)+'\')" style="width:100%;max-height:220px;object-fit:cover;display:block;cursor:zoom-in">' : '';
+  document.getElementById('pmImg').innerHTML = p.video_url
+    ? '<video src="'+APP.esc(p.video_url)+'" controls playsinline style="width:100%;max-height:260px;object-fit:cover;display:block;border-radius:8px"></video>'
+    : p.image_url ? '<img src="'+APP.esc(p.image_url)+'" onclick="openLightbox(\''+APP.esc(p.image_url)+'\'')" style="width:100%;max-height:220px;object-fit:cover;display:block;cursor:zoom-in">' : '';
   document.getElementById('pmTitle').textContent = p.title;
   document.getElementById('pmDesc').textContent = p.description;
   document.getElementById('pmDates').textContent = '📅 '+fmtDate(p.starts_at)+' → '+fmtDate(p.ends_at);

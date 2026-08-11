@@ -114,7 +114,8 @@ try {
             if (!$anuncioId && $method === 'POST')                            { $ac->store($body); break; }
             if ($anuncioId && $method === 'PUT')                              { $ac->update($anuncioId, $body); break; }
             if ($anuncioId && $method === 'DELETE')                           { $ac->destroy($anuncioId); break; }
-            if ($anuncioId && $parts[2] === 'imagen' && $method === 'POST')  { $ac->uploadImage($anuncioId); break; }
+            if ($anuncioId && $parts[2] === 'imagen' && $method === 'POST')  { $ac->uploadImage($anuncioId);  break; }
+            if ($anuncioId && $parts[2] === 'video'  && $method === 'POST')  { $ac->uploadVideo($anuncioId);  break; }
             break;
 
         case 'promotions':

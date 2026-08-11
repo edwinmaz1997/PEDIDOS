@@ -42,8 +42,8 @@ class AnuncioController {
         if (!$biz) Response::error('Negocio no encontrado', 404);
         if (empty($body['title']) || empty($body['description'])) Response::error('Título y descripción son requeridos', 422);
 
-        $stmt = $this->db->prepare("INSERT INTO business_anuncios (business_id, title, description, image_url, is_active) VALUES (?,?,?,?,1)");
-        $stmt->execute([$biz['id'], $body['title'], $body['description'], $body['image_url'] ?? null]);
+        $stmt = $this->db->prepare("INSERT INTO business_anuncios (business_id, title, description, image_url, video_url, is_active) VALUES (?,?,?,?,?,1)");
+        $stmt->execute([$biz['id'], $body['title'], $body['description'], $body['image_url'] ?? null, $body['video_url'] ?? null]);
         $id = $this->db->lastInsertId();
 
         // Notificar a todos los clientes activos
@@ -78,7 +78,7 @@ class AnuncioController {
         }
         if (!$anuncio) Response::notFound('Anuncio no encontrado');
 
-        $this->db->prepare("UPDATE business_anuncios SET title=?, description=?, image_url=COALESCE(?,image_url), is_active=? WHERE id=?")
+        $this->db->prepare("UPDATE business_anuncios SET title=?, description=?, image_url=COALESCE(?,image_url), video_url=COALESCE(?,video_url), is_active=? WHERE id=?")
             ->execute([
                 $body['title'] ?? $anuncio['title'],
                 $body['description'] ?? $anuncio['description'],
@@ -104,6 +104,26 @@ class AnuncioController {
         Response::success(null, 'Anuncio eliminado');
     }
 
+    // POST /api/anuncios/{id}/video
+    public function uploadVideo(int $id): void {
+        $user = AuthMiddleware::requireRole('negocio');
+        if (empty($_FILES['video'])) Response::error('No se recibió video', 422);
+        $bizStmt = $this->db->prepare("SELECT id FROM businesses WHERE user_id=? LIMIT 1");
+        $bizStmt->execute([$user['id']]);
+        $biz = $bizStmt->fetch();
+        $file = $_FILES['video'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, ['mp4','mov','webm'])) Response::error('Formato no válido. Usa MP4, MOV o WEBM', 422);
+        if ($file['size'] > 10 * 1024 * 1024) Response::error('El video no puede superar 10MB', 422);
+        $filename = 'anuncio_video_' . $id . '_' . time() . '.' . $ext;
+        $dest = __DIR__ . '/../../uploads/anuncios/' . $filename;
+        if (!is_dir(dirname($dest))) mkdir(dirname($dest), 0755, true);
+        if (!move_uploaded_file($file['tmp_name'], $dest)) Response::error('Error al subir video', 500);
+        $url = 'https://nuevaexpress.com/uploads/anuncios/' . $filename;
+        $this->db->prepare("UPDATE business_anuncios SET video_url=? WHERE id=?")->execute([$url, $id]);
+        Response::success(['url' => $url]);
+    }
+
     // POST /api/anuncios/{id}/imagen
     public function uploadImage(int $id): void {
         $user = AuthMiddleware::requireRole('negocio');
@@ -123,3 +143,5 @@ class AnuncioController {
         Response::success(['url' => $url]);
     }
 }
+
+// Reopen class context
