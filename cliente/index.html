@@ -331,7 +331,13 @@ async function loadPromos() {
     if (!promos.length) return;
     var carousel = document.getElementById('promoCarousel');
     carousel.innerHTML = promos.map(function(p) {
-      var photoHtml = p.video_url ? '<video src="'+ p.video_url +'" class="promo-slide-img" muted playsinline style="height:110px;width:100%;object-fit:cover"></video>' : p.image_url ? '<img src="'+p.image_url+'" class="promo-slide-img">': '<div class="promo-slide-nophoto">🏷️</div>';
+      var photoHtml = p.video_url
+        ? '<div style="position:relative;height:110px;overflow:hidden;background:#000;cursor:pointer" onclick="event.stopPropagation();openVideoLightbox(\''+p.video_url+'\')">' +
+            '<video src="'+p.video_url+'" style="width:100%;height:110px;object-fit:cover;opacity:.7" muted></video>' +
+            '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:44px;height:44px;background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem">▶️</div></div>' +
+          '</div>'
+        : p.image_url ? '<img src="'+p.image_url+'" class="promo-slide-img">'
+        : '<div class="promo-slide-nophoto">🏷️</div>';
       var bizLogo = p.business_logo ? '<img src="'+p.business_logo+'">' : '';
       var minPrice = (p.items||[]).reduce(function(mn,i){ return Math.min(mn, parseFloat(i.promo_price||0)); }, Infinity);
       var priceLabel = isFinite(minPrice) && minPrice > 0 ? 'Desde Q'+minPrice.toFixed(2) : '¡Oferta especial!';
@@ -403,5 +409,25 @@ function toggleSidebar() {
 </div>
 
 <script src="/assets/js/pwa.js"></script>
+<div id="videoLightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px" onclick="closeVideoLightbox()">
+  <button onclick="closeVideoLightbox()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;font-size:1.4rem;width:40px;height:40px;border-radius:50%;cursor:pointer">✕</button>
+  <video id="videoLightboxEl" controls playsinline style="max-width:95vw;max-height:85vh;border-radius:10px" onclick="event.stopPropagation()"></video>
+</div>
+<script>
+function openVideoLightbox(url) {
+  var lb = document.getElementById('videoLightbox');
+  var vid = document.getElementById('videoLightboxEl');
+  vid.src = url;
+  lb.style.display = 'flex';
+  vid.play();
+}
+function closeVideoLightbox() {
+  var lb = document.getElementById('videoLightbox');
+  var vid = document.getElementById('videoLightboxEl');
+  vid.pause();
+  vid.src = '';
+  lb.style.display = 'none';
+}
+</script>
 </body>
 </html>
