@@ -601,6 +601,23 @@ async function savePromo() {
   };
   if (imageUrl) payload.image_url = imageUrl;
 
+  // Subir video si hay uno seleccionado
+  var videoFile = document.getElementById('p_video')?.files?.[0];
+  if (videoFile) {
+    btn.textContent = 'Subiendo video...';
+    var vForm = new FormData();
+    vForm.append('video', videoFile);
+    vForm.append('folder', 'promos');
+    var vRes = await fetch(APP.API + '/upload', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + APP.token() },
+      body: vForm
+    });
+    var vData = await vRes.json();
+    if (vData?.success) payload.video_url = vData.data?.url;
+    else { showErr('Error al subir el video: ' + (vData?.message||'')); btn.textContent = editingId ? 'Guardar cambios 💾' : 'Publicar y notificar 🔔'; btn.disabled = false; return; }
+  }
+
   var res;
   if (editingId) {
     res = await APP.put('/promotions/'+editingId, payload);
