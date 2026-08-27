@@ -34,29 +34,16 @@
 <section class="hero">
   <div class="hero-content">
     <h1>Encuentra negocios<br><span class="accent" id="typedText"></span><span id="typedCursor" style="color:var(--gold);animation:blink .7s infinite">|</span></h1>
-    <!-- Hero Slider -->
-    <div style="margin-bottom:18px;max-width:540px;margin-left:auto;margin-right:auto;position:relative">
-      <div id="heroSlider" style="border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.3);position:relative">
-        <!-- Slide 1: Video -->
-        <div class="hero-slide" style="display:block">
-          <video id="heroVideo" src="/assets/video/hero.mp4" autoplay muted loop playsinline style="width:100%;display:block"></video>
-          <button id="heroSoundBtn" onclick="toggleHeroSound()" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.55);border:none;color:white;border-radius:50%;width:38px;height:38px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">🔇</button>
-        </div>
-        <!-- Slide 2: Facebook -->
-        <div class="hero-slide" style="display:none;background:#fff;height:420px;overflow:hidden">
-          <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FNuevaExpressGT&tabs=timeline&width=500&height=420&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false"
-            style="width:100%;height:420px;border:none;overflow:hidden;display:block" scrolling="no" frameborder="0"
-            allow="autoplay;clipboard-write;encrypted-media;picture-in-picture;web-share"></iframe>
-        </div>
+    <div style="margin-bottom:18px;max-width:540px;margin-left:auto;margin-right:auto">
+      <div style="border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.3);position:relative">
+        <video id="heroVideo" src="/assets/video/hero.mp4" autoplay muted loop playsinline style="width:100%;display:block"></video>
+        <button id="heroSoundBtn" onclick="toggleHeroSound()" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.55);border:none;color:white;border-radius:50%;width:38px;height:38px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">🔇</button>
       </div>
-      <!-- Dots -->
-      <div style="display:flex;justify-content:center;gap:8px;margin-top:8px">
-        <button onclick="goHeroSlide(0)" id="heroDot0" style="width:10px;height:10px;border-radius:50%;border:none;background:white;cursor:pointer;opacity:1;transition:.2s"></button>
-        <button onclick="goHeroSlide(1)" id="heroDot1" style="width:10px;height:10px;border-radius:50%;border:none;background:white;cursor:pointer;opacity:.4;transition:.2s"></button>
-      </div>
-      <!-- Arrows -->
-      <button onclick="goHeroSlide((heroCurrentSlide+1)%2)" style="position:absolute;top:50%;right:-14px;transform:translateY(-50%);background:rgba(255,255,255,.85);border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)">›</button>
-      <button onclick="goHeroSlide((heroCurrentSlide+1+1)%2)" style="position:absolute;top:50%;left:-14px;transform:translateY(-50%);background:rgba(255,255,255,.85);border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2)">‹</button>
+      <a href="https://www.facebook.com/NuevaExpressGT" target="_blank" rel="noopener"
+        style="display:inline-flex;align-items:center;gap:8px;margin-top:10px;color:white;text-decoration:none;font-size:.9rem;font-weight:600;opacity:.9">
+        <span style="background:#1877F2;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;color:white;flex-shrink:0">f</span>
+        Síguenos para ofertas y novedades
+      </a>
     </div>
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Busca restaurantes, ceviches, farmacias..." autocomplete="off">
@@ -763,32 +750,6 @@ setTimeout(initCatCarousel, 1500);
 
 
 <script>
-var heroCurrentSlide = 0;
-
-// Touch swipe for hero slider
-(function(){
-  var startX = 0;
-  var el = null;
-  document.addEventListener('DOMContentLoaded', function(){
-    el = document.getElementById('heroSlider');
-    if (!el) return;
-    el.addEventListener('touchstart', function(e){ startX = e.touches[0].clientX; }, {passive:true});
-    el.addEventListener('touchend', function(e){
-      var dx = e.changedTouches[0].clientX - startX;
-      if (Math.abs(dx) > 40) goHeroSlide(dx < 0 ? 1 : 0);
-    }, {passive:true});
-  });
-})();
-
-function goHeroSlide(n) {
-  var slides = document.querySelectorAll('.hero-slide');
-  slides.forEach(function(s,i){ s.style.display = i===n ? (i===1?'flex':'block') : 'none'; });
-  document.getElementById('heroDot0').style.opacity = n===0 ? '1' : '.4';
-  document.getElementById('heroDot1').style.opacity = n===1 ? '1' : '.4';
-  heroCurrentSlide = n;
-  var v = document.getElementById('heroVideo');
-  if (n===0) v.play(); else v.pause();
-}
 function toggleHeroSound() {
   var v = document.getElementById('heroVideo');
   var btn = document.getElementById('heroSoundBtn');
