@@ -77,7 +77,7 @@
 
     <!-- Global metrics -->
     <div class="metric-grid">
-      <div class="metric-box">
+      <div class="metric-box" style="display:none">
         <div class="val" id="mTotal" style="color:var(--blue)">—</div>
         <div class="lbl">Total gastado</div>
       </div>
@@ -273,7 +273,7 @@ async function init() {
   } else {
     var maxM = Math.max.apply(null, sortedMonths.map(function(e){ return e[1].total; }));
     var html3 = '<div style="overflow-x:auto"><table class="report-table"><thead><tr>' +
-      '<th>Mes</th><th>Pedidos</th><th>Total gastado</th><th>Promedio</th><th></th>' +
+      '<th>Mes</th><th>Pedidos</th><th>Promedio</th><th></th>' +
       '</tr></thead><tbody>';
     sortedMonths.forEach(function(entry){
       var m = entry[1];
@@ -281,7 +281,7 @@ async function init() {
       html3 += '<tr>' +
         '<td><strong>'+monthNames[m.month]+' '+m.year+'</strong></td>' +
         '<td>'+m.orders+'</td>' +
-        '<td><strong style="color:var(--blue)">'+money(m.total)+'</strong></td>' +
+
         '<td>'+money(m.orders?m.total/m.orders:0)+'</td>' +
         '<td style="width:120px"><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:var(--blue)"></div></div></td>' +
       '</tr>';
