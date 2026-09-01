@@ -1677,8 +1677,11 @@ document.getElementById('customItems').addEventListener('input', updateCart);
       });
       updateCart();
 
-      // Open modal — cart already has items so qty shows automatically
-      setTimeout(openProductModal, 200);
+      // Scroll to cart summary so user sees what was loaded
+      setTimeout(function() {
+        var cartBar = document.getElementById('cartBar');
+        if (cartBar) cartBar.scrollIntoView({behavior:'smooth', block:'center'});
+      }, 300);
 
       // Toast — con aviso si los precios cambiaron
       var toast = document.createElement('div');
