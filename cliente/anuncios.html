@@ -28,7 +28,7 @@
 @media(max-width:480px){.anuncios-grid{grid-template-columns:1fr}}
 </style>
 </head>
-<body>
+<body style="padding-bottom:60px">
 <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="dashboard-layout">
@@ -138,5 +138,45 @@ loadAnuncios();
   <img id="nx-lightbox-img" style="max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain">
 </div>
 <script src="/assets/js/pwa.js"></script>
+<!-- Bottom Nav Cliente -->
+<nav style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;z-index:1000;display:flex;align-items:stretch;box-shadow:0 -2px 12px rgba(0,0,0,.08);height:60px;padding-bottom:env(safe-area-inset-bottom)">
+  <a href="/cliente/index.html" class="bnav-item" data-page="index">
+    <span class="bnav-icon">📋</span>
+    <span class="bnav-label">Pedidos</span>
+  </a>
+  <a href="/cliente/promociones.html" class="bnav-item" data-page="promociones">
+    <span class="bnav-icon">🏷️</span>
+    <span class="bnav-label">Promos</span>
+  </a>
+  <a href="/index.html" class="bnav-item bnav-center" data-page="directorio">
+    <span class="bnav-icon">🏠</span>
+    <span class="bnav-label">Inicio</span>
+  </a>
+  <a href="/cliente/reportes.html" class="bnav-item" data-page="reportes">
+    <span class="bnav-icon">📊</span>
+    <span class="bnav-label">Reportes</span>
+  </a>
+  <a href="/cliente/anuncios.html" class="bnav-item" data-page="anuncios">
+    <span class="bnav-icon">📢</span>
+    <span class="bnav-label">Anuncios</span>
+  </a>
+</nav>
+<style>
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#6b7280;font-size:.65rem;font-weight:500;gap:2px;transition:.15s;padding:6px 0}
+.bnav-icon{font-size:1.3rem;line-height:1}
+.bnav-label{font-family:'DM Sans',sans-serif;line-height:1}
+.bnav-item.active{color:var(--blue,#3b82f6)}
+.bnav-center{position:relative}
+.bnav-center .bnav-icon{background:var(--blue,#3b82f6);color:white;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-top:-16px;box-shadow:0 4px 12px rgba(59,130,246,.4)}
+.bnav-center.active .bnav-icon{background:#1d4ed8}
+</style>
+<script>
+(function(){
+  var page = location.pathname.split('/').pop().replace('.html','') || 'index';
+  document.querySelectorAll('.bnav-item').forEach(function(a){
+    if(a.dataset.page === page) a.classList.add('active');
+  });
+})();
+</script>
 </body>
 </html>
