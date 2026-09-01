@@ -84,13 +84,7 @@ window.fbAsyncInit = function() {
   var h = window.innerHeight - 80;
   page.setAttribute('data-width', w);
   page.setAttribute('data-height', h);
-  FB.XFBML.parse(wrap, function() {
-    // After render, force iframe to fill
-    var iframes = wrap.querySelectorAll('iframe');
-    iframes.forEach(function(f) {
-      f.style.width = '100%';
-    });
-  });
+  FB.XFBML.parse();
 };
 (function(d,s,id){
   var js,fjs=d.getElementsByTagName(s)[0];
