@@ -1659,37 +1659,39 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     // Pre-fill cart items
     if (data.items && data.items.length) {
       var hasPriceDiff = false;
+
+      // First add items to cart using product list (available after business loads)
       data.items.forEach(function(item) {
         if (!item.product_id) return;
         var id = item.product_id;
         var qty = item.quantity || 1;
-        var prodEl = document.querySelector('[data-pid="' + id + '"]');
-        if (prodEl) {
-          var currentPrice = parseFloat(prodEl.dataset.price) || 0;
+        var prod = products.find(function(p){ return p.id == id; });
+        if (prod) {
+          var currentPrice = parseFloat(prod.price) || 0;
           var prevPrice    = parseFloat(item.unit_price) || 0;
-          // Detectar si el precio cambió (precio promo vs precio actual)
-          if (prevPrice > 0 && currentPrice > 0 && Math.abs(currentPrice - prevPrice) > 0.01) {
-            hasPriceDiff = true;
-          }
-          var name = prodEl.dataset.name || item.product_name || '';
-          cart[id] = { name: name, price: currentPrice, qty: qty };
-          // Update qty display
-          var qEl = document.getElementById('qty-' + id);
-          if (qEl) qEl.textContent = qty;
-          var ppEl = document.getElementById('pp-' + id);
-          if (ppEl) { ppEl.style.borderColor = 'var(--blue)'; ppEl.style.background = '#f0f7ff'; }
+          if (prevPrice > 0 && currentPrice > 0 && Math.abs(currentPrice - prevPrice) > 0.01) hasPriceDiff = true;
+          cart[id] = { name: prod.name, price: currentPrice, qty: qty };
         } else {
-          cart[id] = { name: item.product_name || 'Producto', price: item.unit_price || 0, qty: qty };
+          cart[id] = { name: item.product_name || 'Producto', price: parseFloat(item.unit_price) || 0, qty: qty };
         }
       });
       updateCart();
 
-      // Open product modal to show what was added
+      // Open modal and update qty displays after it renders
       setTimeout(function() {
-        var prodBtn = document.getElementById('openProductModalBtn') || document.querySelector('[onclick*="openProductModal"]');
-        if (prodBtn) prodBtn.click();
-        else openProductModal && openProductModal();
-      }, 300);
+        openProductModal();
+        setTimeout(function() {
+          Object.entries(cart).forEach(function(entry) {
+            var id = entry[0], item = entry[1];
+            var qEl = document.getElementById('qty-' + id);
+            if (qEl) qEl.textContent = item.qty;
+            var ppEl = document.getElementById('pp-' + id);
+            if (ppEl) { ppEl.style.borderColor = 'var(--blue)'; ppEl.style.background = '#f0f7ff'; }
+          });
+          // Re-render modal to show quantities
+          renderProductModal(document.getElementById('prodSearch')?.value || '', activeProdCat);
+        }, 150);
+      }, 200);
 
       // Toast — con aviso si los precios cambiaron
       var toast = document.createElement('div');
