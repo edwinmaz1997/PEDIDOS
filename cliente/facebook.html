@@ -19,8 +19,8 @@
   }
   .fb-logo { width:32px;height:32px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;color:#1877F2; }
   .fb-title { font-weight:700;font-size:1rem; }
-  .fb-frame-wrap { flex:1; overflow:hidden; }
-  .fb-frame-wrap iframe { width:100%; height:100%; border:none; display:block; }
+  .fb-frame-wrap { flex:1; overflow-y:auto; background:white; }
+  .fb-page { width:100% !important; }
 </style>
 </head>
 <body>
@@ -33,30 +33,29 @@
   </a>
 </div>
 <div class="fb-frame-wrap" id="fbWrap">
-  <iframe
-    id="fbIframe"
-    src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FNuevaExpressGT&tabs=timeline&width=500&height=800&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false"
-    scrolling="yes"
-    frameborder="0"
-    allow="autoplay;clipboard-write;encrypted-media;picture-in-picture;web-share">
-  </iframe>
+  <div id="fb-root"></div>
+  <div class="fb-page"
+    data-href="https://www.facebook.com/NuevaExpressGT"
+    data-tabs="timeline"
+    data-width=""
+    data-height=""
+    data-small-header="true"
+    data-adapt-container-width="true"
+    data-hide-cover="false"
+    data-show-facepile="false">
+  </div>
 </div>
 <script>
-(function(){
-  var wrap = document.getElementById('fbWrap');
-  var iframe = document.getElementById('fbIframe');
-  var iframeW = 500;
-  function resize() {
-    var w = wrap.offsetWidth;
-    var scale = w / iframeW;
-    iframe.style.width = iframeW + 'px';
-    iframe.style.height = (wrap.offsetHeight / scale) + 'px';
-    iframe.style.transform = 'scale(' + scale + ')';
-    iframe.style.transformOrigin = '0 0';
-  }
-  window.addEventListener('resize', resize);
-  resize();
-})();
+window.fbAsyncInit = function() {
+  FB.init({ appId: '1358762119208350', xfbml: true, version: 'v19.0' });
+};
+(function(d, s, id){
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "https://connect.facebook.net/es_LA/sdk.js";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
 </script>
 
 <!-- Bottom Nav Cliente -->
