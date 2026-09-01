@@ -521,6 +521,7 @@ try {
 
         // ── HEALTH ───────────────────────────────────────────
         case 'delivery-reward':
+            $db = Database::connect();
             AuthMiddleware::authenticate();
             $user = AuthMiddleware::getUser();
             $month = date('Y-m');
