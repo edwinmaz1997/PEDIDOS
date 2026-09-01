@@ -1655,6 +1655,7 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     }
 
     // Fetch order items from API and fill cart
+    console.log('reorder data:', data);
     if (data.orderId) {
       var token = localStorage.getItem('nuevaexpress_token');
       fetch('/api/orders/' + data.orderId, { headers: { Authorization: 'Bearer ' + token } })
