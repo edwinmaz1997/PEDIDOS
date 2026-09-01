@@ -34,20 +34,27 @@
 </div>
 <div class="fb-frame-wrap" id="fbWrap">
   <div id="fb-root"></div>
-  <div class="fb-page"
+  <div id="fbPageDiv" class="fb-page"
     data-href="https://www.facebook.com/NuevaExpressGT"
     data-tabs="timeline"
-    data-width=""
-    data-height=""
+    data-width="500"
+    data-height="700"
     data-small-header="true"
     data-adapt-container-width="true"
     data-hide-cover="false"
-    data-show-facepile="false">
+    data-show-facepile="true">
   </div>
 </div>
 <script>
 window.fbAsyncInit = function() {
   FB.init({ appId: '1626396929202423', xfbml: true, version: 'v19.0' });
+  FB.Event.subscribe('xfbml.render', function() {
+    // Reparse with correct width after init
+    var w = document.getElementById('fbWrap').offsetWidth;
+    var div = document.getElementById('fbPageDiv');
+    if (div) div.setAttribute('data-width', w);
+    FB.XFBML.parse();
+  });
 };
 (function(d, s, id){
   var js, fjs = d.getElementsByTagName(s)[0];
