@@ -522,8 +522,7 @@ try {
         // ── HEALTH ───────────────────────────────────────────
         case 'delivery-reward':
             $db = Database::connect();
-            AuthMiddleware::authenticate();
-            $user = AuthMiddleware::getUser();
+            $user = AuthMiddleware::authenticate();
             $month = date('Y-m');
             $stmt = $db->prepare("SELECT delivery_count, reward_used FROM delivery_rewards WHERE client_id=? AND month=?");
             $stmt->execute([$user['id'], $month]);
