@@ -210,6 +210,13 @@ class DeliveryController {
                     try { Mailer::orderDelivered($row['client_email'], $row['client_name'], $row['order_number'], $row['business_name']); }
                     catch (\Exception $e) { error_log('Mailer error: ' . $e->getMessage()); }
                 }
+                // Track delivery reward
+                $month = date('Y-m');
+                $this->db->prepare("
+                    INSERT INTO delivery_rewards (client_id, month, delivery_count, reward_used)
+                    VALUES (?, ?, 1, 0)
+                    ON DUPLICATE KEY UPDATE delivery_count = delivery_count + 1
+                ")->execute([(int)$row['client_id'], $month]);
             }
         }
 
