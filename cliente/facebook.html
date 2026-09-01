@@ -6,7 +6,92 @@
 <title>Facebook — NuevaExpress</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:#f0f2f5; padding-bottom:60px; }
+body { background:#f0f2f5; font-family:'Segoe UI',sans-serif; padding-bottom:70px; }
+
+.fb-cover {
+  background:linear-gradient(180deg,#1877F2 0%,#1251a3 100%);
+  height:180px;
+  position:relative;
+  display:flex;
+  align-items:flex-end;
+  padding:0 16px 16px;
+}
+.fb-cover-img {
+  position:absolute;inset:0;
+  background:url('https://nuevaexpress.com/assets/img/cover.jpg') center/cover no-repeat;
+  opacity:.6;
+}
+.fb-avatar {
+  width:72px;height:72px;border-radius:50%;
+  border:3px solid white;
+  background:#1877F2;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;font-weight:900;color:white;
+  position:relative;z-index:1;
+  flex-shrink:0;
+}
+.fb-page-info {
+  background:white;
+  padding:12px 16px 16px;
+  border-bottom:1px solid #e4e6ea;
+}
+.fb-page-name { font-size:1.3rem;font-weight:800;color:#1c1e21; }
+.fb-page-sub { font-size:.85rem;color:#65676b;margin-top:2px; }
+.fb-actions {
+  display:flex;gap:8px;margin-top:12px;
+}
+.fb-btn {
+  flex:1;padding:8px;border-radius:6px;font-size:.9rem;font-weight:700;
+  text-align:center;text-decoration:none;cursor:pointer;border:none;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+}
+.fb-btn-blue { background:#1877F2;color:white; }
+.fb-btn-gray { background:#e4e6ea;color:#1c1e21; }
+
+.fb-posts { padding:8px 0; }
+.fb-post {
+  background:white;
+  margin-bottom:8px;
+  border-top:1px solid #e4e6ea;
+  border-bottom:1px solid #e4e6ea;
+}
+.fb-post-header {
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px 8px;
+}
+.fb-post-avatar {
+  width:40px;height:40px;border-radius:50%;
+  background:#1877F2;display:flex;align-items:center;justify-content:center;
+  font-weight:900;color:white;font-size:1rem;flex-shrink:0;
+}
+.fb-post-meta { flex:1; }
+.fb-post-name { font-size:.9rem;font-weight:700;color:#1c1e21; }
+.fb-post-time { font-size:.75rem;color:#65676b; }
+.fb-post-text { padding:4px 16px 12px;font-size:.92rem;color:#1c1e21;line-height:1.4; }
+.fb-post-reactions {
+  padding:8px 16px;border-top:1px solid #e4e6ea;
+  display:flex;gap:4px;
+}
+.fb-react-btn {
+  flex:1;padding:7px;border-radius:6px;border:none;background:none;
+  font-size:.88rem;font-weight:600;color:#65676b;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.fb-react-btn:hover { background:#f0f2f5; }
+
+.fb-open-bar {
+  background:white;
+  border:1px solid #e4e6ea;
+  border-radius:10px;
+  margin:8px 16px;
+  padding:14px;
+  text-align:center;
+}
+.fb-open-bar a {
+  color:#1877F2;font-weight:700;font-size:.9rem;text-decoration:none;
+  display:inline-flex;align-items:center;gap:8px;
+}
+
 .bnav {
   position:fixed;bottom:0;left:0;right:0;
   background:white;border-top:1px solid #e5e7eb;
@@ -23,20 +108,39 @@ body { background:#f0f2f5; padding-bottom:60px; }
 </head>
 <body>
 
-<div id="fb-root"></div>
-<script async defer crossorigin="anonymous"
-  src="https://connect.facebook.net/es_LA/sdk.js#xfbml=1&version=v19.0&appId=1626396929202423">
-</script>
+<!-- Portada -->
+<div class="fb-cover">
+  <div class="fb-cover-img"></div>
+  <div class="fb-avatar">N</div>
+</div>
 
-<div class="fb-page"
-  data-href="https://www.facebook.com/NuevaExpressGT"
-  data-tabs="timeline"
-  data-width=""
-  data-height=""
-  data-small-header="false"
-  data-adapt-container-width="true"
-  data-hide-cover="false"
-  data-show-facepile="true">
+<!-- Info de página -->
+<div class="fb-page-info">
+  <div class="fb-page-name">Nueva Express</div>
+  <div class="fb-page-sub">🛵 Servicio de delivery · Guatemala</div>
+  <div class="fb-actions">
+    <a href="https://www.facebook.com/NuevaExpressGT" target="_blank" rel="noopener" class="fb-btn fb-btn-blue">
+      👍 Seguir
+    </a>
+    <a href="https://www.facebook.com/NuevaExpressGT" target="_blank" rel="noopener" class="fb-btn fb-btn-gray">
+      ↗️ Ver en Facebook
+    </a>
+  </div>
+</div>
+
+<!-- Aviso publicaciones -->
+<div class="fb-open-bar">
+  <a href="https://www.facebook.com/NuevaExpressGT" target="_blank" rel="noopener">
+    📰 Ver todas las publicaciones en Facebook
+  </a>
+</div>
+
+<!-- Posts de muestra (los reales están en Facebook) -->
+<div class="fb-posts" id="fbPosts">
+  <div style="text-align:center;padding:40px 20px;color:#65676b;">
+    <div style="font-size:2.5rem;margin-bottom:10px">📱</div>
+    <div style="font-weight:700;margin-bottom:6px">Cargando publicaciones...</div>
+  </div>
 </div>
 
 <nav class="bnav">
@@ -61,6 +165,41 @@ body { background:#f0f2f5; padding-bottom:60px; }
     <span class="bnav-label">Anuncios</span>
   </a>
 </nav>
+
+<script>
+// Fetch posts via RSS2JSON (free service, no auth needed)
+fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.facebook.com/feeds/page.php?id=NuevaExpressGT&format=rss20&lang=es_LA')
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    var posts = data.items || [];
+    if (!posts.length) { showFallback(); return; }
+    var html = posts.slice(0,10).map(function(p) {
+      var date = new Date(p.pubDate).toLocaleDateString('es-GT',{day:'numeric',month:'long'});
+      var text = (p.description||'').replace(/<[^>]+>/g,'').substring(0,300);
+      return '<div class="fb-post">' +
+        '<div class="fb-post-header">' +
+          '<div class="fb-post-avatar">N</div>' +
+          '<div class="fb-post-meta">' +
+            '<div class="fb-post-name">Nueva Express</div>' +
+            '<div class="fb-post-time">' + date + ' · 🌐</div>' +
+          '</div>' +
+        '</div>' +
+        (text ? '<div class="fb-post-text">' + text + '</div>' : '') +
+        '<div class="fb-post-reactions">' +
+          '<a href="' + p.link + '" target="_blank" class="fb-react-btn">👍 Me gusta</a>' +
+          '<a href="' + p.link + '" target="_blank" class="fb-react-btn">💬 Comentar</a>' +
+          '<a href="' + p.link + '" target="_blank" class="fb-react-btn">↗️ Compartir</a>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('fbPosts').innerHTML = html;
+  })
+  .catch(showFallback);
+
+function showFallback() {
+  document.getElementById('fbPosts').innerHTML = '<div class="fb-open-bar" style="margin:16px"><a href="https://www.facebook.com/NuevaExpressGT" target="_blank" rel="noopener">📰 Ver publicaciones en Facebook ↗️</a></div>';
+}
+</script>
 
 </body>
 </html>
