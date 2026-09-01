@@ -139,8 +139,12 @@ class OrderController {
                 $pStmt->execute([$productId, $businessId]);
                 $product = $pStmt->fetch();
                 if ($product) {
-                    $productName = $product['name'];
-                    // Si el cliente envía un precio diferente (ej. precio promo), usar ese
+                    // Preservar nombre del frontend si incluye variante (ej. "Café (Grande)")
+                    $frontendName = Security::sanitize($item['name'] ?? '');
+                    $productName = (strpos($frontendName, $product['name']) === 0 && $frontendName !== $product['name'])
+                        ? $frontendName  // contiene variante
+                        : $product['name'];
+                    // Si el cliente envía un precio diferente (ej. precio promo o variante), usar ese
                     $frontendPrice = isset($item['price']) && (float)$item['price'] > 0 ? (float)$item['price'] : null;
                     $unitPrice = $frontendPrice ?? (float)$product['price'];
                     $subtotal += $unitPrice * $quantity;
