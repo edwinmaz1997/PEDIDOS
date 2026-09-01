@@ -1684,18 +1684,6 @@ document.getElementById('customItems').addEventListener('input', updateCart);
           setTimeout(function(){ toast.remove(); }, 3500);
         });
 
-      // Toast — con aviso si los precios cambiaron
-      var toast = document.createElement('div');
-      toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center';
-      if (hasPriceDiff) {
-        toast.style.background = '#c0392b';
-        toast.innerHTML = '⚠️ Algunos precios han cambiado desde tu pedido anterior.<br><span style="font-size:.82rem;opacity:.85">Los precios mostrados son los actuales del negocio.</span>';
-        setTimeout(function() { toast.remove(); }, 5000);
-      } else {
-        toast.textContent = '🔁 Carrito listo con tu pedido anterior';
-        setTimeout(function() { toast.remove(); }, 3500);
-      }
-      document.body.appendChild(toast);
     }
   }, 100);
 })();
