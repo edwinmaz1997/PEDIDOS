@@ -1665,18 +1665,21 @@ document.getElementById('customItems').addEventListener('input', updateCart);
           var items = res?.data?.items || [];
           console.log('items from API:', items);
           var hasPriceDiff = false;
-          items.forEach(function(item) {
-            if (!item.product_id) return;
-            var id = item.product_id;
+          items.forEach(function(item, idx) {
             var qty = parseInt(item.quantity) || 1;
-            var prod = products.find(function(p){ return p.id == id; });
+            var prod = item.product_id ? products.find(function(p){ return p.id == item.product_id; }) : null;
+            if (!prod && item.product_name) {
+              prod = products.find(function(p){ return p.name.trim().toLowerCase() === item.product_name.trim().toLowerCase(); });
+            }
             if (prod) {
               var currentPrice = parseFloat(prod.price) || 0;
               var prevPrice = parseFloat(item.unit_price) || 0;
               if (prevPrice > 0 && currentPrice > 0 && Math.abs(currentPrice - prevPrice) > 0.01) hasPriceDiff = true;
-              cart[id] = { name: prod.name, price: currentPrice, qty: qty };
+              cart[prod.id] = { name: prod.name, price: currentPrice, qty: qty };
             } else {
-              cart[id] = { name: item.product_name || 'Producto', price: parseFloat(item.unit_price) || 0, qty: qty };
+              // Producto no encontrado — agregar con clave única por nombre
+              var key = 'custom_' + idx;
+              cart[key] = { name: item.product_name || 'Producto', price: parseFloat(item.unit_price) || 0, qty: qty };
             }
           });
           updateCart();
