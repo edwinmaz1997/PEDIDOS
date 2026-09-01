@@ -1641,13 +1641,11 @@ document.getElementById('customItems').addEventListener('input', updateCart);
                         document.getElementById('deliveryBtn');
       if (deliveryBtn) deliveryBtn.click();
 
-      // Pre-fill delivery address
       if (data.deliveryAddress) {
         setTimeout(function() {
           var addrInput = document.getElementById('deliveryAddress');
           if (addrInput) {
             addrInput.value = data.deliveryAddress;
-            // Uncheck "usar dirección guardada" if checked
             var savedCheck = document.getElementById('useSavedAddress');
             if (savedCheck) savedCheck.checked = false;
             addrInput.closest('.form-group')?.style && (addrInput.closest('.form-group').style.display = 'block');
@@ -1656,32 +1654,35 @@ document.getElementById('customItems').addEventListener('input', updateCart);
       }
     }
 
-    // Pre-fill cart items
-    if (data.items && data.items.length) {
-      var hasPriceDiff = false;
-
-      // First add items to cart using product list (available after business loads)
-      data.items.forEach(function(item) {
-        if (!item.product_id) return;
-        var id = item.product_id;
-        var qty = item.quantity || 1;
-        var prod = products.find(function(p){ return p.id == id; });
-        if (prod) {
-          var currentPrice = parseFloat(prod.price) || 0;
-          var prevPrice    = parseFloat(item.unit_price) || 0;
-          if (prevPrice > 0 && currentPrice > 0 && Math.abs(currentPrice - prevPrice) > 0.01) hasPriceDiff = true;
-          cart[id] = { name: prod.name, price: currentPrice, qty: qty };
-        } else {
-          cart[id] = { name: item.product_name || 'Producto', price: parseFloat(item.unit_price) || 0, qty: qty };
-        }
-      });
-      updateCart();
-
-      // Scroll to cart summary so user sees what was loaded
-      setTimeout(function() {
-        var cartBar = document.getElementById('cartBar');
-        if (cartBar) cartBar.scrollIntoView({behavior:'smooth', block:'center'});
-      }, 300);
+    // Fetch order items from API and fill cart
+    if (data.orderId) {
+      var token = localStorage.getItem('nuevaexpress_token');
+      fetch('/api/orders/' + data.orderId, { headers: { Authorization: 'Bearer ' + token } })
+        .then(function(r){ return r.json(); })
+        .then(function(res) {
+          var items = res?.data?.items || [];
+          var hasPriceDiff = false;
+          items.forEach(function(item) {
+            if (!item.product_id) return;
+            var id = item.product_id;
+            var qty = parseInt(item.quantity) || 1;
+            var prod = products.find(function(p){ return p.id == id; });
+            if (prod) {
+              var currentPrice = parseFloat(prod.price) || 0;
+              var prevPrice = parseFloat(item.unit_price) || 0;
+              if (prevPrice > 0 && currentPrice > 0 && Math.abs(currentPrice - prevPrice) > 0.01) hasPriceDiff = true;
+              cart[id] = { name: prod.name, price: currentPrice, qty: qty };
+            } else {
+              cart[id] = { name: item.product_name || 'Producto', price: parseFloat(item.unit_price) || 0, qty: qty };
+            }
+          });
+          updateCart();
+          var toast = document.createElement('div');
+          toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center';
+          toast.textContent = hasPriceDiff ? '⚠️ Algunos precios han cambiado' : '🔁 Carrito listo con tu pedido anterior';
+          document.body.appendChild(toast);
+          setTimeout(function(){ toast.remove(); }, 3500);
+        });
 
       // Toast — con aviso si los precios cambiaron
       var toast = document.createElement('div');

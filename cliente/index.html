@@ -280,7 +280,7 @@ function renderOrder(o) {
       <div class="order-actions">
         <a href="pedido-detalle.html?id=${o.id}" class="btn-ghost" style="font-size:.85rem;padding:7px 14px">💬 Ver detalle y chat</a>
         ${o.status === 'pendiente' ? `<button class="btn-ghost" style="font-size:.85rem;padding:7px 14px;border-color:var(--danger);color:var(--danger)" onclick="openCancelModal(${o.id},'${esc(o.order_number)}')">❌ Cancelar</button>` : ''}
-        ${o.status === 'entregado' && !o.from_promo ? `<button class="btn-ghost" style="font-size:.85rem;padding:7px 14px" onclick="reorder(${o.business_id},${JSON.stringify(o.items||[]).replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_type||'pickup').replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_address||'').replace(/"/g,'&quot;')})">🔁 Pedir de nuevo</button>` : ''}
+        ${o.status === 'entregado' && !o.from_promo ? `<button class="btn-ghost" style="font-size:.85rem;padding:7px 14px" onclick="reorder(${o.business_id},${o.id},${JSON.stringify(o.delivery_type||'pickup').replace(/"/g,'&quot;')},${JSON.stringify(o.delivery_address||'').replace(/"/g,'&quot;')})">🔁 Pedir de nuevo</button>` : ''}
       </div>
     </div>
   `;
@@ -314,12 +314,8 @@ async function confirmCancel() {
     msg.textContent = data.message||'Error al cancelar'; msg.style.display = 'block';
   }
 }
-function reorder(businessId, items, deliveryType, deliveryAddress) {
-  // Normalizar items para incluir unit_price
-  var normalizedItems = (items || []).map(function(i) {
-    return { product_id: i.product_id, product_name: i.product_name, quantity: i.quantity, unit_price: i.unit_price };
-  });
-  localStorage.setItem('nuevaexpress_reorder', JSON.stringify({ items: normalizedItems, deliveryType, deliveryAddress }));
+function reorder(businessId, orderId, deliveryType, deliveryAddress) {
+  localStorage.setItem('nuevaexpress_reorder', JSON.stringify({ orderId: orderId, deliveryType: deliveryType, deliveryAddress: deliveryAddress }));
   window.location.href = '/cliente/pedido.html?business=' + businessId + '&reorder=1';
 }
 
