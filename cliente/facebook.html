@@ -32,14 +32,32 @@
     Abrir
   </a>
 </div>
-<div class="fb-frame-wrap">
+<div class="fb-frame-wrap" id="fbWrap">
   <iframe
+    id="fbIframe"
     src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FNuevaExpressGT&tabs=timeline&width=500&height=800&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false"
     scrolling="yes"
     frameborder="0"
     allow="autoplay;clipboard-write;encrypted-media;picture-in-picture;web-share">
   </iframe>
 </div>
+<script>
+(function(){
+  var wrap = document.getElementById('fbWrap');
+  var iframe = document.getElementById('fbIframe');
+  var iframeW = 500;
+  function resize() {
+    var w = wrap.offsetWidth;
+    var scale = w / iframeW;
+    iframe.style.width = iframeW + 'px';
+    iframe.style.height = (wrap.offsetHeight / scale) + 'px';
+    iframe.style.transform = 'scale(' + scale + ')';
+    iframe.style.transformOrigin = '0 0';
+  }
+  window.addEventListener('resize', resize);
+  resize();
+})();
+</script>
 
 <!-- Bottom Nav Cliente -->
 <nav style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;z-index:1000;display:flex;align-items:stretch;box-shadow:0 -2px 12px rgba(0,0,0,.08);height:60px;padding-bottom:env(safe-area-inset-bottom)">
