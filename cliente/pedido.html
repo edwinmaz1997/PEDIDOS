@@ -301,12 +301,16 @@ if (fromPromo) {
 window._freeDeliveryEligible = false;
 (async function(){
   try {
-    var r = await fetch(APP.API+'/delivery-reward', {headers:{Authorization:'Bearer '+APP.token()}});
+    var tok = localStorage.getItem('nuevaexpress_token');
+    if (!tok) return;
+    var r = await fetch(API+'/delivery-reward', {headers:{Authorization:'Bearer '+tok}});
     var res = await r.json();
+    console.log('delivery reward:', res?.data);
     if (res?.data?.eligible) {
       window._freeDeliveryEligible = true;
+      console.log('FREE DELIVERY ELIGIBLE!');
     }
-  } catch(e) {}
+  } catch(e) { console.error('reward check error:', e); }
 })();
 
 async function init() {
