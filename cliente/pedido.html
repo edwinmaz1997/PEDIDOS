@@ -1661,7 +1661,9 @@ document.getElementById('customItems').addEventListener('input', updateCart);
       fetch('/api/orders/' + data.orderId, { headers: { Authorization: 'Bearer ' + token } })
         .then(function(r){ return r.json(); })
         .then(function(res) {
+          console.log('reorder API response:', res);
           var items = res?.data?.items || [];
+          console.log('items from API:', items);
           var hasPriceDiff = false;
           items.forEach(function(item) {
             if (!item.product_id) return;
