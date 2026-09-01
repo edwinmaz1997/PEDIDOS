@@ -29,8 +29,9 @@ body { font-family:'Segoe UI',sans-serif; background:#f0f2f5; min-height:100dvh;
 
 .fb-embed-wrap {
   width:100%;
-  overflow:hidden;
+  overflow-y:auto;
   background:white;
+  -webkit-overflow-scrolling:touch;
 }
 
 /* Bottom Nav */
@@ -98,8 +99,10 @@ window.fbAsyncInit = function() {
   FB.init({ appId: '1626396929202423', xfbml: false, version: 'v19.0' });
   // Set width and parse
   var w = Math.min(window.innerWidth, 500);
-  document.getElementById('fbPage').setAttribute('data-width', w);
-  document.getElementById('fbWrap').style.minHeight = (window.innerHeight - 120) + 'px';
+  var fbPage = document.getElementById('fbPage');
+  fbPage.setAttribute('data-width', w);
+  fbPage.setAttribute('data-height', window.innerHeight - 120);
+  document.getElementById('fbWrap').style.height = (window.innerHeight - 120) + 'px';
   FB.XFBML.parse();
 };
 (function(d, s, id){
