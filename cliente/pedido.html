@@ -1684,6 +1684,13 @@ document.getElementById('customItems').addEventListener('input', updateCart);
       });
       updateCart();
 
+      // Open product modal to show what was added
+      setTimeout(function() {
+        var prodBtn = document.getElementById('openProductModalBtn') || document.querySelector('[onclick*="openProductModal"]');
+        if (prodBtn) prodBtn.click();
+        else openProductModal && openProductModal();
+      }, 300);
+
       // Toast — con aviso si los precios cambiaron
       var toast = document.createElement('div');
       toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center';
