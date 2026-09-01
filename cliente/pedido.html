@@ -1671,15 +1671,14 @@ document.getElementById('customItems').addEventListener('input', updateCart);
             if (!prod && item.product_name) {
               prod = products.find(function(p){ return p.name.trim().toLowerCase() === item.product_name.trim().toLowerCase(); });
             }
+            var prevPrice = parseFloat(item.unit_price) || 0;
             if (prod) {
               var currentPrice = parseFloat(prod.price) || 0;
-              var prevPrice = parseFloat(item.unit_price) || 0;
               if (prevPrice > 0 && currentPrice > 0 && Math.abs(currentPrice - prevPrice) > 0.01) hasPriceDiff = true;
-              cart[prod.id] = { name: prod.name, price: currentPrice, qty: qty };
+              cart[prod.id] = { name: prod.name, price: prevPrice || currentPrice, qty: qty };
             } else {
-              // Producto no encontrado — agregar con clave única por nombre
               var key = 'custom_' + idx;
-              cart[key] = { name: item.product_name || 'Producto', price: parseFloat(item.unit_price) || 0, qty: qty };
+              cart[key] = { name: item.product_name || 'Producto', price: prevPrice, qty: qty };
             }
           });
           updateCart();
