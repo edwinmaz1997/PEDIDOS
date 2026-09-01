@@ -6,9 +6,29 @@
 <title>Facebook — NuevaExpress</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:#f0f2f5; min-height:100dvh; padding-bottom:60px; padding-top:10px; }
-.fb-embed-wrap { width:100%; min-height:calc(100dvh - 70px); background:white; }
-.bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;z-index:1000;display:flex;align-items:stretch;box-shadow:0 -2px 12px rgba(0,0,0,.08);height:60px;padding-bottom:env(safe-area-inset-bottom)}
+html, body { height:100%; background:#f0f2f5; }
+body { display:flex; flex-direction:column; padding-bottom:60px; }
+#fbWrap {
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  background:#f0f2f5;
+  padding-top:12px;
+  display:flex;
+  justify-content:center;
+}
+/* Forzar que el iframe de Facebook llene el ancho */
+#fbWrap .fb-page span,
+#fbWrap .fb-page span iframe {
+  width:100% !important;
+}
+.bnav {
+  position:fixed;bottom:0;left:0;right:0;
+  background:white;border-top:1px solid #e5e7eb;
+  z-index:1000;display:flex;align-items:stretch;
+  box-shadow:0 -2px 12px rgba(0,0,0,.08);
+  height:60px;padding-bottom:env(safe-area-inset-bottom);
+}
 .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#6b7280;font-size:.65rem;font-weight:500;gap:2px;padding:6px 0}
 .bnav-icon{font-size:1.3rem;line-height:1}
 .bnav-label{line-height:1}
@@ -18,7 +38,7 @@ body { background:#f0f2f5; min-height:100dvh; padding-bottom:60px; padding-top:1
 </head>
 <body>
 
-<div class="fb-embed-wrap" id="fbWrap">
+<div id="fbWrap">
   <div id="fb-root"></div>
   <div
     class="fb-page"
@@ -58,9 +78,19 @@ body { background:#f0f2f5; min-height:100dvh; padding-bottom:60px; padding-top:1
 <script>
 window.fbAsyncInit = function() {
   FB.init({ appId: '1626396929202423', xfbml: false, version: 'v19.0' });
-  var w = document.getElementById('fbWrap').offsetWidth;
-  document.getElementById('fbPage').setAttribute('data-width', w);
-  FB.XFBML.parse();
+  var wrap = document.getElementById('fbWrap');
+  var page = document.getElementById('fbPage');
+  var w = Math.min(wrap.offsetWidth - 16, 500);
+  var h = window.innerHeight - 80;
+  page.setAttribute('data-width', w);
+  page.setAttribute('data-height', h);
+  FB.XFBML.parse(wrap, function() {
+    // After render, force iframe to fill
+    var iframes = wrap.querySelectorAll('iframe');
+    iframes.forEach(function(f) {
+      f.style.width = '100%';
+    });
+  });
 };
 (function(d,s,id){
   var js,fjs=d.getElementsByTagName(s)[0];
