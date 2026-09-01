@@ -498,6 +498,13 @@ function renderProductModal(searchQ, catId) {
     return mQ && mC && p.is_available;
   });
 
+  // Sort: selected products first
+  filtered.sort(function(a, b) {
+    var aQty = cart[a.id]?.qty || 0;
+    var bQty = cart[b.id]?.qty || 0;
+    return (bQty > 0 ? 1 : 0) - (aQty > 0 ? 1 : 0);
+  });
+
   var html = filtered.map(function(p){
     var qty = cart[p.id]?.qty || 0;
     var inCart = qty > 0;
