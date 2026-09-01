@@ -299,18 +299,18 @@ if (fromPromo) {
 // ── Load Business ──────────────────────────────────────────
 // Check free delivery eligibility
 window._freeDeliveryEligible = false;
-(async function(){
+window._freeDeliveryChecked = false;
+window._freeDeliveryCheckPromise = (async function(){
   try {
     var tok = localStorage.getItem('nuevaexpress_token');
     if (!tok) return;
     var r = await fetch(API+'/delivery-reward', {headers:{Authorization:'Bearer '+tok}});
     var res = await r.json();
-    console.log('delivery reward:', res?.data);
     if (res?.data?.eligible) {
       window._freeDeliveryEligible = true;
-      console.log('FREE DELIVERY ELIGIBLE!');
     }
-  } catch(e) { console.error('reward check error:', e); }
+  } catch(e) {}
+  window._freeDeliveryChecked = true;
 })();
 
 async function init() {
@@ -1230,6 +1230,8 @@ function getClientMapsUrlForDelivery() {
 }
 
 async function calculateDeliveryFee() {
+  // Wait for reward check to complete
+  if (window._freeDeliveryCheckPromise) await window._freeDeliveryCheckPromise;
   var btn    = document.getElementById('calcDeliveryBtn');
   var result = document.getElementById('deliveryCalcResult');
   var mapsUrl = getClientMapsUrlForDelivery();
