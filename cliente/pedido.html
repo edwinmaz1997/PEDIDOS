@@ -1677,21 +1677,8 @@ document.getElementById('customItems').addEventListener('input', updateCart);
       });
       updateCart();
 
-      // Open modal and update qty displays after it renders
-      setTimeout(function() {
-        openProductModal();
-        setTimeout(function() {
-          Object.entries(cart).forEach(function(entry) {
-            var id = entry[0], item = entry[1];
-            var qEl = document.getElementById('qty-' + id);
-            if (qEl) qEl.textContent = item.qty;
-            var ppEl = document.getElementById('pp-' + id);
-            if (ppEl) { ppEl.style.borderColor = 'var(--blue)'; ppEl.style.background = '#f0f7ff'; }
-          });
-          // Re-render modal to show quantities
-          renderProductModal(document.getElementById('prodSearch')?.value || '', activeProdCat);
-        }, 150);
-      }, 200);
+      // Open modal — cart already has items so qty shows automatically
+      setTimeout(openProductModal, 200);
 
       // Toast — con aviso si los precios cambiaron
       var toast = document.createElement('div');
