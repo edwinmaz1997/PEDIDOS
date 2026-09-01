@@ -2,21 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Facebook — NuevaExpress</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-html, body { height:100%; background:#f0f2f5; overflow:hidden; }
-body { display:flex; flex-direction:column; }
-#fbWrap {
-  flex:1;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  padding:8px 0 70px;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-}
+body { background:#f0f2f5; padding-bottom:60px; }
 .bnav {
   position:fixed;bottom:0;left:0;right:0;
   background:white;border-top:1px solid #e5e7eb;
@@ -33,19 +23,20 @@ body { display:flex; flex-direction:column; }
 </head>
 <body>
 
-<div id="fbWrap">
-  <div id="fb-root"></div>
-  <div
-    class="fb-page"
-    data-href="https://www.facebook.com/NuevaExpressGT"
-    data-tabs="timeline"
-    data-width="500"
-    data-height="700"
-    data-small-header="false"
-    data-adapt-container-width="true"
-    data-hide-cover="false"
-    data-show-facepile="true">
-  </div>
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous"
+  src="https://connect.facebook.net/es_LA/sdk.js#xfbml=1&version=v19.0&appId=1626396929202423">
+</script>
+
+<div class="fb-page"
+  data-href="https://www.facebook.com/NuevaExpressGT"
+  data-tabs="timeline"
+  data-width=""
+  data-height=""
+  data-small-header="false"
+  data-adapt-container-width="true"
+  data-hide-cover="false"
+  data-show-facepile="true">
 </div>
 
 <nav class="bnav">
@@ -71,9 +62,5 @@ body { display:flex; flex-direction:column; }
   </a>
 </nav>
 
-<div id="fb-root"></div>
-<script async defer crossorigin="anonymous"
-  src="https://connect.facebook.net/es_LA/sdk.js#xfbml=1&version=v19.0&appId=1626396929202423">
-</script>
 </body>
 </html>
