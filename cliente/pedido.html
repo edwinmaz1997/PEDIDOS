@@ -1631,8 +1631,8 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     attempts++;
     if (attempts > 40) { clearInterval(interval); return; } // timeout 4s
 
-    // Check products are loaded (business object exists)
-    if (!business) return;
+    // Check products are loaded
+    if (!business || !products || !products.length) return;
     clearInterval(interval);
 
     // Pre-fill delivery type
