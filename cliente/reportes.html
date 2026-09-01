@@ -131,7 +131,33 @@
       <div id="recentActivity"><div class="loading-state"><div class="spinner"></div></div></div>
     </div>
 
-  </main>
+    <!-- Delivery Gratis -->
+  <div style="background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:2px solid #fbbf24">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="font-size:1.6rem">🎁</div>
+      <div>
+        <div style="font-weight:800;font-size:1rem;color:var(--navy)">Delivery gratis</div>
+        <div style="font-size:.8rem;color:var(--muted)">Completa 15 deliveries este mes y el 16 es gratis</div>
+      </div>
+    </div>
+    <div id="rewardLoading" style="text-align:center;color:var(--muted);font-size:.85rem">Cargando...</div>
+    <div id="rewardContent" style="display:none">
+      <div style="background:#f9fafb;border-radius:10px;padding:14px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:.85rem;color:var(--muted)">Deliveries este mes</span>
+          <span id="rewardCount" style="font-weight:700;font-size:1.1rem">0</span>
+        </div>
+        <div style="background:#e5e7eb;border-radius:20px;height:10px;overflow:hidden">
+          <div id="rewardBar" style="background:linear-gradient(90deg,#f59e0b,#fbbf24);height:100%;border-radius:20px;transition:width .5s;width:0%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.72rem;color:var(--muted)">
+          <span>0</span><span>15</span>
+        </div>
+      </div>
+      <div id="rewardStatus"></div>
+    </div>
+  </div>
+</main>
 </div>
 
 <script src="../assets/js/app.js"></script>
@@ -396,6 +422,30 @@ init();
   document.querySelectorAll('.bnav-item').forEach(function(a){
     if(a.dataset.page === page) a.classList.add('active');
   });
+})();
+
+// Load delivery reward
+(async function(){
+  try {
+    var r = await fetch(APP.API+'/delivery-reward', {headers:{Authorization:'Bearer '+APP.token()}});
+    var res = await r.json();
+    var d = res?.data;
+    document.getElementById('rewardLoading').style.display = 'none';
+    document.getElementById('rewardContent').style.display = 'block';
+    var count = Math.min(d.delivery_count, 15);
+    document.getElementById('rewardCount').textContent = d.delivery_count;
+    document.getElementById('rewardBar').style.width = (count/15*100) + '%';
+    var statusEl = document.getElementById('rewardStatus');
+    if (d.reward_used) {
+      statusEl.innerHTML = '<div style="background:#fef3c7;border-radius:8px;padding:10px 14px;font-size:.85rem;color:#92400e;text-align:center">✅ Ya usaste tu delivery gratis este mes — ¡sigue pediendo!</div>';
+    } else if (d.eligible) {
+      statusEl.innerHTML = '<div style="background:#d1fae5;border-radius:8px;padding:12px 14px;font-size:.88rem;color:#065f46;text-align:center;font-weight:700">🎉 ¡Tienes un delivery gratis! Tu próximo pedido delivery no tendrá costo de envío.</div>';
+    } else {
+      statusEl.innerHTML = '<div style="font-size:.82rem;color:var(--muted);text-align:center">Te faltan <strong style="color:var(--navy)">' + d.remaining + ' deliveries</strong> para ganar tu delivery gratis este mes</div>';
+    }
+  } catch(e) {
+    document.getElementById('rewardLoading').textContent = '';
+  }
 })();
 </script>
 </body>

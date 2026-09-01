@@ -520,6 +520,23 @@ try {
             break;
 
         // ── HEALTH ───────────────────────────────────────────
+        case 'delivery-reward':
+            AuthMiddleware::authenticate();
+            $user = AuthMiddleware::getUser();
+            $month = date('Y-m');
+            $stmt = $db->prepare("SELECT delivery_count, reward_used FROM delivery_rewards WHERE client_id=? AND month=?");
+            $stmt->execute([$user['id'], $month]);
+            $reward = $stmt->fetch() ?: ['delivery_count'=>0,'reward_used'=>0];
+            $eligible = (int)$reward['delivery_count'] >= 15 && !(int)$reward['reward_used'];
+            Response::success([
+                'delivery_count' => (int)$reward['delivery_count'],
+                'reward_used'    => (bool)$reward['reward_used'],
+                'eligible'       => $eligible,
+                'remaining'      => max(0, 15 - (int)$reward['delivery_count']),
+                'month'          => $month,
+            ]);
+            break;
+
         case 'health':
             Response::success(['status' => 'ok', 'version' => '1.2', 'php' => PHP_VERSION, 'domain' => APP_URL]);
             break;

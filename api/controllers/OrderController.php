@@ -118,9 +118,19 @@ class OrderController {
         // Calculate fees
         $serviceFee  = SERVICE_FEE;
         if ($deliveryType === 'delivery' && $business['accepts_delivery']) {
-            // Usar la tarifa calculada por distancia que envía el frontend
-            $sentFee = isset($body['delivery_fee']) ? (float)$body['delivery_fee'] : null;
-            $deliveryFee = $sentFee !== null && $sentFee > 0 ? $sentFee : (float)$business['delivery_fee'];
+            // Check free delivery reward
+            $month = date('Y-m');
+            $rewStmt = $this->db->prepare("SELECT delivery_count, reward_used FROM delivery_rewards WHERE client_id=? AND month=?");
+            $rewStmt->execute([$user['id'], $month]);
+            $rew = $rewStmt->fetch();
+            if ($rew && (int)$rew['delivery_count'] >= 15 && !(int)$rew['reward_used']) {
+                $deliveryFee = 0;
+                // Mark reward as used
+                $this->db->prepare("UPDATE delivery_rewards SET reward_used=1 WHERE client_id=? AND month=?")->execute([$user['id'], $month]);
+            } else {
+                $sentFee = isset($body['delivery_fee']) ? (float)$body['delivery_fee'] : null;
+                $deliveryFee = $sentFee !== null && $sentFee > 0 ? $sentFee : (float)$business['delivery_fee'];
+            }
         } else {
             $deliveryFee = 0;
         }
@@ -493,6 +503,16 @@ class OrderController {
             }
         }
         $this->logStatus($id, $status, $body['message'] ?? null, $user['id']);
+
+        // Track delivery reward when order is delivered
+        if ($status === 'entregado' && $order['delivery_type'] === 'delivery') {
+            $month = date('Y-m');
+            $this->db->prepare("
+                INSERT INTO delivery_rewards (client_id, month, delivery_count, reward_used)
+                VALUES (?, ?, 1, 0)
+                ON DUPLICATE KEY UPDATE delivery_count = delivery_count + 1
+            ")->execute([$order['client_id'], $month]);
+        }
 
         // Notify client
         $statusLabels = [
