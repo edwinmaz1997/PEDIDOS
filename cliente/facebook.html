@@ -4,27 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Facebook — NuevaExpress</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Segoe UI',sans-serif; background:#f0f2f5; min-height:100dvh; padding-bottom:70px; }
-
-.fb-embed-wrap {
-  width:100%;
-  overflow-y:auto;
-  background:white;
-  -webkit-overflow-scrolling:touch;
-  padding-top:8px;
-}
-
-/* Bottom Nav */
-.bnav {
-  position:fixed;bottom:0;left:0;right:0;
-  background:white;border-top:1px solid #e5e7eb;
-  z-index:1000;display:flex;align-items:stretch;
-  box-shadow:0 -2px 12px rgba(0,0,0,.08);
-  height:60px;padding-bottom:env(safe-area-inset-bottom);
-}
+body { background:#f0f2f5; min-height:100dvh; padding-bottom:60px; padding-top:10px; }
+.fb-embed-wrap { width:100%; }
+.bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;z-index:1000;display:flex;align-items:stretch;box-shadow:0 -2px 12px rgba(0,0,0,.08);height:60px;padding-bottom:env(safe-area-inset-bottom)}
 .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#6b7280;font-size:.65rem;font-weight:500;gap:2px;padding:6px 0}
 .bnav-icon{font-size:1.3rem;line-height:1}
 .bnav-label{line-height:1}
@@ -34,8 +18,6 @@ body { font-family:'Segoe UI',sans-serif; background:#f0f2f5; min-height:100dvh;
 </head>
 <body>
 
-
-
 <div class="fb-embed-wrap" id="fbWrap">
   <div id="fb-root"></div>
   <div
@@ -43,10 +25,10 @@ body { font-family:'Segoe UI',sans-serif; background:#f0f2f5; min-height:100dvh;
     id="fbPage"
     data-href="https://www.facebook.com/NuevaExpressGT"
     data-tabs="timeline"
-    data-small-header="true"
+    data-small-header="false"
     data-adapt-container-width="true"
     data-hide-cover="false"
-    data-show-facepile="false">
+    data-show-facepile="true">
   </div>
 </div>
 
@@ -76,21 +58,17 @@ body { font-family:'Segoe UI',sans-serif; background:#f0f2f5; min-height:100dvh;
 <script>
 window.fbAsyncInit = function() {
   FB.init({ appId: '1626396929202423', xfbml: false, version: 'v19.0' });
-  // Set width and parse
-  var w = Math.min(window.innerWidth, 500);
-  var fbPage = document.getElementById('fbPage');
-  fbPage.setAttribute('data-width', w);
-  fbPage.setAttribute('data-height', window.innerHeight - 70);
-  document.getElementById('fbWrap').style.height = (window.innerHeight - 70) + 'px';
+  var w = document.getElementById('fbWrap').offsetWidth;
+  document.getElementById('fbPage').setAttribute('data-width', w);
   FB.XFBML.parse();
 };
-(function(d, s, id){
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = 'https://connect.facebook.net/es_LA/sdk.js';
-  fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
+(function(d,s,id){
+  var js,fjs=d.getElementsByTagName(s)[0];
+  if(d.getElementById(id)) return;
+  js=d.createElement(s); js.id=id;
+  js.src='https://connect.facebook.net/es_LA/sdk.js';
+  fjs.parentNode.insertBefore(js,fjs);
+}(document,'script','facebook-jssdk'));
 </script>
 </body>
 </html>
