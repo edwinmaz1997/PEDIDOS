@@ -6,16 +6,16 @@
 <title>Facebook — NuevaExpress</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-html, body { height:100%; background:#f0f2f5; }
-body { display:flex; flex-direction:column; padding-bottom:60px; }
+html, body { height:100%; background:#f0f2f5; overflow:hidden; }
+body { display:flex; flex-direction:column; }
 #fbWrap {
   flex:1;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
-  background:#f0f2f5;
-  padding-top:8px;
+  padding:8px 0 70px;
   display:flex;
   justify-content:center;
+  align-items:flex-start;
 }
 .bnav {
   position:fixed;bottom:0;left:0;right:0;
@@ -37,9 +37,10 @@ body { display:flex; flex-direction:column; padding-bottom:60px; }
   <div id="fb-root"></div>
   <div
     class="fb-page"
-    id="fbPage"
     data-href="https://www.facebook.com/NuevaExpressGT"
     data-tabs="timeline"
+    data-width="500"
+    data-height="700"
     data-small-header="false"
     data-adapt-container-width="true"
     data-hide-cover="false"
@@ -70,22 +71,9 @@ body { display:flex; flex-direction:column; padding-bottom:60px; }
   </a>
 </nav>
 
-<script>
-window.fbAsyncInit = function() {
-  FB.init({ appId: '1626396929202423', xfbml: false, version: 'v19.0' });
-  var w = Math.min(document.getElementById('fbWrap').offsetWidth - 8, 500);
-  var h = window.innerHeight - 80;
-  document.getElementById('fbPage').setAttribute('data-width', w);
-  document.getElementById('fbPage').setAttribute('data-height', h);
-  FB.XFBML.parse();
-};
-(function(d,s,id){
-  var js,fjs=d.getElementsByTagName(s)[0];
-  if(d.getElementById(id)) return;
-  js=d.createElement(s); js.id=id;
-  js.src='https://connect.facebook.net/es_LA/sdk.js';
-  fjs.parentNode.insertBefore(js,fjs);
-}(document,'script','facebook-jssdk'));
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous"
+  src="https://connect.facebook.net/es_LA/sdk.js#xfbml=1&version=v19.0&appId=1626396929202423">
 </script>
 </body>
 </html>
