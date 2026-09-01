@@ -13,14 +13,9 @@ body { display:flex; flex-direction:column; padding-bottom:60px; }
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   background:#f0f2f5;
-  padding-top:12px;
+  padding-top:8px;
   display:flex;
   justify-content:center;
-}
-/* Forzar que el iframe de Facebook llene el ancho */
-#fbWrap .fb-page span,
-#fbWrap .fb-page span iframe {
-  width:100% !important;
 }
 .bnav {
   position:fixed;bottom:0;left:0;right:0;
@@ -78,12 +73,10 @@ body { display:flex; flex-direction:column; padding-bottom:60px; }
 <script>
 window.fbAsyncInit = function() {
   FB.init({ appId: '1626396929202423', xfbml: false, version: 'v19.0' });
-  var wrap = document.getElementById('fbWrap');
-  var page = document.getElementById('fbPage');
-  var w = Math.min(wrap.offsetWidth - 16, 500);
+  var w = Math.min(document.getElementById('fbWrap').offsetWidth - 8, 500);
   var h = window.innerHeight - 80;
-  page.setAttribute('data-width', w);
-  page.setAttribute('data-height', h);
+  document.getElementById('fbPage').setAttribute('data-width', w);
+  document.getElementById('fbPage').setAttribute('data-height', h);
   FB.XFBML.parse();
 };
 (function(d,s,id){
