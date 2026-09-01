@@ -297,6 +297,18 @@ if (fromPromo) {
 }
 
 // ── Load Business ──────────────────────────────────────────
+// Check free delivery eligibility
+window._freeDeliveryEligible = false;
+(async function(){
+  try {
+    var r = await fetch(APP.API+'/delivery-reward', {headers:{Authorization:'Bearer '+APP.token()}});
+    var res = await r.json();
+    if (res?.data?.eligible) {
+      window._freeDeliveryEligible = true;
+    }
+  } catch(e) {}
+})();
+
 async function init() {
   try {
     const res = await fetch(`${API}/businesses/${businessId}`);
@@ -1086,7 +1098,7 @@ async function calculatePackageDeliveryFee() {
     result.style.display = 'block';
     result.style.background = '#e8f5e9';
     result.style.color = '#2e7d32';
-    result.innerHTML = '✅ Distancia: ' + data.data.distance_km + ' km — Costo de envío: Q' + parseFloat(data.data.delivery_fee).toFixed(2);
+    result.innerHTML = window._freeDeliveryEligible ? '<strong style="color:#16a34a">🎁 ¡Delivery GRATIS! Premio por 15 pedidos este mes</strong>' : ('✅ Distancia: ' + data.data.distance_km + ' km — Costo de envío: Q' + parseFloat(data.data.delivery_fee).toFixed(2));
 
     btn.style.display = 'none';
     updateCart();
@@ -1290,7 +1302,7 @@ async function calculateDeliveryFee() {
     }
 
     // Éxito
-    window._calculatedDeliveryFee = data.data.delivery_fee;
+    window._calculatedDeliveryFee = window._freeDeliveryEligible ? 0 : data.data.delivery_fee;
     window._calculatedDistanceKm  = data.data.distance_km;
 
     // Mostrar boleta si hay productos que la requieren (negocio 5)
@@ -1299,7 +1311,7 @@ async function calculateDeliveryFee() {
     result.style.display = 'block';
     result.style.background = '#e8f5e9';
     result.style.color = '#2e7d32';
-    result.innerHTML = '✅ Distancia: ' + data.data.distance_km + ' km — Costo de envío: Q' + parseFloat(data.data.delivery_fee).toFixed(2);
+    result.innerHTML = window._freeDeliveryEligible ? '<strong style="color:#16a34a">🎁 ¡Delivery GRATIS! Premio por 15 pedidos este mes</strong>' : ('✅ Distancia: ' + data.data.distance_km + ' km — Costo de envío: Q' + parseFloat(data.data.delivery_fee).toFixed(2));
 
     btn.style.display = 'none';
     updateCart();
