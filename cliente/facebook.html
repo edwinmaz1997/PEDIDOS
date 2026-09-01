@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facebook — NuevaExpress</title>
+<link rel="stylesheet" href="/assets/css/main.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#1877F2; height:100dvh; display:flex; flex-direction:column; padding-bottom:60px; }
+  .fb-header {
+    background:#1877F2;
+    padding:12px 16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:white;
+    flex-shrink:0;
+  }
+  .fb-logo { width:32px;height:32px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;color:#1877F2; }
+  .fb-title { font-weight:700;font-size:1rem; }
+  .fb-frame-wrap { flex:1; overflow:hidden; }
+  .fb-frame-wrap iframe { width:100%; height:100%; border:none; display:block; }
+</style>
+</head>
+<body>
+<div class="fb-header">
+  <div class="fb-logo">f</div>
+  <span class="fb-title">NuevaExpress GT</span>
+  <a href="https://www.facebook.com/NuevaExpressGT" target="_blank" rel="noopener"
+    style="margin-left:auto;background:white;color:#1877F2;font-size:.8rem;font-weight:700;padding:6px 14px;border-radius:20px;text-decoration:none">
+    Abrir
+  </a>
+</div>
+<div class="fb-frame-wrap">
+  <iframe
+    src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2FNuevaExpressGT&tabs=timeline&width=500&height=800&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false"
+    scrolling="yes"
+    frameborder="0"
+    allow="autoplay;clipboard-write;encrypted-media;picture-in-picture;web-share">
+  </iframe>
+</div>
+
+<!-- Bottom Nav Cliente -->
+<nav style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;z-index:1000;display:flex;align-items:stretch;box-shadow:0 -2px 12px rgba(0,0,0,.08);height:60px;padding-bottom:env(safe-area-inset-bottom)">
+  <a href="/cliente/index.html" class="bnav-item" data-page="index">
+    <span class="bnav-icon">📋</span>
+    <span class="bnav-label">Pedidos</span>
+  </a>
+  <a href="/cliente/promociones.html" class="bnav-item" data-page="promociones">
+    <span class="bnav-icon">🏷️</span>
+    <span class="bnav-label">Promos</span>
+  </a>
+  <a href="/index.html" class="bnav-item bnav-center" data-page="directorio">
+    <span class="bnav-icon">🏠</span>
+    <span class="bnav-label">Inicio</span>
+  </a>
+  <a href="/cliente/facebook.html" class="bnav-item active" data-page="facebook">
+    <span class="bnav-icon" style="font-size:1.1rem;font-weight:900;background:#1877F2;color:white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center">f</span>
+    <span class="bnav-label">Facebook</span>
+  </a>
+  <a href="/cliente/anuncios.html" class="bnav-item" data-page="anuncios">
+    <span class="bnav-icon">📢</span>
+    <span class="bnav-label">Anuncios</span>
+  </a>
+</nav>
+<style>
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#6b7280;font-size:.65rem;font-weight:500;gap:2px;padding:6px 0}
+.bnav-icon{font-size:1.3rem;line-height:1}
+.bnav-label{font-family:'DM Sans',sans-serif;line-height:1}
+.bnav-item.active{color:var(--blue,#3b82f6)}
+.bnav-center .bnav-icon{background:var(--blue,#3b82f6);color:white;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-top:-16px;box-shadow:0 4px 12px rgba(59,130,246,.4)}
+</style>
+</body>
+</html>
