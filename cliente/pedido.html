@@ -783,7 +783,7 @@ function addCustomizedToCart() {
     }
   }
 
-  var base = parseFloat(p.price) || 0;
+  var base = (promoOverrides && promoOverrides[p.id] !== undefined) ? promoOverrides[p.id] : (parseFloat(p.price) || 0);
 
   // Complementos seleccionados con cantidad
   var selectedComplements = [];
