@@ -568,11 +568,19 @@ function renderProductModal(searchQ, catId) {
       '</div>' +
       // Selector de variantes
       (hasVariants ? '<div style="margin-top:10px;padding-left:84px">' +
-        '<div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;font-weight:600">Selecciona una opción:</div>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+        '<div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;font-weight:600">Selecciona una opción:</div>' +
+        '<div style="display:flex;flex-direction:column;gap:8px">' +
           p.variants.map(function(v) {
-            var isSelected = selectedVariant && selectedVariant.id === v.id;
-            return '<button onclick="selectVariant('+p.id+','+JSON.stringify(v).replace(/"/g,"'")+')" style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(isSelected?'var(--blue)':'var(--border)')+';background:'+(isSelected?'var(--blue)':'white')+';color:'+(isSelected?'white':'var(--charcoal)')+';font-size:.8rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif" id="var-'+p.id+'-'+v.id+'">'+esc(v.name)+' — Q'+parseFloat(v.price).toFixed(2)+'</button>';
+            var vKey = 'v_' + p.id + '_' + v.id;
+            var vQty = (cart[vKey] && cart[vKey].qty) ? cart[vKey].qty : 0;
+            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;border:1.5px solid '+(vQty>0?'var(--blue)':'var(--border)')+';background:'+(vQty>0?'#f0f7ff':'white')+'">' +
+              '<div style="font-size:.88rem;font-weight:600;color:var(--charcoal)">' + esc(v.name) + '<span style="color:var(--blue);margin-left:8px">Q' + parseFloat(v.price).toFixed(2) + '</span></div>' +
+              '<div style="display:flex;align-items:center;gap:8px">' +
+                '<button onclick="changeVariantQty('+p.id+','+JSON.stringify(v).replace(/"/g,"'")+' ,-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center">−</button>' +
+                '<span id="vqty-'+p.id+'-'+v.id+'" style="font-weight:700;min-width:18px;text-align:center">' + vQty + '</span>' +
+                '<button onclick="changeVariantQty('+p.id+','+JSON.stringify(v).replace(/"/g,"'")+' ,1)" style="width:28px;height:28px;border-radius:50%;border:none;background:var(--blue);color:white;cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center">+</button>' +
+              '</div>' +
+            '</div>';
           }).join('') +
         '</div>' +
       '</div>' : '') +
@@ -610,6 +618,23 @@ function selectVariant(productId, variant) {
   if (qEl) qEl.textContent = cart[productId].qty;
   var ppEl = document.getElementById('pp-'+productId);
   if (ppEl) { ppEl.style.background = '#f0f7ff'; }
+  updateCart();
+}
+
+function changeVariantQty(productId, variant, delta) {
+  var p = products.find(function(x){ return x.id === productId; });
+  if (!p) return;
+  var vKey = 'v_' + productId + '_' + variant.id;
+  if (!cart[vKey] && delta > 0) {
+    cart[vKey] = { product_id: productId, name: p.name + ' (' + variant.name + ')', price: parseFloat(promoOverrides && promoOverrides[productId] !== undefined ? promoOverrides[productId] : variant.price), qty: 1, variant: variant };
+  } else if (cart[vKey]) {
+    cart[vKey].qty += delta;
+    if (cart[vKey].qty <= 0) delete cart[vKey];
+  }
+  var qEl = document.getElementById('vqty-' + productId + '-' + variant.id);
+  if (qEl) qEl.textContent = (cart[vKey] && cart[vKey].qty) ? cart[vKey].qty : 0;
+  // Update border color
+  renderProductModal(document.getElementById('prodSearch')?.value || '', activeProdCat);
   updateCart();
 }
 
