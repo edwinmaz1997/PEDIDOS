@@ -602,11 +602,9 @@ function selectVariant(productId, variant) {
   // Actualizar precio mostrado
   var priceEl = document.getElementById('price-'+productId);
   if (priceEl) priceEl.textContent = 'Q' + parseFloat(variant.price).toFixed(2);
-  // Guardar variante en el cart
-  if (!cart[productId]) cart[productId] = { name: p.name, price: parseFloat(variant.price), qty: 1, variant: variant };
-  else { cart[productId].price = parseFloat(variant.price); cart[productId].variant = variant; if (!cart[productId].qty) cart[productId].qty = 1; }
-  // Actualizar nombre con variante
-  cart[productId].name = p.name + ' (' + variant.name + ')';
+  // Guardar variante en el cart preservando la cantidad actual
+  var currentQty = (cart[productId] && cart[productId].qty) ? cart[productId].qty : 1;
+  cart[productId] = { name: p.name + ' (' + variant.name + ')', price: parseFloat(variant.price), qty: currentQty, variant: variant };
   // Actualizar qty display
   var qEl = document.getElementById('qty-'+productId);
   if (qEl) qEl.textContent = cart[productId].qty;
