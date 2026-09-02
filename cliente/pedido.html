@@ -820,6 +820,9 @@ function addCustomizedToCart() {
   var compKey = selectedComplements.join('_');
   var cartKey = p.id + (compKey ? '_c'+compKey : '') + (extrasKey ? '_e'+extrasKey : '');
 
+  // Remove base product entry (without variant) to avoid double counting
+  if (cart[p.id]) delete cart[p.id];
+
   if (!cart[cartKey]) {
     cart[cartKey] = { product_id: p.id, name: p.name + label, price: totalPrice, qty: 1, extras: selectedExtras, notes: notes };
   } else {
