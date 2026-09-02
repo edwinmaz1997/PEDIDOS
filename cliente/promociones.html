@@ -156,8 +156,7 @@ function openPromo(promoId) {
         '<span class="promo-price">Q'+parseFloat(item.promo_price).toFixed(2)+'</span>' +
         '<span class="saving">-Q'+saving+'</span>' +
       '</div>' +
-      ((item.has_variants || item.has_complements) ?
-        '<button onclick="openPromoCustomize('+p.id+','+JSON.stringify(item).replace(/"/g,'&quot;')+')" style="margin:6px 0 4px;padding:6px 14px;border-radius:20px;border:none;background:var(--accent);color:white;font-size:.8rem;font-weight:700;cursor:pointer">🎨 Personalizar</button>' : '') +
+
     '</div>';
   }).join('');
 
