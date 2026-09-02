@@ -229,6 +229,18 @@ function dismissInstall() {
       fbBtn.onmouseenter = function(){ this.style.background='#1558b0'; };
       fbBtn.onmouseleave = function(){ this.style.background='#1877F2'; };
       iconRow.appendChild(fbBtn);
+
+      // Ícono de TikTok — solo para clientes
+      var ttBtn = document.createElement('a');
+      ttBtn.href = 'https://www.tiktok.com/@nuevaexpress';
+      ttBtn.target = '_blank';
+      ttBtn.rel = 'noopener';
+      ttBtn.title = 'TikTok NuevaExpress';
+      ttBtn.style.cssText = 'background:#1a1a1a;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:white;text-decoration:none;flex-shrink:0;transition:.2s';
+      ttBtn.innerHTML = '♪';
+      ttBtn.onmouseenter = function(){ this.style.background='#333'; };
+      ttBtn.onmouseleave = function(){ this.style.background='#1a1a1a'; };
+      iconRow.appendChild(ttBtn);
     } // end if cliente
 
     // Panel
