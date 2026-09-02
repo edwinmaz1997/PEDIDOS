@@ -156,6 +156,8 @@ function openPromo(promoId) {
         '<span class="promo-price">Q'+parseFloat(item.promo_price).toFixed(2)+'</span>' +
         '<span class="saving">-Q'+saving+'</span>' +
       '</div>' +
+      ((item.has_variants || item.has_complements) ?
+        '<button onclick="openPromoCustomize('+p.id+','+JSON.stringify(item).replace(/"/g,'&quot;')+')" style="margin:6px 0 4px;padding:6px 14px;border-radius:20px;border:none;background:var(--accent);color:white;font-size:.8rem;font-weight:700;cursor:pointer">🎨 Personalizar</button>' : '') +
     '</div>';
   }).join('');
 
@@ -179,6 +181,15 @@ function openPromo(promoId) {
   document.getElementById('promoModal').style.display = 'flex';
 }
 
+function openPromoCustomize(promoId, item) {
+  // Store promo price override, then open the customize modal from pedido.html flow
+  // We redirect to the business pedido page with the promo item pre-configured
+  var promoData = JSON.parse(sessionStorage.getItem('promo_pending') || '{}');
+  promoData[item.product_id] = { promoPrice: item.promo_price, item: item };
+  sessionStorage.setItem('promo_pending', JSON.stringify(promoData));
+  APP.toast('Selecciona la variante al hacer el pedido 🎨', 'info');
+}
+
 function closeModal() { document.getElementById('promoModal').style.display = 'none'; }
 
 function toggleItem(promoId, item) {
@@ -195,9 +206,15 @@ function toggleItem(promoId, item) {
 function pedirPromo(promoId, businessId) {
   var items = Object.values(selectedItems[promoId] || {});
   if (!items.length) { APP.toast('Selecciona al menos un producto', 'error'); return; }
-  var cartItems = items.map(function(i){ return { id: i.product_id, name: i.product_name, price: i.promo_price, qty: 1 }; });
+  var cartItems = items.map(function(i){
+    return { id: i.product_id, name: i.product_name, price: i.promo_price, qty: 1,
+             has_variants: i.has_variants, has_complements: i.has_complements };
+  });
   sessionStorage.setItem('promo_cart', JSON.stringify({ business_id: businessId, items: cartItems }));
-  window.location.href = '/cliente/pedido.html?business_id=' + businessId + '&from_promo=1';
+  var hasVariants = items.some(function(i){ return i.has_variants || i.has_complements; });
+  var url = '/cliente/pedido.html?business_id=' + businessId + '&from_promo=1';
+  if (hasVariants) url += '&open_products=1';
+  window.location.href = url;
 }
 
 function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }

@@ -23,9 +23,26 @@ class PromotionController {
             $stmt->execute([$now, $now]);
             $promos = $stmt->fetchAll();
             foreach ($promos as &$promo) {
-                $iStmt = $this->db->prepare("SELECT * FROM promotion_items WHERE promotion_id = ? ORDER BY product_name ASC");
+                $iStmt = $this->db->prepare("
+                    SELECT pi.*, ps.has_variants, ps.variants, ps.has_complements, ps.complements,
+                           ps.complement1_name, ps.complements_required, ps.has_complements2, ps.complements2,
+                           ps.complement2_name, ps.complements2_required, ps.has_complements3, ps.complements3,
+                           ps.complement3_name, ps.complements3_required, ps.extras, ps.photo, ps.category_icon
+                    FROM promotion_items pi
+                    LEFT JOIN products_services ps ON ps.id = pi.product_id
+                    WHERE pi.promotion_id = ? ORDER BY pi.product_name ASC
+                ");
                 $iStmt->execute([$promo['id']]);
-                $promo['items'] = $iStmt->fetchAll();
+                $items = $iStmt->fetchAll();
+                // Decode JSON fields
+                foreach ($items as &$item) {
+                    foreach (['variants','complements','complements2','complements3','extras'] as $field) {
+                        if (isset($item[$field]) && is_string($item[$field])) {
+                            $item[$field] = json_decode($item[$field], true) ?: [];
+                        }
+                    }
+                }
+                $promo['items'] = $items;
             }
             Response::success($promos);
         } catch (\Exception $e) {
