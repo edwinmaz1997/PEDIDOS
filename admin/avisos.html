@@ -77,7 +77,7 @@
 // Auth check
 var adminUser = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
 if (!localStorage.getItem('nuevaexpress_token') || adminUser.role !== 'admin') {
-  window.location.href = '/cliente/login.html';
+  window.location.href = 'https://nuevaexpress.com';
 }
 
 async function sendAviso() {
