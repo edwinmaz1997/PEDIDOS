@@ -216,8 +216,6 @@ function dismissInstall() {
       profileBtn.innerHTML = '👤';
       profileBtn.onmouseenter = function(){ this.style.background='rgba(255,255,255,.2)'; };
       profileBtn.onmouseleave = function(){ this.style.background='rgba(255,255,255,.12)'; };
-      iconRow.appendChild(profileBtn);
-
       // Ícono de Facebook — solo para clientes
       var fbBtn = document.createElement('a');
       fbBtn.href = 'https://www.facebook.com/share/18Fbqca6CW/';
@@ -241,6 +239,16 @@ function dismissInstall() {
       ttBtn.onmouseenter = function(){ this.style.background='#333'; };
       ttBtn.onmouseleave = function(){ this.style.background='#1a1a1a'; };
       iconRow.appendChild(ttBtn);
+
+      // Ícono de Instagram — solo para clientes
+      var igBtn = document.createElement('a');
+      igBtn.href = 'https://www.instagram.com/nuevaexpressgt';
+      igBtn.target = '_blank';
+      igBtn.rel = 'noopener';
+      igBtn.title = 'Instagram NuevaExpress';
+      igBtn.style.cssText = 'border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:white;text-decoration:none;flex-shrink:0;background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%)';
+      igBtn.innerHTML = '📷';
+      iconRow.appendChild(igBtn);
     } // end if cliente
 
     // Panel
