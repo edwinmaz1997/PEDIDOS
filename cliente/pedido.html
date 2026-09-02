@@ -293,13 +293,6 @@ if (fromPromo) {
         });
       }
       sessionStorage.removeItem('promo_cart');
-      // If any item has variants, open product modal so user can select them
-      if (openProducts) {
-        setTimeout(function() {
-          openProductModal();
-          APP.toast('🎨 Selecciona las variantes o complementos de tus productos', 'info');
-        }, 500);
-      }
     }
   } catch(e) {}
 }
@@ -332,6 +325,22 @@ async function init() {
     document.getElementById('deliveryAddressWrap').style.display = 'block';
     loadSavedAddress();
     renderProducts();
+
+    // If from promo, check if any cart item has variants and open modal
+    if (fromPromo && Object.keys(cart).length) {
+      var hasVariants = Object.keys(cart).some(function(id) {
+        var prod = products.find(function(p){ return p.id == id; });
+        return prod && (prod.has_variants || prod.has_complements);
+      });
+      if (hasVariants) {
+        setTimeout(function() {
+          openProductModal();
+          setTimeout(function(){
+            APP.toast('🎨 Personaliza los productos que lo requieren', 'info');
+          }, 400);
+        }, 300);
+      }
+    }
 
     // ── Verificar horario ──────────────────────────────────
     try {
