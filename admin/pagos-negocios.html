@@ -124,10 +124,14 @@ fetch('/api/admin/businesses', { headers: { Authorization: 'Bearer '+getToken() 
   .then(function(r){ return r.json(); })
   .then(function(d){
     var sel = document.getElementById('bizFilter');
+    window._allBizes = {};
     (d.data||[]).forEach(function(b) {
-      var opt = document.createElement('option');
-      opt.value = b.id; opt.textContent = b.name;
-      sel.appendChild(opt);
+      window._allBizes[b.id] = b;
+      if (!b.cash_on_delivery) {
+        var opt = document.createElement('option');
+        opt.value = b.id; opt.textContent = b.name;
+        sel.appendChild(opt);
+      }
     });
   });
 
@@ -160,11 +164,13 @@ async function loadReport() {
 
   var bizId = document.getElementById('bizFilter').value;
 
-  // Filtrar solo pedidos de delivery entregados en el rango
+  // Filtrar solo pedidos de delivery entregados en el rango (excluir negocios con cash_on_delivery)
   var orders = (data.data || []).filter(function(o) {
     if (o.status !== 'entregado' && o.status !== 'listo') return false;
     if (o.delivery_type !== 'delivery') return false;
     if (bizId && o.business_id != bizId) return false;
+    var biz = window._allBizes && window._allBizes[o.business_id];
+    if (biz && biz.cash_on_delivery) return false;
     var d = (o.updated_at || o.created_at || '').substring(0, 10);
     return d >= dateFrom && d <= dateTo;
   });
