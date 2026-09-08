@@ -867,7 +867,6 @@ function addCustomizedToCart() {
 var boletaFileToUpload = null;
 
 function updateBoletaRequired() {
-  if (businessId !== 5) return;
   var required = Object.values(cart).some(function(item) {
     var p = products.find(function(x){ return x.id == (item.product_id || 0); });
     return p && p.requires_boleta && item.qty > 0;

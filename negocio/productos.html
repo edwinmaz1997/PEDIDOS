@@ -636,6 +636,9 @@ async function openModal(productId = null) {
   if (p?.photo) { preview.src = p.photo; preview.style.display = 'block'; placeholder.style.display = 'none'; }
   else { preview.style.display = 'none'; placeholder.style.display = 'flex'; }
 
+  // Requiere boleta
+  document.getElementById('p_requires_boleta').checked = !!(p?.requires_boleta);
+
   // Variantes
   document.getElementById('variantsList').innerHTML = '';
   var hasVariants = !!(p?.has_variants);
