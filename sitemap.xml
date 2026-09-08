@@ -12,12 +12,6 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
-    <loc>https://nuevaexpress.com/terminos.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
   <!-- Negocios -->
   <url>
     <loc>https://nuevaexpress.com/delcastillo-pasteler-a-bistr</loc>
