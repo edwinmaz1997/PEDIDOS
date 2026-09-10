@@ -537,11 +537,8 @@ function renderOrder(o) {
         </div>
       ` : ''}
       <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
-        <div style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:4px">
-          <span>Total cobrado al cliente</span><span>Q${parseFloat(o.total).toFixed(2)}</span>
-        </div>
         <div style="display:flex;justify-content:space-between;font-weight:700">
-          <span>Tu ingreso neto</span><span style="color:var(--success)">Q${parseFloat(o.net_income||((o.subtotal||0)-(o.service_fee||3))).toFixed(2)}</span>
+          <span>Subtotal productos</span><span style="color:var(--success)">Q${parseFloat(o.subtotal||0).toFixed(2)}</span>
         </div>
       </div>
       <div style="margin-top:8px"><a href="pedido-detalle.html?id=${o.id}" class="btn-ghost" style="font-size:.82rem;padding:6px 14px">💬 Chat y detalle</a></div>
