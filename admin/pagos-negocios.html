@@ -248,9 +248,12 @@ async function loadReport() {
     var totalRepGlobal = 0;
     var repHtml = '';
     Object.values(byRep).forEach(function(rep) {
-      var repSubtotal = rep.items.reduce(function(s,d){ return s + parseFloat(d.subtotal||0); }, 0);
-      var repDelivery = rep.items.reduce(function(s,d){ return s + parseFloat(d.delivery_fee||0); }, 0);
-      var repTotal = repSubtotal + repDelivery;
+      var repTotal = rep.items.reduce(function(s,d){
+        var biz = window._allBizes && window._allBizes[d.business_id];
+        // Si el negocio tiene cash_on_delivery, el repartidor solo entrega el delivery_fee
+        if (biz && biz.cash_on_delivery) return s + parseFloat(d.delivery_fee||0);
+        return s + parseFloat(d.subtotal||0) + parseFloat(d.delivery_fee||0);
+      }, 0);
       totalRepGlobal += repTotal;
 
       repHtml += '<div class="pago-card">' +
@@ -262,7 +265,16 @@ async function loadReport() {
       rep.items.forEach(function(d) {
         repHtml += '<div class="orden-row">' +
           '<div><div style="font-weight:600">#'+esc(d.order_number)+'</div><div style="color:var(--muted);font-size:.75rem">'+esc(d.client_name)+' · '+esc(d.business_name)+'</div></div>' +
-          '<div style="text-align:right"><div style="font-weight:700">'+money(parseFloat(d.subtotal)+parseFloat(d.delivery_fee))+'</div><div style="font-size:.72rem;color:var(--muted)">Prod: '+money(d.subtotal)+' · Del: '+money(d.delivery_fee)+'</div></div>' +
+          (function(){
+            var bizD = window._allBizes && window._allBizes[d.business_id];
+            var amtD = (bizD && bizD.cash_on_delivery)
+              ? parseFloat(d.delivery_fee||0)
+              : parseFloat(d.subtotal||0) + parseFloat(d.delivery_fee||0);
+            var lblD = (bizD && bizD.cash_on_delivery)
+              ? 'Solo delivery (cobro en efectivo)'
+              : 'Prod: '+money(d.subtotal)+' · Del: '+money(d.delivery_fee);
+            return '<div style="text-align:right"><div style="font-weight:700">'+money(amtD)+'</div><div style="font-size:.72rem;color:var(--muted)">'+lblD+'</div></div>';
+          })() +
         '</div>';
       });
       repHtml += '</div>' +
