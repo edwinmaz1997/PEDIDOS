@@ -202,7 +202,9 @@ class AuthController {
     // --------------------------------------------------------
     private function createSession(int $userId): string {
         $token     = Security::generateToken(64);
-        $expiresAt = date('Y-m-d H:i:s', time() + SESSION_LIFETIME);
+        // Clientes tienen sesión de 30 días; otros roles usan SESSION_LIFETIME
+        $sessionTtl = ($role === 'cliente') ? 2592000 : SESSION_LIFETIME;
+        $expiresAt = date('Y-m-d H:i:s', time() + $sessionTtl);
         $ip        = Security::getClientIp();
         $ua        = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
 

@@ -23,8 +23,10 @@ class AuthMiddleware {
         if (!$user) Response::unauthorized('Sesión inválida o expirada. Para corregirlo, cierra sesión e inicia sesión nuevamente.');
         if (!$user['is_active']) Response::forbidden('Cuenta desactivada');
 
+        // For cliente role, extend to 30 days; others use default SESSION_LIFETIME
+        $ttl = (isset($row['role']) && $row['role'] === 'cliente') ? 2592000 : SESSION_LIFETIME;
         $db->prepare("UPDATE user_sessions SET expires_at = DATE_ADD(NOW(), INTERVAL ? SECOND) WHERE token = ?")
-           ->execute([SESSION_LIFETIME, $token]);
+           ->execute([$ttl, $token]);
 
         return $user;
     }
