@@ -457,9 +457,10 @@ function renderBizInfo() {
   `;
   // Enable/disable delivery button
   if (!business.accepts_delivery) {
-    document.getElementById('deliveryBtn').disabled = true;
-    document.getElementById('deliveryBtn').title = 'Este negocio no ofrece delivery';
-    document.getElementById('deliveryBtn').style.opacity = '.4';
+    document.getElementById('deliveryBtn').style.display = 'none';
+    // Auto-select pickup
+    var pickupBtnAlt = document.querySelector('.delivery-btn[onclick*="pickup"]');
+    if (pickupBtnAlt) pickupBtnAlt.click();
   }
   // Solo delivery — ocultar opción pickup
   if (business.business_type === 'delivery') {
