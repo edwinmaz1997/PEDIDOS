@@ -165,8 +165,8 @@
         </div>
 
 
-        <div class="delivery-toggle" id="deliveryToggle" style="display:none">
-          <button class="delivery-btn active" id="deliveryBtn" onclick="setDelivery('delivery',this)" style="display:none">🛵 Delivery</button>
+        <div class="delivery-toggle" id="deliveryToggle">
+          <button class="delivery-btn active" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
           <button class="delivery-btn" id="dineInBtn" style="display:none" onclick="setDelivery('dine_in',this)">🍽️ Comer aquí</button>
           <button class="delivery-btn" onclick="setDelivery('pickup',this)">🏃 Recoger</button>
         </div>
@@ -270,8 +270,7 @@ const openProducts = params.get('open_products') === '1';
 let business    = null;
 let cart        = {};
 let customItems = [];
-const DELIVERY_DISABLED = true; // Desactivado temporalmente
-let deliveryType = 'pickup';
+let deliveryType = 'delivery';
 let promoOverrides = {}; // precios promocionales por product_id
 
 const SERVICE_FEE = 3;
@@ -976,8 +975,8 @@ function applyOrderType(type) {
     // Mostrar solo pedido normal
     packageForm.style.display     = 'none';
     productsSection.style.display = 'block';
-    if (!DELIVERY_DISABLED) deliveryToggle.style.display = 'flex';
-    deliveryWrap.style.display    = 'none';
+    deliveryToggle.style.display  = 'flex';
+    deliveryWrap.style.display    = 'block';
     deliveryType = 'delivery';
     // Badge
     badgeInner.style.background = '#e3f2fd';
@@ -1707,7 +1706,7 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     if (data.deliveryType === 'delivery') {
       var deliveryBtn = document.querySelector('[onclick*="setDelivery(\'delivery\')"]') ||
                         document.getElementById('deliveryBtn');
-      if (!DELIVERY_DISABLED && deliveryBtn) deliveryBtn.click();
+      if (deliveryBtn) deliveryBtn.click();
 
       if (data.deliveryAddress) {
         setTimeout(function() {
