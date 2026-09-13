@@ -270,7 +270,8 @@ const openProducts = params.get('open_products') === '1';
 let business    = null;
 let cart        = {};
 let customItems = [];
-let deliveryType = 'delivery';
+const DELIVERY_DISABLED = true; // Desactivado temporalmente
+let deliveryType = 'pickup';
 let promoOverrides = {}; // precios promocionales por product_id
 
 const SERVICE_FEE = 3;
@@ -975,8 +976,8 @@ function applyOrderType(type) {
     // Mostrar solo pedido normal
     packageForm.style.display     = 'none';
     productsSection.style.display = 'block';
-    deliveryToggle.style.display  = 'flex';
-    deliveryWrap.style.display    = 'block';
+    if (!DELIVERY_DISABLED) deliveryToggle.style.display = 'flex';
+    deliveryWrap.style.display    = 'none';
     deliveryType = 'delivery';
     // Badge
     badgeInner.style.background = '#e3f2fd';
@@ -1706,7 +1707,7 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     if (data.deliveryType === 'delivery') {
       var deliveryBtn = document.querySelector('[onclick*="setDelivery(\'delivery\')"]') ||
                         document.getElementById('deliveryBtn');
-      if (deliveryBtn) deliveryBtn.click();
+      if (!DELIVERY_DISABLED && deliveryBtn) deliveryBtn.click();
 
       if (data.deliveryAddress) {
         setTimeout(function() {
