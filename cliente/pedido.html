@@ -265,7 +265,6 @@ const businessId = parseInt(params.get('business') || params.get('business_id'))
 if (!businessId) window.location.href = '/index.html';
 const urlOrderType = params.get('type') || 'pedido';
 const fromPromo    = params.get('from_promo') === '1';
-const openProducts = params.get('open_products') === '1';
 
 let business    = null;
 let cart        = {};
@@ -325,22 +324,6 @@ async function init() {
     document.getElementById('deliveryAddressWrap').style.display = 'block';
     loadSavedAddress();
     renderProducts();
-
-    // If from promo, check if any cart item has variants and open modal
-    if (fromPromo && Object.keys(cart).length) {
-      var hasVariants = Object.keys(cart).some(function(id) {
-        var prod = products.find(function(p){ return p.id == id; });
-        return prod && (prod.has_variants || prod.has_complements);
-      });
-      if (hasVariants) {
-        setTimeout(function() {
-          openProductModal();
-          setTimeout(function(){
-            APP.toast('🎨 Personaliza los productos que lo requieren', 'info');
-          }, 400);
-        }, 300);
-      }
-    }
 
     // ── Verificar horario ──────────────────────────────────
     try {
@@ -568,19 +551,11 @@ function renderProductModal(searchQ, catId) {
       '</div>' +
       // Selector de variantes
       (hasVariants ? '<div style="margin-top:10px;padding-left:84px">' +
-        '<div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;font-weight:600">Selecciona una opción:</div>' +
-        '<div style="display:flex;flex-direction:column;gap:8px">' +
+        '<div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;font-weight:600">Selecciona una opción:</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
           p.variants.map(function(v) {
-            var vKey = 'v_' + p.id + '_' + v.id;
-            var vQty = (cart[vKey] && cart[vKey].qty) ? cart[vKey].qty : 0;
-            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;border:1.5px solid '+(vQty>0?'var(--blue)':'var(--border)')+';background:'+(vQty>0?'#f0f7ff':'white')+'">' +
-              '<div style="font-size:.88rem;font-weight:600;color:var(--charcoal)">' + esc(v.name) + '<span style="color:var(--blue);margin-left:8px">Q' + parseFloat(v.price).toFixed(2) + '</span></div>' +
-              '<div style="display:flex;align-items:center;gap:8px">' +
-                '<button onclick="changeVariantQty('+p.id+','+JSON.stringify(v).replace(/"/g,"'")+' ,-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center">−</button>' +
-                '<span id="vqty-'+p.id+'-'+v.id+'" style="font-weight:700;min-width:18px;text-align:center">' + vQty + '</span>' +
-                '<button onclick="changeVariantQty('+p.id+','+JSON.stringify(v).replace(/"/g,"'")+' ,1)" style="width:28px;height:28px;border-radius:50%;border:none;background:var(--blue);color:white;cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center">+</button>' +
-              '</div>' +
-            '</div>';
+            var isSelected = selectedVariant && selectedVariant.id === v.id;
+            return '<button onclick="selectVariant('+p.id+','+JSON.stringify(v).replace(/"/g,"'")+')" style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(isSelected?'var(--blue)':'var(--border)')+';background:'+(isSelected?'var(--blue)':'white')+';color:'+(isSelected?'white':'var(--charcoal)')+';font-size:.8rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif" id="var-'+p.id+'-'+v.id+'">'+esc(v.name)+' — Q'+parseFloat(v.price).toFixed(2)+'</button>';
           }).join('') +
         '</div>' +
       '</div>' : '') +
@@ -610,31 +585,16 @@ function selectVariant(productId, variant) {
   // Actualizar precio mostrado
   var priceEl = document.getElementById('price-'+productId);
   if (priceEl) priceEl.textContent = 'Q' + parseFloat(variant.price).toFixed(2);
-  // Guardar variante en el cart preservando la cantidad actual
-  var currentQty = (cart[productId] && cart[productId].qty) ? cart[productId].qty : 1;
-  cart[productId] = { name: p.name + ' (' + variant.name + ')', price: parseFloat(variant.price), qty: currentQty, variant: variant };
+  // Guardar variante en el cart
+  if (!cart[productId]) cart[productId] = { name: p.name, price: parseFloat(variant.price), qty: 1, variant: variant };
+  else { cart[productId].price = parseFloat(variant.price); cart[productId].variant = variant; if (!cart[productId].qty) cart[productId].qty = 1; }
+  // Actualizar nombre con variante
+  cart[productId].name = p.name + ' (' + variant.name + ')';
   // Actualizar qty display
   var qEl = document.getElementById('qty-'+productId);
   if (qEl) qEl.textContent = cart[productId].qty;
   var ppEl = document.getElementById('pp-'+productId);
   if (ppEl) { ppEl.style.background = '#f0f7ff'; }
-  updateCart();
-}
-
-function changeVariantQty(productId, variant, delta) {
-  var p = products.find(function(x){ return x.id === productId; });
-  if (!p) return;
-  var vKey = 'v_' + productId + '_' + variant.id;
-  if (!cart[vKey] && delta > 0) {
-    cart[vKey] = { product_id: productId, name: p.name + ' (' + variant.name + ')', price: parseFloat(promoOverrides && promoOverrides[productId] !== undefined ? promoOverrides[productId] : variant.price), qty: 1, variant: variant };
-  } else if (cart[vKey]) {
-    cart[vKey].qty += delta;
-    if (cart[vKey].qty <= 0) delete cart[vKey];
-  }
-  var qEl = document.getElementById('vqty-' + productId + '-' + variant.id);
-  if (qEl) qEl.textContent = (cart[vKey] && cart[vKey].qty) ? cart[vKey].qty : 0;
-  // Update border color
-  renderProductModal(document.getElementById('prodSearch')?.value || '', activeProdCat);
   updateCart();
 }
 
@@ -806,7 +766,7 @@ function addCustomizedToCart() {
     }
   }
 
-  var base = (promoOverrides && promoOverrides[p.id] !== undefined) ? promoOverrides[p.id] : (parseFloat(p.price) || 0);
+  var base = parseFloat(p.price) || 0;
 
   // Complementos seleccionados con cantidad
   var selectedComplements = [];
@@ -843,9 +803,6 @@ function addCustomizedToCart() {
   var compKey = selectedComplements.join('_');
   var cartKey = p.id + (compKey ? '_c'+compKey : '') + (extrasKey ? '_e'+extrasKey : '');
 
-  // Remove base product entry (without variant) to avoid double counting
-  if (cart[p.id]) delete cart[p.id];
-
   if (!cart[cartKey]) {
     cart[cartKey] = { product_id: p.id, name: p.name + label, price: totalPrice, qty: 1, extras: selectedExtras, notes: notes };
   } else {
@@ -867,6 +824,7 @@ function addCustomizedToCart() {
 var boletaFileToUpload = null;
 
 function updateBoletaRequired() {
+  if (businessId !== 5) return;
   var required = Object.values(cart).some(function(item) {
     var p = products.find(function(x){ return x.id == (item.product_id || 0); });
     return p && p.requires_boleta && item.qty > 0;

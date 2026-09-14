@@ -50,7 +50,6 @@
     <ul class="sidebar-nav">
 
       <li><a href="perfil.html">👤 Mi Perfil</a></li>
-      <li><a href="https://wa.me/50231586340?text=Hola%2C+necesito+soporte+técnico" target="_blank" rel="noopener">🛠️ Soporte técnico</a></li>
       <li><a href="#" id="updateAppBtn" onclick="forceUpdate()" style="color:rgba(255,255,255,.5);font-size:.82rem">🔄 Actualizar app</a></li>
       <li style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.15)"><a href="#" onclick="doLogout()">🚪 Cerrar Sesión</a></li>
     </ul>
@@ -157,7 +156,6 @@ function openPromo(promoId) {
         '<span class="promo-price">Q'+parseFloat(item.promo_price).toFixed(2)+'</span>' +
         '<span class="saving">-Q'+saving+'</span>' +
       '</div>' +
-
     '</div>';
   }).join('');
 
@@ -181,15 +179,6 @@ function openPromo(promoId) {
   document.getElementById('promoModal').style.display = 'flex';
 }
 
-function openPromoCustomize(promoId, item) {
-  // Store promo price override, then open the customize modal from pedido.html flow
-  // We redirect to the business pedido page with the promo item pre-configured
-  var promoData = JSON.parse(sessionStorage.getItem('promo_pending') || '{}');
-  promoData[item.product_id] = { promoPrice: item.promo_price, item: item };
-  sessionStorage.setItem('promo_pending', JSON.stringify(promoData));
-  APP.toast('Selecciona la variante al hacer el pedido 🎨', 'info');
-}
-
 function closeModal() { document.getElementById('promoModal').style.display = 'none'; }
 
 function toggleItem(promoId, item) {
@@ -206,15 +195,9 @@ function toggleItem(promoId, item) {
 function pedirPromo(promoId, businessId) {
   var items = Object.values(selectedItems[promoId] || {});
   if (!items.length) { APP.toast('Selecciona al menos un producto', 'error'); return; }
-  var cartItems = items.map(function(i){
-    return { id: i.product_id, name: i.product_name, price: i.promo_price, qty: 1,
-             has_variants: i.has_variants, has_complements: i.has_complements };
-  });
+  var cartItems = items.map(function(i){ return { id: i.product_id, name: i.product_name, price: i.promo_price, qty: 1 }; });
   sessionStorage.setItem('promo_cart', JSON.stringify({ business_id: businessId, items: cartItems }));
-  var hasVariants = items.some(function(i){ return i.has_variants || i.has_complements; });
-  var url = '/cliente/pedido.html?business_id=' + businessId + '&from_promo=1';
-  if (hasVariants) url += '&open_products=1';
-  window.location.href = url;
+  window.location.href = '/cliente/pedido.html?business_id=' + businessId + '&from_promo=1';
 }
 
 function doLogout(){ localStorage.clear(); window.location.href='/cliente/login.html'; }
