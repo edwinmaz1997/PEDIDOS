@@ -270,7 +270,7 @@ const openProducts = params.get('open_products') === '1';
 let business    = null;
 let cart        = {};
 let customItems = [];
-let deliveryType = 'pickup';
+let deliveryType = 'delivery';
 let promoOverrides = {}; // precios promocionales por product_id
 
 const SERVICE_FEE = 3;
@@ -457,10 +457,9 @@ function renderBizInfo() {
   `;
   // Enable/disable delivery button
   if (!business.accepts_delivery) {
-    document.getElementById('deliveryBtn').style.display = 'none';
-    // Auto-select pickup
-    var pickupBtnAlt = document.querySelector('.delivery-btn[onclick*="pickup"]');
-    if (pickupBtnAlt) pickupBtnAlt.click();
+    document.getElementById('deliveryBtn').disabled = true;
+    document.getElementById('deliveryBtn').title = 'Este negocio no ofrece delivery';
+    document.getElementById('deliveryBtn').style.opacity = '.4';
   }
   // Solo delivery — ocultar opción pickup
   if (business.business_type === 'delivery') {
