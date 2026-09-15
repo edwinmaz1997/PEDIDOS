@@ -124,10 +124,14 @@ fetch('/api/admin/businesses', { headers: { Authorization: 'Bearer '+getToken() 
   .then(function(r){ return r.json(); })
   .then(function(d){
     var sel = document.getElementById('bizFilter');
+    window._allBizes = {};
     (d.data||[]).forEach(function(b) {
-      var opt = document.createElement('option');
-      opt.value = b.id; opt.textContent = b.name;
-      sel.appendChild(opt);
+      window._allBizes[b.id] = b;
+      if (!b.cash_on_delivery) {
+        var opt = document.createElement('option');
+        opt.value = b.id; opt.textContent = b.name;
+        sel.appendChild(opt);
+      }
     });
   });
 
@@ -165,6 +169,8 @@ async function loadReport() {
     if (o.status !== 'entregado' && o.status !== 'listo') return false;
     if (o.delivery_type !== 'delivery') return false;
     if (bizId && o.business_id != bizId) return false;
+    var biz = window._allBizes && window._allBizes[o.business_id];
+    if (biz && biz.cash_on_delivery) return false;
     var d = (o.updated_at || o.created_at || '').substring(0, 10);
     return d >= dateFrom && d <= dateTo;
   });
@@ -242,9 +248,10 @@ async function loadReport() {
     var totalRepGlobal = 0;
     var repHtml = '';
     Object.values(byRep).forEach(function(rep) {
-      var repSubtotal = rep.items.reduce(function(s,d){ return s + parseFloat(d.subtotal||0); }, 0);
-      var repDelivery = rep.items.reduce(function(s,d){ return s + parseFloat(d.delivery_fee||0); }, 0);
-      var repTotal = repSubtotal + repDelivery;
+      var repTotal = rep.items.reduce(function(s,d){
+        if (d.cash_on_delivery) return s + parseFloat(d.delivery_fee||0);
+        return s + parseFloat(d.subtotal||0) + parseFloat(d.delivery_fee||0);
+      }, 0);
       totalRepGlobal += repTotal;
 
       repHtml += '<div class="pago-card">' +
@@ -256,7 +263,11 @@ async function loadReport() {
       rep.items.forEach(function(d) {
         repHtml += '<div class="orden-row">' +
           '<div><div style="font-weight:600">#'+esc(d.order_number)+'</div><div style="color:var(--muted);font-size:.75rem">'+esc(d.client_name)+' · '+esc(d.business_name)+'</div></div>' +
-          '<div style="text-align:right"><div style="font-weight:700">'+money(parseFloat(d.subtotal)+parseFloat(d.delivery_fee))+'</div><div style="font-size:.72rem;color:var(--muted)">Prod: '+money(d.subtotal)+' · Del: '+money(d.delivery_fee)+'</div></div>' +
+          (function(){
+            var amt = d.cash_on_delivery ? parseFloat(d.delivery_fee||0) : parseFloat(d.subtotal||0)+parseFloat(d.delivery_fee||0);
+            var lbl = d.cash_on_delivery ? 'Solo delivery (efectivo)' : 'Prod: '+money(d.subtotal)+' · Del: '+money(d.delivery_fee);
+            return '<div style="text-align:right"><div style="font-weight:700">'+money(amt)+'</div><div style="font-size:.72rem;color:var(--muted)">'+lbl+'</div></div>';
+          })() +
         '</div>';
       });
       repHtml += '</div>' +
