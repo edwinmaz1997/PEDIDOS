@@ -551,13 +551,19 @@ function renderProductModal(searchQ, catId) {
       '</div>' +
       // Selector de variantes
       (hasVariants ? '<div style="margin-top:10px;padding-left:84px">' +
-        '<div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;font-weight:600">Selecciona una opción:</div>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
-          p.variants.map(function(v) {
-            var isSelected = selectedVariant && selectedVariant.id === v.id;
-            return '<button onclick="selectVariant('+p.id+','+JSON.stringify(v).replace(/"/g,"'")+')" style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(isSelected?'var(--blue)':'var(--border)')+';background:'+(isSelected?'var(--blue)':'white')+';color:'+(isSelected?'white':'var(--charcoal)')+';font-size:.8rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif" id="var-'+p.id+'-'+v.id+'">'+esc(v.name)+' — Q'+parseFloat(v.price).toFixed(2)+'</button>';
-          }).join('') +
-        '</div>' +
+        p.variants.map(function(v) {
+          var vKey = 'v_' + p.id + '_' + v.id;
+          var vQty = cart[vKey] ? cart[vKey].qty : 0;
+          var vPrice = promoOverrides && promoOverrides[p.id] !== undefined ? promoOverrides[p.id] : parseFloat(v.price);
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">' +
+            '<span style="font-size:.85rem;color:var(--charcoal)">' + esc(v.name) + ' — <strong>Q' + vPrice.toFixed(2) + '</strong></span>' +
+            '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
+              '<button onclick="changeVariantQty(' + p.id + ',' + JSON.stringify(v).replace(/"/g,"'") + ',-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:white;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">−</button>' +
+              '<span id="qty-v-' + p.id + '-' + v.id + '" style="font-weight:700;min-width:18px;text-align:center;font-size:.9rem">' + vQty + '</span>' +
+              '<button onclick="changeVariantQty(' + p.id + ',' + JSON.stringify(v).replace(/"/g,"'") + ',1)" style="width:28px;height:28px;border-radius:50%;border:none;background:var(--blue);color:white;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">+</button>' +
+            '</div>' +
+          '</div>';
+        }).join('') +
       '</div>' : '') +
       (p.description?'<div style="font-size:.8rem;color:var(--muted);margin-top:8px;line-height:1.5;padding-left:84px">'+esc(p.description)+'</div>':'') +
     '</div>';
@@ -595,6 +601,25 @@ function selectVariant(productId, variant) {
   if (qEl) qEl.textContent = cart[productId].qty;
   var ppEl = document.getElementById('pp-'+productId);
   if (ppEl) { ppEl.style.background = '#f0f7ff'; }
+  updateCart();
+}
+
+function changeVariantQty(productId, variant, delta) {
+  var p = products.find(function(x){ return x.id === productId; });
+  if (!p) return;
+  var vKey = 'v_' + productId + '_' + variant.id;
+  var vPrice = promoOverrides && promoOverrides[productId] !== undefined ? promoOverrides[productId] : parseFloat(variant.price);
+  if (!cart[vKey] && delta > 0) {
+    cart[vKey] = { product_id: productId, name: p.name + ' (' + variant.name + ')', price: vPrice, qty: 1, variant: variant };
+  } else if (cart[vKey]) {
+    cart[vKey].qty += delta;
+    if (cart[vKey].qty <= 0) delete cart[vKey];
+  }
+  var qEl = document.getElementById('qty-v-' + productId + '-' + variant.id);
+  if (qEl) qEl.textContent = cart[vKey] ? cart[vKey].qty : 0;
+  var ppEl = document.getElementById('pp-' + productId);
+  var totalQty = p.variants.reduce(function(s, v2){ var k = 'v_'+productId+'_'+v2.id; return s + (cart[k]?cart[k].qty:0); }, 0);
+  if (ppEl) ppEl.style.background = totalQty > 0 ? '#f0f7ff' : 'white';
   updateCart();
 }
 
