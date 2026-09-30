@@ -119,11 +119,14 @@ var todayStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-
 document.getElementById('dateFrom').value = todayStr;
 document.getElementById('dateTo').value = todayStr;
 
-// Cargar negocios en el select
-fetch('/api/admin/businesses', { headers: { Authorization: 'Bearer '+getToken() } })
+// Cargar negocios — guardamos la promesa para que loadReport() pueda esperarla
+window._allBizes = {};
+window._bizPromise = fetch('/api/admin/businesses', { headers: { Authorization: 'Bearer '+getToken() } })
   .then(function(r){ return r.json(); })
   .then(function(d){
     var sel = document.getElementById('bizFilter');
+    // Limpiar opciones previas (excepto "Todos")
+    while (sel.options.length > 1) sel.remove(1);
     window._allBizes = {};
     (d.data||[]).forEach(function(b) {
       window._allBizes[b.id] = b;
@@ -150,6 +153,9 @@ async function loadReport() {
   var dateFrom = document.getElementById('dateFrom').value;
   var dateTo   = document.getElementById('dateTo').value;
   if (!dateFrom || !dateTo) return;
+
+  // Esperar a que los negocios estén cargados antes de filtrar
+  if (window._bizPromise) await window._bizPromise;
 
   document.getElementById('reportEl').innerHTML = '';
   document.getElementById('summaryBar').style.display = 'none';
