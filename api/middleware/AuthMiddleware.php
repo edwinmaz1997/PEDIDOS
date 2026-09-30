@@ -15,7 +15,7 @@ class AuthMiddleware {
             FROM user_sessions s
             JOIN users u ON s.user_id = u.id
             JOIN roles r ON u.role_id = r.id
-            WHERE s.token = ? AND s.expires_at > NOW()
+            WHERE s.token = ?
         ");
         $stmt->execute([$token]);
         $user = $stmt->fetch();
