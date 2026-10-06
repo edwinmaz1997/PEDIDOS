@@ -83,6 +83,7 @@ class AnuncioController {
                 $body['title'] ?? $anuncio['title'],
                 $body['description'] ?? $anuncio['description'],
                 $body['image_url'] ?? null,
+                $body['video_url'] ?? null,
                 isset($body['is_active']) ? (int)$body['is_active'] : $anuncio['is_active'],
                 $id
             ]);
