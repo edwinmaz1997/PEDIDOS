@@ -430,28 +430,6 @@ class OrderController {
             } catch (\Exception $e) {
                 error_log('Admin delivery email ERROR for ' . $order['order_number'] . ': ' . $e->getMessage());
             }
-            // WhatsApp via CallMeBot
-            try {
-                $waMsg = urlencode('🛵 Nuevo delivery aceptado' . "
-" .
-                    '#' . $order['order_number'] . "
-" .
-                    '🏪 ' . $order['business_name'] . "
-" .
-                    '👤 ' . $order['client_name'] . "
-" .
-                    '💰 Q' . $total);
-                $waUrl = 'https://api.callmebot.com/whatsapp.php?phone=50231586340&apikey=9804050&text=' . $waMsg;
-                $ch = curl_init($waUrl);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                $waResult = curl_exec($ch);
-                curl_close($ch);
-                error_log('WhatsApp notify result: ' . $waResult);
-            } catch (\Exception $e) {
-                error_log('WhatsApp notify ERROR: ' . $e->getMessage());
-            }
         }
 
         Response::success(null, 'Respuesta enviada');
