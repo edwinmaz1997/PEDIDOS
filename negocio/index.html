@@ -993,14 +993,33 @@ function cpAddCustomizedToCart() {
 function cpUpdateCartSummary() {
   var el = document.getElementById('cpCartSummary');
   if (el) {
-    var items = Object.values(cpCartMap);
-    if (!items.length) { el.innerHTML=''; return; }
-    var sub = items.reduce(function(s,x){return s+(x.price||0)*(x.qty||1);},0);
-    el.innerHTML = '<div style="background:#e3f2fd;border-radius:8px;padding:8px 12px;font-size:.85rem">'+
-      items.map(function(x){return cpEsc(x.name)+(x.qty>1?' ×'+x.qty:'');}).join(' · ')+
-      ' — <strong>Q'+sub.toFixed(2)+'</strong></div>';
+    var entries = Object.entries(cpCartMap);
+    if (!entries.length) { el.innerHTML=''; actualizarResumenCP(); return; }
+    var sub = entries.reduce(function(s,e){var x=e[1];return s+(x.price||0)*(x.qty||1);},0);
+    var rows = entries.map(function(e){
+      var key=e[0], x=e[1];
+      var removeBtn = x.isCustom
+        ? '<button onclick="cpRemoveCustomItem(\''+key+'\')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:1rem;line-height:1;padding:0 4px" title="Quitar">×</button>'
+        : '';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e0efff;font-size:.85rem">'+
+        '<span style="flex:1">'+cpEsc(x.name)+(x.qty>1?' <span style="color:var(--muted)">×'+x.qty+'</span>':'')+(x.isCustom?' <span style="font-size:.7rem;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:10px">personalizado</span>':'')+'</span>'+
+        '<span style="font-weight:700;margin-left:8px">Q'+((x.price||0)*(x.qty||1)).toFixed(2)+'</span>'+
+        removeBtn+
+      '</div>';
+    }).join('');
+    el.innerHTML = '<div style="background:#e3f2fd;border-radius:8px;padding:8px 12px">'+
+      rows+
+      '<div style="display:flex;justify-content:space-between;padding-top:6px;margin-top:4px;border-top:2px solid var(--blue);font-weight:700;font-size:.88rem">'+
+        '<span>Subtotal</span><span>Q'+sub.toFixed(2)+'</span>'+
+      '</div>'+
+    '</div>';
   }
   actualizarResumenCP();
+}
+
+function cpRemoveCustomItem(key) {
+  delete cpCartMap[key];
+  cpUpdateCartSummary();
 }
 
 function cpOpenProductPhoto(src, name) {
