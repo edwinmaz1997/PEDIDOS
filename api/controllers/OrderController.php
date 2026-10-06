@@ -252,6 +252,7 @@ class OrderController {
         if (!$business) Response::error('Negocio no encontrado', 404);
 
         $clientId     = (int)($body['client_id'] ?? 0);
+        $clientName   = Security::sanitize($body['client_name'] ?? '');
         $deliveryType = 'delivery';
         $notes        = Security::sanitize($body['notes'] ?? '');
         $clientPhone  = Security::sanitize($body['phone'] ?? '');
@@ -262,14 +263,20 @@ class OrderController {
         $deliveryLat  = $body['delivery_lat'] ?? null;
         $deliveryLng  = $body['delivery_lng'] ?? null;
 
-        if (!$clientId) Response::error('Cliente requerido', 400);
         if (empty($items)) Response::error('Agrega al menos un producto', 400);
         if (!$deliveryAddr) Response::error('Dirección de entrega requerida', 400);
 
-        // Verify client exists
-        $cStmt = $this->db->prepare("SELECT id, name FROM users WHERE id = ? AND role_id = 3 AND is_active = 1 LIMIT 1");
-        $cStmt->execute([$clientId]);
-        if (!$cStmt->fetch()) Response::error('Cliente no encontrado', 404);
+        // Si no se pasa client_id, usar el user_id del negocio y guardar nombre en notes
+        if (!$clientId) {
+            if (!$clientName) Response::error('Nombre del cliente requerido', 400);
+            $clientId = $user['id'];
+            $notes = 'Cliente: ' . $clientName . ($notes ? ' | ' . $notes : '');
+        } else {
+            // Verify client exists
+            $cStmt = $this->db->prepare("SELECT id, name FROM users WHERE id = ? AND role_id = 3 AND is_active = 1 LIMIT 1");
+            $cStmt->execute([$clientId]);
+            if (!$cStmt->fetch()) Response::error('Cliente no encontrado', 404);
+        }
 
         // Build items & subtotal
         $serviceFee = SERVICE_FEE;

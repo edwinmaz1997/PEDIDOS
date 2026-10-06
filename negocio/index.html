@@ -153,11 +153,16 @@
 
     <!-- Paso 1: Cliente -->
     <div style="margin-bottom:16px">
-      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">CLIENTE</label>
-      <input type="text" id="cpClientSearch" placeholder="Buscar por nombre o teléfono..." oninput="buscarCliente(this.value)"
+      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">NOMBRE DEL CLIENTE</label>
+      <input type="text" id="cpClientName" placeholder="Nombre del cliente..."
         style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
-      <div id="cpClientResults" style="border:1px solid var(--border);border-radius:var(--radius-sm);margin-top:4px;display:none;max-height:160px;overflow-y:auto;background:white;box-shadow:0 4px 12px rgba(0,0,0,.1)"></div>
-      <div id="cpClientSelected" style="display:none;background:#e8f5e9;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:.88rem;display:flex;align-items:center;justify-content:space-between"></div>
+    </div>
+
+    <!-- Teléfono -->
+    <div style="margin-bottom:16px">
+      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">TELÉFONO DEL CLIENTE</label>
+      <input type="tel" id="cpClientPhone" placeholder="Número de teléfono..."
+        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
     </div>
 
     <!-- Paso 2: Productos -->
@@ -169,6 +174,17 @@
         </button>
         <div id="cpCartSummary" style="margin-top:8px"></div>
       </div>
+      <!-- Item personalizado -->
+      <div style="margin-top:10px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);padding:12px">
+        <div style="font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:8px">➕ ITEM PERSONALIZADO</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="cpCustomItemName" placeholder="Nombre del producto..."
+            style="flex:2;min-width:140px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;box-sizing:border-box">
+          <input type="number" id="cpCustomItemPrice" placeholder="Precio Q" min="0" step="0.01"
+            style="flex:1;min-width:90px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;box-sizing:border-box">
+          <button onclick="cpAgregarItemPersonalizado()" class="btn-ghost" style="padding:8px 14px;font-size:.85rem;white-space:nowrap">Agregar</button>
+        </div>
+      </div>
     </div>
 
     <!-- Paso 3: Ubicación -->
@@ -178,7 +194,7 @@
       <input type="text" id="cpMapsUrl" placeholder="Coordenadas (14.6349,-90.5069) o link largo de Google Maps..."
         oninput="calcularDeliveryCP()"
         style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
-      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Para links cortos (maps.app.goo.gl): pide al cliente que guarde su ubicación en su perfil y úsala con el check de arriba. O escribe coordenadas: 14.6349,-90.5069</div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Escribe coordenadas: 14.6349,-90.5069 o pega el link de Google Maps</div>
     </div>
 
     <!-- Delivery fee calculado -->
@@ -187,13 +203,6 @@
         <span style="font-size:.88rem;color:var(--muted)">Costo de delivery:</span>
         <span id="cpDeliveryFeeDisplay" style="font-weight:700;font-size:.95rem;color:var(--blue)">—</span>
       </div>
-    </div>
-
-    <!-- Teléfono -->
-    <div style="margin-bottom:16px">
-      <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">TELÉFONO DEL CLIENTE</label>
-      <input type="tel" id="cpClientPhone" placeholder="Número de teléfono..."
-        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
     </div>
 
     <!-- Nota -->
@@ -661,23 +670,14 @@ document.addEventListener("DOMContentLoaded", function(){
 
 async function abrirModalCrearPedido() {
   cpCart = []; cpCartMap = {}; cpSelectedClient = null; cpCalculatedFee = 0;
-  document.getElementById('cpClientSearch').value = '';
-  document.getElementById('cpClientResults').style.display = 'none';
-  document.getElementById('cpClientSelected').style.display = 'none';
-  var addrEl = document.getElementById('cpClientAddresses');
-  if (cpSelectedClient && cpSelectedClient.mapsUrl) {
-    addrEl.innerHTML = '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;cursor:pointer;margin-bottom:6px">'+
-      '<input type="checkbox" id="cpUsarUbicacionCliente" checked onchange="cpToggleUbicacionCliente(this.checked)" style="width:18px;height:18px;accent-color:#16a34a">'+
-      '<span style="font-size:.85rem;color:#166534;font-weight:600">📍 Usar ubicación guardada del cliente</span>'+
-    '</label>';
-    cpToggleUbicacionCliente(true);
-  } else {
-    addrEl.innerHTML = '<div style="font-size:.8rem;color:var(--muted);padding:4px 0">Este cliente no tiene ubicación guardada — ingresa el link manualmente.</div>';
-  }
+  document.getElementById('cpClientName').value = '';
+  document.getElementById('cpClientAddresses').innerHTML = '';
   document.getElementById('cpMapsUrl').value = '';
   document.getElementById('cpDeliveryFeeDisplay').textContent = '—';
   document.getElementById('cpNotes').value = '';
   document.getElementById('cpClientPhone').value = '';
+  document.getElementById('cpCustomItemName').value = '';
+  document.getElementById('cpCustomItemPrice').value = '';
   document.getElementById('cpResumen').style.display = 'none';
   document.getElementById('modalCrearPedido').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -1065,78 +1065,9 @@ function actualizarResumenCP() {
     '<div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:700;margin-top:6px;border-top:1px solid #bbdefb;padding-top:6px"><span>Total cliente</span><strong style="color:var(--blue)">Q'+(sub+cpCalculatedFee).toFixed(2)+'</strong></div>';
 }
 
-var cpSearchTimeout = null;
-function buscarCliente(q) {
-  clearTimeout(cpSearchTimeout);
-  if (q.length < 2) { document.getElementById('cpClientResults').style.display='none'; return; }
-  cpSearchTimeout = setTimeout(async function(){
-    const r = await fetch(API+'/admin/users/search-clients?q='+encodeURIComponent(q), {headers:{Authorization:'Bearer '+cpToken()}});
-    const res = await r.json();
-    const users = res?.data || [];
-    const el = document.getElementById('cpClientResults');
-    if (!users.length) { el.innerHTML='<div style="padding:10px;color:var(--muted);font-size:.85rem">Sin resultados</div>'; el.style.display='block'; return; }
-    el.innerHTML = users.slice(0,8).map(function(u){
-      var nm = (u.name||'').replace(/'/g,"\'");
-      var ph = (u.phone||'').replace(/'/g,"\'");
-      var mp = (u.google_maps_url||'').replace(/'/g,"\'");
-      return '<div onclick="seleccionarClienteCP('+u.id+',\''+nm+'\',\''+ph+'\',\''+mp+'\')" '+
-        'style="padding:10px 14px;cursor:pointer;font-size:.88rem;border-bottom:1px solid #f3f4f6">'+
-        '<strong>'+cpEsc(u.name)+'</strong>'+(u.phone?' &middot; '+cpEsc(u.phone):'')+
-      '</div>';
-    }).join('');
-    el.style.display = 'block';
-  }, 350);
-}
-
-function seleccionarClienteCP(id, name, phone, mapsUrl) {
-  cpSelectedClient = {id:id, name:name, phone:phone, mapsUrl:mapsUrl||''};
-  var phoneEl = document.getElementById('cpClientPhone');
-  if (phoneEl) phoneEl.value = phone || '';
-  document.getElementById('cpClientResults').style.display = 'none';
-  document.getElementById('cpClientSearch').value = name;
-  const sel = document.getElementById('cpClientSelected');
-  sel.style.display = 'flex';
-  sel.innerHTML = '<span>✅ <strong>'+cpEsc(name)+'</strong>'+(phone?' · '+cpEsc(phone):'')+
-    '</span><button onclick="limpiarClienteCP()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem">×</button>';
-  var addrEl = document.getElementById('cpClientAddresses');
-  if (cpSelectedClient && cpSelectedClient.mapsUrl) {
-    addrEl.innerHTML = '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;cursor:pointer;margin-bottom:6px">'+
-      '<input type="checkbox" id="cpUsarUbicacionCliente" checked onchange="cpToggleUbicacionCliente(this.checked)" style="width:18px;height:18px;accent-color:#16a34a">'+
-      '<span style="font-size:.85rem;color:#166534;font-weight:600">📍 Usar ubicación guardada del cliente</span>'+
-    '</label>';
-    cpToggleUbicacionCliente(true);
-  } else {
-    addrEl.innerHTML = '<div style="font-size:.8rem;color:var(--muted);padding:4px 0">Este cliente no tiene ubicación guardada — ingresa el link manualmente.</div>';
-  }
-}
-
 function usarMapsCliente(url) {
   document.getElementById('cpMapsUrl').value = url;
   calcularDeliveryCP();
-}
-
-function limpiarClienteCP() {
-  cpSelectedClient = null;
-  document.getElementById('cpClientSearch').value = '';
-  document.getElementById('cpClientSelected').style.display = 'none';
-  document.getElementById('cpClientAddresses').innerHTML = '';
-  document.getElementById('cpClientPhone').value = '';
-  var mapsInput = document.getElementById('cpMapsUrl');
-  mapsInput.value = '';
-  mapsInput.disabled = false;
-  cpCalculatedFee = 0;
-  document.getElementById('cpDeliveryFeeDisplay').textContent = '—';
-  document.getElementById('cpResumen').style.display = 'none';
-  var addrEl = document.getElementById('cpClientAddresses');
-  if (cpSelectedClient && cpSelectedClient.mapsUrl) {
-    addrEl.innerHTML = '<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;background:#f0fdf4;cursor:pointer;margin-bottom:6px">'+
-      '<input type="checkbox" id="cpUsarUbicacionCliente" checked onchange="cpToggleUbicacionCliente(this.checked)" style="width:18px;height:18px;accent-color:#16a34a">'+
-      '<span style="font-size:.85rem;color:#166534;font-weight:600">📍 Usar ubicación guardada del cliente</span>'+
-    '</label>';
-    cpToggleUbicacionCliente(true);
-  } else {
-    addrEl.innerHTML = '<div style="font-size:.8rem;color:var(--muted);padding:4px 0">Este cliente no tiene ubicación guardada — ingresa el link manualmente.</div>';
-  }
 }
 
 var cpClientLat = null, cpClientLng = null;
@@ -1277,10 +1208,25 @@ async function calcularDeliveryCP() {
   }, 800);
 }
 
+function cpAgregarItemPersonalizado() {
+  var nombre = document.getElementById('cpCustomItemName').value.trim();
+  var precio = parseFloat(document.getElementById('cpCustomItemPrice').value);
+  if (!nombre) { cpToast('Ingresa el nombre del producto','error'); return; }
+  if (isNaN(precio) || precio < 0) { cpToast('Ingresa un precio válido','error'); return; }
+  var key = 'custom_' + Date.now();
+  cpCartMap[key] = { name: nombre, price: precio, qty: 1, isCustom: true };
+  document.getElementById('cpCustomItemName').value = '';
+  document.getElementById('cpCustomItemPrice').value = '';
+  cpUpdateCartSummary();
+  actualizarResumenCP();
+  cpToast('✅ Item agregado');
+}
+
 var cpCreando = false;
 async function confirmarCrearPedido() {
   if (cpCreando) return;
-  if (!cpSelectedClient) { cpToast('Selecciona un cliente','error'); return; }
+  var clientName = document.getElementById('cpClientName').value.trim();
+  if (!clientName) { cpToast('Ingresa el nombre del cliente','error'); return; }
   if (!Object.keys(cpCartMap).length) { cpToast('Agrega al menos un producto','error'); return; }
   const mapsUrl = document.getElementById('cpMapsUrl').value.trim();
   if (!mapsUrl)          { cpToast('Ingresa el link de Google Maps','error'); return; }
@@ -1292,12 +1238,12 @@ async function confirmarCrearPedido() {
 
   try {
     var payload = {
-      client_id:        cpSelectedClient.id,
+      client_name:      clientName,
       delivery_address: mapsUrl,
       delivery_fee:     cpCalculatedFee,
       phone:            document.getElementById('cpClientPhone').value,
       notes:            document.getElementById('cpNotes').value,
-      items:            Object.values(cpCartMap).map(function(x){return {product_id:x.product_id||x.id, name:x.name, price:x.price, quantity:x.qty||1, notes:x.notes||''}})
+      items:            Object.values(cpCartMap).map(function(x){return {product_id:x.isCustom?null:(x.product_id||x.id), name:x.name, price:x.price, quantity:x.qty||1, notes:x.notes||''}})
     };
 
     const r = await fetch(API+'/orders/by-negocio', {
