@@ -330,6 +330,9 @@ async function init() {
       document.getElementById('rainModeBanner').style.display = 'block';
       var deliveryBtn = document.getElementById('deliveryBtn');
       if (deliveryBtn) { deliveryBtn.disabled = true; deliveryBtn.style.opacity = '.4'; deliveryBtn.title = 'Deliverys suspendidos por el clima'; }
+      // Seleccionar "Recoger" por defecto
+      var pickupBtn = document.querySelector('.delivery-btn[onclick*="pickup"]');
+      if (pickupBtn) pickupBtn.click();
     }
   } catch(e) { window._rainMode = false; }
 
