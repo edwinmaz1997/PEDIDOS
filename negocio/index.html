@@ -565,6 +565,12 @@ function renderOrder(o) {
                 <div style="color:#fff;font-weight:700;font-size:.88rem">Deliverys suspendidos por el clima</div>
                 <div style="color:#93c5fd;font-size:.78rem;margin-top:3px">No es posible aceptar pedidos delivery en este momento.</div>
               </div>
+            ` : window._maintenanceMode && o.delivery_type === 'delivery' ? `
+              <div style="width:100%;background:#422006;border-radius:var(--radius-sm);padding:12px 14px;text-align:center">
+                <div style="font-size:1.3rem">🔧</div>
+                <div style="color:#fff;font-weight:700;font-size:.88rem">Plataforma en mantenimiento</div>
+                <div style="color:#fdba74;font-size:.78rem;margin-top:3px">No es posible aceptar pedidos delivery en este momento.</div>
+              </div>
             ` : `
               <button class="btn-primary" onclick="respond(${o.id},'aceptar')" style="padding:9px 18px">✅ Aceptar</button>
             `}
@@ -643,9 +649,11 @@ function doLogout() { localStorage.clear(); window.location.href = '/cliente/log
 
 // Cargar modo lluvia antes de renderizar pedidos
 window._rainMode = false;
-fetch('/api/rain-mode').then(function(r){ return r.json(); }).then(function(d){
-  window._rainMode = !!(d.data && d.data.rain_mode);
-}).catch(function(){}).finally(function(){
+window._maintenanceMode = false;
+Promise.all([
+  fetch('/api/rain-mode').then(function(r){ return r.json(); }).then(function(d){ window._rainMode = !!(d.data && d.data.rain_mode); }).catch(function(){}),
+  fetch('/api/maintenance-mode').then(function(r){ return r.json(); }).then(function(d){ window._maintenanceMode = !!(d.data && d.data.maintenance_mode); }).catch(function(){})
+]).finally(function(){
   loadOrders('pendiente', null);
 });
 

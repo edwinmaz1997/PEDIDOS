@@ -65,6 +65,25 @@
       </label>
     </div>
 
+    <!-- MODO MANTENIMIENTO -->
+    <div id="maintenanceModeCard" style="background:#422006;border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:1.8rem">🔧</span>
+        <div>
+          <div style="color:#fff;font-weight:700;font-size:1rem">Modo Mantenimiento</div>
+          <div id="maintenanceModeStatus" style="color:#fdba74;font-size:.82rem">Cargando estado...</div>
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
+        <span id="maintenanceModeLabel" style="color:#fff;font-size:.88rem;font-weight:600">DESACTIVADO</span>
+        <div style="position:relative;width:52px;height:28px" onclick="toggleMaintenanceMode()">
+          <input type="checkbox" id="maintenanceModeToggle" style="opacity:0;width:0;height:0;position:absolute">
+          <div id="maintenanceModeTrack" style="position:absolute;inset:0;border-radius:14px;background:#374151;transition:.3s;cursor:pointer"></div>
+          <div id="maintenanceModeThumb" style="position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.3s;cursor:pointer"></div>
+        </div>
+      </label>
+    </div>
+
     <div class="stats-grid" id="statsGrid">
       <div class="stat-card"><div class="stat-label">Negocios activos</div><div class="stat-value" id="sBiz">—</div></div>
       <div class="stat-card"><div class="stat-label">Usuarios</div><div class="stat-value" id="sUsers">—</div></div>
@@ -282,6 +301,52 @@ async function toggleRainMode() {
 }
 
 loadRainMode();
+
+// ── MAINTENANCE MODE ─────────────────────────────────────
+var _maintenanceMode = false;
+
+function applyMaintenanceUI(enabled) {
+  _maintenanceMode = enabled;
+  var track = document.getElementById('maintenanceModeTrack');
+  var thumb = document.getElementById('maintenanceModeThumb');
+  var label = document.getElementById('maintenanceModeLabel');
+  var status = document.getElementById('maintenanceModeStatus');
+  if (enabled) {
+    track.style.background = '#f97316';
+    thumb.style.left = '27px';
+    label.textContent = 'ACTIVADO';
+    status.textContent = '⚠️ Plataforma en mantenimiento — solo recoger disponible';
+    status.style.color = '#fbbf24';
+  } else {
+    track.style.background = '#374151';
+    thumb.style.left = '3px';
+    label.textContent = 'DESACTIVADO';
+    status.textContent = 'La plataforma funciona con normalidad';
+    status.style.color = '#fdba74';
+  }
+}
+
+async function loadMaintenanceMode() {
+  try {
+    var res = await fetch('/api/admin/maintenance-mode', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
+    var d = await res.json();
+    applyMaintenanceUI(d.data && d.data.maintenance_mode);
+  } catch(e) {}
+}
+
+async function toggleMaintenanceMode() {
+  var newVal = !_maintenanceMode;
+  applyMaintenanceUI(newVal);
+  try {
+    await fetch('/api/admin/maintenance-mode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
+      body: JSON.stringify({ enabled: newVal })
+    });
+  } catch(e) { applyMaintenanceUI(!newVal); }
+}
+
+loadMaintenanceMode();
 </script>
 
 <script>

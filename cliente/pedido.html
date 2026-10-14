@@ -165,6 +165,13 @@
         </div>
 
 
+        <!-- Banner modo mantenimiento -->
+        <div id="maintenanceModeBanner" style="display:none;background:#422006;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px;text-align:center">
+          <div style="font-size:1.5rem;margin-bottom:4px">🔧</div>
+          <div style="color:#fff;font-weight:700;font-size:.95rem">Plataforma en mantenimiento</div>
+          <div style="color:#fdba74;font-size:.82rem;margin-top:4px">Los deliverys están temporalmente suspendidos.<br>Puedes elegir recoger en el negocio.</div>
+        </div>
+
         <!-- Banner modo lluvia -->
         <div id="rainModeBanner" style="display:none;background:#1e3a5f;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px;text-align:center">
           <div style="font-size:1.5rem;margin-bottom:4px">🌧️</div>
@@ -321,20 +328,33 @@ window._freeDeliveryCheckPromise = (async function(){
 })();
 
 async function init() {
-  // Verificar modo lluvia
+  // Verificar modos especiales (lluvia y mantenimiento)
+  window._rainMode = false;
+  window._maintenanceMode = false;
   try {
     var rainRes = await fetch('/api/rain-mode');
     var rainData = await rainRes.json();
     window._rainMode = !!(rainData.data && rainData.data.rain_mode);
-    if (window._rainMode) {
-      document.getElementById('rainModeBanner').style.display = 'block';
-      var deliveryBtn = document.getElementById('deliveryBtn');
-      if (deliveryBtn) { deliveryBtn.disabled = true; deliveryBtn.style.opacity = '.4'; deliveryBtn.title = 'Deliverys suspendidos por el clima'; }
-      // Seleccionar "Recoger" por defecto
-      var pickupBtn = document.querySelector('.delivery-btn[onclick*="pickup"]');
-      if (pickupBtn) pickupBtn.click();
-    }
-  } catch(e) { window._rainMode = false; }
+  } catch(e) {}
+  try {
+    var maintRes = await fetch('/api/maintenance-mode');
+    var maintData = await maintRes.json();
+    window._maintenanceMode = !!(maintData.data && maintData.data.maintenance_mode);
+  } catch(e) {}
+
+  var deliveryBlocked = window._rainMode || window._maintenanceMode;
+  if (window._maintenanceMode) {
+    document.getElementById('maintenanceModeBanner').style.display = 'block';
+  }
+  if (window._rainMode) {
+    document.getElementById('rainModeBanner').style.display = 'block';
+  }
+  if (deliveryBlocked) {
+    var deliveryBtn = document.getElementById('deliveryBtn');
+    if (deliveryBtn) { deliveryBtn.disabled = true; deliveryBtn.style.opacity = '.4'; deliveryBtn.title = 'Delivery no disponible en este momento'; }
+    var pickupBtn = document.querySelector('.delivery-btn[onclick*="pickup"]');
+    if (pickupBtn) pickupBtn.click();
+  }
 
   try {
     const res = await fetch(`${API}/businesses/${businessId}`);
@@ -1505,6 +1525,10 @@ async function submitOrder() {
   }
   if (deliveryType === 'delivery' && window._rainMode) {
     alert('🌧️ Deliverys suspendidos por el clima.\n\nCuidamos la integridad de nuestros repartidores. Por favor intenta más tarde o elige la opción de recoger en el negocio.');
+    return;
+  }
+  if (deliveryType === 'delivery' && window._maintenanceMode) {
+    alert('🔧 Plataforma en mantenimiento.\n\nLos deliverys están temporalmente suspendidos. Por favor elige la opción de recoger en el negocio.');
     return;
   }
   if (orderType !== 'paquete' && deliveryType === 'delivery' && business?.accepts_delivery && window._calculatedDeliveryFee == null) {

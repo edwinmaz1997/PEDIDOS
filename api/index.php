@@ -91,6 +91,13 @@ try {
             Response::success(['rain_mode' => $row ? (bool)(int)$row['value'] : false]);
             break;
 
+        // ── MAINTENANCE MODE (público) ────────────────────────
+        case 'maintenance-mode':
+            $db = Database::connect();
+            $row = $db->query("SELECT value FROM app_settings WHERE `key`='maintenance_mode' LIMIT 1")->fetch();
+            Response::success(['maintenance_mode' => $row ? (bool)(int)$row['value'] : false]);
+            break;
+
         // ── PROMOTIONS ────────────────────────────────────────
         case 'expand-url':
             if ($method !== 'POST') Response::error('Método no permitido', 405);
@@ -480,8 +487,25 @@ try {
                 Response::success(['rain_mode' => (bool)$enabled]);
                 break;
             }
+            // GET /api/admin/maintenance-mode
+            if ($action === 'maintenance-mode' && $method === 'GET') {
+                AuthMiddleware::requireRole('admin');
+                $db = Database::connect();
+                $row = $db->query("SELECT value FROM app_settings WHERE `key`='maintenance_mode' LIMIT 1")->fetch();
+                Response::success(['maintenance_mode' => $row ? (bool)(int)$row['value'] : false]);
+                break;
+            }
+            // POST /api/admin/maintenance-mode
+            if ($action === 'maintenance-mode' && $method === 'POST') {
+                AuthMiddleware::requireRole('admin');
+                $enabled = isset($body['enabled']) ? (int)(bool)$body['enabled'] : 0;
+                $db = Database::connect();
+                $db->prepare("INSERT INTO app_settings (`key`,`value`) VALUES ('maintenance_mode',?) ON DUPLICATE KEY UPDATE `value`=?")->execute([$enabled, $enabled]);
+                Response::success(['maintenance_mode' => (bool)$enabled]);
+                break;
+            }
 
-            // GET /api/admin/rain-mode (público — clientes y negocios lo consultan)
+            // Rutas admin generales
             switch ($action) {
                 case 'dashboard':  $ctrl->dashboard();  break;
                 case 'users':      $ctrl->users();       break;
