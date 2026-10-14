@@ -165,6 +165,13 @@
         </div>
 
 
+        <!-- Banner modo lluvia -->
+        <div id="rainModeBanner" style="display:none;background:#1e3a5f;border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px;text-align:center">
+          <div style="font-size:1.5rem;margin-bottom:4px">🌧️</div>
+          <div style="color:#fff;font-weight:700;font-size:.95rem">Deliverys suspendidos por el clima</div>
+          <div style="color:#93c5fd;font-size:.82rem;margin-top:4px">Cuidamos la integridad de nuestros repartidores.<br>Puedes elegir recoger en el negocio.</div>
+        </div>
+
         <div class="delivery-toggle" id="deliveryToggle">
           <button class="delivery-btn active" id="deliveryBtn" onclick="setDelivery('delivery',this)">🛵 Delivery</button>
           <button class="delivery-btn" id="dineInBtn" style="display:none" onclick="setDelivery('dine_in',this)">🍽️ Comer aquí</button>
@@ -314,6 +321,18 @@ window._freeDeliveryCheckPromise = (async function(){
 })();
 
 async function init() {
+  // Verificar modo lluvia
+  try {
+    var rainRes = await fetch('/api/rain-mode');
+    var rainData = await rainRes.json();
+    window._rainMode = !!(rainData.data && rainData.data.rain_mode);
+    if (window._rainMode) {
+      document.getElementById('rainModeBanner').style.display = 'block';
+      var deliveryBtn = document.getElementById('deliveryBtn');
+      if (deliveryBtn) { deliveryBtn.disabled = true; deliveryBtn.style.opacity = '.4'; deliveryBtn.title = 'Deliverys suspendidos por el clima'; }
+    }
+  } catch(e) { window._rainMode = false; }
+
   try {
     const res = await fetch(`${API}/businesses/${businessId}`);
     const data = await res.json();
@@ -1479,6 +1498,10 @@ function updateCart() {
 async function submitOrder() {
   if (window._bizClosed) {
     alert('Este negocio está cerrado en este momento. Por favor intenta más tarde.');
+    return;
+  }
+  if (deliveryType === 'delivery' && window._rainMode) {
+    alert('🌧️ Deliverys suspendidos por el clima.\n\nCuidamos la integridad de nuestros repartidores. Por favor intenta más tarde o elige la opción de recoger en el negocio.');
     return;
   }
   if (orderType !== 'paquete' && deliveryType === 'delivery' && business?.accepts_delivery && window._calculatedDeliveryFee == null) {

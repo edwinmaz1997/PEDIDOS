@@ -559,7 +559,15 @@ function renderOrder(o) {
             <div style="font-size:.75rem;color:var(--muted);margin-top:4px">${o.dine_in_time ? '🍽️ Precalculado según hora de llegada del cliente ('+o.dine_in_time+')' : 'El cliente verá un contador con el tiempo restante'}</div>
           </div>
           <div class="respond-row">
-            <button class="btn-primary" onclick="respond(${o.id},'aceptar')" style="padding:9px 18px">✅ Aceptar</button>
+            ${window._rainMode && o.delivery_type === 'delivery' ? `
+              <div style="width:100%;background:#1e3a5f;border-radius:var(--radius-sm);padding:12px 14px;text-align:center">
+                <div style="font-size:1.3rem">🌧️</div>
+                <div style="color:#fff;font-weight:700;font-size:.88rem">Deliverys suspendidos por el clima</div>
+                <div style="color:#93c5fd;font-size:.78rem;margin-top:3px">No es posible aceptar pedidos delivery en este momento.</div>
+              </div>
+            ` : `
+              <button class="btn-primary" onclick="respond(${o.id},'aceptar')" style="padding:9px 18px">✅ Aceptar</button>
+            `}
             <button class="btn-ghost" onclick="respond(${o.id},'rechazar')" style="padding:9px 18px;color:var(--danger);border-color:var(--danger)">✕ Rechazar</button>
           </div>
         </div>
@@ -633,7 +641,13 @@ async function refreshStats() {
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function doLogout() { localStorage.clear(); window.location.href = '/cliente/login.html'; }
 
-loadOrders('pendiente', null);
+// Cargar modo lluvia antes de renderizar pedidos
+window._rainMode = false;
+fetch('/api/rain-mode').then(function(r){ return r.json(); }).then(function(d){
+  window._rainMode = !!(d.data && d.data.rain_mode);
+}).catch(function(){}).finally(function(){
+  loadOrders('pendiente', null);
+});
 
 </script>
 
