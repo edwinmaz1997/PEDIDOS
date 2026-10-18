@@ -363,7 +363,7 @@ async function init() {
     business = data.data;
     renderBizInfo();
     // Delivery activo por defecto
-    document.getElementById('deliveryAddressWrap').style.display = 'block';
+    document.getElementById('deliveryAddressWrap').style.display = (window._rainMode || window._maintenanceMode) ? 'none' : 'block';
     loadSavedAddress();
     renderProducts();
 
