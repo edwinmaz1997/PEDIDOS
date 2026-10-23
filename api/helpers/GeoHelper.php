@@ -28,26 +28,42 @@ class GeoHelper {
             if ($resolved) $url = $resolved;
         }
 
-        // Patrón 1: ?q=lat,lng  o  &q=lat,lng
-        if (preg_match('/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/', $url, $m)) {
-            return ['lat' => (float)$m[1], 'lng' => (float)$m[2]];
+        // Decodificar (los links de consentimiento de Google traen la URL real codificada)
+        $candidates = [$url];
+        $dec = $url;
+        for ($i = 0; $i < 3; $i++) {
+            $next = urldecode($dec);
+            if ($next === $dec) break;
+            $dec = $next;
+            $candidates[] = $dec;
         }
 
-        // Patrón 2: @lat,lng,zoom  (formato típico de Google Maps al compartir un lugar)
-        if (preg_match('/@(-?\d+\.\d+),(-?\d+\.\d+)/', $url, $m)) {
-            return ['lat' => (float)$m[1], 'lng' => (float)$m[2]];
+        foreach ($candidates as $u) {
+            $c = self::matchCoords($u);
+            if ($c) return $c;
         }
+        return null;
+    }
 
-        // Patrón 3: !3dLAT!4dLNG (formato interno de algunos links de "place")
-        if (preg_match('/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/', $url, $m)) {
-            return ['lat' => (float)$m[1], 'lng' => (float)$m[2]];
+    /**
+     * Busca coordenadas en un texto/URL con los formatos conocidos de Google Maps y Waze.
+     */
+    public static function matchCoords(string $u): ?array {
+        $patterns = [
+            '/[?&](?:q|ll|center|query|destination|daddr|sll)=(-?\d{1,3}\.\d+)\s*,\s*\+?(-?\d{1,3}\.\d+)/', // ?q=lat,lng
+            '/@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/',                       // @lat,lng,zoom
+            '/!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/',                   // !3dLAT!4dLNG
+            '/\/(?:search|place|dir)\/(-?\d{1,3}\.\d+),\s*\+?(-?\d{1,3}\.\d+)/', // /search/lat,lng
+            '/^\s*(-?\d{1,3}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)\s*$/',          // "lat,lng"
+        ];
+        foreach ($patterns as $re) {
+            if (preg_match($re, $u, $m)) {
+                $lat = (float)$m[1]; $lng = (float)$m[2];
+                if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180 && !($lat == 0.0 && $lng == 0.0)) {
+                    return ['lat' => $lat, 'lng' => $lng];
+                }
+            }
         }
-
-        // Patrón 4: coordenadas plain text "lat,lng"
-        if (preg_match('/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/', $url, $m)) {
-            return ['lat' => (float)$m[1], 'lng' => (float)$m[2]];
-        }
-
         return null;
     }
 
@@ -97,11 +113,23 @@ class GeoHelper {
         }
 
         if ($finalUrl && $finalUrl !== $shortUrl) {
-            // Si la URL final ya tiene coordenadas, usarla directamente
-            if (preg_match('/@(-?\d+\.\d+),(-?\d+\.\d+)/', $finalUrl) ||
-                preg_match('/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/', $finalUrl) ||
-                preg_match('/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/', $finalUrl)) {
-                return $finalUrl;
+            // Si la URL final (o su versión decodificada) ya tiene coordenadas, usarla
+            foreach ([$finalUrl, urldecode($finalUrl), urldecode(urldecode($finalUrl))] as $u) {
+                $c = self::matchCoords($u);
+                if ($c) return 'https://www.google.com/maps?q=' . $c['lat'] . ',' . $c['lng'];
+            }
+        }
+        if ($redirectUrl) {
+            foreach ([$redirectUrl, urldecode($redirectUrl)] as $u) {
+                $c = self::matchCoords($u);
+                if ($c) return 'https://www.google.com/maps?q=' . $c['lat'] . ',' . $c['lng'];
+            }
+        }
+        if ($body && strpos($body, '%') !== false) {
+            $decBody = urldecode(substr($body, 0, 800000));
+            if (preg_match('/!3d(-?\d+\.\d{4,})!4d(-?\d+\.\d{4,})/', $decBody, $m) ||
+                preg_match('/@(-?\d+\.\d{4,}),(-?\d+\.\d{4,})/', $decBody, $m)) {
+                return 'https://www.google.com/maps?q=' . $m[1] . ',' . $m[2];
             }
         }
 

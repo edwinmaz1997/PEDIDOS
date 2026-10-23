@@ -345,6 +345,13 @@ class BusinessController {
             $originCoords = ['lat' => (float)$biz['latitude'], 'lng' => (float)$biz['longitude']];
         } elseif ($biz['google_maps_url']) {
             $originCoords = GeoHelper::extractCoords($biz['google_maps_url']);
+            // Guardar las coordenadas para no depender del link corto la próxima vez
+            if ($originCoords) {
+                try {
+                    $this->db->prepare("UPDATE businesses SET latitude = ?, longitude = ? WHERE id = ?")
+                        ->execute([$originCoords['lat'], $originCoords['lng'], $businessId]);
+                } catch (\Throwable $e) {}
+            }
         }
         if (!$originCoords) {
             $msg = $originMapsUrl
