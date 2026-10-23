@@ -526,7 +526,7 @@ function dismissInstall() {
 })();
 // ── Sistema de actualización de app ─────────────────────────
 (function() {
-  var APP_VERSION = '1.0.10'; // Incrementar en cada deploy importante
+  var APP_VERSION = '1.0.11'; // Incrementar en cada deploy importante
   var stored = localStorage.getItem('nx_app_version');
 
   function forceUpdateFn() {

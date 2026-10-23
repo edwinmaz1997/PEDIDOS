@@ -56,39 +56,30 @@
   </aside>
 
   <main class="main-content">
-  <!-- Delivery Gratis -->
-  <div style="background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:2px solid #fbbf24">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="font-size:1.6rem">🎁</div>
-      <div>
-        <div style="font-weight:800;font-size:1rem;color:var(--navy)">Delivery gratis</div>
-        <div style="font-size:.8rem;color:var(--muted)">Completa 15 deliveries este mes y el 16 es gratis</div>
+  <div class="cx-reward" id="rewardCard" style="margin-top:0">
+    <div class="cx-reward-head">
+      <div class="cx-reward-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg></div>
+      <div class="cx-reward-t">
+        <strong id="rewardTitle">Delivery gratis</strong>
+        <span id="rewardMsg">Completa 15 deliveries este mes y el 16 es gratis</span>
       </div>
+      <div class="cx-reward-pill" id="rewardPill">…</div>
     </div>
-    <div id="rewardLoading" style="text-align:center;color:var(--muted);font-size:.85rem">Cargando...</div>
-    <div id="rewardContent" style="display:none">
-      <div style="background:#f9fafb;border-radius:10px;padding:14px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:.85rem;color:var(--muted)">Deliveries este mes</span>
-          <span id="rewardCount" style="font-weight:700;font-size:1.1rem">0</span>
-        </div>
-        <div style="background:#e5e7eb;border-radius:20px;height:10px;overflow:hidden">
-          <div id="rewardBar" style="background:linear-gradient(90deg,#f59e0b,#fbbf24);height:100%;border-radius:20px;transition:width .5s;width:0%"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.72rem;color:var(--muted)">
-          <span>0</span><span>15</span>
-        </div>
-      </div>
-      <div id="rewardStatus"></div>
-    </div>
+    <div class="cx-stamps" id="rewardStamps"></div>
   </div>
     <div class="page-header">
-      <h1>📊 Mis Reportes</h1>
+      <h1>Mis reportes</h1>
       <p>Resumen de tu actividad en NuevaExpress</p>
     </div>
 
     <!-- Filter -->
-    <div class="filter-row">
+    <div class="cx-chips" id="periodChips">
+      <button type="button" class="filter-tab active" data-p="month">Este mes</button>
+      <button type="button" class="filter-tab" data-p="3months">3 meses</button>
+      <button type="button" class="filter-tab" data-p="year">Este año</button>
+      <button type="button" class="filter-tab" data-p="all">Todo</button>
+    </div>
+    <div class="filter-row" style="display:none">
       <select id="periodFilter" onchange="init()">
         <option value="all">Todo el tiempo</option>
         <option value="month" selected>Este mes</option>
@@ -104,7 +95,7 @@
         <div class="val" id="mTotal" style="color:var(--blue)">—</div>
         <div class="lbl">Total gastado</div>
       </div>
-      <div class="metric-box">
+      <div class="metric-box hl">
         <div class="val" id="mOrders">—</div>
         <div class="lbl">Pedidos realizados</div>
       </div>
@@ -132,54 +123,28 @@
 
     <!-- Negocios favoritos -->
     <div class="report-card">
-      <h3>🏪 Negocios donde he consumido</h3>
-      <div id="bizList"><div class="loading-state"><div class="spinner"></div></div></div>
+      <h3><span class="cx-h-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M10 21v-5h4v5"/></svg></span>Negocios donde he consumido</h3>
+      <div id="bizList"><div class="cx-skel" style="border:0;padding:0;margin:0"><div style="height:14px;width:70%;margin-bottom:10px"></div><div style="height:14px;width:45%"></div></div></div>
     </div>
 
     <!-- Productos favoritos -->
     <div class="report-card">
-      <h3>⭐ Mis productos más pedidos</h3>
-      <div id="topProducts"><div class="loading-state"><div class="spinner"></div></div></div>
+      <h3><span class="cx-h-ic o"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg></span>Mis productos más pedidos</h3>
+      <div id="topProducts"><div class="cx-skel" style="border:0;padding:0;margin:0"><div style="height:14px;width:70%;margin-bottom:10px"></div><div style="height:14px;width:45%"></div></div></div>
     </div>
 
     <!-- Historial por mes -->
     <div class="report-card">
-      <h3>📅 Mi historial por mes</h3>
-      <div id="monthlyHistory"><div class="loading-state"><div class="spinner"></div></div></div>
+      <h3><span class="cx-h-ic p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg></span>Mi historial por mes</h3>
+      <div id="monthlyHistory"><div class="cx-skel" style="border:0;padding:0;margin:0"><div style="height:14px;width:70%;margin-bottom:10px"></div><div style="height:14px;width:45%"></div></div></div>
     </div>
 
     <!-- Últimos pedidos -->
     <div class="report-card">
-      <h3>🕐 Actividad reciente</h3>
-      <div id="recentActivity"><div class="loading-state"><div class="spinner"></div></div></div>
+      <h3><span class="cx-h-ic g"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>Actividad reciente</h3>
+      <div id="recentActivity"><div class="cx-skel" style="border:0;padding:0;margin:0"><div style="height:14px;width:70%;margin-bottom:10px"></div><div style="height:14px;width:45%"></div></div></div>
     </div>
 
-    <!-- Delivery Gratis -->
-  <div style="background:white;border-radius:var(--radius);padding:20px;margin-bottom:20px;border:2px solid #fbbf24">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="font-size:1.6rem">🎁</div>
-      <div>
-        <div style="font-weight:800;font-size:1rem;color:var(--navy)">Delivery gratis</div>
-        <div style="font-size:.8rem;color:var(--muted)">Completa 15 deliveries este mes y el 16 es gratis</div>
-      </div>
-    </div>
-    <div id="rewardLoading" style="text-align:center;color:var(--muted);font-size:.85rem">Cargando...</div>
-    <div id="rewardContent" style="display:none">
-      <div style="background:#f9fafb;border-radius:10px;padding:14px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:.85rem;color:var(--muted)">Deliveries este mes</span>
-          <span id="rewardCount" style="font-weight:700;font-size:1.1rem">0</span>
-        </div>
-        <div style="background:#e5e7eb;border-radius:20px;height:10px;overflow:hidden">
-          <div id="rewardBar" style="background:linear-gradient(90deg,#f59e0b,#fbbf24);height:100%;border-radius:20px;transition:width .5s;width:0%"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.72rem;color:var(--muted)">
-          <span>0</span><span>15</span>
-        </div>
-      </div>
-      <div id="rewardStatus"></div>
-    </div>
-  </div>
 </main>
 </div>
 
@@ -253,7 +218,7 @@ async function init() {
   var bizList = Object.values(bizMap).sort(function(a,b){ return b.total-a.total; });
 
   if(!bizList.length){
-    document.getElementById('bizList').innerHTML = '<div class="empty-state"><p>Sin pedidos en este período.</p></div>';
+    document.getElementById('bizList').innerHTML = '<div style="text-align:center;padding:18px;color:#94a3b8;font-size:.85rem"><p>Sin pedidos en este período.</p></div>';
   } else {
     var maxTotal = bizList[0].total;
     var html = bizList.map(function(b, i){
@@ -262,7 +227,7 @@ async function init() {
       return '<div class="biz-card">' +
         '<div class="biz-card-header">' +
           '<div>' +
-            '<div style="font-weight:700;font-size:1rem">'+esc(b.name)+(i===0?' 🏆':'')+'</div>' +
+            '<div style="font-weight:700;font-size:1rem">'+esc(b.name)+(i===0?'<span class="cx-top-pill">Favorito</span>':'')+'</div>' +
             '<div style="font-size:.78rem;color:var(--muted);margin-top:2px">Último pedido: '+(b.lastOrder?new Date(b.lastOrder).toLocaleDateString('es-GT'):'—')+'</div>' +
           '</div>' +
           '<div style="text-align:right">' +
@@ -272,7 +237,7 @@ async function init() {
         '</div>' +
         '<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:10px">' +
           '<div style="font-size:.82rem"><span style="color:var(--muted)">Ticket promedio:</span> <strong>'+money(avg)+'</strong></div>' +
-          (star?'<div style="font-size:.82rem"><span style="color:var(--muted)">Producto favorito:</span> <span class="star-badge">⭐ '+esc(star[0])+'</span> ×'+star[1]+'</div>':'') +
+          (star?'<div style="font-size:.82rem"><span style="color:var(--muted)">Producto favorito:</span> <span class="star-badge">'+esc(star[0])+'</span> ×'+star[1]+'</div>':'') +
         '</div>' +
         '<div class="bar-track" style="height:6px"><div class="bar-fill" style="width:'+Math.round(b.total/maxTotal*100)+'%;background:var(--blue)"></div></div>' +
       '</div>';
@@ -292,13 +257,13 @@ async function init() {
   });
   var topList = Object.entries(products).sort(function(a,b){ return b[1].qty-a[1].qty; }).slice(0,10);
   if(!topList.length){
-    document.getElementById('topProducts').innerHTML = '<div class="empty-state"><p>Sin datos de productos.</p></div>';
+    document.getElementById('topProducts').innerHTML = '<div style="text-align:center;padding:18px;color:#94a3b8;font-size:.85rem"><p>Sin datos de productos.</p></div>';
   } else {
     var maxQty = topList[0][1].qty;
     var colors = ['#4A90D9','#27ae60','#e67e22','#8e44ad','#e74c3c','#16a085','#2980b9','#f39c12','#c0392b','#1abc9c'];
     var html2 = topList.map(function(entry, i){
       return '<div class="bar-wrap">' +
-        '<div class="bar-label">'+(i===0?'⭐ ':'')+esc(entry[0])+'<div style="font-size:.7rem;color:var(--muted)">'+esc(entry[1].biz)+'</div></div>' +
+        '<div class="bar-label" style="font-weight:600">'+esc(entry[0])+'<div style="font-size:.7rem;color:var(--muted)">'+esc(entry[1].biz)+'</div></div>' +
         '<div class="bar-track"><div class="bar-fill" style="width:'+Math.round(entry[1].qty/maxQty*100)+'%;background:'+colors[i%colors.length]+'"></div></div>' +
         '<div class="bar-val">×'+entry[1].qty+'</div>' +
       '</div>';
@@ -318,7 +283,7 @@ async function init() {
   });
   var sortedMonths = Object.entries(months).sort(function(a,b){ return b[0].localeCompare(a[0]); }).slice(0,12);
   if(!sortedMonths.length){
-    document.getElementById('monthlyHistory').innerHTML = '<div class="empty-state"><p>Sin historial.</p></div>';
+    document.getElementById('monthlyHistory').innerHTML = '<div style="text-align:center;padding:18px;color:#94a3b8;font-size:.85rem"><p>Sin historial.</p></div>';
   } else {
     var maxM = Math.max.apply(null, sortedMonths.map(function(e){ return e[1].total; }));
     var html3 = '<div style="overflow-x:auto"><table class="report-table"><thead><tr>' +
@@ -341,14 +306,14 @@ async function init() {
 
   // ── Recent activity con paginación ──────────────────────────
   var statusColors = {pendiente:'#f39c12',aceptado:'#27ae60',en_preparacion:'#8e44ad',listo:'#2980b9',en_camino:'#16a085',entregado:'#27ae60',cancelado:'#e74c3c'};
-  var statusLabels = {pendiente:'⏳ Pendiente',aceptado:'✅ Aceptado',en_preparacion:'👨‍🍳 En preparación',listo:'📦 Listo',en_camino:'🛵 En camino',entregado:'✔ Entregado',cancelado:'✕ Cancelado'};
+  var statusLabels = {pendiente:'Pendiente',aceptado:'Aceptado',en_preparacion:'En preparación',listo:'Listo',en_camino:'En camino',entregado:'Entregado',cancelado:'Cancelado'};
 
   var activityPage = 1;
   var activityPerPage = 10;
 
   function renderActivity() {
     if (!allOrders.length) {
-      document.getElementById('recentActivity').innerHTML = '<div class="empty-state"><p>Sin actividad.</p></div>';
+      document.getElementById('recentActivity').innerHTML = '<div style="text-align:center;padding:18px;color:#94a3b8;font-size:.85rem"><p>Sin actividad.</p></div>';
       return;
     }
     var totalPages = Math.ceil(allOrders.length / activityPerPage);
@@ -357,34 +322,26 @@ async function init() {
     var html4 = pageData.map(function(o){
       var color = statusColors[o.status]||'#95a5a6';
       var total = parseFloat(o.subtotal||0)+parseFloat(o.delivery_fee||0);
-      return '<div class="timeline-row">' +
-        '<div class="timeline-dot" style="background:'+color+'"></div>' +
-        '<div style="flex:1">' +
-          '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px">' +
-            '<div><strong>'+esc(o.order_number)+'</strong> · <span style="font-size:.82rem;color:var(--muted)">'+esc(o.business_name)+'</span></div>' +
-            '<div style="font-weight:700;color:var(--blue)">'+money(total)+'</div>' +
-          '</div>' +
-          '<div style="font-size:.78rem;color:var(--muted);margin-top:2px">' +
-            (statusLabels[o.status]||o.status)+' · '+new Date(o.created_at).toLocaleDateString('es-GT') +
-          '</div>' +
-        '</div>' +
-      '</div>';
+      var dstr = ''; try { dstr = new Date(String(o.created_at).replace(' ','T')).toLocaleDateString('es-GT',{day:'numeric',month:'short'}); } catch(e) {}
+      var ini = esc(String(o.business_name||'N').trim().charAt(0).toUpperCase());
+      var lg = o.business_logo ? '<img src="'+esc(o.business_logo)+'" alt="" onerror="this.parentNode.textContent=\''+ini+'\'">' : ini;
+      return '<a class="cx-act" href="pedido-detalle.html?id='+o.id+'">' +
+        '<div class="cx-biz-logo" style="width:40px;height:40px;border-radius:12px;font-size:.9rem">'+lg+'</div>' +
+        '<div class="cx-act-main"><strong>'+esc(o.business_name)+'</strong><small>#'+esc(String(o.order_number||'').replace(/^PED-/,''))+' · '+dstr+'</small></div>' +
+        '<div class="cx-act-amt"><b>'+money(total)+'</b><span class="cx-st s-'+esc(o.status)+'">'+(statusLabels[o.status]||esc(o.status))+'</span></div>' +
+      '</a>';
     }).join('');
 
     // Paginación
     var pag = '';
     if (totalPages > 1) {
-      pag += '<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap">';
-      pag += '<button onclick="goActivityPage('+(activityPage-1)+')" '+(activityPage===1?'disabled':'')+' style="padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-family:Plus Jakarta Sans,system-ui,Segoe UI,Roboto,sans-serif">‹</button>';
+      pag += '<div class="cx-pg">';
+      pag += '<button onclick="goActivityPage('+(activityPage-1)+')" '+(activityPage===1?'disabled':'')+'>‹</button>';
       for (var p = 1; p <= totalPages; p++) {
-        if (p===1||p===totalPages||(p>=activityPage-2&&p<=activityPage+2)) {
-          pag += '<button onclick="goActivityPage('+p+')" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;background:'+(p===activityPage?'var(--charcoal)':'white')+';color:'+(p===activityPage?'white':'inherit')+';cursor:pointer;font-family:Plus Jakarta Sans,system-ui,Segoe UI,Roboto,sans-serif">'+p+'</button>';
-        } else if (p===activityPage-3||p===activityPage+3) {
-          pag += '<span style="color:var(--muted)">…</span>';
-        }
+        if (p===1||p===totalPages||(p>=activityPage-2&&p<=activityPage+2)) pag += '<button class="'+(p===activityPage?'on':'')+'" onclick="goActivityPage('+p+')">'+p+'</button>';
+        else if (p===activityPage-3||p===activityPage+3) pag += '<span>…</span>';
       }
-      pag += '<button onclick="goActivityPage('+(activityPage+1)+')" '+(activityPage===totalPages?'disabled':'')+' style="padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-family:Plus Jakarta Sans,system-ui,Segoe UI,Roboto,sans-serif">›</button>';
-      pag += '<span style="font-size:.8rem;color:var(--muted)">'+allOrders.length+' actividades</span>';
+      pag += '<button onclick="goActivityPage('+(activityPage+1)+')" '+(activityPage===totalPages?'disabled':'')+'>›</button>';
       pag += '</div>';
     }
 
@@ -449,27 +406,37 @@ init();
 
 // Load delivery reward
 (async function(){
+  var card = document.getElementById('rewardCard');
+  var stamps = document.getElementById('rewardStamps');
+  function paint(n){ var h=''; for (var i=0;i<15;i++) h+='<i'+(i<n?' class="on"':'')+'></i>'; stamps.innerHTML=h; }
+  paint(0);
   try {
     var r = await fetch(APP.API+'/delivery-reward', {headers:{Authorization:'Bearer '+APP.token()}});
     var res = await r.json();
-    var d = res?.data;
-    document.getElementById('rewardLoading').style.display = 'none';
-    document.getElementById('rewardContent').style.display = 'block';
-    var count = Math.min(d.delivery_count, 15);
-    document.getElementById('rewardCount').textContent = d.delivery_count;
-    document.getElementById('rewardBar').style.width = (count/15*100) + '%';
-    var statusEl = document.getElementById('rewardStatus');
+    var d = res && res.data;
+    if (!d) { card.style.display='none'; return; }
+    var count = Math.min(parseInt(d.delivery_count,10)||0, 15);
+    paint(count);
+    var t = document.getElementById('rewardTitle'), m = document.getElementById('rewardMsg'), pl = document.getElementById('rewardPill');
     if (d.reward_used) {
-      statusEl.innerHTML = '<div style="background:#fef3c7;border-radius:8px;padding:10px 14px;font-size:.85rem;color:#92400e;text-align:center">✅ Ya usaste tu delivery gratis este mes — ¡sigue pediendo!</div>';
+      card.classList.add('ok','used'); t.textContent='Delivery gratis usado'; m.textContent='Ya lo usaste este mes. ¡Sigue sumando!'; pl.textContent=count+'/15';
     } else if (d.eligible) {
-      statusEl.innerHTML = '<div style="background:#d1fae5;border-radius:8px;padding:12px 14px;font-size:.88rem;color:#065f46;text-align:center;font-weight:700">🎉 ¡Tienes un delivery gratis! Tu próximo pedido delivery no tendrá costo de envío.</div>';
+      card.classList.add('ok'); t.textContent='¡Tienes un delivery gratis!'; m.textContent='Tu próximo pedido delivery no tendrá costo de envío'; pl.textContent='Listo';
     } else {
-      statusEl.innerHTML = '<div style="font-size:.82rem;color:var(--muted);text-align:center">Te faltan <strong style="color:var(--navy)">' + d.remaining + ' deliveries</strong> para ganar tu delivery gratis este mes</div>';
+      m.textContent = count+' de 15 deliveries este mes · el 16 es gratis'; pl.textContent = 'Te faltan '+(d.remaining!=null?d.remaining:15-count);
     }
-  } catch(e) {
-    document.getElementById('rewardLoading').textContent = '';
-  }
+  } catch(e) { card.style.display='none'; }
 })();
+
+// Filtro de período con chips
+document.querySelectorAll('#periodChips .filter-tab').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('#periodChips .filter-tab').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('periodFilter').value = btn.dataset.p;
+    init();
+  });
+});
 </script>
 <script src="/assets/js/cliente-ui.js"></script>
 </body>
