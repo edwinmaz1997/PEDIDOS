@@ -109,12 +109,12 @@ class AnuncioController {
     public function uploadVideo(int $id): void {
         $user = AuthMiddleware::requireRole('negocio');
         if (empty($_FILES['video'])) Response::error('No se recibió video', 422);
-        $bizStmt = $this->db->prepare("SELECT id FROM businesses WHERE user_id=? LIMIT 1");
-        $bizStmt->execute([$user['id']]);
-        $biz = $bizStmt->fetch();
+        $this->assertOwnAnuncio($id, $user);
         $file = $_FILES['video'];
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, ['mp4','mov','webm'])) Response::error('Formato no válido. Usa MP4, MOV o WEBM', 422);
+        $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+        if (!in_array($mime, ['video/mp4','video/quicktime','video/webm'])) Response::error('El archivo no es un video válido', 422);
         if ($file['size'] > 10 * 1024 * 1024) Response::error('El video no puede superar 10MB', 422);
         $filename = 'anuncio_video_' . $id . '_' . time() . '.' . $ext;
         $dest = __DIR__ . '/../../uploads/anuncios/' . $filename;
@@ -129,12 +129,13 @@ class AnuncioController {
     public function uploadImage(int $id): void {
         $user = AuthMiddleware::requireRole('negocio');
         if (empty($_FILES['image'])) Response::error('No se recibió imagen', 422);
-        $bizStmt = $this->db->prepare("SELECT id FROM businesses WHERE user_id=? LIMIT 1");
-        $bizStmt->execute([$user['id']]);
-        $biz = $bizStmt->fetch();
+        $this->assertOwnAnuncio($id, $user);
         $file = $_FILES['image'];
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, ['jpg','jpeg','png','webp'])) Response::error('Formato no válido', 422);
+        if ($file['size'] > 6 * 1024 * 1024) Response::error('La imagen no puede superar 6MB', 422);
+        $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+        if (!in_array($mime, ['image/jpeg','image/png','image/webp'])) Response::error('El archivo no es una imagen válida', 422);
         $filename = 'anuncio_' . $id . '_' . time() . '.' . $ext;
         $dest = __DIR__ . '/../../uploads/anuncios/' . $filename;
         if (!is_dir(dirname($dest))) mkdir(dirname($dest), 0755, true);
@@ -143,6 +144,10 @@ class AnuncioController {
         $this->db->prepare("UPDATE business_anuncios SET image_url=? WHERE id=?")->execute([$url, $id]);
         Response::success(['url' => $url]);
     }
-}
 
-// Reopen class context
+    private function assertOwnAnuncio(int $id, array $user): void {
+        $st = $this->db->prepare("SELECT a.id FROM business_anuncios a JOIN businesses b ON b.id = a.business_id WHERE a.id = ? AND b.user_id = ? LIMIT 1");
+        $st->execute([$id, $user['id']]);
+        if (!$st->fetch()) Response::forbidden('Este anuncio no es tuyo');
+    }
+}

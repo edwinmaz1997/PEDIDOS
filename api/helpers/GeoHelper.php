@@ -75,14 +75,34 @@ class GeoHelper {
         return self::resolveShortUrl($shortUrl);
     }
 
+    /**
+     * Solo permite links de Google Maps / Waze (evita que el servidor visite direcciones internas).
+     */
+    public static function isAllowedMapsUrl(string $url): bool {
+        $p = parse_url($url);
+        if (!$p || empty($p['host']) || !in_array(strtolower($p['scheme'] ?? ''), ['http', 'https'], true)) return false;
+        $host = strtolower($p['host']);
+        $ok = false;
+        foreach (['goo.gl', 'maps.app.goo.gl', 'google.com', 'google.com.gt', 'maps.google.com', 'waze.com'] as $d) {
+            if ($host === $d || substr($host, -strlen('.' . $d)) === '.' . $d) { $ok = true; break; }
+        }
+        if (!$ok) return false;
+        if (isset($p['port']) && !in_array((int)$p['port'], [80, 443], true)) return false;
+        return true;
+    }
+
     private static function resolveShortUrl(string $shortUrl): ?string {
         if (!filter_var($shortUrl, FILTER_VALIDATE_URL)) return null;
+        if (!self::isAllowedMapsUrl($shortUrl)) return null;
 
         // First try HEAD request to get redirect location
         $ch = curl_init($shortUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 15);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 8);
+        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+        curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+        curl_setopt($ch, CURLOPT_MAXFILESIZE, 2 * 1024 * 1024);
         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);

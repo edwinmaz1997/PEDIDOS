@@ -170,6 +170,12 @@ class DeliveryController {
         $dbStatus = $map[$status] ?? $status;
         if (!in_array($dbStatus, ['asignado','recogido','entregado'])) Response::error('Estado inválido', 400);
 
+        if ($user['role'] === 'repartidor') {
+            $own = $this->db->prepare("SELECT id FROM deliveries WHERE id = ? AND repartidor_id = ? LIMIT 1");
+            $own->execute([$id, $user['id']]);
+            if (!$own->fetch()) Response::forbidden('Esta entrega no está asignada a ti');
+        }
+
         $extra = '';
         if ($dbStatus === 'recogido')  $extra = ', picked_up_at = NOW()';
         if ($dbStatus === 'entregado') $extra = ', delivered_at = NOW()';

@@ -14,6 +14,9 @@ class PasswordResetController {
         }
         $email = trim($body['email'] ?? '');
         if (!Security::validateEmail($email)) Response::error('Email inválido', 400);
+        if (!Security::checkRateLimit('acct:' . md5(strtolower($email)), 'forgot-acct', 3, 3600)) {
+            Response::success(null, 'Si el correo existe recibirás un enlace para restablecer tu contraseña.');
+        }
 
         $stmt = $this->db->prepare("SELECT id, name FROM users WHERE email = ? AND is_active = 1");
         $stmt->execute([$email]);

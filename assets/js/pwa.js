@@ -320,6 +320,7 @@ function dismissInstall() {
   else enhance();
 })();
 
+function _nxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 // ── Sistema de Notificaciones (Campanita) ─────────────────────
 (function() {
   var _notifOpen = false;
@@ -452,8 +453,8 @@ function dismissInstall() {
         'style="display:flex;gap:14px;padding:16px 20px;border-bottom:1px solid #f1f5f9;background:'+bg+';border-left:3px solid '+borderL+';cursor:pointer;transition:.15s">' +
         '<div style="width:40px;height:40px;border-radius:50%;background:'+(n.is_read?'#f1f5f9':'#dbeafe')+';display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">'+icon+'</div>'+
         '<div style="flex:1;min-width:0">'+
-          '<div style="font-size:.85rem;font-weight:'+(n.is_read?'400':'600')+';color:#0f172a;line-height:1.4;margin-bottom:3px">'+n.title+'</div>'+
-          '<div style="font-size:.78rem;color:#64748b;line-height:1.4;margin-bottom:4px">'+n.message+'</div>'+
+          '<div style="font-size:.85rem;font-weight:'+(n.is_read?'400':'600')+';color:#0f172a;line-height:1.4;margin-bottom:3px">'+_nxEsc(n.title)+'</div>'+
+          '<div style="font-size:.78rem;color:#64748b;line-height:1.4;margin-bottom:4px">'+_nxEsc(n.message)+'</div>'+
           '<div style="font-size:.7rem;color:#94a3b8">'+timeAgo(n.created_at)+'</div>'+
         '</div>'+
         (url ? '<div style="color:#94a3b8;font-size:.9rem;align-self:center">›</div>' : '')+

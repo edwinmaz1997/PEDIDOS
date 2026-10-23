@@ -26,6 +26,17 @@
 Options -Indexes
 RewriteEngine On
 
+# ── Seguridad: bloquear acceso directo a archivos internos ──
+# Archivos y carpetas ocultas (.git, .env, .htpasswd…)
+RewriteRule (^|/)\.(?!well-known/) - [F,L]
+# Código interno de la API: solo se entra por api/index.php
+RewriteRule ^api/(config|controllers|helpers|middleware|libs|cron)(/|$) - [F,L]
+RewriteRule ^api/(?!index\.php$)[^/]+\.php$ - [F,L]
+# Respaldo y esquema de base de datos
+RewriteRule ^database(/|$) - [F,L]
+# No ejecutar PHP dentro de las subidas de usuarios
+RewriteRule ^uploads/.*\.(php|phtml|phar|php\d|pl|py|cgi|sh)$ - [F,L,NC]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^api/.*$ api/index.php [QSA,L]
 
@@ -49,7 +60,7 @@ RewriteRule ^(cliente|negocio|admin|repartidor)/(.*)$ /$1/$2 [L]
     Header unset Server
 </IfModule>
 
-<FilesMatch "\.(sql|log|env|bak|php~)$">
+<FilesMatch "\.(sql|log|env|bak|php~|ini|sh|md|yml|yaml|lock)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
@@ -60,3 +71,8 @@ RewriteRule ^(cliente|negocio|admin|repartidor)/(.*)$ /$1/$2 [L]
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
 </IfModule>
+
+<Files "DOCUMENTACION.txt">
+    Order allow,deny
+    Deny from all
+</Files>

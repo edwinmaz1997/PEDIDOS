@@ -467,6 +467,16 @@ class OrderController {
         $order  = $this->findOrder($id);
         $status = Security::sanitize($body['status'] ?? '');
 
+        // Permisos: el negocio solo toca sus pedidos; el repartidor solo los que tiene asignados
+        if ($user['role'] === 'negocio') {
+            $biz = $this->getUserBusiness($user['id']);
+            if ((int)$order['business_id'] !== (int)$biz['id']) Response::forbidden();
+        } elseif ($user['role'] === 'repartidor') {
+            $ds = $this->db->prepare("SELECT id FROM deliveries WHERE order_id = ? AND repartidor_id = ? LIMIT 1");
+            $ds->execute([$id, $user['id']]);
+            if (!$ds->fetch()) Response::forbidden();
+        }
+
         $validStatuses = ['en_preparacion', 'listo', 'en_camino', 'entregado', 'cancelado'];
         if (!in_array($status, $validStatuses)) Response::error('Estado inválido', 400);
 

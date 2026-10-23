@@ -122,19 +122,20 @@ class UserController {
         try {
             AuthMiddleware::requireRole(['negocio','admin']);
             $q = trim($_GET['q'] ?? '');
-            if (strlen($q) < 2) { Response::success([]); return; }
+            if (mb_strlen($q) < 3) { Response::success([]); return; }
             $like = '%' . $q . '%';
             $stmt = $this->db->prepare("
                 SELECT id, name, phone, email, google_maps_url
                 FROM users
                 WHERE role_id = 3 AND is_active = 1
                   AND (name LIKE ? OR phone LIKE ? OR email LIKE ?)
-                ORDER BY name LIMIT 10
+                ORDER BY name LIMIT 8
             ");
             $stmt->execute([$like, $like, $like]);
             Response::success($stmt->fetchAll());
         } catch (\Throwable $e) {
-            Response::error('searchClients error: ' . $e->getMessage(), 500);
+            error_log('searchClients: ' . $e->getMessage());
+            Response::error('Error al buscar clientes', 500);
         }
     }
 

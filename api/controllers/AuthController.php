@@ -24,6 +24,9 @@ class AuthController {
         $name  = trim($body['name'] ?? 'Usuario');
 
         if (!Security::validateEmail($email)) Response::error('Email inválido', 400);
+        if (!Security::checkRateLimit('acct:' . md5(strtolower($email)), 'send-code-acct', 4, 3600)) {
+            Response::error('Ya enviamos varios códigos a este correo. Espera un momento.', 429);
+        }
 
         // Check no está ya registrado
         $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
@@ -56,6 +59,9 @@ class AuthController {
         $code  = trim($body['code'] ?? '');
 
         if (!$email || !$code) Response::error('Email y código requeridos', 400);
+        if (!Security::checkRateLimit('acct:' . md5(strtolower($email)), 'verify-code', 6, 900)) {
+            Response::error('Demasiados intentos. Solicita un código nuevo en unos minutos.', 429);
+        }
 
         $stmt = $this->db->prepare("SELECT * FROM email_verifications WHERE email = ? AND used = 0 ORDER BY created_at DESC LIMIT 1");
         $stmt->execute([$email]);
@@ -143,6 +149,10 @@ class AuthController {
         $password = $body['password'] ?? '';
 
         if (!$email || !$password) Response::error('Email y contraseña requeridos', 400);
+        // Límite por cuenta (no depende de la IP, que se puede falsificar)
+        if (!Security::checkRateLimit('acct:' . md5(strtolower($email)), 'login-acct', 8, 900)) {
+            Response::error('Demasiados intentos para esta cuenta. Espera 15 minutos.', 429);
+        }
 
         $stmt = $this->db->prepare("
             SELECT u.*, r.name as role
@@ -202,7 +212,7 @@ class AuthController {
     // --------------------------------------------------------
     private function createSession(int $userId): string {
         $token     = Security::generateToken(64);
-        $expiresAt = date('Y-m-d H:i:s', time() + SESSION_LIFETIME);
+        $expiresAt = date('Y-m-d H:i:s', time() + max((int)SESSION_LIFETIME, 60 * 86400));
         $ip        = Security::getClientIp();
         $ua        = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
 

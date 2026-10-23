@@ -173,6 +173,8 @@ class PromotionController {
     }
 
     private function notifyClients(string $bizName, string $title, string $desc, int $promoId): void {
+        // Evitar que un negocio sature a todos los clientes con avisos (máx. 4 por día)
+        if (!Security::checkRateLimit('promo:' . md5($bizName), 'promo-notify', 4, 86400)) return;
         $stmt = $this->db->prepare("SELECT id FROM users WHERE role_id = 3 AND is_active = 1");
         $stmt->execute();
         $clientIds = $stmt->fetchAll(PDO::FETCH_COLUMN);

@@ -54,6 +54,16 @@ $skipRateLimit = (
 if (!$skipRateLimit && !Security::checkRateLimit($ip, $endpoint)) {
     Response::error('Demasiadas solicitudes. Intenta de nuevo en un momento.', 429);
 }
+// Límite global por IP (todas las rutas juntas) para frenar ráfagas
+if (!Security::checkRateLimit($ip, '*', 900, 60)) {
+    Response::error('Demasiadas solicitudes. Intenta de nuevo en un momento.', 429);
+}
+
+// Rechazar cuerpos JSON enormes (las subidas de archivos van aparte)
+$ctype = $_SERVER['CONTENT_TYPE'] ?? '';
+if (stripos($ctype, 'multipart/form-data') === false && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 1024 * 1024) {
+    Response::error('Solicitud demasiado grande', 413);
+}
 
 // Router
 $method = $_SERVER['REQUEST_METHOD'];
@@ -104,11 +114,14 @@ try {
             AuthMiddleware::authenticate();
             $shortUrl = $body['url'] ?? '';
             if (!filter_var($shortUrl, FILTER_VALIDATE_URL)) Response::error('URL inválida', 422);
+            if (!GeoHelper::isAllowedMapsUrl($shortUrl)) Response::error('Solo se aceptan links de Google Maps o Waze', 422);
             $ch = curl_init($shortUrl);
+            curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+            curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
             curl_setopt($ch, CURLOPT_NOBODY, true);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
+            curl_setopt($ch, CURLOPT_MAXREDIRS, 6);
             curl_setopt($ch, CURLOPT_TIMEOUT, 8);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Mobile Safari/537.36');
@@ -588,12 +601,12 @@ try {
             break;
 
         case 'health':
-            Response::success(['status' => 'ok', 'version' => '1.2', 'php' => PHP_VERSION, 'domain' => APP_URL]);
+            Response::success(['status' => 'ok']);
             break;
 
         // ── TEST PUSH ─────────────────────────────────────────
         case 'test-push':
-            AuthMiddleware::authenticate();
+            AuthMiddleware::requireRole('admin');
             $uid = isset($_GET['uid']) ? (int)$_GET['uid'] : 0;
             if (!$uid) Response::error('Falta uid', 400);
             PushNotification::send($uid, '🔔 Test NuevaExpress', 'Push funcionando correctamente para uid=' . $uid, '/');
@@ -601,6 +614,7 @@ try {
             break;
 
         case 'test-email':
+            AuthMiddleware::requireRole('admin');
             $email = $_GET['email'] ?? '';
             if (!$email) Response::error('Falta email', 400);
             require_once __DIR__ . '/helpers/Mailer.php';

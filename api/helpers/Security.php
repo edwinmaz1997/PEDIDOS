@@ -17,15 +17,22 @@ class Security {
         }
     }
 
-    public static function sanitize($input) {
+    public static function sanitize($input, $key = null) {
         if (is_array($input)) {
-            return array_map([self::class, 'sanitize'], $input);
+            $out = [];
+            foreach ($input as $k => $v) $out[$k] = self::sanitize($v, is_string($k) ? $k : $key);
+            return $out;
         }
         if (is_string($input)) {
-            // Solo eliminar tags HTML peligrosos y espacios extremos
-            // NO aplicar htmlspecialchars — eso se hace al mostrar en el frontend
-            // PDO ya previene SQL injection con prepared statements
-            return strip_tags(trim($input));
+            // Contraseñas: mismo tratamiento de siempre para no romper cuentas existentes
+            if ($key !== null && stripos((string)$key, 'password') !== false) {
+                return strip_tags(trim($input));
+            }
+            // Decodificar entidades antes de quitar etiquetas: evita que "&lt;script&gt;" se guarde
+            // y luego se convierta en etiqueta real al responder (Response::decode)
+            $v = html_entity_decode(trim($input), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $v = strip_tags($v);
+            return str_replace(['<', '>'], ['‹', '›'], $v);
         }
         return $input;
     }
@@ -60,7 +67,11 @@ class Security {
     public static function checkRateLimit($ip, $endpoint, $max = RATE_LIMIT_MAX, $window = RATE_LIMIT_WINDOW) {
         $db = Database::connect();
         $windowStart = date('Y-m-d H:i:s', time() - $window);
-        $db->prepare("DELETE FROM rate_limits WHERE window_start < ?")->execute([$windowStart]);
+        // Limpiar solo la ventana de este mismo contador (antes se borraban los bloqueos de login/reset de todos)
+        $db->prepare("DELETE FROM rate_limits WHERE endpoint = ? AND window_start < ?")->execute([$endpoint, $windowStart]);
+        if (mt_rand(1, 200) === 1) {
+            $db->exec("DELETE FROM rate_limits WHERE window_start < NOW() - INTERVAL 1 DAY");
+        }
         $stmt = $db->prepare("SELECT attempts FROM rate_limits WHERE ip_address = ? AND endpoint = ? AND window_start >= ?");
         $stmt->execute([$ip, $endpoint, $windowStart]);
         $row = $stmt->fetch();

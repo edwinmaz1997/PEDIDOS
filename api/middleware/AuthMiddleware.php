@@ -16,6 +16,7 @@ class AuthMiddleware {
             JOIN users u ON s.user_id = u.id
             JOIN roles r ON u.role_id = r.id
             WHERE s.token = ?
+              AND (s.expires_at IS NULL OR s.expires_at > NOW())
         ");
         $stmt->execute([$token]);
         $user = $stmt->fetch();
@@ -23,8 +24,9 @@ class AuthMiddleware {
         if (!$user) Response::unauthorized('Sesión inválida o expirada. Para corregirlo, cierra sesión e inicia sesión nuevamente.');
         if (!$user['is_active']) Response::forbidden('Cuenta desactivada');
 
+        // Sesión deslizante: se renueva con cada uso; vence tras 60 días sin entrar
         $db->prepare("UPDATE user_sessions SET expires_at = DATE_ADD(NOW(), INTERVAL ? SECOND) WHERE token = ?")
-           ->execute([SESSION_LIFETIME, $token]);
+           ->execute([max((int)SESSION_LIFETIME, 60 * 86400), $token]);
 
         return $user;
     }
@@ -41,8 +43,8 @@ class AuthMiddleware {
 
     private static function extractToken() {
         $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        if (preg_match('/^Bearer\s+(.+)$/i', $header, $matches)) {
-            return trim($matches[1]);
+        if (preg_match('/^Bearer\s+([A-Za-z0-9]{32,128})$/', trim($header), $matches)) {
+            return $matches[1];
         }
         return null;
     }
