@@ -16,6 +16,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
+<link rel="stylesheet" href="/assets/css/cliente.css?v=202610230031">
+<link rel="stylesheet" href="/assets/css/negocio.css?v=202610230031">
 <style>
 .products-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
 .prod-row { display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid var(--border); }
@@ -360,8 +362,8 @@ function renderCatList() {
     return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)" id="catrow-'+c.id+'">' +
       '<span style="font-size:1.2rem" id="cicon-'+c.id+'">'+c.icon+'</span>' +
       '<span style="flex:1;font-weight:600" id="cname-'+c.id+'">'+APP.esc(c.name)+'</span>' +
-      '<button onclick="startEditCat('+c.id+',\''+APP.esc(c.icon)+'\',\''+APP.esc(c.name)+'\')" class="icon-btn" style="padding:5px 10px;font-size:.8rem">✏️</button>' +
-      '<button onclick="deleteCategory('+c.id+')" class="icon-btn danger" style="padding:5px 10px;font-size:.8rem">🗑️</button>' +
+      '<button onclick="startEditCat('+c.id+',\''+APP.esc(c.icon)+'\',\''+APP.esc(c.name)+'\')" class="icon-btn" style="padding:5px 10px;font-size:.8rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg></button>' +
+      '<button onclick="deleteCategory('+c.id+')" class="icon-btn danger" style="padding:5px 10px;font-size:.8rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>' +
     '</div>';
   }).join('');
 }
@@ -372,7 +374,7 @@ function startEditCat(id, icon, name) {
     '<input type="text" value="'+icon+'" maxlength="4" style="width:48px;padding:7px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-align:center;font-size:1.1rem;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif" id="edit-icon-'+id+'">' +
     '<input type="text" value="'+name+'" style="flex:1;padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif;font-size:.9rem" id="edit-name-'+id+'">' +
     '<button onclick="saveEditCat('+id+')" class="btn-primary" style="padding:6px 12px;font-size:.82rem">✓</button>' +
-    '<button onclick="renderCatList()" class="icon-btn" style="padding:6px 10px;font-size:.82rem">✕</button>';
+    '<button onclick="renderCatList()" class="icon-btn" style="padding:6px 10px;font-size:.82rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>';
 }
 
 async function saveEditCat(id) {
@@ -502,7 +504,7 @@ function renderProductRow(p) {
     <div class="prod-row" id="prod-row-${p.id}">
       <div class="prod-row-top" style="display:flex;gap:12px;align-items:flex-start">
         <div class="prod-thumb">
-          ${p.photo ? `<img src="${APP.esc(p.photo)}" alt="">` : '📦'}
+          ${p.photo ? `<img src="${APP.esc(p.photo)}" alt="">` : `<span style="font-weight:800;color:#4A90D9;font-size:1.4rem">${APP.esc(String(p.name||'P').charAt(0).toUpperCase())}</span>`}
         </div>
         <div class="prod-content">
           <div class="prod-name">${APP.esc(p.name)}${badge}</div>
@@ -512,9 +514,9 @@ function renderProductRow(p) {
       <div class="prod-footer">
         <div class="prod-price">${priceHtml}</div>
         <div class="prod-actions">
-          <button class="icon-btn" onclick="openModal(${p.id})" title="Editar">✏️ Editar</button>
-          <button class="icon-btn" onclick="toggleAvailable(${p.id}, ${p.is_available?0:1})" title="${p.is_available?'Desactivar':'Activar'}">${p.is_available?'⏸':'▶'}</button>
-          <button class="icon-btn danger" onclick="deleteProduct(${p.id})" title="Eliminar">🗑️</button>
+          <button class="icon-btn" onclick="openModal(${p.id})" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg> Editar</button>
+          <button class="icon-btn" onclick="toggleAvailable(${p.id}, ${p.is_available?0:1})" title="${p.is_available?'Desactivar':'Activar'}">${p.is_available?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>'}</button>
+          <button class="icon-btn danger" onclick="deleteProduct(${p.id})" title="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
         </div>
       </div>
     </div>`;
@@ -959,5 +961,6 @@ async function doBulkImport() {
   </div>
 </div>
 
+<script src="/assets/js/cliente-ui.js?v=202610230031"></script>
 </body>
 </html>

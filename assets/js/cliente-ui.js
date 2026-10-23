@@ -14,7 +14,12 @@
   function svg(k) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[k] || '') + '</svg>'; }
   window.cxSvg = svg;
 
-  var TITLES = {
+  var IS_NEGOCIO = location.pathname.indexOf('/negocio/') === 0;
+  var TITLES = IS_NEGOCIO ? {
+    index: 'Pedidos', productos: 'Productos', promociones: 'Promociones', anuncios: 'Anuncios',
+    reportes: 'Reportes', perfil: 'Perfil del negocio', 'pedido-detalle': 'Detalle del pedido',
+    'zonas-entrega': 'Zonas de entrega', servicios: 'Mis servicios', 'crear-negocio': 'Crear negocio'
+  } : {
     index: 'Tus pedidos', promociones: 'Promociones', reportes: 'Mis reportes',
     anuncios: 'Anuncios', perfil: 'Mi perfil', 'pedido-detalle': 'Detalle del pedido'
   };
@@ -22,6 +27,7 @@
   function init() {
     if (document.body.classList.contains('cx')) return;
     document.body.classList.add('cx');
+    if (IS_NEGOCIO) document.body.classList.add('nb');
     var page = (location.pathname.split('/').pop() || 'index.html').replace('.html', '') || 'index';
     var user = {};
     try { user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}'); } catch (e) {}
@@ -58,6 +64,48 @@
     });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
+  // ── Panel del negocio: quitar emojis decorativos al inicio de títulos y botones ──
+  var EMOJI_RE = /^[\s‍️←-⇿⌀-⏿①-➿⤀-⥿⬀-⯿〰〽㊗㊙™ℹ©®✔✖➕➖➗✅❌✖✕\ud83c-\ud83e][\udc00-\udfff]?/;
+  var CLEAN_SEL = '.tab-btn, .report-tab, .cat-tab, .page-header h1, main h2, main h3, main h4, main button:not(.icon-btn):not(.pw-toggle), main a.btn-primary, main a.btn-ghost, main .badge, .stat-label, main label, .order-client, .modal-form-box h2, .modal-form-box h3, .modal-form-box button:not(.icon-btn)';
+  function stripLead(el) {
+    var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+    var n = walker.nextNode();
+    while (n && !n.nodeValue.trim()) n = walker.nextNode();
+    if (!n) return;
+    var v = n.nodeValue, out = v.replace(/^\s+/, ''), guard = 0;
+    while (EMOJI_RE.test(out) && guard++ < 8) {
+      var nx = out.replace(EMOJI_RE, '');
+      if (nx === out) break;
+      out = nx;
+    }
+    out = out.replace(/^\s+/, '');
+    if (out !== v.replace(/^\s+/, '') && out.trim().length > 1) n.nodeValue = out;
+  }
+  function cleanAll(root) {
+    if (!root || !root.querySelectorAll) return;
+    if (root.matches && root.matches(CLEAN_SEL)) stripLead(root);
+    root.querySelectorAll(CLEAN_SEL).forEach(stripLead);
+    root.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(function (i) {
+      var ph = i.getAttribute('placeholder'), c = ph, k = 0;
+      while (EMOJI_RE.test(c) && k++ < 4) c = c.replace(EMOJI_RE, '');
+      c = c.replace(/^\s+/, '');
+      if (c !== ph && c.length > 1) i.setAttribute('placeholder', c);
+    });
+  }
+  function startCleaner() {
+    if (!IS_NEGOCIO) return;
+    cleanAll(document.body);
+    var pending = false;
+    new MutationObserver(function (muts) {
+      if (pending) return; pending = true;
+      requestAnimationFrame(function () {
+        pending = false;
+        muts.forEach(function (m) { m.addedNodes.forEach(function (nd) { if (nd.nodeType === 1) cleanAll(nd); }); });
+      });
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+
+  function boot() { init(); startCleaner(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
