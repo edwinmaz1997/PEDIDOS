@@ -163,3 +163,39 @@ body.home .modal-overlay { align-items: center !important; padding: 14px !import
 body.home .modal-box { border-radius: 24px !important; max-height: 88vh !important; animation: hPop .2s cubic-bezier(.4,0,.2,1); }
 @keyframes hPop { from { transform: scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
 .h-cats, .h-feat { scroll-padding: 0 16px; }
+
+/* Categorías: nombre completo */
+body.home .h-cat { width: auto; min-width: 84px; max-width: 116px; padding: 10px 8px 9px; }
+.h-cat-t { white-space: normal; overflow: visible; text-overflow: clip; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; min-height: 2.4em; }
+
+/* Fila horizontal de tarjetas (Abiertos ahora) */
+.h-row { display: flex; gap: 12px; overflow-x: auto; margin: 0 -16px; padding: 2px 16px 8px; scroll-snap-type: x mandatory; scroll-padding: 0 16px; scrollbar-width: none; }
+.h-row::-webkit-scrollbar { display: none; }
+.h-row .h-card { flex: 0 0 44%; max-width: 220px; scroll-snap-align: start; }
+@media (min-width: 640px) { .h-row .h-card { flex-basis: 30%; } }
+
+/* Desplegable: todos los negocios */
+.h-all-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 20px; border: 1px solid #edf0f5; background: #fff; cursor: pointer; text-align: left; font: inherit; box-shadow: 0 8px 20px -16px rgba(15,23,42,.45); }
+.h-all-ic { width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #eef4fc; color: #4A90D9; }
+.h-all-t { flex: 1; min-width: 0; }
+.h-all-t strong { display: block; font-size: .95rem; font-weight: 800; color: #0f172a; }
+.h-all-t small { display: block; font-size: .76rem; color: #64748b; font-weight: 600; }
+.h-all-chev { color: #94a3b8; flex-shrink: 0; transition: transform .2s; }
+.h-all-btn.open { border-radius: 20px 20px 0 0; border-bottom-color: transparent; }
+.h-all-btn.open .h-all-chev { transform: rotate(180deg); color: #4A90D9; }
+.h-all-list { background: #fff; border: 1px solid #edf0f5; border-top: 0; border-radius: 0 0 20px 20px; padding: 0 8px 8px; max-height: 60vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.h-all-list[hidden] { display: none; }
+.h-li { display: flex; align-items: center; gap: 12px; padding: 10px 6px; border-top: 1px solid #f1f3f7; text-decoration: none; color: inherit; border-radius: 12px; }
+.h-li:first-child { border-top: 0; }
+.h-li:active { background: #f6f8fb; }
+.h-li-logo { width: 42px; height: 42px; border-radius: 13px; overflow: hidden; flex-shrink: 0; background: linear-gradient(135deg,#e6f0fc,#e8f8ef); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #2563b8; }
+.h-li-logo img { width: 100%; height: 100%; object-fit: cover; }
+.h-li-t { flex: 1; min-width: 0; }
+.h-li-t strong { display: block; font-size: .88rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h-li-t small { display: block; font-size: .72rem; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h-li .h-st { flex-shrink: 0; }
+.h-li .h-st.on { background: #ecfdf5; }
+.h-li-chev { color: #cbd5e1; flex-shrink: 0; }
+.h-li.is-closed .h-li-logo { filter: grayscale(.6); opacity: .8; }
+body.home .h-cat { max-width: 128px; }
+.h-cat-t { word-break: normal; overflow-wrap: anywhere; }

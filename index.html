@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/main.css?v=202610222210">
-<link rel="stylesheet" href="/assets/css/home.css?v=202610222300">
+<link rel="stylesheet" href="/assets/css/home.css?v=202610222310">
 </head>
 <body class="home">
 
@@ -191,15 +191,25 @@ async function filterCategory(id, btn) {
       }
       const featured = all.filter(b => parseInt(b.is_featured));
       const sorted = all.slice().sort((a, b) => (isBusinessOpen(b) === false ? 0 : 1) - (isBusinessOpen(a) === false ? 0 : 1));
+      const openNow = all.filter(b => isBusinessOpen(b) === true && !parseInt(b.is_featured));
       document.getElementById('businessSections').innerHTML = `
         ${featured.length ? `
         <section class="h-sec">
           <div class="h-sec-head"><h2>Destacados</h2></div>
           <div class="h-feat">${featured.map(b => renderFeatured(b)).join('')}</div>
         </section>` : ''}
+        ${openNow.length ? `
         <section class="h-sec">
-          <div class="h-sec-head"><h2>Todos los negocios</h2><span class="h-count">${all.length}</span></div>
-          <div class="h-grid">${sorted.map(b => renderCard(b)).join('')}</div>
+          <div class="h-sec-head"><h2>Abiertos ahora</h2><span class="h-count">${openNow.length}</span></div>
+          <div class="h-row">${openNow.slice(0, 10).map(b => renderCard(b)).join('')}</div>
+        </section>` : ''}
+        <section class="h-sec">
+          <button type="button" class="h-all-btn" onclick="toggleAllBiz(this)" aria-expanded="false">
+            <span class="h-all-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M10 21v-5h4v5"/></svg></span>
+            <span class="h-all-t"><strong>Ver todos los negocios</strong><small>${all.length} negocio${all.length !== 1 ? 's' : ''} en NuevaExpress</small></span>
+            <svg class="h-all-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="h-all-list" id="allBizList" hidden>${sorted.map(b => renderRow(b)).join('')}</div>
         </section>`;
     } catch(e) {
       document.getElementById('businessSections').innerHTML = emptyHome('No pudimos cargar los negocios. Revisa tu conexión.');
@@ -352,6 +362,23 @@ function renderFeatured(b) {
         </div>
       </div>
     </article>`;
+}
+function renderRow(b) {
+  const open = isBusinessOpen(b);
+  return `<a class="h-li${open === false ? ' is-closed' : ''}" href="javascript:void(0)" onclick="openBusiness(${b.id})">
+    ${bizLogo(b, 'h-li-logo')}
+    <span class="h-li-t"><strong>${escHtml(b.name)}</strong><small>${escHtml(b.category_name || '')}${b.zone ? ' · ' + escHtml(b.zone) : ''}</small></span>
+    ${open !== null ? `<span class="h-st ${open ? 'on' : 'off'}">${open ? 'Abierto' : 'Cerrado'}</span>` : ''}
+    <svg class="h-li-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+  </a>`;
+}
+function toggleAllBiz(btn) {
+  var list = document.getElementById('allBizList');
+  if (!list) return;
+  var open = list.hasAttribute('hidden');
+  if (open) list.removeAttribute('hidden'); else list.setAttribute('hidden', '');
+  btn.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 function skeletonGrid() {
   return '<div class="h-grid">' + Array(5).join('<div class="h-card h-skel"><div class="h-card-ph"></div><div class="h-card-body"><div class="h-sk" style="width:70%"></div><div class="h-sk" style="width:45%;margin-top:6px"></div></div></div>') + '</div>';
