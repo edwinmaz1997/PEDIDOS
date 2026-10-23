@@ -299,6 +299,7 @@ function dismissInstall() {
         else if (a.id === 'updateAppBtn') { foot.insertBefore(li, foot.firstChild); }
       });
       if (foot.children.length) nav.parentNode.insertBefore(foot, nav.nextSibling);
+      if (!nav.querySelector('li')) nav.style.display = 'none';
     }
 
     // ── Botón hamburguesa ──
