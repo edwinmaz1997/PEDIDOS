@@ -55,7 +55,7 @@ if (!$skipRateLimit && !Security::checkRateLimit($ip, $endpoint)) {
     Response::error('Demasiadas solicitudes. Intenta de nuevo en un momento.', 429);
 }
 // Límite global por IP (todas las rutas juntas) para frenar ráfagas
-if (!Security::checkRateLimit($ip, '*', 900, 60)) {
+if (!$skipRateLimit && !Security::checkRateLimit($ip, '*', 1500, 60)) {
     Response::error('Demasiadas solicitudes. Intenta de nuevo en un momento.', 429);
 }
 
