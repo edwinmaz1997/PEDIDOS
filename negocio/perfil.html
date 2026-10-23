@@ -20,8 +20,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
-<link rel="stylesheet" href="/assets/css/cliente.css?v=202610230031">
-<link rel="stylesheet" href="/assets/css/negocio.css?v=202610230031">
+<link rel="stylesheet" href="/assets/css/cliente.css?v=202610230037">
+<link rel="stylesheet" href="/assets/css/negocio.css?v=202610230037">
 <style>
 .tabs { display:flex; gap:4px; background:var(--off-white); border-radius:var(--radius-sm); padding:4px; margin-bottom:28px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; width:100%; }
 .tabs::-webkit-scrollbar { display:none; }
@@ -173,7 +173,7 @@
                   <input type="number" id="f_delivery_fee" min="15" step="1" placeholder="15" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif">
                   <div style="font-size:.75rem;color:var(--muted);margin-top:3px">Puedes ajustar según la distancia</div>
                 </div>
-                <div class="form-group" style="margin:0">
+                <div class="form-group" style="margin:0;display:none">
                   <label style="font-size:.82rem">Pedido mínimo (Q) <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
                   <input type="number" id="f_min_order_delivery" min="0" step="1" placeholder="0" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif">
                   <div style="font-size:.75rem;color:var(--muted);margin-top:3px">Monto mínimo para hacer delivery</div>
@@ -488,7 +488,7 @@ async function saveInfo() {
     accepts_delivery: document.getElementById('f_accepts_delivery').checked ? 1 : 0,
     allows_dine_in: document.getElementById('f_allows_dine_in').checked ? 1 : 0,
     delivery_fee: parseFloat(document.getElementById('f_delivery_fee').value) || 15,
-    min_order_delivery: parseFloat(document.getElementById('f_min_order_delivery').value) || 0,
+    min_order_delivery: 0,
   };
   const res = await APP.put(`/businesses/${biz.id}`, data);
   if (res?.success) { APP.toast('Información guardada'); biz = {...biz, ...data}; document.getElementById('bizNameDisplay').textContent = data.name; }
@@ -702,6 +702,6 @@ function copySlugLink() {
   } catch(e){}
 })();
 </script>
-<script src="/assets/js/cliente-ui.js?v=202610230031"></script>
+<script src="/assets/js/cliente-ui.js?v=202610230037"></script>
 </body>
 </html>

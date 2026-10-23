@@ -95,12 +95,14 @@
   function startCleaner() {
     if (!IS_NEGOCIO) return;
     cleanAll(document.body);
-    var pending = false;
+    var queue = [], pending = false;
     new MutationObserver(function (muts) {
+      muts.forEach(function (m) { m.addedNodes.forEach(function (nd) { if (nd.nodeType === 1) queue.push(nd); }); });
       if (pending) return; pending = true;
       requestAnimationFrame(function () {
         pending = false;
-        muts.forEach(function (m) { m.addedNodes.forEach(function (nd) { if (nd.nodeType === 1) cleanAll(nd); }); });
+        var q = queue; queue = [];
+        q.forEach(function (nd) { if (nd.isConnected) cleanAll(nd); });
       });
     }).observe(document.body, { childList: true, subtree: true });
   }

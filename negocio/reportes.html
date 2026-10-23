@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
-<link rel="stylesheet" href="/assets/css/cliente.css?v=202610230031">
-<link rel="stylesheet" href="/assets/css/negocio.css?v=202610230031">
+<link rel="stylesheet" href="/assets/css/cliente.css?v=202610230037">
+<link rel="stylesheet" href="/assets/css/negocio.css?v=202610230037">
 <style>
 .report-tabs { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
 .report-tab { padding:10px 20px; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:white; font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-weight:600; font-size:.88rem; cursor:pointer; transition:var(--transition); }
@@ -262,21 +262,25 @@ function filterClientes() {
 
 function renderClientes(list) {
   if (!list.length) { document.getElementById('clientsTable').innerHTML = '<div class="empty-state"><p>No hay clientes.</p></div>'; return; }
-  var html = '<div style="overflow-x:auto"><table class="report-table"><thead><tr>' +
-    '<th>Cliente</th><th>Teléfono</th><th>Pedidos</th><th>Total consumido</th><th>Promedio</th><th>Producto favorito</th>' +
-    '</tr></thead><tbody>';
-  list.forEach(function(c, i) {
+  var html = '<div class="rc-list">' + list.map(function(c, i) {
     var star = Object.entries(c.products).sort(function(a,b){ return b[1]-a[1]; })[0];
-    html += '<tr>' +
-      '<td><strong>' + esc(c.name) + '</strong>' + (i===0?'  <span class="star-badge">🏆 Top cliente</span>':'') + '</td>' +
-      '<td>' + (c.phone ? '<a href="tel:'+esc(c.phone)+'">'+esc(c.phone)+'</a>' : '—') + '</td>' +
-      '<td><strong>' + c.orders + '</strong></td>' +
-      '<td><strong style="color:var(--blue)">' + money(c.total) + '</strong></td>' +
-      '<td>' + money(c.orders ? c.total/c.orders : 0) + '</td>' +
-      '<td>' + (star ? '<span class="star-badge">⭐ '+esc(star[0])+'</span> ×'+star[1] : '—') + '</td>' +
-    '</tr>';
-  });
-  html += '</tbody></table></div>';
+    var ini = esc(String(c.name||'C').trim().charAt(0).toUpperCase());
+    return '<div class="rc-item">' +
+      '<div class="rc-top">' +
+        '<div class="rc-av">' + ini + '</div>' +
+        '<div class="rc-main">' +
+          '<div class="rc-name">' + esc(c.name || 'Cliente') + (i===0 ? '<span class="rc-top-pill">Top</span>' : '') + '</div>' +
+          '<div class="rc-sub">' + (c.phone ? '<a href="tel:'+esc(c.phone)+'">'+esc(c.phone)+'</a>' : 'Sin teléfono') + '</div>' +
+        '</div>' +
+        '<div class="rc-total"><b>' + money(c.total) + '</b><small>consumido</small></div>' +
+      '</div>' +
+      '<div class="rc-stats">' +
+        '<span><b>' + c.orders + '</b> pedido' + (c.orders!==1?'s':'') + '</span>' +
+        '<span>Promedio <b>' + money(c.orders ? c.total/c.orders : 0) + '</b></span>' +
+        (star ? '<span class="rc-fav">' + esc(star[0]) + ' ×' + star[1] + '</span>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('') + '</div>';
   document.getElementById('clientsTable').innerHTML = html;
 }
 
@@ -708,6 +712,6 @@ function filterByPeriod(orders, period) {
 init();
 
 </script>
-<script src="/assets/js/cliente-ui.js?v=202610230031"></script>
+<script src="/assets/js/cliente-ui.js?v=202610230037"></script>
 </body>
 </html>

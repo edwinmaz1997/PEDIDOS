@@ -110,7 +110,8 @@ body.nb .promo-card, body.nb .anuncio-card, body.nb .an-card, body.nb .pm-card, 
 }
 
 /* Reportes */
-body.nb .report-section, body.nb .form-card { background: #fff; border-radius: 20px !important; border: 1px solid #edf0f5 !important; box-shadow: 0 6px 18px -14px rgba(15,23,42,.35); }
+body.nb .report-section { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+body.nb .form-card { background: #fff; border-radius: 20px !important; border: 1px solid #edf0f5 !important; box-shadow: 0 6px 18px -14px rgba(15,23,42,.35); }
 body.nb .report-table { font-size: .84rem; }
 body.nb .report-table th { white-space: nowrap; }
 
@@ -120,3 +121,21 @@ body.nb .page-btn.active { background: #0f172a !important; border-color: #0f172a
 
 /* Vacíos y cargando */
 body.nb .empty-state { background: #fff; border: 1px dashed #dbe1ea; border-radius: 20px; padding: 36px 20px !important; color: #64748b; }
+
+/* Reporte de clientes: tarjetas compactas */
+.rc-list { display: flex; flex-direction: column; gap: 8px; }
+.rc-item { background: #f8fafc; border-radius: 16px; padding: 12px; }
+.rc-top { display: flex; align-items: center; gap: 10px; }
+.rc-av { width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg,#e6f0fc,#e8f8ef); color: #2563b8; font-weight: 800; font-size: .9rem; display: flex; align-items: center; justify-content: center; }
+.rc-main { flex: 1; min-width: 0; }
+.rc-name { font-size: .86rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+.rc-top-pill { flex-shrink: 0; font-size: .6rem; font-weight: 800; color: #b45309; background: #fef3c7; padding: 2px 7px; border-radius: 999px; }
+.rc-sub { font-size: .74rem; color: #94a3b8; margin-top: 1px; }
+.rc-sub a { color: #2563b8; font-weight: 600; }
+.rc-total { text-align: right; flex-shrink: 0; line-height: 1.15; }
+.rc-total b { display: block; font-size: .92rem; font-weight: 800; color: #0f172a; }
+.rc-total small { font-size: .64rem; color: #94a3b8; font-weight: 600; }
+.rc-stats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.rc-stats span { font-size: .72rem; color: #64748b; background: #fff; border-radius: 999px; padding: 4px 10px; }
+.rc-stats b { color: #0f172a; font-weight: 800; }
+.rc-stats .rc-fav { color: #c2410c; background: #fff7ed; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

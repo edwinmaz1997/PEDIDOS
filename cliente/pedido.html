@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
-<link rel="stylesheet" href="/assets/css/cliente.css?v=202610230031">
+<link rel="stylesheet" href="/assets/css/cliente.css?v=202610230037">
 <style>
 .order-layout { display:grid; grid-template-columns:1fr 360px; gap:24px; max-width:1100px; margin:0 auto; padding:32px 24px; }
 @media(max-width:768px){ .order-layout{grid-template-columns:1fr;} }
@@ -1546,7 +1546,7 @@ function updateCart() {
   var needsComprasCalc  = orderType === 'compras' && window._comprasDeliveryFee == null;
   var needsDineInTime   = deliveryType === 'dine_in' && !document.getElementById('dineInTime')?.value;
 
-  var minOrder = parseFloat(business?.min_order_delivery || 0);
+  var minOrder = 0; // pedido mínimo desactivado
   var belowMin = orderType !== 'paquete' && orderType !== 'compras' && deliveryType === 'delivery' && minOrder > 0 && subtotal < minOrder;
 
   var minNotice = document.getElementById('minOrderNotice');
