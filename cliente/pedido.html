@@ -400,6 +400,14 @@ async function init() {
     if (business.business_type === 'delivery') {
       applyOrderType(urlOrderType);
     }
+
+    // Desde "Nuevo pedido": abrir directo la lista de productos
+    if (params.get('productos') === '1') {
+      try { var _u = new URL(location.href); _u.searchParams.delete('productos'); history.replaceState(null, '', _u.pathname + _u.search); } catch(_e) {}
+      if (!window._bizClosed && (business.products || []).length && typeof orderType !== 'undefined' && orderType !== 'paquete') {
+        setTimeout(openProductModal, 150);
+      }
+    }
   } catch(e) { console.error(e); }
 }
 
