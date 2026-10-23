@@ -84,6 +84,26 @@ class Security {
         return true;
     }
 
+    // ¿Ya alcanzó el límite? (no suma intento)
+    public static function isRateBlocked($key, $endpoint, $max, $window) {
+        $db = Database::connect();
+        $windowStart = date('Y-m-d H:i:s', time() - $window);
+        $stmt = $db->prepare("SELECT attempts FROM rate_limits WHERE ip_address = ? AND endpoint = ? AND window_start >= ?");
+        $stmt->execute([$key, $endpoint, $windowStart]);
+        $row = $stmt->fetch();
+        return $row && (int)$row['attempts'] >= $max;
+    }
+
+    // Registrar un intento fallido
+    public static function recordFailure($key, $endpoint, $window) {
+        self::checkRateLimit($key, $endpoint, PHP_INT_MAX, $window);
+    }
+
+    // Limpiar intentos (ej. después de un login correcto)
+    public static function clearRate($key, $endpoint) {
+        Database::connect()->prepare("DELETE FROM rate_limits WHERE ip_address = ? AND endpoint = ?")->execute([$key, $endpoint]);
+    }
+
     public static function hashPassword($password) {
         return password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
     }

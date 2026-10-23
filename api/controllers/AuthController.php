@@ -141,8 +141,10 @@ class AuthController {
     // --------------------------------------------------------
     public function login(array $body): void {
         $ip = Security::getClientIp();
-        if (!Security::checkRateLimit($ip, 'login', LOGIN_MAX_ATTEMPTS, LOGIN_LOCKOUT_TIME)) {
-            Response::error('Demasiados intentos fallidos. Cuenta bloqueada por 15 minutos.', 429);
+        // Solo cuentan los intentos FALLIDOS. Límite alto por IP porque en Guatemala muchos
+        // celulares comparten la misma IP (Tigo/Claro); el límite fuerte es por cuenta.
+        if (Security::isRateBlocked($ip, 'login-fail', 40, 900)) {
+            Response::error('Demasiados intentos fallidos desde esta red. Espera 15 minutos.', 429);
         }
 
         $email    = trim($body['email'] ?? '');
@@ -150,8 +152,9 @@ class AuthController {
 
         if (!$email || !$password) Response::error('Email y contraseña requeridos', 400);
         // Límite por cuenta (no depende de la IP, que se puede falsificar)
-        if (!Security::checkRateLimit('acct:' . md5(strtolower($email)), 'login-acct', 8, 900)) {
-            Response::error('Demasiados intentos para esta cuenta. Espera 15 minutos.', 429);
+        $acctKey = 'acct:' . md5(strtolower($email));
+        if (Security::isRateBlocked($acctKey, 'login-acct', 8, 900)) {
+            Response::error('Demasiados intentos fallidos para esta cuenta. Espera 15 minutos o restablece tu contraseña.', 429);
         }
 
         $stmt = $this->db->prepare("
@@ -166,8 +169,11 @@ class AuthController {
         // Timing-safe: always run verify even if user not found
         $hash = $user['password_hash'] ?? '$2y$12$invalidhashtopreventtiming';
         if (!$user || !Security::verifyPassword($password, $hash)) {
+            Security::recordFailure($ip, 'login-fail', 900);
+            Security::recordFailure($acctKey, 'login-acct', 900);
             Response::error('Credenciales incorrectas', 401);
         }
+        Security::clearRate($acctKey, 'login-acct');
         if (!$user['is_active']) Response::forbidden('Cuenta desactivada. Contacta soporte.');
 
         // Update last login
