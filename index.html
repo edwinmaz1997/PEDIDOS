@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     var panel = role === 'admin' ? '/admin/index.html' : (role === 'negocio' ? '/negocio/index.html' : (role === 'repartidor' ? '/repartidor/index.html' : '/cliente/index.html'));
     var first = escHtml(user.name.split(' ')[0]);
     navRight.innerHTML =
-      '<a href="' + panel + '" class="h-me"><span class="h-me-av">' + first.charAt(0).toUpperCase() + '</span><span class="h-me-t"><small>Hola,</small>' + first + '</span></a>';
+      '<a href="' + panel + '" class="h-btn h-btn-pri"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><rect width="7" height="9" x="3" y="3" rx="1.5"/><rect width="7" height="5" x="14" y="3" rx="1.5"/><rect width="7" height="9" x="14" y="12" rx="1.5"/><rect width="7" height="5" x="3" y="16" rx="1.5"/></svg>Mi panel</a>';
   }
   await loadCategories();
   await filterCategory(null, null);
