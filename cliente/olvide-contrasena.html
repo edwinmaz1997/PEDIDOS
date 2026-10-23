@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
+<link rel="stylesheet" href="/assets/css/auth.css?v=202610230015">
 <style>
 body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 .auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px}
@@ -25,25 +26,25 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 .success-box{background:#d4edda;border:1px solid #c3e6cb;border-radius:var(--radius-sm);padding:16px;font-size:.9rem;color:#155724;display:none}
 </style>
 </head>
-<body>
-<nav class="navbar"><div class="nav-inner"><a href="/" class="logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></a></div></nav>
+<body class="auth">
+<header class="a-top"><a href="/" class="a-back" aria-label="Volver al inicio"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></a><a href="login.html" class="a-top-link">Iniciar sesión</a></header>
 <div class="auth-wrap">
   <div class="auth-card">
-    <div class="auth-logo">Nueva<span>Express</span></div>
-    <h2 style="margin-bottom:6px">Olvidé mi contraseña</h2>
-    <p style="color:var(--muted);font-size:.9rem;margin-bottom:24px">Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.</p>
-    <div class="success-box" id="successBox">✅ Revisa tu correo. Si existe una cuenta con ese email, recibirás las instrucciones en unos minutos.</div>
+    <div class="a-head">
+      <div class="a-logo"><img src="/assets/img/logo.jpg" alt="NuevaExpress"></div>
+      <h1>¿Olvidaste tu contraseña?</h1>
+      <p>Escribe tu correo y te enviaremos un enlace para crear una nueva.</p>
+    </div>
+    <div class="success-box" id="successBox">Revisa tu correo. Si existe una cuenta con ese email, recibirás las instrucciones en unos minutos.</div>
     <div id="formWrap">
       <div class="form-group">
         <label>Correo electrónico</label>
         <input type="email" id="email" placeholder="tucorreo@ejemplo.com" autocomplete="email">
       </div>
-      <div id="errorMsg" style="color:var(--danger);font-size:.85rem;margin-bottom:12px;display:none"></div>
-      <button class="btn-primary" style="width:100%;justify-content:center;padding:13px" onclick="send()" id="sendBtn">Enviar enlace</button>
+      <div id="errorMsg" style="color:#b91c1c;font-size:.85rem;font-weight:600;margin-bottom:12px;display:none"></div>
+      <button class="btn-primary" onclick="send()" id="sendBtn">Enviar enlace</button>
     </div>
-    <p style="text-align:center;margin-top:20px;font-size:.9rem">
-      <a href="login.html" style="color:var(--accent);font-weight:600">← Volver al inicio de sesión</a>
-    </p>
+    <div class="a-links"><a href="login.html">Volver a iniciar sesión</a></div>
   </div>
 </div>
 <script>

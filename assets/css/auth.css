@@ -1,0 +1,94 @@
+/* ============================================================
+   NuevaExpress — Ingreso, registro y recuperar contraseña
+   ============================================================ */
+body.auth {
+  min-height: 100vh; display: flex; flex-direction: column; color: #0f172a;
+  background:
+    radial-gradient(900px 420px at 110% -10%, rgba(46,204,113,.18), transparent 60%),
+    radial-gradient(800px 420px at -10% -10%, rgba(74,144,217,.22), transparent 60%),
+    #f5f7fb;
+}
+.a-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(12px + env(safe-area-inset-top)) 16px 4px; max-width: 520px; width: 100%; margin: 0 auto; }
+.a-back { width: 42px; height: 42px; border-radius: 12px; background: #fff; border: 1px solid #e8ebf0; color: #1e293b; display: inline-flex; align-items: center; justify-content: center; }
+.a-top-link { height: 38px; padding: 0 14px; border-radius: 12px; display: inline-flex; align-items: center; background: #fff; border: 1px solid #e8ebf0; color: #2563b8; font-size: .82rem; font-weight: 800; text-decoration: none; }
+body.auth .auth-wrap { flex: 1; display: flex; align-items: flex-start; justify-content: center; padding: 12px 16px 40px; }
+body.auth .auth-card {
+  width: 100%; max-width: 440px; background: #fff; border: 1px solid #edf0f5; border-radius: 28px;
+  padding: 26px 22px 24px; box-shadow: 0 24px 50px -30px rgba(15,23,42,.45);
+}
+@media (min-height: 760px) { body.auth .auth-wrap { align-items: center; } }
+
+.a-head { text-align: center; margin-bottom: 20px; }
+.a-logo { width: 64px; height: 64px; border-radius: 20px; overflow: hidden; margin: 0 auto 14px; box-shadow: 0 14px 28px -14px rgba(53,120,199,.7); }
+.a-logo img { width: 100%; height: 100%; object-fit: cover; }
+.a-head h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -.03em; color: #0f172a; line-height: 1.2; }
+.a-head p { font-size: .88rem; color: #64748b; margin-top: 4px; }
+
+body.auth .form-group { margin-bottom: 14px; }
+body.auth .form-group label { display: block; font-size: .8rem; font-weight: 700; color: #334155; margin-bottom: 6px; }
+body.auth .form-group input {
+  width: 100%; height: 50px; padding: 0 14px; border: 1px solid #e3e7ee; border-radius: 14px; background: #f8fafc;
+  font: inherit; font-size: .92rem; color: #0f172a; outline: none; transition: border-color .15s, box-shadow .15s, background .15s;
+}
+body.auth .form-group input:focus { background: #fff; border-color: #4A90D9; box-shadow: 0 0 0 4px rgba(74,144,217,.12); }
+body.auth .form-group input::placeholder { color: #a0aec0; }
+body.auth .pw-wrap { position: relative; }
+body.auth .pw-wrap input { padding-right: 48px; }
+body.auth .pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; border-radius: 10px; border: 0; background: transparent; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0; }
+body.auth .pw-toggle svg { width: 20px; height: 20px; }
+body.auth .pw-toggle:hover { color: #475569; background: #f1f5f9; }
+
+.a-btn, body.auth .btn-primary {
+  width: 100%; height: 52px; border: 0; border-radius: 16px; cursor: pointer; font: inherit; font-weight: 800; font-size: .98rem; color: #fff;
+  background: linear-gradient(135deg,#4A90D9,#3578c7); box-shadow: 0 14px 26px -14px rgba(53,120,199,.95);
+  display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 !important; transition: transform .1s, filter .15s;
+}
+.a-btn:active, body.auth .btn-primary:active { transform: scale(.99); }
+body.auth .btn-primary:disabled { filter: grayscale(.4); opacity: .7; }
+
+.a-links { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 18px; font-size: .88rem; color: #64748b; }
+.a-links a { color: #2563b8; font-weight: 700; text-decoration: none; }
+.a-links a.muted { color: #64748b; font-weight: 600; }
+.a-sep { display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: .76rem; font-weight: 600; margin: 18px 0 0; }
+.a-sep::before, .a-sep::after { content: ''; flex: 1; height: 1px; background: #eef0f4; }
+
+body.auth .error-msg { background: #fef2f2 !important; border: 0 !important; color: #b91c1c !important; border-radius: 14px !important; padding: 12px 14px !important; font-size: .86rem !important; font-weight: 600; }
+body.auth .success-msg, body.auth .success-box { background: #ecfdf5 !important; border: 0 !important; color: #15803d !important; border-radius: 14px !important; padding: 12px 14px !important; font-size: .86rem !important; font-weight: 600; }
+
+/* Registro: pasos */
+body.auth .step-indicator { display: flex; align-items: center; gap: 8px; margin: 0 auto 20px; max-width: 220px; }
+body.auth .step-dot { width: 30px; height: 30px; border-radius: 10px; font-size: .8rem; font-weight: 800; }
+body.auth .step-dot.active { background: #4A90D9; color: #fff; box-shadow: 0 8px 16px -8px rgba(74,144,217,.9); }
+body.auth .step-dot.done { background: #22c55e; color: #fff; }
+body.auth .step-dot.pending { background: #eef1f5; color: #94a3b8; }
+body.auth .step-line { height: 3px; border-radius: 3px; background: #eef1f5; }
+body.auth .step-line.done { background: #86efac; }
+
+/* Registro: tipo de cuenta */
+body.auth .role-toggle { display: flex; gap: 4px; background: #f1f4f8; border-radius: 16px; padding: 4px; margin-bottom: 18px; }
+body.auth .role-btn { flex: 1; border: 0; border-radius: 12px; background: transparent; color: #64748b; padding: 9px 4px; font: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+body.auth .role-btn svg { width: 20px; height: 20px; }
+body.auth .role-btn.active { background: #fff; color: #0f172a; box-shadow: 0 4px 12px -6px rgba(15,23,42,.35); }
+body.auth .role-btn.active svg { color: #4A90D9; }
+body.auth .two-col { gap: 12px; }
+@media (max-width: 420px) { body.auth .two-col { grid-template-columns: 1fr !important; gap: 0; } }
+body.auth .pw-rules { font-size: .74rem; color: #94a3b8; margin-top: 6px; }
+
+/* Registro: instalar app (compacto) */
+.a-install { margin-bottom: 16px; border-radius: 16px; background: #f0f6fe; overflow: hidden; }
+.a-install > summary { list-style: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; font-size: .86rem; font-weight: 800; color: #1e3a8a; }
+.a-install > summary::-webkit-details-marker { display: none; }
+.a-install > summary .a-i-ic { width: 32px; height: 32px; border-radius: 10px; background: #fff; color: #4A90D9; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.a-install > summary .a-chev { margin-left: auto; color: #94a3b8; transition: transform .2s; }
+.a-install[open] > summary .a-chev { transform: rotate(180deg); }
+.a-install-body { padding: 0 14px 14px; }
+.a-install-body details { background: #fff; border-radius: 12px; padding: 8px 12px; margin-top: 8px; }
+.a-install-body summary { font-size: .82rem !important; }
+
+/* Código de verificación */
+body.auth .code-inputs { gap: 8px; margin: 20px 0; }
+body.auth .code-inputs input { width: 46px; height: 56px; border: 1px solid #e3e7ee; border-radius: 14px; background: #f8fafc; font-size: 1.5rem; font-weight: 800; font-family: inherit; color: #0f172a; }
+body.auth .code-inputs input:focus { background: #fff; border-color: #4A90D9; box-shadow: 0 0 0 4px rgba(74,144,217,.12); }
+@media (max-width: 360px) { body.auth .code-inputs input { width: 40px; height: 50px; } }
+.a-ok { width: 72px; height: 72px; border-radius: 24px; margin: 4px auto 16px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg,#22c55e,#16a34a); box-shadow: 0 16px 30px -14px rgba(22,163,74,.9); }
+.a-ok svg { width: 36px; height: 36px; }
