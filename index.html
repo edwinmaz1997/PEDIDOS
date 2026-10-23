@@ -20,83 +20,46 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/main.css?v=202610222210">
+<link rel="stylesheet" href="/assets/css/home.css?v=202610222300">
 </head>
-<body>
+<body class="home">
 
 <!-- NAVBAR -->
-<nav class="navbar">
-  <div class="nav-inner">
-    <a href="/" class="logo"><img src="assets/img/logo.jpg" alt="NuevaExpress" style="height:38px;border-radius:8px"><span class="logo-text">Nueva<span>Express</span></span></a>
-    <div class="nav-right">
-      <a href="cliente/login.html" class="btn-ghost">Ingresar</a>
-      <a href="cliente/register.html" class="btn-primary">Registrarse</a>
-    </div>
+<header class="h-nav">
+  <a href="/" class="h-brand"><img src="assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></a>
+  <div class="h-nav-r" id="navRight">
+    <a href="cliente/login.html" class="h-btn h-btn-ghost">Ingresar</a>
+    <a href="cliente/register.html" class="h-btn h-btn-pri">Registrarse</a>
   </div>
-</nav>
+</header>
 
 <!-- HERO -->
-<section class="hero">
-  <div class="hero-content">
-    <h1>Encuentra negocios<br><span class="accent" id="typedText"></span><span id="typedCursor" style="color:var(--gold);animation:blink .7s infinite">|</span></h1>
-    <div style="margin-bottom:18px;max-width:540px;margin-left:auto;margin-right:auto">
-      <div style="border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.3);position:relative">
-        <video id="heroVideo" src="/assets/video/hero.mp4" autoplay muted loop playsinline style="width:100%;display:block"></video>
-        <button id="heroSoundBtn" onclick="toggleHeroSound()" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.55);border:none;color:white;border-radius:50%;width:38px;height:38px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">🔇</button>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:10px;flex-wrap:wrap">
-        <a href="https://www.facebook.com/NuevaExpressGT" target="_blank" rel="noopener"
-          style="display:inline-flex;align-items:center;gap:8px;color:white;text-decoration:none;font-size:.9rem;font-weight:600;opacity:.9">
-          <span style="background:#1877F2;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;color:white;flex-shrink:0">f</span>
-          Facebook
-        </a>
-        <a href="https://www.tiktok.com/@nuevaexpress" target="_blank" rel="noopener"
-          style="display:inline-flex;align-items:center;gap:8px;color:white;text-decoration:none;font-size:.9rem;font-weight:600;opacity:.9">
-          <span style="background:#1a1a1a;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem;color:white;flex-shrink:0">♪</span>
-          TikTok
-        </a>
-      </div>
+<section class="h-hero">
+  <div class="h-hero-card">
+    <div class="h-hero-glow"></div>
+    <p class="h-kicker">Delivery y pedidos en Nueva Concepción</p>
+    <h1>Encuentra negocios<br><span id="typedText"></span><span id="typedCursor" class="h-cursor">|</span></h1>
+    <div class="h-search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="searchInput" placeholder="Busca restaurantes, farmacias, ceviches…" autocomplete="off">
+      <button onclick="doSearch()" class="h-search-go" aria-label="Buscar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
     </div>
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Busca restaurantes, ceviches, farmacias..." autocomplete="off">
-      <button onclick="doSearch()" class="btn-search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      </button>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:16px;justify-content:center">
-      <button onclick="openBusiness(5)" class="btn-primary" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;font-size:.88rem;white-space:nowrap">
-        🛵 Pedir ahora
-      </button>
-      <button onclick="goToPromotions()" class="btn-primary" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;font-size:.88rem;white-space:nowrap;background:linear-gradient(135deg,#F5C518,#FF8C42);color:#1a1a1a">
-        🏷️ Promociones
-      </button>
-    </div>
-
-    <style>
-      @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
-    </style>
-
+    <div class="h-cta">
+      <button onclick="openBusiness(5)" class="h-cta-main"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>Pedir ahora</button>
+      <button onclick="goToPromotions()" class="h-cta-alt"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor"/></svg>Promociones</button>
     </div>
   </div>
-  <div class="hero-bg"></div>
 </section>
 
 <!-- CATEGORIES -->
-<section class="categories-section">
-  <h2 style="text-align:center;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:16px;color:var(--navy)">Categorías</h2>
-  <div class="cat-carousel" style="max-width:1200px;margin:0 auto;padding:0 16px">
-    <button class="cat-arrow left" id="catPrev" onclick="scrollCats(-1)">‹</button>
-    <div class="categories-track" id="categoriesTrack"></div>
-    <button class="cat-arrow right" id="catNext" onclick="scrollCats(1)">›</button>
+<section class="h-sec">
+  <div class="h-sec-head">
+    <h2>Categorías</h2>
+    <button type="button" class="h-link" onclick="toggleAllCats(this)">Ver todas <span id="allCatsArrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button>
   </div>
-  <!-- Botón Ver todas -->
-  <div style="text-align:center;margin-top:12px">
-    <button onclick="toggleAllCats(this)" style="background:none;border:1.5px solid var(--border);border-radius:20px;padding:6px 18px;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.82rem;color:var(--muted);display:inline-flex;align-items:center;gap:6px;transition:.2s" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-      Ver todas <span id="allCatsArrow">▾</span>
-    </button>
-  </div>
-  <!-- Panel expandible -->
-  <div id="allCatsPanel" style="display:none;max-width:1200px;margin:12px auto 0;padding:0 16px">
-    <div id="allCatsGrid" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:16px;background:white;border-radius:var(--radius);border:1px solid var(--border)"></div>
+  <div class="categories-track h-cats" id="categoriesTrack"></div>
+  <div id="allCatsPanel" style="display:none">
+    <div id="allCatsGrid" class="h-cats-grid"></div>
   </div>
 </section>
 
@@ -107,36 +70,42 @@
 <section class="hidden" id="categoryResults" style="padding:24px 0"></section>
 
 <!-- SEARCH RESULTS -->
-<section class="search-results hidden" id="searchResults">
-  <div class="container">
-    <h2 class="section-title" id="searchTitle">Resultados</h2>
-    <div class="businesses-grid" id="resultsGrid"></div>
+<section class="search-results hidden h-sec" id="searchResults">
+  <div class="h-sec-head"><h2 id="searchTitle">Resultados</h2></div>
+  <div class="h-grid" id="resultsGrid"></div>
+</section>
+
+<!-- VIDEO -->
+<section class="h-sec h-video-sec">
+  <div class="h-sec-head"><h2>Conoce NuevaExpress</h2></div>
+  <div class="h-video">
+    <video id="heroVideo" src="/assets/video/hero.mp4" autoplay muted loop playsinline preload="metadata"></video>
+    <button id="heroSoundBtn" onclick="toggleHeroSound()" aria-label="Sonido"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/></svg></button>
+  </div>
+  <div class="h-social">
+    <a href="https://www.facebook.com/NuevaExpressGT" target="_blank" rel="noopener" class="h-soc fb"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook</a>
+    <a href="https://www.tiktok.com/@nuevaexpress" target="_blank" rel="noopener" class="h-soc tt"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>TikTok</a>
+    <a href="https://wa.me/50231586340?text=Hola%2C+necesito+m%C3%A1s+informaci%C3%B3n+sobre+NuevaExpress" target="_blank" rel="noopener" class="h-soc wa"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>WhatsApp</a>
   </div>
 </section>
 
 <!-- MODAL: Business Detail -->
 <div class="modal-overlay hidden" id="businessModal">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" onclick="closeModal()" aria-label="Cerrar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     <div id="modalContent"></div>
   </div>
 </div>
 
-<footer class="footer">
-  <div class="container">
-    <div class="logo" style="justify-content:center"><img src="assets/img/logo.jpg" alt="NuevaExpress" style="height:36px;border-radius:8px"><span class="logo-text">Nueva<span>Express</span></span></div>
-    <div style="display:flex;justify-content:center;gap:20px;margin:16px 0;flex-wrap:wrap">
-      <a href="/nosotros.html" style="color:rgba(255,255,255,.6);text-decoration:none;font-size:.88rem;transition:.2s" onmouseover="this.style.color='#F5C518'" onmouseout="this.style.color='rgba(255,255,255,.6)'">Sobre nosotros</a>
-      <a href="/terminos.html" style="display:none">Términos y condiciones</a>
-      <a href="https://wa.me/50231586340?text=Hola%2C+necesito+m%C3%A1s+informaci%C3%B3n+sobre+NuevaExpress" target="_blank" style="display:flex;align-items:center;gap:6px;color:#25d366;text-decoration:none;font-size:.88rem;font-weight:600">💬 WhatsApp</a>
-      <a href="https://www.tiktok.com/@nuevaexpress" target="_blank" rel="noopener" style="color:rgba(255,255,255,.6);text-decoration:none;font-size:.88rem" onmouseover="this.style.color='#F5C518'" onmouseout="this.style.color='rgba(255,255,255,.6)'">♪ TikTok</a>
-      <a href="https://www.facebook.com/NuevaExpressGT" target="_blank" style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.6);text-decoration:none;font-size:.88rem;transition:.2s" onmouseover="this.style.color='#F5C518'" onmouseout="this.style.color='rgba(255,255,255,.6)'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-        Facebook
-      </a>
-    </div>
-    <p>© <span id="yr"></span> NuevaExpress. Todos los derechos reservados.</p>
+<footer class="h-foot">
+  <div class="h-brand" style="justify-content:center"><img src="assets/img/logo.jpg" alt="NuevaExpress"><span class="logo-text">Nueva<span>Express</span></span></div>
+  <div class="h-foot-links">
+    <a href="/nosotros.html">Sobre nosotros</a>
+    <a href="https://wa.me/50231586340?text=Hola%2C+necesito+m%C3%A1s+informaci%C3%B3n+sobre+NuevaExpress" target="_blank" rel="noopener">WhatsApp</a>
+    <a href="https://www.facebook.com/NuevaExpressGT" target="_blank" rel="noopener">Facebook</a>
+    <a href="https://www.tiktok.com/@nuevaexpress" target="_blank" rel="noopener">TikTok</a>
   </div>
+  <p>© <span id="yr"></span> NuevaExpress. Todos los derechos reservados.</p>
 </footer>
 
 <script>
@@ -157,12 +126,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (token && user.name && navRight) {
     var role  = user.role || 'cliente';
     var panel = role === 'admin' ? '/admin/index.html' : (role === 'negocio' ? '/negocio/index.html' : (role === 'repartidor' ? '/repartidor/index.html' : '/cliente/index.html'));
+    var first = escHtml(user.name.split(' ')[0]);
     navRight.innerHTML =
-      '<a href="' + panel + '" class="btn-ghost" style="padding:7px 14px;font-size:.82rem">👤 ' + user.name.split(' ')[0] + '</a>' +
-      '<a href="' + panel + '" class="btn-primary" style="padding:7px 14px;font-size:.82rem">Mi panel</a>';
+      '<a href="' + panel + '" class="h-me"><span class="h-me-av">' + first.charAt(0).toUpperCase() + '</span><span class="h-me-t"><small>Hola,</small>' + first + '</span></a>';
   }
   await loadCategories();
-  await filterCategory(null, document.querySelector('.cat-chip.active'));
+  await filterCategory(null, null);
 });
 
 // ─── Load Categories ──────────────────────────────────────
@@ -175,74 +144,65 @@ async function loadCategories() {
   } catch(e) { console.error(e); }
 }
 
+var CAT_ICONS = {
+  utensils:'<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+  pills:'<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
+  'shopping-cart':'<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+  wrench:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  shirt:'<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>',
+  laptop:'<path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/>',
+  heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  store:'<path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M10 21v-5h4v5"/>',
+  all:'<rect width="7" height="7" x="3" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="3" rx="1.5"/><rect width="7" height="7" x="14" y="14" rx="1.5"/><rect width="7" height="7" x="3" y="14" rx="1.5"/>'
+};
+function catSvg(k){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(CAT_ICONS[k]||CAT_ICONS.store)+'</svg>'; }
+function catBtn(c, extra) {
+  var id = c ? c.id : null;
+  var color = c && c.color ? escHtml(c.color) : '#4A90D9';
+  return '<button class="cat-chip h-cat'+(id===activeCategory?' active':'')+'" data-cat="'+(id===null?'':id)+'" onclick="filterCategory('+id+', this)'+(extra||'')+'" style="--cat-color:'+color+'">' +
+    '<span class="h-cat-ic">'+catSvg(c ? c.icon : 'all')+'</span><span class="h-cat-t">'+(c ? escHtml(c.name) : 'Todos')+'</span></button>';
+}
 function renderCategories() {
-  const icons = { utensils:'🍴', pills:'💊', 'shopping-cart':'🛒', wrench:'🔧', shirt:'👕', laptop:'💻', heart:'💅', store:'🏪' };
-  const track = document.getElementById('categoriesTrack');
-  track.innerHTML = `
-    <button class="cat-chip active" onclick="filterCategory(null, this)">Todos</button>
-    ${categories.map(c => `
-      <button class="cat-chip" onclick="filterCategory(${c.id}, this)" style="--cat-color:${c.color}">
-        <span>${icons[c.icon] || '🏪'}</span> ${escHtml(c.name)}
-      </button>
-    `).join('')}
-  `;
-
-  // Llenar panel "Ver todas"
+  document.getElementById('categoriesTrack').innerHTML = catBtn(null) + categories.map(function(c){ return catBtn(c); }).join('');
   var grid = document.getElementById('allCatsGrid');
-  if (grid) {
-    grid.innerHTML = `
-      <button class="cat-chip active" onclick="filterCategory(null,this);closeCatsPanel()" style="font-size:.85rem">🏠 Todos</button>
-      ${categories.map(c => `
-        <button class="cat-chip" onclick="filterCategory(${c.id},this);closeCatsPanel()" style="--cat-color:${c.color};font-size:.85rem">
-          <span>${icons[c.icon] || '🏪'}</span> ${escHtml(c.name)}
-        </button>
-      `).join('')}
-    `;
-  }
-
-  // Iniciar carrusel después de renderizar
-  clearInterval(_catTimer);
-  setTimeout(initCatCarousel, 300);
+  if (grid) grid.innerHTML = catBtn(null, ';closeCatsPanel()') + categories.map(function(c){ return catBtn(c, ';closeCatsPanel()'); }).join('');
 }
 
 // ─── Filter by category ───────────────────────────────────
 async function filterCategory(id, btn) {
-  document.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
   activeCategory = id;
+  document.querySelectorAll('.cat-chip').forEach(b => b.classList.toggle('active', (b.dataset.cat || null) == (id === null ? null : String(id))));
+  var _ab = document.querySelector('#categoriesTrack .cat-chip.active');
+  if (_ab && id !== null && _ab.scrollIntoView) _ab.scrollIntoView({ inline:'nearest', block:'nearest', behavior:'smooth' });
   document.getElementById('searchResults').classList.add('hidden');
 
   if (!id) {
     // Todos — carrusel con todos los negocios
     document.getElementById('businessSections').classList.remove('hidden');
     document.getElementById('categoryResults').classList.add('hidden');
-    document.getElementById('businessSections').innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+    document.getElementById('businessSections').innerHTML = skeletonGrid();
     try {
       const res  = await fetch(`${API}/businesses?limit=100`);
       const data = await res.json();
       const all  = data.data?.businesses || [];
       if (!all.length) {
-        document.getElementById('businessSections').innerHTML = '<div class="empty-state"><p>No hay negocios registrados aún.</p></div>';
+        document.getElementById('businessSections').innerHTML = emptyHome('Aún no hay negocios registrados.');
         return;
       }
+      const featured = all.filter(b => parseInt(b.is_featured));
+      const sorted = all.slice().sort((a, b) => (isBusinessOpen(b) === false ? 0 : 1) - (isBusinessOpen(a) === false ? 0 : 1));
       document.getElementById('businessSections').innerHTML = `
-        <section class="biz-section">
-          <div class="container">
-            <div class="section-header">
-              <h2 class="section-title">Todos los negocios</h2>
-              <span style="font-size:.85rem;color:var(--muted)">${all.length} negocio${all.length!==1?'s':''}</span>
-            </div>
-            <div class="carousel-wrapper">
-              <button class="carousel-btn prev" onclick="slideCarousel('all', -1)">‹</button>
-              <div class="carousel-track" id="carousel-all">
-                ${all.map(b => renderCard(b)).join('')}
-              </div>
-              <button class="carousel-btn next" onclick="slideCarousel('all', 1)">›</button>
-            </div>
-          </div>
+        ${featured.length ? `
+        <section class="h-sec">
+          <div class="h-sec-head"><h2>Destacados</h2></div>
+          <div class="h-feat">${featured.map(b => renderFeatured(b)).join('')}</div>
+        </section>` : ''}
+        <section class="h-sec">
+          <div class="h-sec-head"><h2>Todos los negocios</h2><span class="h-count">${all.length}</span></div>
+          <div class="h-grid">${sorted.map(b => renderCard(b)).join('')}</div>
         </section>`;
     } catch(e) {
-      document.getElementById('businessSections').innerHTML = '<div class="empty-state"><p>Error cargando negocios.</p></div>';
+      document.getElementById('businessSections').innerHTML = emptyHome('No pudimos cargar los negocios. Revisa tu conexión.');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
@@ -252,7 +212,7 @@ async function filterCategory(id, btn) {
   document.getElementById('businessSections').classList.add('hidden');
   const catResults = document.getElementById('categoryResults');
   catResults.classList.remove('hidden');
-  catResults.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  catResults.innerHTML = '<section class="h-sec">' + skeletonGrid() + '</section>';
 
   try {
     const res  = await fetch(`${API}/businesses/by-category/${id}`);
@@ -260,19 +220,18 @@ async function filterCategory(id, btn) {
     const businesses = Array.isArray(data.data) ? data.data : (data.data?.businesses || []);
 
     if (!businesses.length) {
-      catResults.innerHTML = '<div class="empty-state"><p>No hay negocios en esta categoría aún.</p></div>';
+      catResults.innerHTML = '<section class="h-sec">' + emptyHome('Aún no hay negocios en esta categoría.') + '</section>';
       return;
     }
 
+    var _cat = categories.find(c => c.id == id);
     catResults.innerHTML = `
-      <div class="container">
-        <div style="margin-bottom:16px;font-size:.9rem;color:var(--muted)">${businesses.length} negocio${businesses.length!==1?'s':''} encontrado${businesses.length!==1?'s':''}</div>
-        <div class="businesses-grid">
-          ${businesses.map(b => renderCard(b)).join('')}
-        </div>
-      </div>`;
+      <section class="h-sec">
+        <div class="h-sec-head"><h2>${escHtml(_cat ? _cat.name : 'Negocios')}</h2><span class="h-count">${businesses.length}</span></div>
+        <div class="h-grid">${businesses.map(b => renderCard(b)).join('')}</div>
+      </section>`;
   } catch(e) {
-    catResults.innerHTML = '<div class="empty-state"><p>Error cargando negocios.</p></div>';
+    catResults.innerHTML = '<section class="h-sec">' + emptyHome('No pudimos cargar los negocios.') + '</section>';
   }
 }
 
@@ -347,29 +306,58 @@ function isBusinessOpen(business) {
   } catch(e) { return null; }
 }
 
+function bizLogo(b, cls) {
+  var ini = escHtml(String(b.name||'N').trim().charAt(0).toUpperCase());
+  return '<div class="'+cls+'">'+(b.logo ? '<img src="'+escHtml(b.logo)+'" alt="" loading="lazy" onerror="this.parentNode.textContent=\''+ini+'\'">' : ini)+'</div>';
+}
+function bizBadges(b) {
+  var open = isBusinessOpen(b);
+  var html = '';
+  if (open !== null) html += '<span class="h-st '+(open?'on':'off')+'">'+(open?'Abierto':'Cerrado')+'</span>';
+  if (b.business_type === 'delivery' || b.accepts_delivery) html += '<span class="h-dl" title="Delivery"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>'+(b.business_type === 'delivery' ? 'Solo delivery' : 'Delivery')+'</span>';
+  return html;
+}
 function renderCard(b) {
-  const photo = b.photos?.[0]?.photo_url || b.cover_photo || 'assets/img/placeholder.svg';
-  const products = (b.products_preview || []).slice(0,3).map(p => `<span class="tag">${escHtml(p.name)}</span>`).join('');
-  const openStatus = isBusinessOpen(b);
+  const photo = b.photos?.[0]?.photo_url || b.cover_photo || '';
+  const open = isBusinessOpen(b);
   return `
-    <article class="biz-card ${b.is_featured ? 'biz-card-featured' : ''}" onclick="openBusiness(${b.id})">
-      <div class="card-photo" style="background-image:url('${escHtml(photo)}')">
-        <span class="card-badge" style="background:${escHtml(b.category_color || '#888')}">${escHtml(b.category_name || '')}</span>
-        ${b.is_featured ? '<span style="position:absolute;top:8px;right:8px;background:#f59e0b;color:white;font-size:.85rem;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2)">⭐</span>' : ''}
-        ${b.business_type === 'delivery' ? '<span class="card-delivery" style="background:#FF8C42">🛵 Solo Delivery</span>' : b.accepts_delivery ? '<span class="card-delivery">🛵 Delivery</span>' : ''}
-        ${openStatus !== null ? `<span style="position:absolute;bottom:8px;left:8px;background:${openStatus ? 'rgba(34,197,94,.92)' : 'rgba(239,68,68,.92)'};color:white;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:white${openStatus ? ';animation:pulse 2s infinite' : ''}"></span>${openStatus ? 'Abierto' : 'Cerrado'}</span>` : ''}
+    <article class="h-card${open === false ? ' is-closed' : ''}" onclick="openBusiness(${b.id})">
+      <div class="h-card-ph" ${photo ? `style="background-image:url('${escHtml(photo)}')"` : ''}>
+        ${photo ? '' : `<span class="h-card-ph-ini">${escHtml(String(b.name||'N').charAt(0).toUpperCase())}</span>`}
+        <div class="h-card-badges">${bizBadges(b)}</div>
+        ${parseInt(b.is_featured) ? '<span class="h-star" title="Destacado"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg></span>' : ''}
       </div>
-      <div class="card-body">
+      <div class="h-card-body">
+        ${bizLogo(b, 'h-card-logo')}
         <h3>${escHtml(b.name)}</h3>
-        <p class="card-desc">${escHtml((b.description || '').slice(0,80))}${b.description?.length > 80 ? '...' : ''}</p>
-        <div class="card-tags">${products}</div>
-        <div class="card-footer">
-          ${b.rating > 0 ? `<span class="rating">★ ${parseFloat(b.rating).toFixed(1)}</span>` : ''}
-          ${b.zone ? `<span class="zone">📍 ${escHtml(b.zone)}</span>` : ''}
+        <p>${escHtml(b.category_name || '')}${b.zone ? ' · ' + escHtml(b.zone) : ''}</p>
+        ${b.rating > 0 ? `<span class="h-rate">★ ${parseFloat(b.rating).toFixed(1)}</span>` : ''}
+      </div>
+    </article>`;
+}
+function renderFeatured(b) {
+  const photo = b.photos?.[0]?.photo_url || b.cover_photo || '';
+  const products = (b.products_preview || []).slice(0,3).map(p => `<span>${escHtml(p.name)}</span>`).join('');
+  return `
+    <article class="h-fcard" onclick="openBusiness(${b.id})">
+      <div class="h-fcard-ph" ${photo ? `style="background-image:url('${escHtml(photo)}')"` : ''}>
+        <div class="h-card-badges">${bizBadges(b)}</div>
+      </div>
+      <div class="h-fcard-body">
+        ${bizLogo(b, 'h-card-logo')}
+        <div style="min-width:0;flex:1">
+          <h3>${escHtml(b.name)}</h3>
+          <p>${escHtml((b.description || b.category_name || '').slice(0,70))}</p>
+          ${products ? `<div class="h-tags">${products}</div>` : ''}
         </div>
       </div>
-    </article>
-  `;
+    </article>`;
+}
+function skeletonGrid() {
+  return '<div class="h-grid">' + Array(5).join('<div class="h-card h-skel"><div class="h-card-ph"></div><div class="h-card-body"><div class="h-sk" style="width:70%"></div><div class="h-sk" style="width:45%;margin-top:6px"></div></div></div>') + '</div>';
+}
+function emptyHome(t) {
+  return '<div class="h-empty"><div class="h-empty-ic"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M10 21v-5h4v5"/></svg></div><p>'+t+'</p></div>';
 }
 
 // ─── Search ───────────────────────────────────────────────
@@ -393,7 +381,7 @@ async function doSearch() {
     document.getElementById('searchTitle').textContent = `${results.length} resultado${results.length !== 1 ? 's' : ''} para "${q}"`;
     document.getElementById('resultsGrid').innerHTML = results.length
       ? results.map(b => renderCard(b)).join('')
-      : '<div class="empty-state"><p>Sin resultados. Intenta con otro término.</p></div>';
+      : emptyHome('Sin resultados. Prueba con otra palabra.');
   } catch(e) { console.error(e); }
 }
 
@@ -505,7 +493,7 @@ async function openBusiness(id) {
   const content = document.getElementById('modalContent');
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
-  content.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  content.innerHTML = '<div class="h-modal-skel"><div></div><div style="width:60%"></div><div style="width:40%"></div></div>';
 
   try {
     const res = await fetch(`${API}/businesses/${id}`);
@@ -541,22 +529,20 @@ async function openBusiness(id) {
         ${b.description ? `<p class="modal-desc">${escHtml(b.description)}</p>` : ''}
         ${b.what_we_offer ? `<div class="modal-section"><h4>¿Qué ofrecemos?</h4><p>${escHtml(b.what_we_offer)}</p></div>` : ''}
         <div class="modal-meta">
-          ${b.address ? `<div class="meta-item">📍 <span>${escHtml(b.address)}${b.zone ? ', ' + escHtml(b.zone) : ''}</span></div>` : ''}
-          ${b.email ? `<div class="meta-item">✉️ <a href="mailto:${escHtml(b.email)}">${escHtml(b.email)}</a></div>` : ''}
-          ${b.accepts_delivery && b.business_type !== 'servicios' ? `<div class="meta-item">🛵 <span>Delivery disponible</span></div>` : ''}
+          ${b.address ? `<div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg><span>${escHtml(b.address)}${b.zone ? ', ' + escHtml(b.zone) : ''}</span></div>` : ''}
+          ${b.email ? `<div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><a href="mailto:${escHtml(b.email)}">${escHtml(b.email)}</a></div>` : ''}
+          ${b.accepts_delivery && b.business_type !== 'servicios' ? `<div class="meta-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg><span>Delivery disponible</span></div>` : ''}
         </div>
         ${b.latitude && b.longitude ? `
-          <a href="https://www.google.com/maps?q=${b.latitude},${b.longitude}" target="_blank" class="btn-maps">
-            🗺️ Ver en Google Maps
-          </a>` : b.google_maps_url ? `<a href="${escHtml(b.google_maps_url)}" target="_blank" class="btn-maps">🗺️ Ver en Google Maps</a>` : ''}
+          <a href="https://www.google.com/maps?q=${b.latitude},${b.longitude}" target="_blank" class="btn-maps"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>Ver en Google Maps</a>` : b.google_maps_url ? `<a href="${escHtml(b.google_maps_url)}" target="_blank" class="btn-maps"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>Ver en Google Maps</a>` : ''}
         ${b.business_type === 'servicios' ? `
           <div class="modal-section" id="servicesSection">
-            <h4>🔧 Servicios que ofrecemos</h4>
+            <h4>Servicios que ofrecemos</h4>
             <div id="servicesList"><div class="loading-state" style="padding:20px"><div class="spinner"></div></div></div>
           </div>
           <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
-            ${b.phone ? `<a href="tel:${escHtml(b.phone)}" class="btn-order" style="flex:1;text-align:center;text-decoration:none">📞 Llamar ahora</a>` : ''}
-            ${b.whatsapp ? `<a href="https://wa.me/${escHtml(b.whatsapp.replace(/\D/g,''))}?text=${encodeURIComponent('Hola, encontré tus servicios en NuevaExpress y me gustaría más información.')}" target="_blank" class="btn-order" style="flex:1;text-align:center;text-decoration:none;background:#25d366">💬 WhatsApp</a>` : ''}
+            ${b.phone ? `<a href="tel:${escHtml(b.phone)}" class="btn-order" style="flex:1;text-align:center;text-decoration:none">Llamar ahora</a>` : ''}
+            ${b.whatsapp ? `<a href="https://wa.me/${escHtml(b.whatsapp.replace(/\D/g,''))}?text=${encodeURIComponent('Hola, encontré tus servicios en NuevaExpress y me gustaría más información.')}" target="_blank" class="btn-order" style="flex:1;text-align:center;text-decoration:none;background:#25d366">WhatsApp</a>` : ''}
           </div>
         ` : `
           ${products.length ? `
@@ -577,15 +563,15 @@ async function openBusiness(id) {
           ${b.business_type === 'delivery' ? `
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px">
               <a href="cliente/pedido.html?business=${b.id}&type=pedido" class="btn-order" style="text-align:center;text-decoration:none;background:var(--accent)">
-                🛒 Hacer Pedido
+                Hacer pedido
               </a>
               <a href="cliente/pedido.html?business=${b.id}&type=paquete" class="btn-order" style="text-align:center;text-decoration:none;background:#FF8C42">
-                📦 Enviar Paquete
+                Enviar paquete
               </a>
             </div>
           ` : `
           <a href="cliente/pedido.html?business=${b.id}" class="btn-order">
-            🛒 Hacer un Pedido
+            Hacer un pedido
           </a>
           `}
         `}
@@ -664,19 +650,15 @@ function scrollCats(dir) {
 
 function toggleAllCats(btn) {
   var panel = document.getElementById('allCatsPanel');
-  var arrow = document.getElementById('allCatsArrow');
   var open  = panel.style.display === 'none';
   panel.style.display = open ? 'block' : 'none';
-  arrow.textContent   = open ? '▴' : '▾';
-  btn.style.color     = open ? 'var(--blue)' : 'var(--muted)';
-  btn.style.borderColor = open ? 'var(--blue)' : 'var(--border)';
+  if (btn) btn.classList.toggle('open', open);
 }
 
 function closeCatsPanel() {
   var panel = document.getElementById('allCatsPanel');
-  var arrow = document.getElementById('allCatsArrow');
   if (panel) panel.style.display = 'none';
-  if (arrow) arrow.textContent = '▾';
+  document.querySelectorAll('.h-link.open').forEach(function(b){ b.classList.remove('open'); });
 }
 
 var _catTimer = null;
@@ -704,7 +686,8 @@ function startBizCarouselScroll(trackId) {
   t.addEventListener('touchstart', function(){ clearInterval(_bizScrollTimer); }, {passive:true});
   t.addEventListener('touchend', function(){ setTimeout(function(){ startBizCarouselScroll(trackId); }, 2500); }, {passive:true});
 }
-function initCatCarousel() {
+function initCatCarousel() { return; // desplazamiento automático desactivado
+
   var t = document.getElementById('categoriesTrack');
   if (!t) return;
   clearInterval(_catTimer);
@@ -765,8 +748,10 @@ setTimeout(initCatCarousel, 1500);
 function toggleHeroSound() {
   var v = document.getElementById('heroVideo');
   var btn = document.getElementById('heroSoundBtn');
-  if (v.muted) { v.muted = false; btn.textContent = '🔊'; }
-  else { v.muted = true; btn.textContent = '🔇'; }
+  var on = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg>';
+  var off = '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/>';
+  if (v.muted) { v.muted = false; btn.innerHTML = on; }
+  else { v.muted = true; btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + off + '</svg>'; }
 }
 </script>
 </body>
