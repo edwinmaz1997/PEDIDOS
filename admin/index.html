@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
-<link rel="stylesheet" href="/assets/css/admin.css?v=202610230056">
+<link rel="stylesheet" href="/assets/css/admin.css?v=202610230059">
 </head>
 <body>
 <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
@@ -47,42 +47,18 @@
   <main class="main-content">
     <div class="page-header"><h1>Dashboard</h1><p>Resumen general del sistema</p></div>
 
-    <!-- MODO LLUVIA -->
-    <div id="rainModeCard" style="background:#1e3a5f;border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:1.8rem">🌧️</span>
-        <div>
-          <div style="color:#fff;font-weight:700;font-size:1rem">Modo Lluvia</div>
-          <div id="rainModeStatus" style="color:#93c5fd;font-size:.82rem">Cargando estado...</div>
-        </div>
+    <!-- MODOS: LLUVIA Y MANTENIMIENTO -->
+    <div class="md-grid">
+      <div class="md-card md-rain" id="rainModeCard">
+        <div class="md-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg></div>
+        <div class="md-t"><strong>Modo lluvia</strong><span id="rainModeStatus">Cargando…</span></div>
+        <button type="button" class="md-sw" id="rainModeSwitch" role="switch" aria-checked="false" aria-label="Modo lluvia" onclick="toggleMode('rain')"><i></i></button>
       </div>
-      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
-        <span id="rainModeLabel" style="color:#fff;font-size:.88rem;font-weight:600">DESACTIVADO</span>
-        <div style="position:relative;width:52px;height:28px" onclick="toggleRainMode()">
-          <input type="checkbox" id="rainModeToggle" style="opacity:0;width:0;height:0;position:absolute">
-          <div id="rainModeTrack" style="position:absolute;inset:0;border-radius:14px;background:#374151;transition:.3s;cursor:pointer"></div>
-          <div id="rainModeThumb" style="position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.3s;cursor:pointer"></div>
-        </div>
-      </label>
-    </div>
-
-    <!-- MODO MANTENIMIENTO -->
-    <div id="maintenanceModeCard" style="background:#422006;border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:1.8rem">🔧</span>
-        <div>
-          <div style="color:#fff;font-weight:700;font-size:1rem">Modo Mantenimiento</div>
-          <div id="maintenanceModeStatus" style="color:#fdba74;font-size:.82rem">Cargando estado...</div>
-        </div>
+      <div class="md-card md-maint" id="maintenanceModeCard">
+        <div class="md-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <div class="md-t"><strong>Mantenimiento</strong><span id="maintenanceModeStatus">Cargando…</span></div>
+        <button type="button" class="md-sw" id="maintenanceModeSwitch" role="switch" aria-checked="false" aria-label="Modo mantenimiento" onclick="toggleMode('maintenance')"><i></i></button>
       </div>
-      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none">
-        <span id="maintenanceModeLabel" style="color:#fff;font-size:.88rem;font-weight:600">DESACTIVADO</span>
-        <div style="position:relative;width:52px;height:28px" onclick="toggleMaintenanceMode()">
-          <input type="checkbox" id="maintenanceModeToggle" style="opacity:0;width:0;height:0;position:absolute">
-          <div id="maintenanceModeTrack" style="position:absolute;inset:0;border-radius:14px;background:#374151;transition:.3s;cursor:pointer"></div>
-          <div id="maintenanceModeThumb" style="position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.3s;cursor:pointer"></div>
-        </div>
-      </label>
     </div>
 
     <div class="stats-grid" id="statsGrid">
@@ -239,97 +215,54 @@ async function doReset() {
 loadDashboard();
 setInterval(loadDashboard, 30000);
 
-// ── RAIN MODE ────────────────────────────────────────────
-var _rainMode = false;
-
-function applyRainUI(enabled) {
-  _rainMode = enabled;
-  var track = document.getElementById('rainModeTrack');
-  var thumb = document.getElementById('rainModeThumb');
-  var label = document.getElementById('rainModeLabel');
-  var status = document.getElementById('rainModeStatus');
-  if (enabled) {
-    track.style.background = '#3b82f6';
-    thumb.style.left = '27px';
-    label.textContent = 'ACTIVADO';
-    status.textContent = '⚠️ Deliverys suspendidos — clientes y negocios están bloqueados';
-    status.style.color = '#fbbf24';
-  } else {
-    track.style.background = '#374151';
-    thumb.style.left = '3px';
-    label.textContent = 'DESACTIVADO';
-    status.textContent = 'Los pedidos delivery funcionan con normalidad';
-    status.style.color = '#93c5fd';
+// ── MODOS: LLUVIA Y MANTENIMIENTO ────────────────────────
+var MODES = {
+  rain:        { url: '/api/admin/rain-mode',        key: 'rain_mode',        card: 'rainModeCard',        sw: 'rainModeSwitch',        st: 'rainModeStatus',
+                 on: 'Deliverys suspendidos', off: 'Deliverys normales', value: false, busy: false },
+  maintenance: { url: '/api/admin/maintenance-mode', key: 'maintenance_mode', card: 'maintenanceModeCard', sw: 'maintenanceModeSwitch', st: 'maintenanceModeStatus',
+                 on: 'Solo recoger disponible', off: 'Plataforma normal', value: false, busy: false }
+};
+function asBool(v) { return v === true || v === 1 || v === '1' || v === 'true'; }
+function applyMode(name, enabled) {
+  var m = MODES[name]; m.value = !!enabled;
+  var card = document.getElementById(m.card), sw = document.getElementById(m.sw), st = document.getElementById(m.st);
+  if (card) card.classList.toggle('on', m.value);
+  if (sw) { sw.setAttribute('aria-checked', m.value ? 'true' : 'false'); sw.classList.toggle('busy', m.busy); }
+  if (st) st.textContent = m.busy ? 'Guardando…' : (m.value ? m.on : m.off);
+}
+async function loadMode(name) {
+  var m = MODES[name];
+  if (m.busy) return;
+  try {
+    var r = await fetch(m.url, { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') }, cache: 'no-store' });
+    var d = await r.json();
+    if (d && d.success) applyMode(name, asBool(d.data && d.data[m.key]));
+  } catch (e) {}
+}
+async function toggleMode(name) {
+  var m = MODES[name];
+  if (m.busy) return;
+  var want = !m.value;
+  m.busy = true; applyMode(name, want);
+  try {
+    var r = await fetch(m.url, {
+      method: 'POST', cache: 'no-store',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
+      body: JSON.stringify({ enabled: want })
+    });
+    var d = await r.json();
+    m.busy = false;
+    if (d && d.success) applyMode(name, asBool(d.data && d.data[m.key]));
+    else { applyMode(name, !want); alert((d && d.message) || 'No se pudo cambiar el modo'); }
+  } catch (e) {
+    m.busy = false; applyMode(name, !want); alert('Error de conexión, intenta de nuevo');
   }
 }
-
-async function loadRainMode() {
-  try {
-    var res = await fetch('/api/admin/rain-mode', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
-    var d = await res.json();
-    applyRainUI(d.data && d.data.rain_mode);
-  } catch(e) {}
-}
-
-async function toggleRainMode() {
-  var newVal = !_rainMode;
-  applyRainUI(newVal);
-  try {
-    await fetch('/api/admin/rain-mode', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
-      body: JSON.stringify({ enabled: newVal })
-    });
-  } catch(e) { applyRainUI(!newVal); }
-}
-
-loadRainMode();
-
-// ── MAINTENANCE MODE ─────────────────────────────────────
-var _maintenanceMode = false;
-
-function applyMaintenanceUI(enabled) {
-  _maintenanceMode = enabled;
-  var track = document.getElementById('maintenanceModeTrack');
-  var thumb = document.getElementById('maintenanceModeThumb');
-  var label = document.getElementById('maintenanceModeLabel');
-  var status = document.getElementById('maintenanceModeStatus');
-  if (enabled) {
-    track.style.background = '#f97316';
-    thumb.style.left = '27px';
-    label.textContent = 'ACTIVADO';
-    status.textContent = '⚠️ Plataforma en mantenimiento — solo recoger disponible';
-    status.style.color = '#fbbf24';
-  } else {
-    track.style.background = '#374151';
-    thumb.style.left = '3px';
-    label.textContent = 'DESACTIVADO';
-    status.textContent = 'La plataforma funciona con normalidad';
-    status.style.color = '#fdba74';
-  }
-}
-
-async function loadMaintenanceMode() {
-  try {
-    var res = await fetch('/api/admin/maintenance-mode', { headers: { Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') } });
-    var d = await res.json();
-    applyMaintenanceUI(d.data && d.data.maintenance_mode);
-  } catch(e) {}
-}
-
-async function toggleMaintenanceMode() {
-  var newVal = !_maintenanceMode;
-  applyMaintenanceUI(newVal);
-  try {
-    await fetch('/api/admin/maintenance-mode', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
-      body: JSON.stringify({ enabled: newVal })
-    });
-  } catch(e) { applyMaintenanceUI(!newVal); }
-}
-
-loadMaintenanceMode();
+// Compatibilidad con nombres anteriores
+var toggleRainMode = function(){ toggleMode('rain'); };
+var toggleMaintenanceMode = function(){ toggleMode('maintenance'); };
+loadMode('rain');
+loadMode('maintenance');
 </script>
 
 <script>

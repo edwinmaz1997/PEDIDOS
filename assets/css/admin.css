@@ -73,3 +73,25 @@
 .stat-card::before { display: none !important; }
 .stat-label { font-size: .62rem !important; font-weight: 800 !important; color: #94a3b8 !important; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stat-value { font-size: 1.25rem !important; font-weight: 800 !important; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Modo lluvia / mantenimiento: tarjetas compactas */
+.md-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+@media (max-width: 560px) { .md-grid { grid-template-columns: 1fr; gap: 8px; } }
+.md-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: #fff; border: 1px solid #edf0f5; box-shadow: 0 6px 16px -14px rgba(15,23,42,.4); min-width: 0; transition: background .2s, border-color .2s; }
+.md-ic { width: 34px; height: 34px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.md-ic svg { width: 18px; height: 18px; }
+.md-rain .md-ic { background: #eff6ff; color: #2563eb; }
+.md-maint .md-ic { background: #fff7ed; color: #ea580c; }
+.md-t { flex: 1; min-width: 0; line-height: 1.2; }
+.md-t strong { display: block; font-size: .82rem; font-weight: 800; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.md-t span { display: block; font-size: .68rem; color: #94a3b8; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.md-sw { position: relative; width: 42px; height: 24px; flex-shrink: 0; border: 0; border-radius: 999px; background: #dbe1ea; cursor: pointer; padding: 0; transition: background .2s; }
+.md-sw i { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: left .2s; }
+.md-sw[aria-checked="true"] i { left: 21px; }
+.md-sw.busy { opacity: .6; cursor: progress; }
+.md-rain.on { background: #eff6ff; border-color: #bfdbfe; }
+.md-rain.on .md-sw { background: #2563eb; }
+.md-rain.on .md-t span { color: #1d4ed8; }
+.md-maint.on { background: #fff7ed; border-color: #fed7aa; }
+.md-maint.on .md-sw { background: #f97316; }
+.md-maint.on .md-t span { color: #c2410c; }
