@@ -339,13 +339,10 @@ body.cx .star-badge { background: #fff7ed; color: #c2410c; }
 .cx-post-body h4 { font-size: .98rem; font-weight: 800; color: #0f172a; line-height: 1.3; letter-spacing: -.01em; }
 .cx-post-body p { font-size: .84rem; color: #64748b; line-height: 1.5; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
-/* Hojas modales (bottom sheet en móvil) */
-@media (max-width: 768px) {
-  body.cx .cx-sheet { align-items: flex-end !important; padding: 0 !important; }
-  body.cx .cx-sheet > div { border-radius: 24px 24px 0 0 !important; max-height: 92vh !important; animation: cxSheetUp .25s cubic-bezier(.4,0,.2,1); }
-}
-@keyframes cxSheetUp { from { transform: translateY(40px); opacity: .5; } to { transform: none; opacity: 1; } }
-body.cx .cx-sheet { z-index: 1150 !important; background: rgba(15,23,42,.5) !important; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+/* Modales centrados */
+body.cx .cx-sheet { align-items: center !important; justify-content: center !important; padding: 16px !important; z-index: 1150 !important; background: rgba(15,23,42,.5) !important; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+body.cx .cx-sheet > div { border-radius: 22px !important; max-height: 88vh !important; animation: cxPop .2s cubic-bezier(.4,0,.2,1); }
+@keyframes cxPop { from { transform: scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
 .cx-grab { width: 40px; height: 4px; border-radius: 999px; background: #d6dbe3; margin: 8px auto 0; }
 
 /* Perfil */
