@@ -588,3 +588,17 @@ body.px .success-screen h2 { font-size: 1.4rem; font-weight: 800; letter-spacing
 .px-ok svg { width: 36px; height: 36px; }
 .px-about p { font-size: .84rem; color: #334155; line-height: 1.55; padding: 6px 0; white-space: pre-line; }
 .px-about-h { font-size: .78rem; font-weight: 800; color: #0f172a; margin-top: 6px; }
+
+/* Guía para copiar ubicación de Google Maps */
+.mg-box { background: #fff; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; border-radius: 24px; padding: 22px 20px 16px; box-shadow: 0 30px 60px -20px rgba(15,23,42,.5); }
+.mg-ic { width: 56px; height: 56px; border-radius: 18px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg,#4A90D9,#2ECC71); box-shadow: 0 12px 24px -12px rgba(74,144,217,.9); }
+.mg-ic svg { width: 28px; height: 28px; }
+.mg-box h3 { text-align: center; font-size: 1.12rem; font-weight: 800; color: #0f172a; letter-spacing: -.02em; }
+.mg-sub { text-align: center; font-size: .84rem; color: #64748b; margin: 4px 0 14px; }
+.mg-steps { list-style: none; display: flex; flex-direction: column; gap: 10px; margin: 0 0 16px; padding: 0; }
+.mg-steps li { display: flex; gap: 12px; align-items: flex-start; background: #f8fafc; border-radius: 14px; padding: 10px 12px; }
+.mg-steps li > span { width: 26px; height: 26px; border-radius: 9px; flex-shrink: 0; background: #4A90D9; color: #fff; font-size: .8rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.mg-steps li div { font-size: .8rem; color: #64748b; line-height: 1.4; }
+.mg-steps li strong { display: block; font-size: .86rem; color: #0f172a; margin-bottom: 1px; }
+.mg-ok { width: 100%; height: 50px; border: 0; border-radius: 15px; cursor: pointer; font: inherit; font-size: .95rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,#4A90D9,#3578c7); box-shadow: 0 12px 24px -12px rgba(53,120,199,.9); }
+.mg-cancel { width: 100%; margin-top: 6px; height: 40px; border: 0; background: none; cursor: pointer; font: inherit; font-size: .86rem; font-weight: 600; color: #64748b; }

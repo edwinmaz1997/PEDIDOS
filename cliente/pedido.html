@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
-<link rel="stylesheet" href="/assets/css/cliente.css?v=202610222341">
+<link rel="stylesheet" href="/assets/css/cliente.css?v=202610230004">
 <style>
 .order-layout { display:grid; grid-template-columns:1fr 360px; gap:24px; max-width:1100px; margin:0 auto; padding:32px 24px; }
 @media(max-width:768px){ .order-layout{grid-template-columns:1fr;} }
@@ -216,17 +216,17 @@
             <div class="px-addr-label">¿A dónde te lo llevamos?</div>
             <div class="px-addr">
               <span class="px-addr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span>
-              <input type="text" id="deliveryAddress" placeholder="Dirección o link de Google Maps" style="flex:1;min-width:0;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;box-sizing:border-box" oninput="previewDeliveryMap()">
+              <input type="text" id="deliveryAddress" placeholder="Link de Google Maps" style="flex:1;min-width:0;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;box-sizing:border-box" oninput="previewDeliveryMap()">
               </div>
             <div class="px-addr-actions">
               <button type="button" id="gpsBtn" onclick="getGPSLocation()" class="px-act px-act-dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg><span>Mi ubicación</span></button>
-              <a href="https://www.google.com/maps" target="_blank" class="px-act" onclick="setTimeout(function(){var i=document.getElementById('deliveryAddress');if(i)i.placeholder='Pega aquí el link copiado de Google Maps...';},500)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg><span>Elegir en Maps</span></a>
+              <a href="#" class="px-act" onclick="openMapsGuide();return false;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg><span>Elegir en Maps</span></a>
             </div>
             <div id="gpsStatus" style="display:none;font-size:.78rem;color:var(--muted);margin-bottom:4px"></div>
             <div id="deliveryMapPreview" style="display:none;margin-bottom:6px">
               <a id="deliveryMapLink" href="#" target="_blank" class="px-chip-ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>Ver en Google Maps</a>
             </div>
-            <div class="px-hint">Toca <b>Mi ubicación</b> si estás en el lugar de entrega, o elige el punto en Maps y pega el link arriba.</div>
+            <div class="px-hint">Toca <b>Mi ubicación</b> si estás en el lugar de entrega, o <b>Elegir en Maps</b> para marcar otro punto y pegar el link aquí.</div>
           </div>
           <!-- Calculadora de envío por distancia -->
           <div id="deliveryCalcWrap" style="margin-top:10px">
@@ -1920,5 +1920,33 @@ document.getElementById('customItems').addEventListener('input', updateCart);
   <button onclick="closeProductPhoto()" style="position:fixed;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;font-size:1.4rem;width:40px;height:40px;border-radius:50%;cursor:pointer">✕</button>
 </div>
 
+
+<!-- Guía: cómo copiar la ubicación de Google Maps -->
+<div id="mapsGuide" class="pm-overlay" style="display:none;z-index:1500" onclick="if(event.target===this)closeMapsGuide()">
+  <div class="mg-box" role="dialog" aria-labelledby="mgTitle">
+    <div class="mg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></div>
+    <h3 id="mgTitle">¿Cómo compartir tu ubicación?</h3>
+    <p class="mg-sub">Te llevaremos a Google Maps. Sigue estos pasos y regresa aquí:</p>
+    <ol class="mg-steps">
+      <li><span>1</span><div><strong>Busca el lugar de entrega</strong>Mueve el mapa hasta tu casa o el punto donde recibirás el pedido.</div></li>
+      <li><span>2</span><div><strong>Mantén presionado el punto exacto</strong>Deja tu dedo sobre el lugar hasta que aparezca un pin rojo.</div></li>
+      <li><span>3</span><div><strong>Toca «Compartir»</strong>Desliza hacia arriba la tarjeta de abajo si no ves el botón.</div></li>
+      <li><span>4</span><div><strong>Toca «Copiar»</strong>Se copiará el link de tu ubicación.</div></li>
+      <li><span>5</span><div><strong>Regresa y pégalo</strong>Vuelve a NuevaExpress y pega el link en el campo «Link de Google Maps».</div></li>
+    </ol>
+    <button type="button" class="mg-ok" onclick="goToMapsFromGuide()">Entiendo</button>
+    <button type="button" class="mg-cancel" onclick="closeMapsGuide()">Cancelar</button>
+  </div>
+</div>
+<script>
+function openMapsGuide(){ document.getElementById('mapsGuide').style.display = 'flex'; }
+function closeMapsGuide(){ document.getElementById('mapsGuide').style.display = 'none'; }
+function goToMapsFromGuide(){
+  closeMapsGuide();
+  var i = document.getElementById('deliveryAddress');
+  if (i) i.placeholder = 'Pega aquí el link copiado de Google Maps';
+  window.open('https://www.google.com/maps', '_blank');
+}
+</script>
 </body>
 </html>
