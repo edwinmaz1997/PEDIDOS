@@ -586,3 +586,5 @@ body.px .success-screen { max-width: 520px; margin: 24px auto; background: #fff;
 body.px .success-screen h2 { font-size: 1.4rem; font-weight: 800; letter-spacing: -.02em; }
 .px-ok { width: 72px; height: 72px; border-radius: 24px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg,#22c55e,#16a34a); box-shadow: 0 16px 30px -14px rgba(22,163,74,.9); animation: cxPop .3s cubic-bezier(.4,0,.2,1); }
 .px-ok svg { width: 36px; height: 36px; }
+.px-about p { font-size: .84rem; color: #334155; line-height: 1.55; padding: 6px 0; white-space: pre-line; }
+.px-about-h { font-size: .78rem; font-weight: 800; color: #0f172a; margin-top: 6px; }

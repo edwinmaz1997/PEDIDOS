@@ -331,7 +331,7 @@ function renderCard(b) {
   const photo = b.photos?.[0]?.photo_url || b.cover_photo || '';
   const open = isBusinessOpen(b);
   return `
-    <article class="h-card${open === false ? ' is-closed' : ''}" onclick="openBusiness(${b.id})">
+    <article class="h-card${open === false ? ' is-closed' : ''}" onclick="goBusiness(${b.id}, '${escHtml(b.business_type || '')}')">
       <div class="h-card-ph" ${photo ? `style="background-image:url('${escHtml(photo)}')"` : ''}>
         ${photo ? '' : `<span class="h-card-ph-ini">${escHtml(String(b.name||'N').charAt(0).toUpperCase())}</span>`}
         <div class="h-card-badges">${bizBadges(b)}</div>
@@ -350,7 +350,7 @@ function renderFeatured(b) {
   const photo = b.photos?.[0]?.photo_url || b.cover_photo || '';
   const products = (b.products_preview || []).slice(0,3).map(p => `<span>${escHtml(p.name)}</span>`).join('');
   return `
-    <article class="h-fcard" onclick="openBusiness(${b.id})">
+    <article class="h-fcard" onclick="goBusiness(${b.id}, '${escHtml(b.business_type || '')}')">
       <div class="h-fcard-ph" ${photo ? `style="background-image:url('${escHtml(photo)}')"` : ''}>
         <div class="h-card-badges">${bizBadges(b)}</div>
       </div>
@@ -364,9 +364,13 @@ function renderFeatured(b) {
       </div>
     </article>`;
 }
+function goBusiness(id, type) {
+  if (type === 'servicios') return openBusiness(id);
+  window.location.href = 'cliente/pedido.html?business=' + id + (type === 'delivery' ? '&type=pedido' : '');
+}
 function renderRow(b) {
   const open = isBusinessOpen(b);
-  return `<a class="h-li${open === false ? ' is-closed' : ''}" href="javascript:void(0)" onclick="openBusiness(${b.id})">
+  return `<a class="h-li${open === false ? ' is-closed' : ''}" href="javascript:void(0)" onclick="goBusiness(${b.id}, '${escHtml(b.business_type || '')}')">
     ${bizLogo(b, 'h-li-logo')}
     <span class="h-li-t"><strong>${escHtml(b.name)}</strong><small>${escHtml(b.category_name || '')}${b.zone ? ' · ' + escHtml(b.zone) : ''}</small></span>
     ${open !== null ? `<span class="h-st ${open ? 'on' : 'off'}">${open ? 'Abierto' : 'Cerrado'}</span>` : ''}
