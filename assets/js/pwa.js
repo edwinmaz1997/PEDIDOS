@@ -527,7 +527,7 @@ function _nxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/<
 })();
 // ── Sistema de actualización de app ─────────────────────────
 (function() {
-  var APP_VERSION = '1.0.12'; // Incrementar en cada deploy importante
+  var APP_VERSION = '1.0.13'; // Incrementar en cada deploy importante
   var stored = localStorage.getItem('nx_app_version');
 
   function forceUpdateFn() {
@@ -577,4 +577,38 @@ function _nxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/<
   } else {
     setTimeout(checkVersion, 600);
   }
+})();
+
+// ── Admin viendo como otro usuario: barra para volver ─────────
+(function () {
+  var raw = null;
+  try { raw = localStorage.getItem('nx_admin_backup'); } catch (e) {}
+  if (!raw) return;
+  var bk; try { bk = JSON.parse(raw); } catch (e) { return; }
+  var cur = {}; try { cur = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}'); } catch (e) {}
+  if (!bk || !bk.token || !cur.role || !localStorage.getItem('nuevaexpress_token') || cur.role === 'admin') { if (cur.role === 'admin') try { localStorage.removeItem('nx_admin_backup'); } catch (e) {} return; }
+
+  function goBack() {
+    var tok = localStorage.getItem('nuevaexpress_token');
+    // Cerrar la sesión temporal del negocio
+    try { fetch('/api/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + tok } }); } catch (e) {}
+    localStorage.setItem('nuevaexpress_token', bk.token);
+    if (bk.user) localStorage.setItem('nuevaexpress_user', bk.user);
+    localStorage.removeItem('nx_admin_backup');
+    window.location.href = bk.back || '/admin/negocios.html';
+  }
+  window.nxBackToAdmin = goBack;
+
+  function show() {
+    if (document.getElementById('nxImpBar')) return;
+    var bar = document.createElement('div');
+    bar.id = 'nxImpBar';
+    bar.style.cssText = 'position:fixed;left:0;right:0;margin:0 auto;width:max-content;bottom:calc(76px + env(safe-area-inset-bottom));z-index:3000;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;border-radius:999px;background:#0f172a;color:#fff;box-shadow:0 14px 30px -12px rgba(15,23,42,.7);font:600 .8rem "Plus Jakarta Sans",system-ui,sans-serif;max-width:calc(100vw - 24px)';
+    var name = String(cur.name || 'usuario').replace(/[<>&"]/g, '');
+    bar.innerHTML = '<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Viendo como <b>' + name + '</b></span>' +
+      '<button type="button" style="flex-shrink:0;height:32px;padding:0 14px;border:0;border-radius:999px;background:#fff;color:#0f172a;font:800 .78rem inherit;font-family:inherit;cursor:pointer">Volver al admin</button>';
+    bar.querySelector('button').onclick = goBack;
+    document.body.appendChild(bar);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show); else show();
 })();

@@ -224,7 +224,7 @@ function renderTable(list) {
         </button>
         <button class="icon-btn" onclick="editBiz(${b.id})" title="Editar">✏️</button>
         <button class="icon-btn" onclick="viewBiz(${b.id})" title="Ver">👁</button>
-        <button class="icon-btn" onclick="connectAsBiz(${b.user_id})" title="Conectar como negocio" style="background:#e0f2fe;border-color:#7dd3fc;font-size:.75rem;padding:4px 8px;width:auto;border-radius:6px">🔗 Conectar</button>
+        <button class="icon-btn" onclick="connectAsBiz(${b.user_id})" title="Conectar como negocio" style="background:#e0f2fe;border-color:#7dd3fc;font-size:.75rem;padding:4px 8px;width:auto;border-radius:6px">Entrar al panel</button>
         <button class="icon-btn ${b.is_verified?'':'success'}" onclick="toggleVerify(${b.id}, ${b.is_verified})">
           ${b.is_verified?'✓':'✓'}
         </button>
@@ -292,7 +292,8 @@ function editBiz(id) { window.location.href = 'editar-negocio.html?id=' + id; }
 function viewBiz(id) { window.open('/negocio.html?id=' + id, '_blank'); }
 
 async function connectAsBiz(userId) {
-  if (!confirm('¿Iniciar sesión como este negocio? Se abrirá en una nueva pestaña.')) return;
+  if (!userId) { alert('Este negocio no tiene un usuario dueño asignado.'); return; }
+  if (!confirm('¿Entrar al panel de este negocio? Podrás volver al admin con el botón "Volver al admin".')) return;
   var res = await fetch('/api/impersonate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('nuevaexpress_token') },
@@ -300,8 +301,19 @@ async function connectAsBiz(userId) {
   });
   var data = await res.json();
   if (!data.success) { alert('Error: ' + (data.message || 'No se pudo conectar')); return; }
-  var token = data.data.token;
-  window.open('/negocio/index.html#tk=' + token, '_blank');
+  if (data.data.user.role !== 'negocio' && !confirm('El dueño de este negocio tiene rol "' + data.data.user.role + '", no "negocio". ¿Entrar a su panel de todas formas?')) return;
+  // Guardar la sesión del admin para poder regresar, y entrar como el negocio en esta misma pestaña
+  try {
+    localStorage.setItem('nx_admin_backup', JSON.stringify({
+      token: localStorage.getItem('nuevaexpress_token'),
+      user: localStorage.getItem('nuevaexpress_user'),
+      back: location.pathname + location.search
+    }));
+  } catch (e) {}
+  localStorage.setItem('nuevaexpress_token', data.data.token);
+  localStorage.setItem('nuevaexpress_user', JSON.stringify(data.data.user));
+  var role = data.data.user.role;
+  window.location.href = role === 'negocio' ? '/negocio/index.html' : role === 'repartidor' ? '/repartidor/index.html' : role === 'admin' ? '/admin/index.html' : '/cliente/index.html';
 }
 
 async function deleteBiz(id, name) {
@@ -326,6 +338,6 @@ function toggleSidebar() {
 }
 </script>
 
-<script src="/assets/js/pwa.js?v=202610222210"></script>
+<script src="/assets/js/pwa.js?v=202610231000"></script>
 </body>
 </html>
