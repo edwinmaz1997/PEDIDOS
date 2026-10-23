@@ -1750,7 +1750,8 @@ function openProductPhoto(src, name) {
 }
 function closeProductPhoto() {
   document.getElementById('productLightbox').style.display = 'none';
-  document.body.style.overflow = '';
+  var _pm = document.getElementById('productModal');
+  if (!_pm || _pm.style.display === 'none') document.body.style.overflow = '';
 }
 
 init();
