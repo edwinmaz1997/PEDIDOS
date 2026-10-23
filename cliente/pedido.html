@@ -14,7 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Hacer Pedido — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .order-layout { display:grid; grid-template-columns:1fr 360px; gap:24px; max-width:1100px; margin:0 auto; padding:32px 24px; }
@@ -32,9 +32,9 @@
 .cart-summary { position:sticky; top:80px; }
 .cart-item { display:flex; justify-content:space-between; font-size:.9rem; margin-bottom:8px; }
 .cart-divider { border:none; border-top:1px solid var(--border); margin:12px 0; }
-.cart-total { display:flex; justify-content:space-between; font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; }
+.cart-total { display:flex; justify-content:space-between; font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-weight:700; font-size:1.1rem; }
 .delivery-toggle { display:flex; gap:8px; margin-bottom:16px; }
-.delivery-btn { flex:1; padding:10px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:white; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:500; transition:var(--transition); text-align:center; }
+.delivery-btn { flex:1; padding:10px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:white; cursor:pointer; font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-size:.9rem; font-weight:500; transition:var(--transition); text-align:center; }
 .delivery-btn.active { background:var(--charcoal); color:white; border-color:var(--charcoal); }
 .fee-row { display:flex; justify-content:space-between; font-size:.85rem; color:var(--muted); margin-bottom:6px; }
 .custom-item { display:flex; gap:8px; margin-bottom:8px; }
@@ -67,7 +67,7 @@
         <h4 style="margin-bottom:10px;font-size:.95rem">O escribe tu pedido personalizado</h4>
         <div id="customItems">
           <div class="custom-item">
-            <input type="text" class="custom-input" placeholder="Ej: 2 ceviches mixtos, extra limón..." style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;width:100%">
+            <input type="text" class="custom-input" placeholder="Ej: 2 ceviches mixtos, extra limón..." style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;width:100%">
           </div>
         </div>
         <button class="btn-ghost" style="font-size:.85rem;padding:7px 14px;margin-top:8px" onclick="addCustomRow()">+ Agregar línea</button>
@@ -113,7 +113,7 @@
             </label>
             <div id="pickupManualWrap">
               <div style="display:flex;gap:8px;margin-bottom:6px">
-                <input type="text" id="pickupAddress" placeholder="Dirección de recogida o link de Maps" style="flex:1;min-width:0;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box" oninput="onPickupAddressInput()">
+                <input type="text" id="pickupAddress" placeholder="Dirección de recogida o link de Maps" style="flex:1;min-width:0;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;box-sizing:border-box" oninput="onPickupAddressInput()">
                 <button onclick="getGPSForField('pickupAddress','pickupGpsStatus')" title="Obtener ubicación" style="padding:9px 12px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;flex-shrink:0">📍</button>
               </div>
               <div style="margin-bottom:6px">
@@ -129,7 +129,7 @@
           <!-- Dirección de entrega -->
           <div style="background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px">
             <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">🏁 Dirección de entrega</div>
-            <input type="text" id="dropoffAddress" placeholder="Escribe la dirección o pega un link de Google Maps" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box;margin-bottom:8px" oninput="previewDropoffMap()">
+            <input type="text" id="dropoffAddress" placeholder="Escribe la dirección o pega un link de Google Maps" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;box-sizing:border-box;margin-bottom:8px" oninput="previewDropoffMap()">
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <a href="https://www.google.com/maps" target="_blank" onclick="openMapsForDropoff(event)"
                 style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#1a73e8;color:white;border-radius:var(--radius-sm);text-decoration:none;font-size:.82rem;font-weight:600">
@@ -153,14 +153,14 @@
           <!-- Datos del destinatario -->
           <div style="background:#f3e5f5;border:1.5px solid #ce93d8;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px">
             <div style="font-weight:700;font-size:.9rem;margin-bottom:8px">👤 Datos del destinatario</div>
-            <input type="text" id="recipientName" placeholder="Nombre de quien recibe" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;margin-bottom:8px;box-sizing:border-box">
-            <input type="tel" id="recipientPhone" placeholder="Teléfono del destinatario" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+            <input type="text" id="recipientName" placeholder="Nombre de quien recibe" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;margin-bottom:8px;box-sizing:border-box">
+            <input type="tel" id="recipientPhone" placeholder="Teléfono del destinatario" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;box-sizing:border-box">
           </div>
 
           <!-- Descripción del paquete -->
           <div class="form-group">
             <label style="font-size:.85rem;font-weight:600">📝 ¿Qué es el paquete?</label>
-            <input type="text" id="packageDesc" placeholder="Ej: Documentos, ropa, comida..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+            <input type="text" id="packageDesc" placeholder="Ej: Documentos, ropa, comida..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;box-sizing:border-box">
           </div>
         </div>
 
@@ -213,7 +213,7 @@
           <!-- Manual address input -->
           <div id="manualAddressWrap">
             <div style="display:flex;gap:8px;margin-bottom:6px">
-              <input type="text" id="deliveryAddress" placeholder="Dirección o link de Google Maps" style="flex:1;min-width:0;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;box-sizing:border-box" oninput="previewDeliveryMap()">
+              <input type="text" id="deliveryAddress" placeholder="Dirección o link de Google Maps" style="flex:1;min-width:0;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;box-sizing:border-box" oninput="previewDeliveryMap()">
               <button id="gpsBtn" onclick="getGPSLocation()" title="Obtener mi ubicación" style="padding:10px 14px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:1rem;flex-shrink:0;transition:var(--transition)">📍</button>
             </div>
             <div style="margin-bottom:6px">
@@ -439,7 +439,7 @@ function renderBizInfo() {
     hoursHtml = `
       <div style="margin-top:10px">
         <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arr').textContent=this.nextElementSibling.style.display==='block'?'▲':'▼'"
-          style="background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;cursor:pointer;font-size:.8rem;display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif">
+          style="background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;cursor:pointer;font-size:.8rem;display:flex;align-items:center;gap:6px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif">
           <span style="color:${statusColor};font-weight:600">${statusText}</span>
           <span style="color:var(--muted)">· Horarios</span>
           <span class="arr" style="color:var(--muted);font-size:.7rem">▼</span>
@@ -464,7 +464,7 @@ function renderBizInfo() {
     ${business.id === 5 ? `
     <div style="margin-top:14px">
       <button onclick="var c=document.getElementById('preciosInfo');var a=document.getElementById('preciosArr');var open=c.style.display==='block';c.style.display=open?'none':'block';a.textContent=open?'▼':'▲';"
-        style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;color:#c2410c">
+        style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem;font-weight:600;color:#c2410c">
         <span>❓ ¿Alguna duda con nuestros precios?</span>
         <span id="preciosArr" style="font-size:.7rem;color:var(--muted)">▼</span>
       </button>
@@ -543,9 +543,9 @@ function renderProductModal(searchQ, catId) {
   });
 
   // Category tabs
-  var catTabs = '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat===null?'var(--blue)':'var(--border)')+';background:'+(cat===null?'var(--blue)':'white')+';color:'+(cat===null?'white':'var(--ink)')+';font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="filterProdCat(null,this)">🏷️ Todas</button>';
+  var catTabs = '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat===null?'var(--blue)':'var(--border)')+';background:'+(cat===null?'var(--blue)':'white')+';color:'+(cat===null?'white':'var(--ink)')+';font-family:Plus Jakarta Sans,system-ui,Segoe UI,Roboto,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="filterProdCat(null,this)">🏷️ Todas</button>';
   Object.entries(catMap).forEach(function(e){
-    catTabs += '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat==e[0]?'var(--blue)':'var(--border)')+';background:'+(cat==e[0]?'var(--blue)':'white')+';color:'+(cat==e[0]?'white':'var(--ink)')+';font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="filterProdCat('+e[0]+',this)">'+(e[1].icon)+' '+esc(e[1].name)+'</button>';
+    catTabs += '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat==e[0]?'var(--blue)':'var(--border)')+';background:'+(cat==e[0]?'var(--blue)':'white')+';color:'+(cat==e[0]?'white':'var(--ink)')+';font-family:Plus Jakarta Sans,system-ui,Segoe UI,Roboto,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="filterProdCat('+e[0]+',this)">'+(e[1].icon)+' '+esc(e[1].name)+'</button>';
   });
   document.getElementById('prodCatTabs').innerHTML = catTabs;
 
@@ -584,7 +584,7 @@ function renderProductModal(searchQ, catId) {
           '<div style="font-weight:700;color:var(--blue);margin-top:4px;font-size:.9rem" id="price-'+p.id+'">'+displayPrice+'</div>' +
         '</div>' +
         (hasExtras
-          ? '<button onclick="openCustomizeModal('+p.id+')" style="padding:8px 14px;border-radius:20px;border:none;background:var(--accent);color:white;font-size:.82rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">🎨 Personalizar</button>'
+          ? '<button onclick="openCustomizeModal('+p.id+')" style="padding:8px 14px;border-radius:20px;border:none;background:var(--accent);color:white;font-size:.82rem;font-weight:700;cursor:pointer;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif;white-space:nowrap">🎨 Personalizar</button>'
           : '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
             '<button onclick="changeQty('+p.id+',-1)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:white;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">−</button>' +
             '<span id="qty-'+p.id+'" style="font-weight:700;min-width:20px;text-align:center;font-size:.95rem">'+qty+'</span>' +
@@ -695,7 +695,7 @@ function addCustomRow() {
   const wrap = document.getElementById('customItems');
   const div  = document.createElement('div');
   div.className = 'custom-item';
-  div.innerHTML = `<input type="text" class="custom-input" placeholder="Descripción del producto..." style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;width:100%"><button onclick="this.parentElement.remove();updateCart()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem">×</button>`;
+  div.innerHTML = `<input type="text" class="custom-input" placeholder="Descripción del producto..." style="padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;width:100%"><button onclick="this.parentElement.remove();updateCart()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem">×</button>`;
   wrap.appendChild(div);
 }
 
@@ -1833,7 +1833,7 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     <button onclick="addCustomizedToCart()" class="btn-primary" style="width:100%;justify-content:center;padding:12px">
       🛒 Agregar al carrito
     </button>
-    <button onclick="document.getElementById('customizeModal').style.display='none'" style="width:100%;margin-top:6px;padding:10px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem">
+    <button onclick="document.getElementById('customizeModal').style.display='none'" style="width:100%;margin-top:6px;padding:10px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem">
       Cancelar
     </button>
   </div>
@@ -1844,10 +1844,10 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     <!-- Header -->
     <div style="padding:18px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h2 style="font-size:1.1rem;font-family:'Syne',sans-serif">🛍️ Seleccionar productos</h2>
+        <h2 style="font-size:1.1rem;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif">🛍️ Seleccionar productos</h2>
         <button onclick="closeProductModal()" style="background:var(--off-white);border:none;width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
       </div>
-      <input type="text" id="prodSearch" placeholder="🔍 Buscar producto..." oninput="renderProductModal()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;margin-bottom:10px;transition:.2s" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+      <input type="text" id="prodSearch" placeholder="🔍 Buscar producto..." oninput="renderProductModal()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;margin-bottom:10px;transition:.2s" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
       <div id="prodCatTabs" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none"></div>
     </div>
     <!-- Product list -->

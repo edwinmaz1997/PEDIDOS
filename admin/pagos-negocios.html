@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Pagos a negocios — Admin NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .pago-card { background:white; border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:14px; }
@@ -58,13 +58,13 @@
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <label style="font-size:.85rem;font-weight:600">Desde:</label>
-          <input type="date" id="dateFrom" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+          <input type="date" id="dateFrom" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem">
           <label style="font-size:.85rem;font-weight:600">Hasta:</label>
-          <input type="date" id="dateTo" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+          <input type="date" id="dateTo" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem">
           <button onclick="setQuick('today')" class="btn-ghost" style="padding:9px 14px">Hoy</button>
           <button onclick="setQuick('week')" class="btn-ghost" style="padding:9px 14px">Semana</button>
           <button onclick="setQuick('month')" class="btn-ghost" style="padding:9px 14px">Mes</button>
-          <select id="bizFilter" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;background:white">
+          <select id="bizFilter" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;background:white">
             <option value="">Todos los negocios</option>
           </select>
           <button onclick="loadReport()" class="btn-primary" style="padding:9px 18px">Ver pagos</button>

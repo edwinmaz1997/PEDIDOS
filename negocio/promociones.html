@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Promociones — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .promo-card { background:white; border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:16px; }
@@ -111,7 +111,7 @@
     </div>
     <div class="form-group">
       <label>Descripción * <span style="font-weight:400;color:var(--muted)">(esto le llegará a los clientes)</span></label>
-      <textarea id="p_desc" rows="3" placeholder="Hoy tu combo de alitas a Q125, precio normal Q150..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical"></textarea>
+      <textarea id="p_desc" rows="3" placeholder="Hoy tu combo de alitas a Q125, precio normal Q150..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;resize:vertical"></textarea>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="form-group">
@@ -138,7 +138,7 @@
       <!-- Aplicar descuento por porcentaje -->
       <div style="display:flex;gap:8px;align-items:center;background:#fff8e1;border:1.5px solid #ffe082;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;flex-wrap:wrap">
         <span style="font-size:.85rem;font-weight:600;white-space:nowrap">🏷️ Aplicar % de descuento:</span>
-        <input type="number" id="promoPercent" placeholder="10" min="1" max="90" style="width:70px;padding:7px 8px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.88rem">
+        <input type="number" id="promoPercent" placeholder="10" min="1" max="90" style="width:70px;padding:7px 8px;border:1.5px solid var(--border);border-radius:6px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem">
         <span style="font-size:.85rem;color:var(--muted)">%</span>
         <button onclick="applyPercentDiscount()" class="btn-primary" style="padding:7px 16px;font-size:.82rem">Aplicar a seleccionados</button>
         <span style="font-size:.76rem;color:var(--muted);width:100%">Selecciona los productos abajo, luego escribe el % y aplica — puedes seguir ajustando precios manualmente después.</span>
@@ -147,7 +147,7 @@
       <!-- Buscador y categorías -->
       <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
         <input type="text" id="promoSearch" placeholder="🔍 Buscar producto..." oninput="filterPromoProducts()"
-          style="flex:1;min-width:160px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem">
+          style="flex:1;min-width:160px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem">
       </div>
       <div id="promoCatFilter" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:8px"></div>
       <div style="display:flex;gap:8px;margin-bottom:8px">
@@ -358,9 +358,9 @@ function renderPromoCatFilter() {
   var el = document.getElementById('promoCatFilter');
   if (!el) return;
   if (!cats.length) { el.style.display = 'none'; return; }
-  el.innerHTML = '<button onclick="setPromoCat(null,this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--blue);background:var(--blue);color:white;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif" id="promoCatAll">Todos</button>' +
+  el.innerHTML = '<button onclick="setPromoCat(null,this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--blue);background:var(--blue);color:white;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif" id="promoCatAll">Todos</button>' +
     cats.map(function(cat) {
-      return '<button onclick="setPromoCat(\''+cat+'\',this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;color:var(--ink);font-size:.78rem;font-weight:500;cursor:pointer;white-space:nowrap;font-family:\'DM Sans\',sans-serif">'+cat+'</button>';
+      return '<button onclick="setPromoCat(\''+cat+'\',this)" style="padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;color:var(--ink);font-size:.78rem;font-weight:500;cursor:pointer;white-space:nowrap;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif">'+cat+'</button>';
     }).join('');
 }
 

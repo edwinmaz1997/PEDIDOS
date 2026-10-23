@@ -14,7 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Admin — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 </head>
 <body>
@@ -96,9 +96,9 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
       <h3 style="font-size:1.1rem">Pedidos recientes</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-        <input type="date" id="adminDayFilter" onchange="applyFilters()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem">
+        <input type="date" id="adminDayFilter" onchange="applyFilters()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem">
         <button onclick="clearDayFilter()" class="btn-ghost" style="padding:7px 12px;font-size:.8rem">✕ Todos los días</button>
-        <select id="adminTypeFilter" onchange="applyFilters()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem;background:white">
+        <select id="adminTypeFilter" onchange="applyFilters()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem;background:white">
           <option value="">Todos los tipos</option>
           <option value="delivery">🛵 Delivery</option>
           <option value="pickup">🏃 Para recoger</option>
@@ -391,7 +391,7 @@ function toggleSidebar() {
       Esta acción <strong>no se puede deshacer</strong>. Escribe exactamente:<br>
       <code style="font-size:1rem;font-weight:700;color:#e74c3c">CONFIRMAR_RESET</code>
     </div>
-    <input type="text" id="resetConfirmInput" placeholder="Escribe CONFIRMAR_RESET" style="width:100%;padding:12px;border:2px solid var(--border);border-radius:10px;font-size:.95rem;margin-bottom:16px;box-sizing:border-box;font-family:'DM Sans',sans-serif">
+    <input type="text" id="resetConfirmInput" placeholder="Escribe CONFIRMAR_RESET" style="width:100%;padding:12px;border:2px solid var(--border);border-radius:10px;font-size:.95rem;margin-bottom:16px;box-sizing:border-box;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif">
     <div style="display:flex;gap:10px">
       <button onclick="closeReset()" style="flex:1;padding:12px;border:1.5px solid var(--border);background:white;border-radius:10px;cursor:pointer;font-weight:600;font-size:.9rem">Cancelar</button>
       <button id="resetBtn" onclick="doReset()" style="flex:1;padding:12px;background:#e74c3c;color:white;border:none;border-radius:10px;cursor:pointer;font-weight:600;font-size:.9rem">Confirmar y limpiar</button>

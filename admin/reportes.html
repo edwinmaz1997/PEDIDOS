@@ -14,7 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Reportes — Admin NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 </head>
 <body>
@@ -52,10 +52,10 @@
 
     <!-- Tabs de navegación -->
     <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0">
-      <button onclick="showTab('tab-ventas',this)" id="btn-tab-ventas" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;color:var(--blue);border-bottom:2px solid var(--blue);margin-bottom:-2px">📊 Ventas</button>
-      <button onclick="showTab('tab-cancelados',this)" id="btn-tab-cancelados" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;color:var(--muted)">❌ Cancelados</button>
-      <button onclick="showTab('tab-repartidores',this)" id="btn-tab-repartidores" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;color:var(--muted)">🛵 Repartidores</button>
-      <button onclick="showTab('tab-pago-rep',this)" id="btn-tab-pago-rep" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;color:var(--muted)">💳 Pago a repartidores</button>
+      <button onclick="showTab('tab-ventas',this)" id="btn-tab-ventas" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;font-weight:700;color:var(--blue);border-bottom:2px solid var(--blue);margin-bottom:-2px">📊 Ventas</button>
+      <button onclick="showTab('tab-cancelados',this)" id="btn-tab-cancelados" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;font-weight:600;color:var(--muted)">❌ Cancelados</button>
+      <button onclick="showTab('tab-repartidores',this)" id="btn-tab-repartidores" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;font-weight:600;color:var(--muted)">🛵 Repartidores</button>
+      <button onclick="showTab('tab-pago-rep',this)" id="btn-tab-pago-rep" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;font-weight:600;color:var(--muted)">💳 Pago a repartidores</button>
     </div>
 
     <!-- Tab ventas -->
@@ -63,7 +63,7 @@
     <div class="report-header no-print">
       <div class="page-header" style="margin:0"><h1>📊 Reportes</h1><p>Cobros por negocio y período</p></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <select id="modeFilter" onchange="toggleMode()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white">
+        <select id="modeFilter" onchange="toggleMode()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none;background:white">
           <option value="month">Por mes</option>
           <option value="day">Por día</option>
           <option value="today">Hoy</option>
@@ -71,19 +71,19 @@
           <option value="range">Rango de fechas</option>
         </select>
         <div id="monthFilters" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-          <select id="monthSel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white"></select>
-          <select id="yearSel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white"></select>
+          <select id="monthSel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none;background:white"></select>
+          <select id="yearSel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none;background:white"></select>
         </div>
         <div id="dayFilters" style="display:none">
-          <input type="date" id="daySel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+          <input type="date" id="daySel" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem">
         </div>
         <div id="rangeFilters" style="display:none;gap:8px;align-items:center;flex-wrap:wrap" id="rangeFilters">
-          <input type="date" id="rangeFrom" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+          <input type="date" id="rangeFrom" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem">
           <span style="color:var(--muted);font-size:.85rem">hasta</span>
-          <input type="date" id="rangeTo" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+          <input type="date" id="rangeTo" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem">
           <button onclick="loadReport()" class="btn-primary" style="padding:9px 16px;font-size:.88rem">Aplicar</button>
         </div>
-        <select id="bizFilter" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white;max-width:200px">
+        <select id="bizFilter" onchange="loadReport()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none;background:white;max-width:200px">
           <option value="">Todos los negocios</option>
         </select>
         <button class="btn-ghost no-print" onclick="window.print()" style="padding:9px 16px">🖨️ Imprimir</button>
@@ -113,7 +113,7 @@
           <button onclick="setCancelledFilter('all',this)" id="cfAll" class="btn-ghost" style="padding:6px 12px;font-size:.82rem;background:var(--blue);color:white;border-color:var(--blue)">Todos</button>
           <button onclick="setCancelledFilter('cliente',this)" id="cfCliente" class="btn-ghost" style="padding:6px 12px;font-size:.82rem">👤 Por cliente</button>
           <button onclick="setCancelledFilter('negocio',this)" id="cfNegocio" class="btn-ghost" style="padding:6px 12px;font-size:.82rem">🏪 Por negocio</button>
-          <select id="cancelBizFilter" onchange="loadCancelled()" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.82rem;background:white">
+          <select id="cancelBizFilter" onchange="loadCancelled()" style="padding:6px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.82rem;background:white">
             <option value="">Todos los negocios</option>
           </select>
         </div>
@@ -130,7 +130,7 @@
         <p style="font-size:.8rem;color:var(--muted);margin:0">Selecciona una fecha para ver cuánto debe entregar cada repartidor.</p>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
-        <input type="date" id="repDate" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+        <input type="date" id="repDate" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem">
         <button onclick="loadRepTab()" class="btn-primary" style="padding:9px 18px">Ver</button>
       </div>
       <div id="repTabContent"><div style="text-align:center;padding:30px;color:var(--muted)">Selecciona una fecha y toca Ver.</div></div>
@@ -143,9 +143,9 @@
         <p style="font-size:.8rem;color:var(--muted);margin:0">Resumen de entregas y ganancias por repartidor en un rango de fechas.</p>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
-        <input type="date" id="pagoRepFrom" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+        <input type="date" id="pagoRepFrom" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem">
         <span style="color:var(--muted);font-size:.85rem">hasta</span>
-        <input type="date" id="pagoRepTo" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem">
+        <input type="date" id="pagoRepTo" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem">
         <button onclick="loadPagoRep()" class="btn-primary" style="padding:9px 18px">Ver</button>
       </div>
       <div id="pagoRepContent"><div style="text-align:center;padding:30px;color:var(--muted)">Selecciona un rango de fechas y toca Ver.</div></div>

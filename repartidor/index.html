@@ -14,7 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Panel Repartidor — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .delivery-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:18px;margin-bottom:14px;transition:var(--transition)}
@@ -168,7 +168,7 @@
     <!-- Total to collect -->
     <div style="background:linear-gradient(135deg,var(--blue),var(--blue-dark));border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;color:white">
       <div style="font-size:.8rem;opacity:.8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">💰 Total a cobrar al cliente</div>
-      <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:700" id="dTotalCollect">—</div>
+      <div style="font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:1.8rem;font-weight:700" id="dTotalCollect">—</div>
       <div style="font-size:.78rem;opacity:.7;margin-top:4px" id="dTotalBreakdown">—</div>
     </div>
 
@@ -187,7 +187,7 @@
         <div class="chat-empty" style="color:var(--muted);font-size:.85rem;text-align:center;margin:auto">Sin mensajes aún</div>
       </div>
       <div style="display:flex;gap:8px">
-        <textarea id="rChatInput" rows="2" placeholder="Escribe un mensaje..." style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:none" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendRepartidorMessage();}"></textarea>
+        <textarea id="rChatInput" rows="2" placeholder="Escribe un mensaje..." style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;resize:none" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendRepartidorMessage();}"></textarea>
         <button onclick="sendRepartidorMessage()" style="padding:10px 16px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:1.1rem">➤</button>
       </div>
     </div>
@@ -885,7 +885,7 @@ setInterval(init, 10000);
     <p style="font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:16px" id="confirmMsg"></p>
     <div id="confirmReasonWrap" style="display:none;margin-bottom:16px;text-align:left">
       <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Motivo *</label>
-      <textarea id="confirmReason" rows="3" placeholder="Escribe el motivo..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box;resize:none"></textarea>
+      <textarea id="confirmReason" rows="3" placeholder="Escribe el motivo..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;box-sizing:border-box;resize:none"></textarea>
     </div>
     <div style="display:flex;gap:10px">
       <button id="confirmCancel" onclick="closeConfirm()" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--border);background:white;font-weight:600;cursor:pointer;font-size:.9rem">Cancelar</button>

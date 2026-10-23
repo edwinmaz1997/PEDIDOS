@@ -14,7 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Registro — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 body { background: var(--bg); display: flex; flex-direction: column; min-height: 100vh; }
@@ -23,7 +23,7 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
 .error-msg { background: #fdf0f0; border: 1px solid #f5c2c2; color: var(--danger); padding: 10px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 16px; display: none; }
 .success-msg { background: #f0fdf4; border: 1px solid #86efac; color: #166534; padding: 10px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 16px; display: none; }
 .role-toggle { display: flex; gap: 8px; margin-bottom: 24px; }
-.role-btn { flex: 1; padding: 9px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: white; cursor: pointer; font-family: 'DM Sans',sans-serif; font-size: .8rem; font-weight: 500; transition: var(--transition); }
+.role-btn { flex: 1; padding: 9px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: white; cursor: pointer; font-family: 'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-size: .8rem; font-weight: 500; transition: var(--transition); }
 .role-btn.active { background: var(--charcoal); color: white; border-color: var(--charcoal); }
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .pw-rules { font-size: .78rem; color: var(--muted); margin-top: 6px; }
@@ -76,7 +76,7 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
 
           <!-- Botón automático -->
           <div id="installBtnWrap" style="margin-bottom:10px">
-            <button id="installNowBtn" onclick="handleInstall()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer">
+            <button id="installNowBtn" onclick="handleInstall()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;border:none;border-radius:8px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer">
               ⚡ Instalar automáticamente
             </button>
             <p id="installBtnNote" style="font-size:.72rem;color:#6b7280;text-align:center;margin:5px 0 0;display:none">Tu navegador soporta instalación directa</p>
@@ -191,7 +191,7 @@ body { background: var(--bg); display: flex; flex-direction: column; min-height:
       <div id="installStep3" style="display:none;background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:16px;margin-bottom:20px;text-align:left">
         <div style="font-weight:700;font-size:.92rem;margin-bottom:8px">📲 Instala la app para una mejor experiencia</div>
         <div id="installBtnWrap3" style="display:none;margin-bottom:10px">
-          <button onclick="handleInstall()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer">
+          <button onclick="handleInstall()" style="width:100%;padding:10px;background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;border:none;border-radius:8px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;font-weight:700;cursor:pointer">
             ⚡ Instalar automáticamente
           </button>
         </div>
@@ -481,7 +481,7 @@ function showError(id, msg) {
         +502 3158-6340
       </a>
     </div>
-    <button onclick="document.getElementById('negocioInfoModal').style.display='none'" style="width:100%;padding:11px;background:var(--charcoal);color:white;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer">
+    <button onclick="document.getElementById('negocioInfoModal').style.display='none'" style="width:100%;padding:11px;background:var(--charcoal);color:white;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;font-weight:600;cursor:pointer">
       Entendido, continuar →
     </button>
   </div>

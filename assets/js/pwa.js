@@ -127,7 +127,7 @@ function showInstallBanner() {
     'color:white','padding:16px 20px',
     'display:flex','align-items:center','gap:14px',
     'box-shadow:0 -4px 20px rgba(0,0,0,.3)',
-    'font-family:DM Sans,sans-serif',
+    'font-family:Plus Jakarta Sans,system-ui,Segoe UI,Roboto,sans-serif',
     'animation:slideUp .3s ease'
   ].join(';');
 

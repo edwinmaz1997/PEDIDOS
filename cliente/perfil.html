@@ -14,12 +14,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mi Perfil — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .profile-card{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:28px;margin-bottom:20px}
 .profile-card h3{font-size:1rem;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
-.avatar{width:72px;height:72px;border-radius:50%;background:var(--charcoal);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:white;font-family:'Syne',sans-serif;font-weight:700;flex-shrink:0}
+.avatar{width:72px;height:72px;border-radius:50%;background:var(--charcoal);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:white;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-weight:700;flex-shrink:0}
 .profile-header{display:flex;gap:16px;align-items:center;margin-bottom:28px;background:white;border-radius:var(--radius);border:1px solid var(--border);padding:24px}
 .pw-rules li{font-size:.8rem;color:var(--muted);margin-bottom:3px;list-style:none}
 .pw-rules li.ok{color:var(--success)}
@@ -49,7 +49,7 @@
     <div class="profile-header">
       <div class="avatar" id="avatarEl">?</div>
       <div>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem" id="profileName">—</div>
+        <div style="font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-weight:700;font-size:1.2rem" id="profileName">—</div>
         <div style="color:var(--muted);font-size:.85rem" id="profileEmail">—</div>
         <div style="color:var(--muted);font-size:.8rem;margin-top:4px" id="profileSince">—</div>
       </div>
@@ -95,7 +95,7 @@
 
       <div class="form-group">
         <label>Descripción de mi casa <span style="font-weight:400;color:var(--muted)">(ayuda al repartidor a ubicarte)</span></label>
-        <textarea id="f_house_description" rows="3" placeholder="Ej: Casa azul con portón negro, frente a la cancha, segunda casa a la derecha..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical"></textarea>
+        <textarea id="f_house_description" rows="3" placeholder="Ej: Casa azul con portón negro, frente a la cancha, segunda casa a la derecha..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;resize:vertical"></textarea>
       </div>
 
       <div class="form-group">
@@ -109,7 +109,7 @@
              style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:#1a73e8;color:white;border-radius:var(--radius-sm);text-decoration:none;font-size:.82rem;font-weight:600;text-align:center">
             🗺️ Abrir Google Maps
           </a>
-          <button type="button" onclick="getGPSPerfil()" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600">
+          <button type="button" onclick="getGPSPerfil()" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.82rem;font-weight:600">
             📍 Usar GPS
           </button>
         </div>
@@ -350,7 +350,7 @@ function previewMapsUrl() {
 <style>
 .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#6b7280;font-size:.65rem;font-weight:500;gap:2px;transition:.15s;padding:6px 0}
 .bnav-icon{font-size:1.3rem;line-height:1}
-.bnav-label{font-family:'DM Sans',sans-serif;line-height:1}
+.bnav-label{font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;line-height:1}
 .bnav-item.active{color:var(--blue,#3b82f6)}
 .bnav-center{position:relative}
 .bnav-center .bnav-icon{background:var(--blue,#3b82f6);color:white;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-top:-16px;box-shadow:0 4px 12px rgba(59,130,246,.4)}

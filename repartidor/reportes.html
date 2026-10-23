@@ -14,7 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mis Reportes — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .stat-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:20px 24px; display:flex; flex-direction:column; gap:6px; }
@@ -33,7 +33,7 @@
 .delivery-fee { text-align:right; flex-shrink:0; }
 .delivery-fee .total { font-size:.95rem; font-weight:700; color:var(--navy); }
 .delivery-fee .ganancia { font-size:.8rem; color:var(--success); font-weight:600; }
-.period-btn { padding:8px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:.82rem; cursor:pointer; font-weight:500; transition:.15s; -webkit-appearance:none; appearance:none; }
+.period-btn { padding:8px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-size:.82rem; cursor:pointer; font-weight:500; transition:.15s; -webkit-appearance:none; appearance:none; }
 .period-btn.active { background:var(--navy); color:white; border-color:var(--navy); }
 </style>
 </head>
@@ -68,7 +68,7 @@
       <button class="period-btn" onclick="changePeriod('week', this)">Esta semana</button>
       <button class="period-btn" onclick="changePeriod('month', this)">Este mes</button>
       <button class="period-btn" id="btnCustomDay" onclick="changePeriod('custom', this)">📅 Día específico</button>
-      <input type="date" id="customDayInput" style="display:none;padding:8px 12px;border:1.5px solid var(--border);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.82rem" onchange="loadCustomDay()">
+      <input type="date" id="customDayInput" style="display:none;padding:8px 12px;border:1.5px solid var(--border);border-radius:20px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.82rem" onchange="loadCustomDay()">
     </div>
 
     <!-- Tarjetas de resumen -->

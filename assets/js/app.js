@@ -99,7 +99,7 @@ const APP = {
     }
     const toast = document.createElement('div');
     const colors = { success: '#1db954', error: '#e63946', info: '#1a56db', warning: '#ffb703' };
-    toast.style.cssText = `background:${colors[type]||colors.info};color:white;padding:12px 20px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.9rem;box-shadow:0 4px 20px rgba(0,0,0,.2);animation:slideIn .2s ease;max-width:320px;`;
+    toast.style.cssText = `background:${colors[type]||colors.info};color:white;padding:12px 20px;border-radius:10px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;box-shadow:0 4px 20px rgba(0,0,0,.2);animation:slideIn .2s ease;max-width:320px;`;
     toast.textContent = msg;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3500);

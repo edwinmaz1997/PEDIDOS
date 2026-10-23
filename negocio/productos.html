@@ -14,7 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mis Productos — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .products-table-wrap { background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
@@ -54,7 +54,7 @@ input:checked + .slider { background:var(--success); }
 input:checked + .slider:before { transform:translateX(20px); }
 .header-actions { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
 .cat-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
-.cat-tab { padding:7px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-size:.82rem; font-weight:600; cursor:pointer; transition:var(--transition); }
+.cat-tab { padding:7px 16px; border-radius:20px; border:1.5px solid var(--border); background:white; font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-size:.82rem; font-weight:600; cursor:pointer; transition:var(--transition); }
 .cat-tab.active { background:var(--blue); color:white; border-color:var(--blue); }
 .cat-tag { background:var(--off-white); border-radius:12px; padding:2px 8px; font-size:.75rem; color:var(--muted); }
 </style>
@@ -94,8 +94,8 @@ input:checked + .slider:before { transform:translateX(20px); }
       <button class="cat-tab active" onclick="filterByCat(null,this)">🏷️ Todas</button>
     </div>
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-      <input type="text" id="searchQ" placeholder="🔍 Buscar producto..." oninput="filterProducts()" style="flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none">
-      <select id="statusFilter" onchange="filterProducts()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white">
+      <input type="text" id="searchQ" placeholder="🔍 Buscar producto..." oninput="filterProducts()" style="flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none">
+      <select id="statusFilter" onchange="filterProducts()" style="padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none;background:white">
         <option value="">Todos</option>
         <option value="1">✅ Activos</option>
         <option value="0">⏸ Inactivos</option>
@@ -116,8 +116,8 @@ input:checked + .slider:before { transform:translateX(20px); }
     </div>
     <div id="catList" style="margin-bottom:16px"></div>
     <div style="display:flex;gap:8px">
-      <input type="text" id="newCatIcon" placeholder="🏷️" maxlength="4" style="width:56px;padding:9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;text-align:center;font-size:1.2rem;outline:none">
-      <input type="text" id="newCatName" placeholder="Nombre de categoría..." style="flex:1;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none">
+      <input type="text" id="newCatIcon" placeholder="🏷️" maxlength="4" style="width:56px;padding:9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;text-align:center;font-size:1.2rem;outline:none">
+      <input type="text" id="newCatName" placeholder="Nombre de categoría..." style="flex:1;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none">
       <button onclick="addCategory()" class="btn-primary" style="padding:9px 16px">+ Agregar</button>
     </div>
   </div>
@@ -157,7 +157,7 @@ input:checked + .slider:before { transform:translateX(20px); }
     </div>
     <div class="form-group" style="margin-bottom:16px">
       <label>Categoría</label>
-      <select id="p_category" style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;background:white">
+      <select id="p_category" style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none;background:white">
         <option value="">Sin categoría</option>
       </select>
     </div>
@@ -174,7 +174,7 @@ input:checked + .slider:before { transform:translateX(20px); }
       <div id="variantsSection" style="display:none">
         <p style="font-size:.78rem;color:var(--muted);margin:0 0 10px">Agrega las variantes del producto. El precio base se ignorará si tiene variantes.</p>
         <div id="variantsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div>
-        <button type="button" onclick="addVariantRow()" style="width:100%;padding:8px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;color:var(--muted)">
+        <button type="button" onclick="addVariantRow()" style="width:100%;padding:8px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:none;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.83rem;color:var(--muted)">
           + Agregar variante
         </button>
       </div>
@@ -210,15 +210,15 @@ input:checked + .slider:before { transform:translateX(20px); }
       <div id="complementsSection1" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px">
         <div style="margin-bottom:10px">
           <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:4px">Nombre que verá el cliente</label>
-          <input type="text" id="p_complement1_name" value="Complemento" placeholder="Ej: Aderezo, Salsa, Proteína" style="width:100%;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;box-sizing:border-box">
+          <input type="text" id="p_complement1_name" value="Complemento" placeholder="Ej: Aderezo, Salsa, Proteína" style="width:100%;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;box-sizing:border-box">
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <label style="font-size:.82rem;margin:0;white-space:nowrap">El cliente debe elegir</label>
-          <input type="number" id="p_complements_required" value="1" min="1" max="10" style="width:55px;padding:6px 8px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;text-align:center">
+          <input type="number" id="p_complements_required" value="1" min="1" max="10" style="width:55px;padding:6px 8px;border:1.5px solid #86efac;border-radius:8px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;text-align:center">
           <label style="font-size:.82rem;margin:0">opción(es)</label>
         </div>
         <div id="complementsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
-        <button type="button" onclick="addComplementRow(1)" style="width:100%;padding:7px;border:1.5px dashed #86efac;border-radius:8px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;color:#16a34a">+ Agregar opción</button>
+        <button type="button" onclick="addComplementRow(1)" style="width:100%;padding:7px;border:1.5px dashed #86efac;border-radius:8px;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.82rem;color:#16a34a">+ Agregar opción</button>
       </div>
     </div>
 
@@ -234,15 +234,15 @@ input:checked + .slider:before { transform:translateX(20px); }
       <div id="complementsSection2" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px">
         <div style="margin-bottom:10px">
           <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:4px">Nombre que verá el cliente</label>
-          <input type="text" id="p_complement2_name" value="Complemento 2" placeholder="Ej: Tamaño, Tipo de pan" style="width:100%;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;box-sizing:border-box">
+          <input type="text" id="p_complement2_name" value="Complemento 2" placeholder="Ej: Tamaño, Tipo de pan" style="width:100%;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;box-sizing:border-box">
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <label style="font-size:.82rem;margin:0;white-space:nowrap">El cliente debe elegir</label>
-          <input type="number" id="p_complements2_required" value="1" min="1" max="10" style="width:55px;padding:6px 8px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;text-align:center">
+          <input type="number" id="p_complements2_required" value="1" min="1" max="10" style="width:55px;padding:6px 8px;border:1.5px solid #86efac;border-radius:8px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;text-align:center">
           <label style="font-size:.82rem;margin:0">opción(es)</label>
         </div>
         <div id="complementsList2" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
-        <button type="button" onclick="addComplementRow(2)" style="width:100%;padding:7px;border:1.5px dashed #86efac;border-radius:8px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;color:#16a34a">+ Agregar opción</button>
+        <button type="button" onclick="addComplementRow(2)" style="width:100%;padding:7px;border:1.5px dashed #86efac;border-radius:8px;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.82rem;color:#16a34a">+ Agregar opción</button>
       </div>
     </div>
 
@@ -258,15 +258,15 @@ input:checked + .slider:before { transform:translateX(20px); }
       <div id="complementsSection3" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px">
         <div style="margin-bottom:10px">
           <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:4px">Nombre que verá el cliente</label>
-          <input type="text" id="p_complement3_name" value="Complemento 3" placeholder="Ej: Acompañamiento, Bebida" style="width:100%;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;box-sizing:border-box">
+          <input type="text" id="p_complement3_name" value="Complemento 3" placeholder="Ej: Acompañamiento, Bebida" style="width:100%;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;box-sizing:border-box">
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
           <label style="font-size:.82rem;margin:0;white-space:nowrap">El cliente debe elegir</label>
-          <input type="number" id="p_complements3_required" value="1" min="1" max="10" style="width:55px;padding:6px 8px;border:1.5px solid #86efac;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;text-align:center">
+          <input type="number" id="p_complements3_required" value="1" min="1" max="10" style="width:55px;padding:6px 8px;border:1.5px solid #86efac;border-radius:8px;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;text-align:center">
           <label style="font-size:.82rem;margin:0">opción(es)</label>
         </div>
         <div id="complementsList3" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
-        <button type="button" onclick="addComplementRow(3)" style="width:100%;padding:7px;border:1.5px dashed #86efac;border-radius:8px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;color:#16a34a">+ Agregar opción</button>
+        <button type="button" onclick="addComplementRow(3)" style="width:100%;padding:7px;border:1.5px dashed #86efac;border-radius:8px;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.82rem;color:#16a34a">+ Agregar opción</button>
       </div>
     </div>
 
@@ -284,7 +284,7 @@ input:checked + .slider:before { transform:translateX(20px); }
       </div>
       <div id="extrasSection" style="display:none">
         <div id="extrasList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
-        <button type="button" onclick="addExtraRow()" style="width:100%;padding:8px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;color:var(--muted)">
+        <button type="button" onclick="addExtraRow()" style="width:100%;padding:8px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:none;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.83rem;color:var(--muted)">
           + Agregar extra
         </button>
       </div>
@@ -369,8 +369,8 @@ function renderCatList() {
 function startEditCat(id, icon, name) {
   var row = document.getElementById('catrow-'+id);
   row.innerHTML =
-    '<input type="text" value="'+icon+'" maxlength="4" style="width:48px;padding:7px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-align:center;font-size:1.1rem;font-family:\'DM Sans\',sans-serif" id="edit-icon-'+id+'">' +
-    '<input type="text" value="'+name+'" style="flex:1;padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif;font-size:.9rem" id="edit-name-'+id+'">' +
+    '<input type="text" value="'+icon+'" maxlength="4" style="width:48px;padding:7px;border:1.5px solid var(--border);border-radius:var(--radius-sm);text-align:center;font-size:1.1rem;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif" id="edit-icon-'+id+'">' +
+    '<input type="text" value="'+name+'" style="flex:1;padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif;font-size:.9rem" id="edit-name-'+id+'">' +
     '<button onclick="saveEditCat('+id+')" class="btn-primary" style="padding:6px 12px;font-size:.82rem">✓</button>' +
     '<button onclick="renderCatList()" class="icon-btn" style="padding:6px 10px;font-size:.82rem">✕</button>';
 }
@@ -464,11 +464,11 @@ function filterProducts() {
   var pagination = '';
   if (totalPages > 1) {
     pagination = '<div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:14px;border-top:1px solid var(--border)">';
-    pagination += '<button onclick="changeProdPage('+(prodPage-1)+')" '+(prodPage===1?'disabled':'')+' style="padding:6px 12px;border:1.5px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-family:\'DM Sans\',sans-serif">‹</button>';
+    pagination += '<button onclick="changeProdPage('+(prodPage-1)+')" '+(prodPage===1?'disabled':'')+' style="padding:6px 12px;border:1.5px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif">‹</button>';
     for (var i=1; i<=totalPages; i++) {
-      pagination += '<button onclick="changeProdPage('+i+')" style="padding:6px 12px;border:1.5px solid '+(i===prodPage?'var(--blue)':'var(--border)')+';border-radius:6px;background:'+(i===prodPage?'var(--blue)':'white')+';color:'+(i===prodPage?'white':'inherit')+';cursor:pointer;font-family:\'DM Sans\',sans-serif">'+i+'</button>';
+      pagination += '<button onclick="changeProdPage('+i+')" style="padding:6px 12px;border:1.5px solid '+(i===prodPage?'var(--blue)':'var(--border)')+';border-radius:6px;background:'+(i===prodPage?'var(--blue)':'white')+';color:'+(i===prodPage?'white':'inherit')+';cursor:pointer;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif">'+i+'</button>';
     }
-    pagination += '<button onclick="changeProdPage('+(prodPage+1)+')" '+(prodPage===totalPages?'disabled':'')+' style="padding:6px 12px;border:1.5px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-family:\'DM Sans\',sans-serif">›</button>';
+    pagination += '<button onclick="changeProdPage('+(prodPage+1)+')" '+(prodPage===totalPages?'disabled':'')+' style="padding:6px 12px;border:1.5px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif">›</button>';
     pagination += '</div>';
   }
 
@@ -558,7 +558,7 @@ function addComplementRow(n, name = '') {
   var div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:8px;align-items:center';
   div.innerHTML =
-    '<input type="text" placeholder="Ej: Fresa, Banano..." value="'+name+'" style="flex:1;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:\'DM Sans\',sans-serif;font-size:.85rem" class="complement-name complement-group-'+n+'">' +
+    '<input type="text" placeholder="Ej: Fresa, Banano..." value="'+name+'" style="flex:1;padding:8px 12px;border:1.5px solid #86efac;border-radius:8px;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif;font-size:.85rem" class="complement-name complement-group-'+n+'">' +
     '<button type="button" onclick="this.parentNode.remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:4px">✕</button>';
   list.appendChild(div);
 }
@@ -574,8 +574,8 @@ function addExtraRow(name = '', price = '') {
   var div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:8px;align-items:center';
   div.innerHTML =
-    '<input type="text" placeholder="Ej: Extra banano" value="'+name+'" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif;font-size:.85rem" class="extra-name">' +
-    '<input type="number" placeholder="+Q0.00" value="'+price+'" min="0" step="0.50" style="width:90px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:\'DM Sans\',sans-serif;font-size:.85rem" class="extra-price">' +
+    '<input type="text" placeholder="Ej: Extra banano" value="'+name+'" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif;font-size:.85rem" class="extra-name">' +
+    '<input type="number" placeholder="+Q0.00" value="'+price+'" min="0" step="0.50" style="width:90px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif;font-size:.85rem" class="extra-price">' +
     '<button type="button" onclick="this.parentNode.remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:4px">✕</button>';
   list.appendChild(div);
 }
@@ -604,8 +604,8 @@ function addVariantRow(name = '', price = '') {
   var div = document.createElement('div');
   div.style.cssText = 'display:flex;gap:8px;align-items:center';
   div.innerHTML = `
-    <input type="text" placeholder="Ej: 12 oz" value="${name}" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem" class="variant-name">
-    <input type="number" placeholder="Q0.00" value="${price}" min="0" step="0.50" style="width:90px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem" class="variant-price">
+    <input type="text" placeholder="Ej: 12 oz" value="${name}" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem" class="variant-name">
+    <input type="number" placeholder="Q0.00" value="${price}" min="0" step="0.50" style="width:90px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem" class="variant-price">
     <button type="button" onclick="this.parentNode.remove()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:4px">✕</button>
   `;
   list.appendChild(div);

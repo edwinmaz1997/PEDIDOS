@@ -14,7 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Panel Negocio — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .order-card { background:white;border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:16px; }
@@ -27,7 +27,7 @@
 .respond-form h4 { margin-bottom:10px;font-size:.95rem; }
 .respond-row { display:flex;gap:10px;flex-wrap:wrap; }
 .tab-nav { display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap; }
-.tab-btn { padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:.85rem;font-family:'DM Sans',sans-serif;transition:var(--transition); }
+.tab-btn { padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);background:white;cursor:pointer;font-size:.85rem;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;transition:var(--transition); }
 .tab-btn.active { background:var(--charcoal);color:white;border-color:var(--charcoal); }
 .bell-badge { display:inline-block;background:var(--accent);color:white;border-radius:10px;font-size:.7rem;padding:1px 6px;margin-left:4px; }
 </style>
@@ -84,9 +84,9 @@
     </div>
 
     <div style="display:flex;gap:10px;margin:12px 0;flex-wrap:wrap">
-      <input type="text" id="searchQ" placeholder="🔍 Buscar por #pedido, cliente..." oninput="applySearch()" style="flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none">
+      <input type="text" id="searchQ" placeholder="🔍 Buscar por #pedido, cliente..." oninput="applySearch()" style="flex:1;min-width:180px;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;outline:none">
       <span id="orderCount" style="font-size:.82rem;color:var(--muted);align-self:center"></span>
-      <button id="downloadBtn" onclick="downloadOrders()" style="display:none;align-items:center;gap:6px;padding:9px 16px;background:var(--success);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600">📥 Descargar CSV</button>
+      <button id="downloadBtn" onclick="downloadOrders()" style="display:none;align-items:center;gap:6px;padding:9px 16px;background:var(--success);color:white;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem;font-weight:600">📥 Descargar CSV</button>
     </div>
     <div id="ordersContainer"><div class="loading-state"><div class="spinner"></div></div></div>
     <div class="pagination" id="pagination"></div>
@@ -116,7 +116,7 @@
       <div id="cm_total" style="font-size:1.1rem;font-weight:800;color:var(--blue)">Q0.00</div>
     </div>
     <button onclick="cpAddCustomizedToCart()" class="btn-primary" style="width:100%;justify-content:center;padding:12px">🛒 Agregar</button>
-    <button onclick="document.getElementById('customizeModal').style.display='none'" style="width:100%;margin-top:6px;padding:10px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem">Cancelar</button>
+    <button onclick="document.getElementById('customizeModal').style.display='none'" style="width:100%;margin-top:6px;padding:10px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem">Cancelar</button>
   </div>
 </div>
 
@@ -125,10 +125,10 @@
   <div style="background:white;border-radius:20px;width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3)">
     <div style="padding:18px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h2 style="font-size:1.1rem;font-family:'Syne',sans-serif">🛍️ Seleccionar productos</h2>
+        <h2 style="font-size:1.1rem;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif">🛍️ Seleccionar productos</h2>
         <button onclick="cpCloseProductModal()" style="background:var(--off-white);border:none;width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
       </div>
-      <input type="text" id="prodSearch" placeholder="🔍 Buscar producto..." oninput="cpRenderProductModal()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;margin-bottom:10px">
+      <input type="text" id="prodSearch" placeholder="🔍 Buscar producto..." oninput="cpRenderProductModal()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;margin-bottom:10px">
       <div id="prodCatTabs" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none"></div>
     </div>
     <div id="prodList" style="overflow-y:auto;flex:1;padding:0"></div>
@@ -155,14 +155,14 @@
     <div style="margin-bottom:16px">
       <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">NOMBRE DEL CLIENTE</label>
       <input type="text" id="cpClientName" placeholder="Nombre del cliente..."
-        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;box-sizing:border-box">
     </div>
 
     <!-- Teléfono -->
     <div style="margin-bottom:16px">
       <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">TELÉFONO DEL CLIENTE</label>
       <input type="tel" id="cpClientPhone" placeholder="Número de teléfono..."
-        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;box-sizing:border-box">
     </div>
 
     <!-- Paso 2: Productos -->
@@ -179,9 +179,9 @@
         <div style="font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:8px">➕ ITEM PERSONALIZADO</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <input type="text" id="cpCustomItemName" placeholder="Nombre del producto..."
-            style="flex:2;min-width:140px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;box-sizing:border-box">
+            style="flex:2;min-width:140px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;box-sizing:border-box">
           <input type="number" id="cpCustomItemPrice" placeholder="Precio Q" min="0" step="0.01"
-            style="flex:1;min-width:90px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.88rem;box-sizing:border-box">
+            style="flex:1;min-width:90px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem;box-sizing:border-box">
           <button onclick="cpAgregarItemPersonalizado()" class="btn-ghost" style="padding:8px 14px;font-size:.85rem;white-space:nowrap">Agregar</button>
         </div>
       </div>
@@ -193,7 +193,7 @@
       <div id="cpClientAddresses" style="margin-bottom:8px"></div>
       <input type="text" id="cpMapsUrl" placeholder="Coordenadas (14.6349,-90.5069) o link largo de Google Maps..."
         oninput="calcularDeliveryCP()"
-        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;box-sizing:border-box">
+        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;box-sizing:border-box">
       <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Escribe coordenadas: 14.6349,-90.5069 o pega el link de Google Maps</div>
     </div>
 
@@ -209,7 +209,7 @@
     <div style="margin-bottom:20px">
       <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">NOTA (opcional)</label>
       <textarea id="cpNotes" rows="2" placeholder="Instrucciones especiales..."
-        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;resize:vertical;box-sizing:border-box"></textarea>
+        style="width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;resize:vertical;box-sizing:border-box"></textarea>
     </div>
 
     <!-- Total -->
@@ -544,7 +544,7 @@ function renderOrder(o) {
         <div class="respond-form">
           <h4>Responder pedido</h4>
           <div class="form-group" style="margin-bottom:10px">
-            <textarea id="resp-${o.id}" rows="2" placeholder="Mensaje al cliente (opcional)..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem"></textarea>
+            <textarea id="resp-${o.id}" rows="2" placeholder="Mensaje al cliente (opcional)..." style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem"></textarea>
           </div>
           <div class="form-group" style="margin-bottom:10px">
             <label style="font-size:.82rem;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:4px;margin-bottom:5px">
@@ -552,7 +552,7 @@ function renderOrder(o) {
             </label>
             <div style="display:flex;align-items:center;gap:8px">
               <input type="number" id="time-${o.id}" placeholder="Ej: 20" min="1" max="480"
-                style="width:100px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.95rem"
+                style="width:100px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.95rem"
                 value="${o.dine_in_time ? (function(t){ var now=new Date(); var p=t.split(':'); var tgt=new Date(now.getFullYear(),now.getMonth(),now.getDate(),parseInt(p[0]),parseInt(p[1]),0); if(tgt<=now)tgt.setDate(tgt.getDate()+1); return Math.max(1,Math.round((tgt-now)/60000)); })(o.dine_in_time) : ''}">
               <span style="font-size:.85rem;color:var(--muted)">minutos</span>
             </div>
@@ -751,9 +751,9 @@ function cpRenderProductModal(searchQ, catId) {
   });
 
   // Category tabs
-  var catTabs = '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat===null?'var(--blue)':'var(--border)')+';background:'+(cat===null?'var(--blue)':'white')+';color:'+(cat===null?'white':'var(--ink)')+';font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="cpFilterProdCat(null,this)">🏷️ Todas</button>';
+  var catTabs = '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat===null?'var(--blue)':'var(--border)')+';background:'+(cat===null?'var(--blue)':'white')+';color:'+(cat===null?'white':'var(--ink)')+';font-family:Plus Jakarta Sans,system-ui,Segoe UI,Roboto,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="cpFilterProdCat(null,this)">🏷️ Todas</button>';
   Object.entries(catMap).forEach(function(e){
-    catTabs += '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat==e[0]?'var(--blue)':'var(--border)')+';background:'+(cat==e[0]?'var(--blue)':'white')+';color:'+(cat==e[0]?'white':'var(--ink)')+';font-family:DM Sans,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="cpFilterProdCat('+e[0]+',this)">'+(e[1].icon)+' '+esc(e[1].name)+'</button>';
+    catTabs += '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat==e[0]?'var(--blue)':'var(--border)')+';background:'+(cat==e[0]?'var(--blue)':'white')+';color:'+(cat==e[0]?'white':'var(--ink)')+';font-family:Plus Jakarta Sans,system-ui,Segoe UI,Roboto,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="cpFilterProdCat('+e[0]+',this)">'+(e[1].icon)+' '+esc(e[1].name)+'</button>';
   });
   document.getElementById('prodCatTabs').innerHTML = catTabs;
 
@@ -785,7 +785,7 @@ function cpRenderProductModal(searchQ, catId) {
           '<div style="font-weight:700;color:var(--blue);margin-top:4px;font-size:.9rem" id="price-'+p.id+'">'+displayPrice+'</div>' +
         '</div>' +
         (hasExtras
-          ? '<button onclick="cpOpenCustomizeModal('+p.id+')" style="padding:8px 14px;border-radius:20px;border:none;background:var(--accent);color:white;font-size:.82rem;font-weight:700;cursor:pointer;font-family:\'DM Sans\',sans-serif;white-space:nowrap">🎨 Personalizar</button>'
+          ? '<button onclick="cpOpenCustomizeModal('+p.id+')" style="padding:8px 14px;border-radius:20px;border:none;background:var(--accent);color:white;font-size:.82rem;font-weight:700;cursor:pointer;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif;white-space:nowrap">🎨 Personalizar</button>'
           : '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
             '<button onclick="cpChangeQty('+p.id+',-1)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:white;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">−</button>' +
             '<span id="qty-'+p.id+'" style="font-weight:700;min-width:20px;text-align:center;font-size:.95rem">'+qty+'</span>' +
@@ -798,7 +798,7 @@ function cpRenderProductModal(searchQ, catId) {
         '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
           p.variants.map(function(v) {
             var isSelected = selectedVariant && selectedVariant.id === v.id;
-            return '<button onclick="cpSelectVariant('+p.id+','+JSON.stringify(v).replace(/"/g,"'")+')" style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(isSelected?'var(--blue)':'var(--border)')+';background:'+(isSelected?'var(--blue)':'white')+';color:'+(isSelected?'white':'var(--charcoal)')+';font-size:.8rem;font-weight:600;cursor:pointer;font-family:\'DM Sans\',sans-serif" id="var-'+p.id+'-'+v.id+'">'+esc(v.name)+' — Q'+parseFloat(v.price).toFixed(2)+'</button>';
+            return '<button onclick="cpSelectVariant('+p.id+','+JSON.stringify(v).replace(/"/g,"'")+')" style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(isSelected?'var(--blue)':'var(--border)')+';background:'+(isSelected?'var(--blue)':'white')+';color:'+(isSelected?'white':'var(--charcoal)')+';font-size:.8rem;font-weight:600;cursor:pointer;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif" id="var-'+p.id+'-'+v.id+'">'+esc(v.name)+' — Q'+parseFloat(v.price).toFixed(2)+'</button>';
           }).join('') +
         '</div>' +
       '</div>' : '') +

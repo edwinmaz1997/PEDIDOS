@@ -8,11 +8,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Reportes — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .report-tabs { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
-.report-tab { padding:10px 20px; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:white; font-family:'DM Sans',sans-serif; font-weight:600; font-size:.88rem; cursor:pointer; transition:var(--transition); }
+.report-tab { padding:10px 20px; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:white; font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-weight:600; font-size:.88rem; cursor:pointer; transition:var(--transition); }
 .report-tab.active { background:var(--blue); color:white; border-color:var(--blue); }
 .report-section { display:none; }
 .report-section.active { display:block; }
@@ -25,14 +25,14 @@
 .report-table tr:hover td { background:var(--off-white); }
 .metric-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:20px; }
 .metric-box { background:var(--off-white); border-radius:var(--radius-sm); padding:16px; text-align:center; }
-.metric-box .val { font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:700; }
+.metric-box .val { font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-size:1.6rem; font-weight:700; }
 .metric-box .lbl { font-size:.75rem; color:var(--muted); margin-top:4px; }
 .saldo-box { background:linear-gradient(135deg,#1a1a2e,#16213e); color:white; border-radius:var(--radius); padding:28px; margin-bottom:20px; text-align:center; }
-.saldo-box .amount { font-family:'Syne',sans-serif; font-size:2.8rem; font-weight:800; margin:12px 0; }
+.saldo-box .amount { font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-size:2.8rem; font-weight:800; margin:12px 0; }
 .saldo-box .period { font-size:.9rem; opacity:.7; }
 .star-badge { background:#fff8e1; color:#f57f17; border-radius:20px; padding:3px 10px; font-size:.78rem; font-weight:700; }
 .filter-row { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
-.filter-row select, .filter-row input { padding:9px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; font-size:.88rem; outline:none; background:white; }
+.filter-row select, .filter-row input { padding:9px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-size:.88rem; outline:none; background:white; }
 .bar-wrap { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
 .bar-label { font-size:.82rem; min-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .bar-track { flex:1; height:10px; background:var(--off-white); border-radius:10px; overflow:hidden; }
@@ -129,9 +129,9 @@
       <div class="filter-row" style="flex-direction:column;gap:10px;align-items:flex-start">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%">
           <label style="font-size:.85rem;font-weight:600">Desde:</label>
-          <input type="date" id="dateFrom" onchange="loadDiario()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;max-width:160px">
+          <input type="date" id="dateFrom" onchange="loadDiario()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem;outline:none;max-width:160px">
           <label style="font-size:.85rem;font-weight:600">Hasta:</label>
-          <input type="date" id="dateTo" onchange="loadDiario()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;max-width:160px">
+          <input type="date" id="dateTo" onchange="loadDiario()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem;outline:none;max-width:160px">
           <button onclick="setDateRange('today')" class="btn-ghost" style="padding:7px 12px;font-size:.8rem">Hoy</button>
           <button onclick="setDateRange('week')" class="btn-ghost" style="padding:7px 12px;font-size:.8rem">Semana</button>
           <button onclick="setDateRange('month')" class="btn-ghost" style="padding:7px 12px;font-size:.8rem">Mes</button>
@@ -646,7 +646,7 @@ async function init() {
       saldoTab.innerHTML =
         '<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;border-radius:var(--radius);padding:28px;margin-bottom:20px;text-align:center">' +
           '<div style="font-size:.9rem;opacity:.7;margin-bottom:8px">Plan de suscripción mensual</div>' +
-          '<div style="font-family:\'Syne\',sans-serif;font-size:3rem;font-weight:800;margin:12px 0">Q75.00</div>' +
+          '<div style="font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif;font-size:3rem;font-weight:800;margin:12px 0">Q75.00</div>' +
           '<div style="font-size:.88rem;opacity:.8">Tarifa fija mensual — NuevaExpress</div>' +
           '<div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.15);font-size:.8rem;opacity:.65">' +
             'Incluye: perfil activo en el directorio, panel de administración, soporte técnico y actualizaciones.' +

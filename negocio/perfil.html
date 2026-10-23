@@ -18,12 +18,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mi Perfil de Negocio — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
 <style>
 .tabs { display:flex; gap:4px; background:var(--off-white); border-radius:var(--radius-sm); padding:4px; margin-bottom:28px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; width:100%; }
 .tabs::-webkit-scrollbar { display:none; }
-.tab { padding:8px 16px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.85rem; font-weight:500; transition:var(--transition); white-space:nowrap; flex-shrink:0; }
+.tab { padding:8px 16px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-size:.85rem; font-weight:500; transition:var(--transition); white-space:nowrap; flex-shrink:0; }
 .tab.active { background:white; box-shadow:var(--shadow-sm); font-weight:600; }
 .panel { display:none; } .panel.active { display:block; }
 .photo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; margin-bottom:16px; }
@@ -37,7 +37,7 @@
 .hours-row { display:grid; grid-template-columns:80px 1fr; align-items:start; gap:10px; padding:8px; background:var(--off-white); border-radius:var(--radius-sm); }
 .hours-day { font-size:.85rem; font-weight:700; padding-top:8px; }
 .hours-inputs { display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:.85rem; }
-.hours-inputs input[type=time] { padding:6px 8px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif; width:105px; min-width:0; }
+.hours-inputs input[type=time] { padding:6px 8px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; width:105px; min-width:0; }
 @media(max-width:480px){
   .hours-row { grid-template-columns:65px 1fr; }
   .hours-inputs input[type=time] { width:90px; font-size:.8rem; }
@@ -102,7 +102,7 @@
           <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="uploadLogo(this)">
         </div>
         <div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem" id="bizNameDisplay">Mi Negocio</div>
+          <div style="font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-weight:700;font-size:1.2rem" id="bizNameDisplay">Mi Negocio</div>
           <div style="font-size:.75rem;color:var(--muted);margin-top:2px">🔗 Copia el link para compartirle a tus clientes</div>
           <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
             <div style="color:var(--primary);font-size:.85rem;font-weight:600" id="bizSlugDisplay"></div>
@@ -168,12 +168,12 @@
               <div style="display:flex;gap:16px;flex-wrap:wrap">
                 <div class="form-group" style="margin:0">
                   <label style="font-size:.82rem">Tarifa de envío (Q) <span style="font-weight:400;color:var(--muted)">mínimo Q15</span></label>
-                  <input type="number" id="f_delivery_fee" min="15" step="1" placeholder="15" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif">
+                  <input type="number" id="f_delivery_fee" min="15" step="1" placeholder="15" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif">
                   <div style="font-size:.75rem;color:var(--muted);margin-top:3px">Puedes ajustar según la distancia</div>
                 </div>
                 <div class="form-group" style="margin:0">
                   <label style="font-size:.82rem">Pedido mínimo (Q) <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
-                  <input type="number" id="f_min_order_delivery" min="0" step="1" placeholder="0" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif">
+                  <input type="number" id="f_min_order_delivery" min="0" step="1" placeholder="0" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif">
                   <div style="font-size:.75rem;color:var(--muted);margin-top:3px">Monto mínimo para hacer delivery</div>
                 </div>
               </div>
