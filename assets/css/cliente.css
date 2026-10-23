@@ -602,3 +602,18 @@ body.px .success-screen h2 { font-size: 1.4rem; font-weight: 800; letter-spacing
 .mg-steps li strong { display: block; font-size: .86rem; color: #0f172a; margin-bottom: 1px; }
 .mg-ok { width: 100%; height: 50px; border: 0; border-radius: 15px; cursor: pointer; font: inherit; font-size: .95rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,#4A90D9,#3578c7); box-shadow: 0 12px 24px -12px rgba(53,120,199,.9); }
 .mg-cancel { width: 100%; margin-top: 6px; height: 40px; border: 0; background: none; cursor: pointer; font: inherit; font-size: .86rem; font-weight: 600; color: #64748b; }
+
+/* Avisos de modo lluvia / mantenimiento (hacer pedido) */
+.px-alerts { max-width: 1080px; margin: 0 auto; padding: 0 14px; }
+.px-alerts .px-alert { margin: 14px 0 0; }
+.px-alert { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border-radius: 18px; margin-bottom: 8px; position: relative; overflow: hidden; animation: cxPop .25s cubic-bezier(.4,0,.2,1); }
+.px-alert::after { content: ''; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,.12); pointer-events: none; }
+.px-alert-ic { width: 42px; height: 42px; border-radius: 13px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.18); color: #fff; }
+.px-alert-ic svg { width: 22px; height: 22px; }
+.px-alert-t { flex: 1; min-width: 0; color: #fff; line-height: 1.35; position: relative; z-index: 1; }
+.px-alert-t strong { display: block; font-size: .95rem; font-weight: 800; letter-spacing: -.01em; }
+.px-alert-t span { display: block; font-size: .8rem; opacity: .9; margin-top: 2px; }
+.px-alert-t b { font-weight: 800; }
+.px-alert-rain { background: linear-gradient(135deg, #1e40af, #3b82f6); box-shadow: 0 14px 28px -16px rgba(30,64,175,.8); }
+.px-alert-maint { background: linear-gradient(135deg, #c2410c, #f97316); box-shadow: 0 14px 28px -16px rgba(194,65,12,.8); }
+
