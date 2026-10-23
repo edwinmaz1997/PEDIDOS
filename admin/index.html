@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
+<link rel="stylesheet" href="/assets/css/admin.css?v=202610230056">
 </head>
 <body>
 <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
@@ -93,26 +94,19 @@
       <div class="stat-card"><div class="stat-label">Deliveries disp.</div><div class="stat-value" id="sDeliveries">—</div></div>
     </div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <h3 style="font-size:1.1rem">Pedidos recientes</h3>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-        <input type="date" id="adminDayFilter" onchange="applyFilters()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem">
-        <button onclick="clearDayFilter()" class="btn-ghost" style="padding:7px 12px;font-size:.8rem">✕ Todos los días</button>
-        <select id="adminTypeFilter" onchange="applyFilters()" style="padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.85rem;background:white">
-          <option value="">Todos los tipos</option>
-          <option value="delivery">🛵 Delivery</option>
-          <option value="pickup">🏃 Para recoger</option>
-          <option value="dine_in">🍽️ Consumo en negocio</option>
-        </select>
-      </div>
-      <a href="reportes.html" class="btn-primary" style="padding:8px 16px;font-size:.85rem">📊 Reportes</a>
+    <div class="ad-head"><h3>Pedidos recientes</h3><a href="pedidos.html" class="ad-chip-btn" style="display:inline-flex;align-items:center;height:36px;text-decoration:none">Ver todos</a></div>
+    <div class="ad-filters">
+      <input type="date" id="adminDayFilter" onchange="applyFilters()" style="flex:1 1 140px">
+      <select id="adminTypeFilter" onchange="applyFilters()" style="flex:1 1 140px">
+        <option value="">Todos los tipos</option>
+        <option value="delivery">Delivery</option>
+        <option value="pickup">Para recoger</option>
+        <option value="dine_in">Consumo en negocio</option>
+      </select>
+      <button onclick="clearDayFilter()" class="ad-chip-btn">Limpiar</button>
     </div>
-    <div class="table-responsive">
-      <table class="data-table" id="recentTable">
-        <thead><tr><th>#</th><th>Cliente</th><th>Negocio</th><th>Total</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
-        <tbody id="recentBody"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Cargando...</td></tr></tbody>
-      </table>
-    </div>
+    <div class="ad-list" id="recentBody"><div class="ad-empty">Cargando…</div></div>
+    <div id="recentPagination"></div>
   </main>
 </div>
 
@@ -138,8 +132,8 @@ async function loadDashboard() {
     document.getElementById('sDeliveries').textContent = s.available_deliveries;
 
     allRecentOrders = data.data.recent_orders || [];
-    recentPage = 1;
-    renderRecentOrders();
+    if (document.getElementById('adminDayFilter').value || document.getElementById('adminTypeFilter').value) applyFilters();
+    else { recentFiltered = null; renderRecentOrders(); }
   } catch(e) { console.error(e); }
 }
 
@@ -155,63 +149,52 @@ function applyFilters() {
     if (type && o.delivery_type !== type) return false;
     return true;
   });
-  var start = 0;
-  var rows = filtered.map(function(o) { return `
-    <tr>
-      <td>${esc(o.order_number)}</td>
-      <td>${esc(o.client_name)}</td>
-      <td>${esc(o.business_name)}</td>
-      <td>Q${(parseFloat(o.total)-parseFloat(o.service_fee||0)).toFixed(2)}</td>
-      <td>${o.delivery_type==='delivery'?'🛵 Delivery':o.delivery_type==='dine_in'?'🍽️ En negocio':'🏃 Recoger'}</td>
-      <td><span class="badge ${statusBadge[o.status]||''}">${statusLabels[o.status]||o.status}</span></td>
-      <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</td>
-      <td><button onclick="viewOrder(${o.id})" style="padding:5px 10px;font-size:.75rem;background:var(--blue);color:white;border:none;border-radius:6px;cursor:pointer">👁 Ver</button></td>
-    </tr>`;
-  }).join('');
-  document.getElementById('recentBody').innerHTML = rows || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Sin pedidos</td></tr>';
-  var el = document.getElementById('recentPagination');
-  if (el) el.innerHTML = '<span class="page-info">'+filtered.length+' pedidos</span>';
+  recentFiltered = filtered; recentPage = 1;
+  renderRecentOrders();
 }
 
 function clearDayFilter() {
   document.getElementById('adminDayFilter').value = '';
+  document.getElementById('adminTypeFilter').value = '';
   applyFilters();
 }
 
-function renderRecentOrders() {
-  var start = (recentPage-1)*recentPerPage;
-  var pageData = allRecentOrders.slice(start, start+recentPerPage);
-  var rows = pageData.map(function(o) { return `
-    <tr>
-      <td>${esc(o.order_number)}</td>
-      <td>${esc(o.client_name)}</td>
-      <td>${esc(o.business_name)}</td>
-      <td>Q${(parseFloat(o.total)-parseFloat(o.service_fee||0)).toFixed(2)}</td>
-      <td>${o.delivery_type==='delivery'?'🛵 Delivery':'🏃 Recoger'}</td>
-      <td><span class="badge ${statusBadge[o.status]||''}">${statusLabels[o.status]||o.status}</span></td>
-      <td style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</td>
-      <td><button onclick="viewOrder(${o.id})" style="padding:5px 10px;font-size:.75rem;background:var(--blue);color:white;border:none;border-radius:6px;cursor:pointer">👁 Ver</button></td>
-    </tr>`;
-  }).join('');
-  document.getElementById('recentBody').innerHTML = rows || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Sin pedidos</td></tr>';
-
-  // Pagination
-  var total = allRecentOrders.length;
-  var pages = Math.ceil(total/recentPerPage);
-  var el = document.getElementById('recentPagination');
-  if (!el||pages<=1){if(el)el.innerHTML='';return;}
-  var html='<button class="page-btn" onclick="goRecentPage('+(recentPage-1)+')" '+(recentPage===1?'disabled':'')+'>‹</button>';
-  for(var i=1;i<=pages;i++){
-    if(i===1||i===pages||(i>=recentPage-2&&i<=recentPage+2)) html+='<button class="page-btn '+(i===recentPage?'active':'')+'" onclick="goRecentPage('+i+')">'+i+'</button>';
-    else if(i===recentPage-3||i===recentPage+3) html+='<span class="page-info">…</span>';
+function adTypeIcon(t){ var p = t==='delivery' ? '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>' : t==='dine_in' ? '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>' : '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>'; return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
+function adTypeLabel(t){ return t==='delivery' ? 'Delivery' : t==='dine_in' ? 'En negocio' : 'Recoger'; }
+function adShortDate(s){ try { var d = new Date(String(s).replace(' ','T')); return d.toLocaleString('es-GT',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}); } catch(e){ return ''; } }
+function adPager(cur, pages, total, fn, noun){
+  if (pages <= 1) return total ? '<div class="ad-pg"><span>'+total+' '+noun+'</span></div>' : '';
+  var h = '<div class="ad-pg"><button onclick="'+fn+'('+(cur-1)+')" '+(cur===1?'disabled':'')+'>‹</button>';
+  for (var i=1;i<=pages;i++){
+    if (i===1||i===pages||(i>=cur-1&&i<=cur+1)) h += '<button class="'+(i===cur?'on':'')+'" onclick="'+fn+'('+i+')">'+i+'</button>';
+    else if (i===cur-2||i===cur+2) h += '<span>…</span>';
   }
-  html+='<button class="page-btn" onclick="goRecentPage('+(recentPage+1)+')" '+(recentPage===pages?'disabled':'')+'>›</button>';
-  html+='<span class="page-info">'+total+' pedidos</span>';
-  el.innerHTML=html;
+  return h + '<button onclick="'+fn+'('+(cur+1)+')" '+(cur===pages?'disabled':'')+'>›</button><span>'+total+' '+noun+'</span></div>';
+}
+var recentFiltered = null;
+function adOrderRow(o) {
+  var total = (parseFloat(o.total)-parseFloat(o.service_fee||0)).toFixed(2);
+  return '<div class="ad-row" onclick="viewOrder('+o.id+')">' +
+    '<div class="ad-av" title="'+adTypeLabel(o.delivery_type)+'">'+adTypeIcon(o.delivery_type)+'</div>' +
+    '<div class="ad-main">' +
+      '<div class="ad-t"><span class="ad-name">'+esc(o.client_name||'Cliente')+'</span></div>' +
+      '<div class="ad-s"><b>'+esc(o.business_name||'')+'</b> · #'+esc(String(o.order_number||'').replace(/^PED-/,''))+' · '+adShortDate(o.created_at)+'</div>' +
+    '</div>' +
+    '<div class="ad-r"><div class="ad-amt">Q'+total+'</div><span class="ad-st s-'+esc(o.status)+'">'+(statusLabels[o.status]||esc(o.status))+'</span></div>' +
+  '</div>';
+}
+function renderRecentOrders() {
+  var list = recentFiltered || allRecentOrders;
+  var pages = Math.max(1, Math.ceil(list.length/recentPerPage));
+  if (recentPage > pages) recentPage = pages;
+  var start = (recentPage-1)*recentPerPage;
+  var pageData = list.slice(start, start+recentPerPage);
+  document.getElementById('recentBody').innerHTML = pageData.length ? pageData.map(adOrderRow).join('') : '<div class="ad-empty">Sin pedidos</div>';
+  document.getElementById('recentPagination').innerHTML = adPager(recentPage, pages, list.length, 'goRecentPage', 'pedidos');
 }
 
 function goRecentPage(p) {
-  var pages = Math.ceil(allRecentOrders.length/recentPerPage);
+  var pages = Math.ceil((recentFiltered || allRecentOrders).length/recentPerPage);
   if(p<1||p>pages) return;
   recentPage=p;
   renderRecentOrders();

@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
+<link rel="stylesheet" href="/assets/css/admin.css?v=202610230056">
 <style>
 .filter-bar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
 .filter-bar input,.filter-bar select { padding:9px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-size:.9rem; outline:none; background:white; }
@@ -59,48 +60,24 @@
       <input type="text" id="searchInput" placeholder="Buscar por # pedido, cliente, negocio..." oninput="filterTable()">
       <select id="statusFilter" onchange="filterTable()">
         <option value="">Todos los estados</option>
-        <option value="pendiente">⏳ Pendiente</option>
-        <option value="aceptado">✅ Aceptado</option>
-        <option value="en_preparacion">👨‍🍳 En preparación</option>
-        <option value="listo">📦 Listo</option>
-        <option value="en_camino">🛵 En camino</option>
-        <option value="entregado">✔ Entregado</option>
-        <option value="cancelado">✕ Cancelado</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="aceptado">Aceptado</option>
+        <option value="en_preparacion">En preparación</option>
+        <option value="listo">Listo</option>
+        <option value="en_camino">En camino</option>
+        <option value="entregado">Entregado</option>
+        <option value="cancelado">Cancelado</option>
       </select>
       <select id="typeFilter" onchange="filterTable()">
         <option value="">Todos los tipos</option>
-        <option value="pickup">🏃 Recoger</option>
-        <option value="delivery">🛵 Delivery</option>
+        <option value="pickup">Recoger</option>
+        <option value="delivery">Delivery</option>
+        <option value="dine_in">En negocio</option>
       </select>
     </div>
 
-    <div style="overflow-x:auto">
-      <div class="filter-bar">
-      <input type="text" id="searchQ" placeholder="🔍 Buscar pedido, cliente, negocio..." oninput="applyFilters()">
-      <select id="statusFilter" onchange="applyFilters()">
-        <option value="">Todos los estados</option>
-        <option value="pendiente">⏳ Pendiente</option>
-        <option value="aceptado">✅ Aceptado</option>
-        <option value="en_preparacion">👨‍🍳 En preparación</option>
-        <option value="listo">📦 Listo</option>
-        <option value="en_camino">🛵 En camino</option>
-        <option value="entregado">✔ Entregado</option>
-        <option value="cancelado">✕ Cancelado</option>
-      </select>
-      <input type="date" id="dateFrom" onchange="applyFilters()" title="Desde">
-      <input type="date" id="dateTo" onchange="applyFilters()" title="Hasta">
-      <button class="btn-filter" onclick="setToday()" id="btnHoy">📅 Hoy</button>
-      <button class="btn-filter" onclick="clearFilters()">✕ Limpiar</button>
-      <span id="filterCount" style="font-size:.82rem;color:var(--muted);margin-left:4px"></span>
-    </div>
-    <div class="table-responsive"><table class="data-table">
-        <thead>
-          <tr><th>#</th><th>Cliente</th><th>Negocio</th><th>Tipo</th><th>Subtotal</th><th>Tarifa</th><th>Delivery</th><th>Total</th><th>Estado</th><th>Fecha</th><th></th></tr>
-        </thead>
-        <tbody id="ordersBody"><tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">Cargando...</td></tr></tbody>
-      </table></div>
-    <div class="pagination" id="pagination"></div>
-    </div>
+    <div class="ad-list" id="ordersBody"><div class="ad-empty">Cargando…</div></div>
+    <div id="pagination"></div>
   </main>
 </div>
 
@@ -158,26 +135,45 @@ function filterTable() {
   renderTable(filtered);
 }
 
-function renderTable(list) {
+function adTypeIcon(t){ var p = t==='delivery' ? '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>' : t==='dine_in' ? '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>' : '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>'; return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'; }
+function adTypeLabel(t){ return t==='delivery' ? 'Delivery' : t==='dine_in' ? 'En negocio' : 'Recoger'; }
+function adShortDate(s){ try { var d = new Date(String(s).replace(' ','T')); return d.toLocaleString('es-GT',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}); } catch(e){ return ''; } }
+function adPager(cur, pages, total, fn, noun){
+  if (pages <= 1) return total ? '<div class="ad-pg"><span>'+total+' '+noun+'</span></div>' : '';
+  var h = '<div class="ad-pg"><button onclick="'+fn+'('+(cur-1)+')" '+(cur===1?'disabled':'')+'>‹</button>';
+  for (var i=1;i<=pages;i++){
+    if (i===1||i===pages||(i>=cur-1&&i<=cur+1)) h += '<button class="'+(i===cur?'on':'')+'" onclick="'+fn+'('+i+')">'+i+'</button>';
+    else if (i===cur-2||i===cur+2) h += '<span>…</span>';
+  }
+  return h + '<button onclick="'+fn+'('+(cur+1)+')" '+(cur===pages?'disabled':'')+'>›</button><span>'+total+' '+noun+'</span></div>';
+}
+var ordPage = 1, ordList = [], ORD_PAGE = 15;
+function goOrdPage(p){ var pages = Math.ceil(ordList.length/ORD_PAGE); if (p<1||p>pages) return; ordPage = p; drawOrders(); window.scrollTo({top:0,behavior:'smooth'}); }
+function renderTable(list) { ordList = list; ordPage = 1; drawOrders(); }
+function drawOrders() {
   const body = document.getElementById('ordersBody');
-  if (!list.length) { body.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:24px;color:var(--muted)">Sin resultados</td></tr>'; return; }
-  body.innerHTML = list.map(o => `
-    <tr>
-      <td style="font-size:.8rem;font-weight:700">${APP.esc(o.order_number)}</td>
-      <td style="font-size:.85rem">${APP.esc(o.client_name)}</td>
-      <td style="font-size:.85rem">${APP.esc(o.business_name)}</td>
-      <td style="font-size:.8rem">${o.delivery_type==='delivery'?'🛵':'🏃'}</td>
-      <td style="font-size:.85rem">${APP.money(o.subtotal)}</td>
-      <td style="font-size:.85rem;color:var(--success)">+${APP.money(o.service_fee)}</td>
-      <td style="font-size:.85rem">${parseFloat(o.delivery_fee)>0?APP.money(o.delivery_fee):'—'}</td>
-      <td style="font-weight:700">${APP.money(o.total)}</td>
-      <td><span class="badge ${APP.statusBadge[o.status]||''}">${APP.statusLabel[o.status]||o.status}</span></td>
-      <td style="font-size:.78rem;color:var(--muted)">${APP.date(o.created_at)}</td>
-      <td style="display:flex;gap:4px">
-        ${o.delivery_type==='delivery' && !['entregado','cancelado'].includes(o.status) ? `<button onclick="releaseDelivery(${o.id})" style="background:none;border:1px solid #ffe082;color:#f57f17;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem" title="Liberar repartidor">🔄</button>` : ''}
-        <button onclick="deleteOrder(${o.id},'${(o.order_number||'').replace(/'/g,'')}')" style="background:none;border:1px solid #f5c2c2;color:var(--danger);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:.8rem">🗑️</button>
-      </td>
-    </tr>
+  const pages = Math.max(1, Math.ceil(ordList.length/ORD_PAGE));
+  if (ordPage > pages) ordPage = pages;
+  const page = ordList.slice((ordPage-1)*ORD_PAGE, ordPage*ORD_PAGE);
+  document.getElementById('pagination').innerHTML = adPager(ordPage, pages, ordList.length, 'goOrdPage', 'pedidos');
+  if (!page.length) { body.innerHTML = '<div class="ad-empty">Sin resultados</div>'; return; }
+  body.innerHTML = page.map(o => `
+    <div class="ad-row" style="cursor:default">
+      <div class="ad-av" title="${adTypeLabel(o.delivery_type)}">${adTypeIcon(o.delivery_type)}</div>
+      <div class="ad-main">
+        <div class="ad-t"><span class="ad-name">${APP.esc(o.client_name||'Cliente')}</span></div>
+        <div class="ad-s"><b>${APP.esc(o.business_name||'')}</b> · #${APP.esc(String(o.order_number||'').replace(/^PED-/,''))}</div>
+        <div class="ad-s">${adShortDate(o.created_at)} · Tarifa <b style="color:#15803d">+${APP.money(o.service_fee)}</b>${parseFloat(o.delivery_fee)>0?' · Envío '+APP.money(o.delivery_fee):''}</div>
+      </div>
+      <div class="ad-r">
+        <div class="ad-amt">${APP.money(o.total)}</div>
+        <span class="ad-st s-${o.status}">${(APP.statusLabel[o.status]||o.status).replace(/^[^A-Za-zÁÉÍÓÚÑáéíóúñ]+/,'')}</span>
+        <div class="ad-acts">
+          ${o.delivery_type==='delivery' && !['entregado','cancelado'].includes(o.status) ? `<button class="ad-ib warn" onclick="releaseDelivery(${o.id})" title="Liberar repartidor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></button>` : ''}
+          <button class="ad-ib danger" onclick="deleteOrder(${o.id},'${(o.order_number||'').replace(/'/g,'')}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>
+        </div>
+      </div>
+    </div>
   `).join('');
 }
 
