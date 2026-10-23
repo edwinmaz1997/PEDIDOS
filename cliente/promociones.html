@@ -11,8 +11,8 @@
 <title>Promociones — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/main.css">
-<link rel="stylesheet" href="/assets/css/cliente.css">
+<link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
+<link rel="stylesheet" href="/assets/css/cliente.css?v=202610222210">
 <style>
 .promos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .pm-card{background:white;border-radius:14px;overflow:hidden;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.07);border:1px solid var(--border);transition:transform .15s,box-shadow .15s}
@@ -82,7 +82,7 @@
   </div>
 </div>
 
-<script src="../assets/js/app.js"></script>
+<script src="../assets/js/app.js?v=202610222210"></script>
 <script>
 (function(){var h=window.location.hash;if(h&&h.indexOf('tk=')!==-1){var p=h.substring(1).split('&'),tk='',us='';p.forEach(function(x){if(x.indexOf('tk=')===0)tk=x.substring(3);if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}})();
 
@@ -216,7 +216,7 @@ init();
   <button onclick="document.getElementById('nx-lightbox').style.display='none'" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:1.3rem;cursor:pointer">✕</button>
   <img id="nx-lightbox-img" style="max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain">
 </div>
-<script src="/assets/js/pwa.js"></script>
+<script src="/assets/js/pwa.js?v=202610222210"></script>
 <!-- Bottom Nav Cliente -->
 <nav style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;z-index:1000;display:flex;align-items:stretch;box-shadow:0 -2px 12px rgba(0,0,0,.08);height:60px;padding-bottom:env(safe-area-inset-bottom)">
   <a href="/cliente/index.html" class="bnav-item" data-page="index">
@@ -257,6 +257,6 @@ init();
   });
 })();
 </script>
-<script src="/assets/js/cliente-ui.js"></script>
+<script src="/assets/js/cliente-ui.js?v=202610222210"></script>
 </body>
 </html>

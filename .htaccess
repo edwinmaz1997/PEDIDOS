@@ -53,3 +53,10 @@ RewriteRule ^(cliente|negocio|admin|repartidor)/(.*)$ /$1/$2 [L]
     Order allow,deny
     Deny from all
 </FilesMatch>
+
+# Que el navegador siempre revise si hay versión nueva de páginas, estilos y scripts
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|css|js)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>

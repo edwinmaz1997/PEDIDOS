@@ -9,7 +9,7 @@
 <title>Reportes — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
 <style>
 .report-tabs { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
 .report-tab { padding:10px 20px; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:white; font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif; font-weight:600; font-size:.88rem; cursor:pointer; transition:var(--transition); }
@@ -193,8 +193,8 @@
   </main>
 </div>
 
-<script src="../assets/js/app.js"></script>
-<script src="/assets/js/pwa.js"></script>
+<script src="../assets/js/app.js?v=202610222210"></script>
+<script src="/assets/js/pwa.js?v=202610222210"></script>
 <script>
 (function(){var h=window.location.hash;if(h&&h.indexOf('tk=')!==-1){var p=h.substring(1).split('&'),tk='',us='';p.forEach(function(x){if(x.indexOf('tk=')===0)tk=x.substring(3);if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}})();
 

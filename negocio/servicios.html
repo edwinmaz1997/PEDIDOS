@@ -15,7 +15,7 @@
 <title>Mis Servicios — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
 <style>
 .svc-row {
   display:flex;
@@ -208,7 +208,7 @@ input:checked + .slider:before { transform:translateX(20px); }
   </div>
 </div>
 
-<script src="/assets/js/app.js"></script>
+<script src="/assets/js/app.js?v=202610222210"></script>
 <script>
 const API = '/api';
 const user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}');
@@ -386,7 +386,7 @@ function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('
 
 init();
 </script>
-<script src="/assets/js/pwa.js">
+<script src="/assets/js/pwa.js?v=202610222210">
 // Adaptar sidebar según tipo de negocio
 (async function(){
   try {

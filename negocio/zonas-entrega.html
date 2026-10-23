@@ -15,7 +15,7 @@
 <title>Zonas de Entrega — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
 <style>
 .zone-item{background:white;border-radius:var(--radius);border:1.5px solid var(--border);padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:var(--transition)}
 .zone-item:hover{border-color:var(--blue)}
@@ -63,7 +63,7 @@
   </main>
 </div>
 
-<script src="../assets/js/app.js"></script>
+<script src="../assets/js/app.js?v=202610222210"></script>
 <script>
 (function(){var hash=window.location.hash;if(hash&&hash.indexOf('tk=')!==-1){var parts=hash.substring(1).split('&');var tk='',us='';parts.forEach(function(p){if(p.indexOf('tk=')===0)tk=p.substring(3);if(p.indexOf('us=')===0)us=decodeURIComponent(p.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}})();
 var user=JSON.parse(localStorage.getItem('nuevaexpress_user')||'{}');
@@ -131,7 +131,7 @@ function toggleSidebar(){var s=document.querySelector('.sidebar');var o=document
 init();
 </script>
 <script>var e=document.getElementById("yr");if(e)e.textContent=new Date().getFullYear();</script>
-<script src="/assets/js/pwa.js">
+<script src="/assets/js/pwa.js?v=202610222210">
 // Adaptar sidebar según tipo de negocio
 (async function(){
   try {

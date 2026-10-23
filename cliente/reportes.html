@@ -9,8 +9,8 @@
 <title>Mis Reportes — NuevaExpress</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/main.css">
-<link rel="stylesheet" href="/assets/css/cliente.css">
+<link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
+<link rel="stylesheet" href="/assets/css/cliente.css?v=202610222210">
 <style>
 .metric-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:24px}
 .metric-box{background:white;border-radius:var(--radius);border:1px solid var(--border);padding:18px;text-align:center}
@@ -148,8 +148,8 @@
 </main>
 </div>
 
-<script src="../assets/js/app.js"></script>
-<script src="/assets/js/pwa.js"></script>
+<script src="../assets/js/app.js?v=202610222210"></script>
+<script src="/assets/js/pwa.js?v=202610222210"></script>
 <script>
 (function(){var h=window.location.hash;if(h&&h.indexOf('tk=')!==-1){var p=h.substring(1).split('&'),tk='',us='';p.forEach(function(x){if(x.indexOf('tk=')===0)tk=x.substring(3);if(x.indexOf('us=')===0)us=decodeURIComponent(x.substring(3));});if(tk){localStorage.setItem('nuevaexpress_token',tk);if(us)localStorage.setItem('nuevaexpress_user',us);history.replaceState(null,'',window.location.pathname);}}})();
 
@@ -438,6 +438,6 @@ document.querySelectorAll('#periodChips .filter-tab').forEach(function(btn){
   });
 });
 </script>
-<script src="/assets/js/cliente-ui.js"></script>
+<script src="/assets/js/cliente-ui.js?v=202610222210"></script>
 </body>
 </html>
