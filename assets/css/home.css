@@ -232,3 +232,5 @@ body.home .modal-box { overflow-x: hidden !important; overflow-y: auto !importan
 .h-cta-brand span { color: #FFE27A; }
 .h-cta { flex-wrap: nowrap; }
 .h-cta-brand { font-size: clamp(1rem, 5.2vw, 1.4rem); min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.h-search { padding-right: 14px; }
+.h-search input { height: 50px; }
