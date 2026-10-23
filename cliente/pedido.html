@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
+<link rel="stylesheet" href="/assets/css/cliente.css?v=202610222220">
 <style>
 .order-layout { display:grid; grid-template-columns:1fr 360px; gap:24px; max-width:1100px; margin:0 auto; padding:32px 24px; }
 @media(max-width:768px){ .order-layout{grid-template-columns:1fr;} }
@@ -551,10 +552,16 @@ function renderProductModal(searchQ, catId) {
   });
 
   // Category tabs
-  var catTabs = '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat===null?'var(--blue)':'var(--border)')+';background:'+(cat===null?'var(--blue)':'white')+';color:'+(cat===null?'white':'var(--ink)')+';font-family:Plus Jakarta Sans,system-ui,Segoe UI,Roboto,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="filterProdCat(null,this)">🏷️ Todas</button>';
+  var catTabs = '<button type="button" class="pm-chip'+(cat===null?' on':'')+'" onclick="filterProdCat(null,this)">Todo</button>';
   Object.entries(catMap).forEach(function(e){
-    catTabs += '<button style="padding:6px 14px;border-radius:20px;border:1.5px solid '+(cat==e[0]?'var(--blue)':'var(--border)')+';background:'+(cat==e[0]?'var(--blue)':'white')+';color:'+(cat==e[0]?'white':'var(--ink)')+';font-family:Plus Jakarta Sans,system-ui,Segoe UI,Roboto,sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap" onclick="filterProdCat('+e[0]+',this)">'+(e[1].icon)+' '+esc(e[1].name)+'</button>';
+    catTabs += '<button type="button" class="pm-chip'+(cat==e[0]?' on':'')+'" onclick="filterProdCat('+e[0]+',this)">'+esc(e[1].name)+'</button>';
   });
+  // Encabezado del negocio
+  try {
+    var _bn = document.getElementById('pmBizName'); if (_bn) _bn.textContent = business.name || 'Productos';
+    var _bl = document.getElementById('pmBizLogo');
+    if (_bl) _bl.innerHTML = business.logo ? '<img src="'+esc(business.logo)+'" alt="">' : esc(String(business.name||'N').charAt(0).toUpperCase());
+  } catch(_e) {}
   document.getElementById('prodCatTabs').innerHTML = catTabs;
 
   // Filter products
@@ -573,54 +580,81 @@ function renderProductModal(searchQ, catId) {
 
   var html = filtered.map(function(p){
     var qty = cart[p.id]?.qty || 0;
-    var inCart = qty > 0;
     var hasVariants = p.has_variants && p.variants && p.variants.length > 0;
     var hasExtras = (p.extras && p.extras.length > 0) || (p.has_complements && p.complements && p.complements.length > 0) || (p.has_complements2 && p.complements2 && p.complements2.length > 0) || (p.has_complements3 && p.complements3 && p.complements3.length > 0);
     var selectedVariant = cart[p.id]?.variant || null;
     var displayPrice = hasVariants
       ? (selectedVariant ? 'Q' + parseFloat(selectedVariant.price).toFixed(2) : 'Desde Q' + parseFloat(p.variants[0].price).toFixed(2))
       : (p.price ? 'Q' + parseFloat(p.price).toFixed(2) : '');
+    var inQty = productQtyInCart(p.id);
 
-    return '<div id="pp-'+p.id+'" data-pid="'+p.id+'" data-price="'+(p.price||0)+'" data-name="'+esc(p.name)+'" style="padding:12px 16px;border-bottom:1px solid var(--border);background:'+(inCart?'#f0f7ff':'white')+';transition:.15s">' +
-      '<div style="display:flex;align-items:center;gap:12px">' +
-        (p.photo
-          ? '<img src="'+esc(p.photo)+'" alt="'+esc(p.name)+'" style="width:72px;height:72px;object-fit:cover;border-radius:10px;flex-shrink:0;cursor:zoom-in" onclick="openProductPhoto(\''+esc(p.photo)+'\',\''+esc(p.name)+'\')">'
-          : '<div style="width:72px;height:72px;border-radius:10px;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0">'+(p.category_icon||'🍽️')+'</div>') +
-        '<div style="flex:1;min-width:0">' +
-          (p.category_name?'<div style="font-size:.7rem;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em">'+(p.category_icon||'🏷️')+' '+esc(p.category_name)+'</div>':'') +
-          '<div style="font-weight:700;font-size:.92rem;line-height:1.3">'+esc(p.name)+'</div>' +
-          '<div style="font-weight:700;color:var(--blue);margin-top:4px;font-size:.9rem" id="price-'+p.id+'">'+displayPrice+'</div>' +
+    var photo = p.photo
+      ? '<img src="'+esc(p.photo)+'" alt="'+esc(p.name)+'" loading="lazy" onclick="openProductPhoto(\''+esc(p.photo)+'\',\''+esc(p.name)+'\')">'
+      : '<span>'+esc(String(p.name||'P').charAt(0).toUpperCase())+'</span>';
+
+    var control;
+    if (hasExtras) {
+      control = '<button type="button" class="pm-custom" onclick="openCustomizeModal('+p.id+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Agregar</button>';
+    } else if (hasVariants) {
+      control = '';
+    } else {
+      control = '<div class="pm-step">' +
+        '<button type="button" class="pm-minus" onclick="changeQty('+p.id+',-1)" aria-label="Quitar">−</button>' +
+        '<span class="pm-q" id="qty-'+p.id+'">'+qty+'</span>' +
+        '<button type="button" class="pm-plus" onclick="changeQty('+p.id+',1)" aria-label="Agregar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>' +
+      '</div>';
+    }
+
+    var vars = '';
+    if (hasVariants) {
+      vars = '<div class="pm-vars">' + p.variants.map(function(v) {
+        var vKey = 'v_' + p.id + '_' + v.id;
+        var vQty = cart[vKey] ? cart[vKey].qty : 0;
+        var vPrice = promoOverrides && promoOverrides[p.id] !== undefined ? promoOverrides[p.id] : parseFloat(v.price);
+        return '<div class="pm-var'+(vQty>0?' in':'')+'" id="pv-'+p.id+'-'+v.id+'">' +
+          '<div class="pm-var-t"><span>' + esc(v.name) + '</span><b>Q' + vPrice.toFixed(2) + '</b></div>' +
+          '<div class="pm-step sm">' +
+            '<button type="button" class="pm-minus" onclick="changeVariantQty(' + p.id + ',' + JSON.stringify(v).replace(/"/g,"'") + ',-1)" aria-label="Quitar">−</button>' +
+            '<span class="pm-q" id="qty-v-' + p.id + '-' + v.id + '">' + vQty + '</span>' +
+            '<button type="button" class="pm-plus" onclick="changeVariantQty(' + p.id + ',' + JSON.stringify(v).replace(/"/g,"'") + ',1)" aria-label="Agregar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>' +
+          '</div>' +
+        '</div>';
+      }).join('') + '</div>';
+    }
+
+    return '<div id="pp-'+p.id+'" class="pm-item'+(inQty>0?' in':'')+(qty>0?' has':'')+'" data-pid="'+p.id+'" data-price="'+(p.price||0)+'" data-name="'+esc(p.name)+'">' +
+      '<div class="pm-row">' +
+        '<div class="pm-ph">'+photo+'</div>' +
+        '<div class="pm-info">' +
+          '<div class="pm-name">'+esc(p.name)+'<span class="pm-badge" id="inc-'+p.id+'">'+(inQty>0?inQty:'')+'</span></div>' +
+          (p.description ? '<div class="pm-desc">'+esc(p.description)+'</div>' : '') +
+          '<div class="pm-bottom"><div class="pm-price" id="price-'+p.id+'">'+displayPrice+'</div>'+control+'</div>' +
         '</div>' +
-        (hasExtras
-          ? '<button onclick="openCustomizeModal('+p.id+')" style="padding:8px 14px;border-radius:20px;border:none;background:var(--accent);color:white;font-size:.82rem;font-weight:700;cursor:pointer;font-family:\'Plus Jakarta Sans\',system-ui,\'Segoe UI\',Roboto,sans-serif;white-space:nowrap">🎨 Personalizar</button>'
-          : '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
-            '<button onclick="changeQty('+p.id+',-1)" style="width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:white;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">−</button>' +
-            '<span id="qty-'+p.id+'" style="font-weight:700;min-width:20px;text-align:center;font-size:.95rem">'+qty+'</span>' +
-            '<button onclick="changeQty('+p.id+',1)" style="width:32px;height:32px;border-radius:50%;border:none;background:var(--blue);color:white;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">+</button>' +
-          '</div>') +
-      '</div>' +
-      // Selector de variantes
-      (hasVariants ? '<div style="margin-top:10px;padding-left:84px">' +
-        p.variants.map(function(v) {
-          var vKey = 'v_' + p.id + '_' + v.id;
-          var vQty = cart[vKey] ? cart[vKey].qty : 0;
-          var vPrice = promoOverrides && promoOverrides[p.id] !== undefined ? promoOverrides[p.id] : parseFloat(v.price);
-          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">' +
-            '<span style="font-size:.85rem;color:var(--charcoal)">' + esc(v.name) + ' — <strong>Q' + vPrice.toFixed(2) + '</strong></span>' +
-            '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
-              '<button onclick="changeVariantQty(' + p.id + ',' + JSON.stringify(v).replace(/"/g,"'") + ',-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:white;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">−</button>' +
-              '<span id="qty-v-' + p.id + '-' + v.id + '" style="font-weight:700;min-width:18px;text-align:center;font-size:.9rem">' + vQty + '</span>' +
-              '<button onclick="changeVariantQty(' + p.id + ',' + JSON.stringify(v).replace(/"/g,"'") + ',1)" style="width:28px;height:28px;border-radius:50%;border:none;background:var(--blue);color:white;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">+</button>' +
-            '</div>' +
-          '</div>';
-        }).join('') +
-      '</div>' : '') +
-      (p.description?'<div style="font-size:.8rem;color:var(--muted);margin-top:8px;line-height:1.5;padding-left:84px">'+esc(p.description)+'</div>':'') +
+      '</div>' + vars +
     '</div>';
   }).join('');
 
-  document.getElementById('prodList').innerHTML = html || '<p style="color:var(--muted);text-align:center;padding:20px">Sin productos</p>';
+  document.getElementById('prodList').innerHTML = html || '<div class="cx-empty"><div class="cx-empty-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div><strong>Sin resultados</strong><p>Prueba con otro nombre o categoría.</p></div>';
 }
+
+// Cantidad total de un producto en el carrito (sumando variantes y personalizados)
+function productQtyInCart(pid) {
+  var n = 0;
+  Object.keys(cart).forEach(function(k){
+    var it = cart[k]; if (!it) return;
+    if (String(k) === String(pid) || String(it.product_id) === String(pid)) n += it.qty || 0;
+  });
+  return n;
+}
+function markInCart(pid) {
+  var el = document.getElementById('pp-'+pid);
+  if (!el) return;
+  var n = productQtyInCart(pid);
+  el.classList.toggle('in', n > 0);
+  el.classList.toggle('has', (cart[pid] && cart[pid].qty > 0) ? true : false);
+  var b = document.getElementById('inc-'+pid); if (b) b.textContent = n > 0 ? n : '';
+}
+
 
 function filterProdCat(catId, btn) {
   activeProdCat = catId;
@@ -649,8 +683,7 @@ function selectVariant(productId, variant) {
   // Actualizar qty display
   var qEl = document.getElementById('qty-'+productId);
   if (qEl) qEl.textContent = cart[productId].qty;
-  var ppEl = document.getElementById('pp-'+productId);
-  if (ppEl) { ppEl.style.background = '#f0f7ff'; }
+  markInCart(productId);
   updateCart();
 }
 
@@ -667,9 +700,9 @@ function changeVariantQty(productId, variant, delta) {
   }
   var qEl = document.getElementById('qty-v-' + productId + '-' + variant.id);
   if (qEl) qEl.textContent = cart[vKey] ? cart[vKey].qty : 0;
-  var ppEl = document.getElementById('pp-' + productId);
-  var totalQty = p.variants.reduce(function(s, v2){ var k = 'v_'+productId+'_'+v2.id; return s + (cart[k]?cart[k].qty:0); }, 0);
-  if (ppEl) ppEl.style.background = totalQty > 0 ? '#f0f7ff' : 'white';
+  var pvEl = document.getElementById('pv-' + productId + '-' + variant.id);
+  if (pvEl) pvEl.classList.toggle('in', !!(cart[vKey] && cart[vKey].qty > 0));
+  markInCart(productId);
   updateCart();
 }
 
@@ -679,7 +712,7 @@ function changeQty(id, delta) {
   // Si tiene variantes y no hay una seleccionada, pedir que seleccione
   if (p?.has_variants && p?.variants?.length && delta > 0 && !cart[id]?.variant) {
     var t2 = document.createElement('div');
-    t2.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#c0392b;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999';
+    t2.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#c0392b;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:2000';
     t2.textContent = 'Selecciona una opción primero';
     document.body.appendChild(t2);
     setTimeout(function(){ t2.remove(); }, 2500);
@@ -691,11 +724,7 @@ function changeQty(id, delta) {
   if (cart[id].qty === 0) delete cart[id];
   var qEl = document.getElementById('qty-'+id);
   if (qEl) qEl.textContent = cart[id]?.qty || 0;
-  var ppEl = document.getElementById('pp-'+id);
-  if (ppEl) {
-    ppEl.style.borderColor = cart[id]?.qty ? 'var(--blue)' : '';
-    ppEl.style.background  = cart[id]?.qty ? '#f0f7ff' : '';
-  }
+  markInCart(id);
   updateCart();
 }
 
@@ -834,7 +863,7 @@ function addCustomizedToCart() {
     document.querySelectorAll('.comp-qty[data-group="'+g.n+'"]').forEach(function(s){ total += parseInt(s.textContent)||0; });
     if (total < g.req) {
       var t = document.createElement('div');
-      t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#dc2626;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:9999;text-align:center';
+      t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#dc2626;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:20009;text-align:center';
       t.textContent = 'Debes elegir ' + g.req + ' opción' + (g.req>1?'es':'') + ' en "' + g.label + '"';
       document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 2500);
       return;
@@ -884,13 +913,12 @@ function addCustomizedToCart() {
     cart[cartKey].qty += 1;
   }
 
-  var ppEl = document.getElementById('pp-'+p.id);
-  if (ppEl) ppEl.style.background = '#f0f7ff';
+  markInCart(p.id);
 
   document.getElementById('customizeModal').style.display = 'none';
   updateCart();
   var t = document.createElement('div');
-  t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+  t.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:2000;box-shadow:0 4px 20px rgba(0,0,0,.3)';
   t.textContent = '✅ ' + p.name + ' agregado';
   document.body.appendChild(t);
   setTimeout(function(){ t.remove(); }, 2500);
@@ -1445,7 +1473,12 @@ function updateCart() {
   var totalItems = Object.values(cart).reduce(function(s,i){ return s+i.qty; }, 0);
   var totalPrice = Object.values(cart).reduce(function(s,i){ return s+i.price*i.qty; }, 0);
   var btn = document.getElementById('prodModalBtn');
-  if (btn) btn.textContent = totalItems > 0 ? '✓ Listo — '+totalItems+' productos (Q'+totalPrice.toFixed(2)+')' : 'Ver carrito';
+  if (btn) {
+    btn.classList.toggle('on', totalItems > 0);
+    btn.innerHTML = totalItems > 0
+      ? '<span class="pm-go-n">'+totalItems+'</span><span class="pm-go-t">Continuar con mi pedido</span><span class="pm-go-p">Q'+totalPrice.toFixed(2)+'</span>'
+      : 'Cerrar';
+  }
   var cartBar = document.getElementById('cartBar');
   if (cartBar) {
     cartBar.style.display = totalItems > 0 ? 'flex' : 'none';
@@ -1793,7 +1826,7 @@ document.getElementById('customItems').addEventListener('input', updateCart);
           // Abrir modal con productos ya seleccionados
           openProductModal();
           var toast = document.createElement('div');
-          toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center';
+          toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 20px;border-radius:10px;font-size:.9rem;z-index:2000;box-shadow:0 4px 20px rgba(0,0,0,.3);max-width:90vw;text-align:center';
           toast.textContent = hasPriceDiff ? '⚠️ Algunos precios han cambiado desde tu pedido anterior' : '🔁 Tu pedido anterior está listo — ajusta si quieres';
           document.body.appendChild(toast);
           setTimeout(function(){ toast.remove(); }, 4000);
@@ -1807,18 +1840,18 @@ document.getElementById('customItems').addEventListener('input', updateCart);
 
 <!-- Product Modal -->
 <!-- Modal de Personalización de Extras -->
-<div id="customizeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;align-items:center;justify-content:center;padding:16px">
-  <div style="background:white;border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:20px">
+<div id="customizeModal" class="pm-overlay pm-cm" style="display:none;z-index:1400" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:white;border-radius:22px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:20px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <span style="font-weight:700;font-size:.95rem;color:var(--navy)">🎨 Personalizar</span>
-      <button onclick="document.getElementById('customizeModal').style.display='none'" style="background:var(--off-white);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center">✕</button>
+      <span style="font-weight:800;font-size:1.05rem;color:#0f172a;letter-spacing:-.01em">Personaliza tu producto</span>
+      <button onclick="document.getElementById('customizeModal').style.display='none'" class="pm-x" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
     </div>
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
-      <div id="cm_photo" style="width:64px;height:64px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1.6rem"></div>
+      <div id="cm_photo" style="width:72px;height:72px;border-radius:16px;overflow:hidden;flex-shrink:0;background:var(--off-white);display:flex;align-items:center;justify-content:center;font-size:1.6rem"></div>
       <div style="flex:1">
         <div id="cm_name" style="font-weight:700;font-size:.95rem"></div>
         <div id="cm_desc" style="font-size:.75rem;color:var(--muted);margin-top:2px"></div>
-        <div id="cm_price" style="font-weight:700;color:var(--blue);margin-top:4px"></div>
+        <div id="cm_price" style="font-weight:800;color:#0f172a;margin-top:4px"></div>
       </div>
     </div>
     <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:12px">
@@ -1828,7 +1861,7 @@ document.getElementById('customItems').addEventListener('input', updateCart);
       <div id="cm_extras_section" style="display:none">
         <details>
           <summary style="font-size:.85rem;font-weight:700;color:var(--navy);cursor:pointer;padding:8px 0;list-style:none;display:flex;align-items:center;justify-content:space-between">
-            ➕ Extras disponibles <span style="font-size:.7rem;color:var(--muted)">▼</span>
+            Extras disponibles <span style="font-size:.7rem;color:var(--muted)">▼</span>
           </summary>
           <div id="cm_extras" style="display:flex;flex-direction:column;gap:6px;margin-top:8px"></div>
         </details>
@@ -1836,10 +1869,10 @@ document.getElementById('customItems').addEventListener('input', updateCart);
     </div>
     <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
       <div style="font-size:.9rem;color:var(--muted)">Total:</div>
-      <div id="cm_total" style="font-size:1.1rem;font-weight:800;color:var(--blue)">Q0.00</div>
+      <div id="cm_total" style="font-size:1.2rem;font-weight:800;color:#0f172a">Q0.00</div>
     </div>
-    <button onclick="addCustomizedToCart()" class="btn-primary" style="width:100%;justify-content:center;padding:12px">
-      🛒 Agregar al carrito
+    <button onclick="addCustomizedToCart()" class="pm-go on" style="width:100%">
+      Agregar al pedido
     </button>
     <button onclick="document.getElementById('customizeModal').style.display='none'" style="width:100%;margin-top:6px;padding:10px;border:none;background:none;color:var(--muted);cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.88rem">
       Cancelar
@@ -1847,22 +1880,25 @@ document.getElementById('customItems').addEventListener('input', updateCart);
   </div>
 </div>
 
-<div id="productModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;padding:16px">
-  <div style="background:white;border-radius:20px;width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3)">
-    <!-- Header -->
-    <div style="padding:18px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h2 style="font-size:1.1rem;font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif">🛍️ Seleccionar productos</h2>
-        <button onclick="closeProductModal()" style="background:var(--off-white);border:none;width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+<div id="productModal" class="pm-overlay" style="display:none" onclick="if(event.target===this)closeProductModal()">
+  <div class="pm-box" role="dialog" aria-label="Productos">
+    <div class="pm-head">
+      <div class="pm-head-row">
+        <div class="pm-head-biz">
+          <div class="cx-biz-logo" id="pmBizLogo"></div>
+          <div><small>Menú</small><strong id="pmBizName">Productos</strong></div>
+        </div>
+        <button type="button" class="pm-x" onclick="closeProductModal()" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
       </div>
-      <input type="text" id="prodSearch" placeholder="🔍 Buscar producto..." oninput="renderProductModal()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',Roboto,sans-serif;font-size:.9rem;outline:none;box-sizing:border-box;margin-bottom:10px;transition:.2s" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
-      <div id="prodCatTabs" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none"></div>
+      <div class="cx-search" style="margin:0 0 10px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="prodSearch" placeholder="Buscar producto" autocomplete="off" oninput="renderProductModal()">
+      </div>
+      <div id="prodCatTabs" class="pm-chips"></div>
     </div>
-    <!-- Product list -->
-    <div id="prodList" style="overflow-y:auto;flex:1;padding:0"></div>
-    <!-- Footer -->
-    <div style="padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0;background:white;border-radius:0 0 20px 20px">
-      <button onclick="closeProductModal()" class="btn-primary" style="width:100%;padding:14px;font-size:1rem;justify-content:center;border-radius:12px" id="prodModalBtn">✓ Listo</button>
+    <div id="prodList" class="pm-list"></div>
+    <div class="pm-foot-bar">
+      <button type="button" onclick="closeProductModal()" class="pm-go" id="prodModalBtn">Cerrar</button>
     </div>
   </div>
 </div>
