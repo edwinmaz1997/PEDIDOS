@@ -139,3 +139,37 @@ body.nb .empty-state { background: #fff; border: 1px dashed #dbe1ea; border-radi
 .rc-stats span { font-size: .72rem; color: #64748b; background: #fff; border-radius: 999px; padding: 4px 10px; }
 .rc-stats b { color: #0f172a; font-weight: 800; }
 .rc-stats .rc-fav { color: #c2410c; background: #fff7ed; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ============================================================
+   Panel del repartidor (body.rp)
+   ============================================================ */
+body.rp .stats-grid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
+body.rp .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+body.rp .filter-bar input { flex: 1 1 100% !important; }
+body.rp .filter-bar select { flex: 1 1 0; min-width: 0; padding: 0 12px; }
+body.rp .btn-filter { height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid #e6e9ef; background: #fff; color: #475569; font: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; }
+body.rp #filterCount { width: 100%; font-size: .76rem !important; color: #94a3b8 !important; font-weight: 600; }
+
+body.rp .delivery-card { background: #fff !important; border: 1px solid #edf0f5 !important; border-radius: 20px !important; padding: 16px !important; box-shadow: 0 8px 20px -16px rgba(15,23,42,.45); margin-bottom: 12px !important; }
+body.rp .delivery-card:hover { box-shadow: 0 8px 20px -16px rgba(15,23,42,.45) !important; }
+body.rp .delivery-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+body.rp .delivery-header > div:first-child > div:first-child { font-weight: 800 !important; font-size: 1rem !important; letter-spacing: -.01em; }
+body.rp .route-wrap { background: #f8fafc !important; border-radius: 16px !important; padding: 14px !important; }
+body.rp .route-line { left: 20px !important; background: repeating-linear-gradient(#cbd5e1 0 4px, transparent 4px 8px) !important; width: 2px; }
+body.rp .route-dot { width: 14px !important; height: 14px !important; border: 3px solid #fff !important; box-shadow: 0 0 0 1.5px #cbd5e1 !important; }
+body.rp .route-dot.pickup { background: #f59e0b !important; }
+body.rp .route-dot.dropoff { background: #4A90D9 !important; }
+body.rp .route-label { font-size: .64rem !important; font-weight: 800 !important; color: #94a3b8 !important; letter-spacing: .08em; }
+body.rp .route-name { font-weight: 800 !important; color: #0f172a; }
+body.rp .route-addr { color: #64748b !important; }
+body.rp .map-btn { border-radius: 999px !important; border: 0 !important; background: #eef4fc !important; color: #2563b8 !important; font-weight: 700 !important; padding: 6px 12px !important; }
+body.rp .delivery-card .btn-primary, body.rp .delivery-card .btn-ghost { flex: 1 1 auto; justify-content: center; min-height: 44px; }
+
+body.rp .detail-modal { align-items: center !important; padding: 14px !important; background: rgba(15,23,42,.5) !important; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 1150 !important; }
+body.rp .detail-sheet { border-radius: 24px !important; max-height: 88vh !important; padding: 22px 20px !important; box-shadow: 0 30px 60px -20px rgba(15,23,42,.5); }
+body.rp .detail-sheet h2 { font-weight: 800; letter-spacing: -.02em; }
+body.rp .period-btn { height: 38px; padding: 0 16px !important; border-radius: 999px !important; border: 1px solid #e6e9ef !important; background: #fff !important; color: #475569 !important; font-weight: 700 !important; }
+body.rp .period-btn.active { background: #0f172a !important; border-color: #0f172a !important; color: #fff !important; }
+body.rp .period-btn + input[type="date"] { min-height: 38px; }
+body.nb main .btn-primary[style*="--green"], body.nb main .btn-primary[style*="--success"] { background: linear-gradient(135deg,#22c55e,#16a34a) !important; box-shadow: 0 10px 20px -12px rgba(22,163,74,.9) !important; }
+body.rp .delivery-card .btn-ghost { color: #2563b8 !important; border-color: #cfe0f6 !important; background: #f0f6fe !important; }

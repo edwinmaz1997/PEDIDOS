@@ -14,8 +14,11 @@
   function svg(k) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[k] || '') + '</svg>'; }
   window.cxSvg = svg;
 
-  var IS_NEGOCIO = location.pathname.indexOf('/negocio/') === 0;
-  var TITLES = IS_NEGOCIO ? {
+  var IS_REPARTIDOR = location.pathname.indexOf('/repartidor/') === 0;
+  var IS_NEGOCIO = location.pathname.indexOf('/negocio/') === 0 || IS_REPARTIDOR;
+  var TITLES = IS_REPARTIDOR ? {
+    index: 'Mis entregas', reportes: 'Mis reportes', perfil: 'Mi perfil'
+  } : IS_NEGOCIO ? {
     index: 'Pedidos', productos: 'Productos', promociones: 'Promociones', anuncios: 'Anuncios',
     reportes: 'Reportes', perfil: 'Perfil del negocio', 'pedido-detalle': 'Detalle del pedido',
     'zonas-entrega': 'Zonas de entrega', servicios: 'Mis servicios', 'crear-negocio': 'Crear negocio'
@@ -28,6 +31,7 @@
     if (document.body.classList.contains('cx')) return;
     document.body.classList.add('cx');
     if (IS_NEGOCIO) document.body.classList.add('nb');
+    if (IS_REPARTIDOR) document.body.classList.add('rp');
     var page = (location.pathname.split('/').pop() || 'index.html').replace('.html', '') || 'index';
     var user = {};
     try { user = JSON.parse(localStorage.getItem('nuevaexpress_user') || '{}'); } catch (e) {}
@@ -66,7 +70,7 @@
 
   // ── Panel del negocio: quitar emojis decorativos al inicio de títulos y botones ──
   var EMOJI_RE = /^[\s‍️←-⇿⌀-⏿①-➿⤀-⥿⬀-⯿〰〽㊗㊙™ℹ©®✔✖➕➖➗✅❌✖✕\ud83c-\ud83e][\udc00-\udfff]?/;
-  var CLEAN_SEL = '.tab-btn, .report-tab, .cat-tab, .page-header h1, main h2, main h3, main h4, main button:not(.icon-btn):not(.pw-toggle), main a.btn-primary, main a.btn-ghost, main .badge, .stat-label, main label, .order-client, .modal-form-box h2, .modal-form-box h3, .modal-form-box button:not(.icon-btn)';
+  var CLEAN_SEL = '.tab-btn, .period-btn, .report-tab, .cat-tab, .page-header h1, main h2, main h3, main h4, main button:not(.icon-btn):not(.pw-toggle), main a.btn-primary, main a.btn-ghost, main .badge, .stat-label, main label, .order-client, .modal-form-box h2, .modal-form-box h3, .modal-form-box button:not(.icon-btn)';
   function stripLead(el) {
     var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
     var n = walker.nextNode();
