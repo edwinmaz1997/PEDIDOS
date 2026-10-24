@@ -505,7 +505,7 @@ function renderOrder(o) {
           <strong>${esc(o.order_number)}</strong>
           <div class="order-client">👤 ${esc(o.client_name)} ${o.client_phone?`· <a href="tel:${esc(o.client_phone)}">${esc(o.client_phone)}</a>`:''}</div>
           <div style="font-size:.8rem;color:var(--muted)">${new Date(o.created_at).toLocaleString('es-GT')}</div>
-          ${o.delivery_type==='delivery'?`<div style="font-size:.8rem;color:var(--accent)">🛵 Delivery: ${esc(o.delivery_address||'')}</div>`:o.delivery_type==='dine_in'?`<div style="font-size:.8rem;color:#166534">🍽️ Consumo en negocio</div>`:'<div style="font-size:.8rem;color:var(--muted)">🏃 Recoger en negocio</div>'}
+          ${o.delivery_type==='delivery'?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px"><span style="font-size:.8rem;color:var(--accent)">🛵 Delivery</span>${o.delivery_address?`<a href="${esc(/^https?:\/\//i.test(o.delivery_address)?o.delivery_address:'https://www.google.com/maps/search/'+encodeURIComponent(o.delivery_address))}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:#e3f2fd;border-radius:20px;color:#1565c0;font-size:.78rem;font-weight:700;text-decoration:none">📍 Ver en mapa</a>`:''}</div>`:o.delivery_type==='dine_in'?`<div style="font-size:.8rem;color:#166534">🍽️ Consumo en negocio</div>`:'<div style="font-size:.8rem;color:var(--muted)">🏃 Recoger en negocio</div>'}
         </div>
         <span class="badge ${statusBadge[o.status]||'badge-pending'}">${statusLabels[o.status]||o.status}</span>
       </div>
