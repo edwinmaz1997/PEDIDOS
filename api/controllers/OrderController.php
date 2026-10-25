@@ -245,6 +245,12 @@ class OrderController {
     public function storeByNegocio(array $body): void {
         $user = AuthMiddleware::requireRole('negocio');
 
+        // Modo mantenimiento: no se permiten pedidos delivery creados por el negocio
+        try {
+            $mm = $this->db->query("SELECT value FROM app_settings WHERE `key`='maintenance_mode' LIMIT 1")->fetch();
+            if ($mm && (int)$mm['value'] === 1) Response::error('La plataforma está en mantenimiento. Los deliverys están pausados por ahora.', 403);
+        } catch (\Throwable $e) {}
+
         // Get business
         $bizStmt = $this->db->prepare("SELECT * FROM businesses WHERE user_id = ? AND is_active = 1 LIMIT 1");
         $bizStmt->execute([$user['id']]);
