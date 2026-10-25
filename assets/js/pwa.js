@@ -412,9 +412,19 @@ function _nxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/<
     fetchNotifs();
   }
 
+  // Contador en el ícono de la app instalada (Badging API)
+  function nxSetAppBadge(n) {
+    try {
+      if (!('setAppBadge' in navigator)) return;
+      if (n > 0) navigator.setAppBadge(n).catch(function(){});
+      else navigator.clearAppBadge().catch(function(){});
+    } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) fetchNotifs(); });
+
   // Polling independiente — siempre arranca aunque no haya sidebar
   function startPolling() {
-    if (!getToken()) return;
+    if (!getToken()) { nxSetAppBadge(0); return; }
     fetchNotifs();
     setInterval(fetchNotifs, 10000);
   }
@@ -428,6 +438,7 @@ function _nxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/<
       var unread = data.data.unread || 0;
       var badge = document.getElementById('nx-badge');
       if (badge) { badge.textContent = unread>99?'99+':unread; badge.style.display = unread>0?'flex':'none'; }
+      nxSetAppBadge(unread);
       if (unread > _lastUnread && _lastUnread !== null) {
         var bell = document.getElementById('nx-bell');
         if (bell) { bell.classList.add('sb-qbtn--ping'); setTimeout(function(){ bell.classList.remove('sb-qbtn--ping'); },1500); }
@@ -527,7 +538,7 @@ function _nxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/<
 })();
 // ── Sistema de actualización de app ─────────────────────────
 (function() {
-  var APP_VERSION = '1.0.13'; // Incrementar en cada deploy importante
+  var APP_VERSION = '1.0.14'; // Incrementar en cada deploy importante
   var stored = localStorage.getItem('nx_app_version');
 
   function forceUpdateFn() {
