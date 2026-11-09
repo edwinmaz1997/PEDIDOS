@@ -538,7 +538,7 @@ function _nxEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/<
 })();
 // ── Sistema de actualización de app ─────────────────────────
 (function() {
-  var APP_VERSION = '1.0.14'; // Incrementar en cada deploy importante
+  var APP_VERSION = '1.0.15'; // Incrementar en cada deploy importante
   var stored = localStorage.getItem('nx_app_version');
 
   function forceUpdateFn() {

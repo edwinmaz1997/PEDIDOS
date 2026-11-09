@@ -1,6 +1,6 @@
 // NuevaExpress Service Worker
 // Push notifications handled by OneSignal (OneSignalSDKWorker.js)
-const CACHE = 'nuevaexpress-v33';
+const CACHE = 'nuevaexpress-v34';
 
 self.addEventListener('install', function(e) { self.skipWaiting(); });
 self.addEventListener('activate', function(e) {
