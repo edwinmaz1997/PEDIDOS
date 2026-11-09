@@ -120,7 +120,7 @@ async function loadAnuncios() {
   document.getElementById('anuncioList').innerHTML = list.map(function(a){
     var date = new Date(a.created_at).toLocaleDateString('es-GT',{day:'2-digit',month:'short',year:'numeric'});
     return '<div class="anuncio-card">' +
-      (a.image_url ? '<img src="'+esc(a.image_url)+'" class="anuncio-img">' : '') +
+      (a.video_url ? '<video src="'+esc(a.video_url)+'" class="anuncio-img" controls playsinline preload="metadata" style="background:#000"></video>' : a.image_url ? '<img src="'+esc(a.image_url)+'" class="anuncio-img">' : '') +
       '<div class="anuncio-body">' +
         '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px">' +
           '<div style="font-weight:700;font-size:.95rem">'+esc(a.title)+'</div>' +
@@ -259,6 +259,34 @@ async function saveAnuncio() {
     });
     var uploadData = await uploadRes.json();
     if (!uploadData.success) showMsg('Anuncio guardado pero la imagen falló: '+(uploadData.message||''), false);
+  }
+
+  // Subir video si se seleccionó uno
+  var vidInput = document.getElementById('f_video');
+  var vidFile = vidInput && vidInput.files ? vidInput.files[0] : null;
+  if (vidFile && anuncioId) {
+    btn.textContent = 'Subiendo video...';
+    var vfd = new FormData();
+    vfd.append('video', vidFile);
+    try {
+      var vRes = await fetch('/api/anuncios/'+anuncioId+'/video', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer '+getToken() },
+        body: vfd
+      });
+      var vData = await vRes.json().catch(function(){ return { success:false, message:'El servidor rechazó el video (¿muy pesado?)' }; });
+      if (!vData.success) {
+        btn.textContent = editingId ? 'Guardar cambios' : 'Publicar anuncio'; btn.disabled = false;
+        editingId = anuncioId;
+        showMsg('Anuncio guardado pero el video falló: '+(vData.message||''), true);
+        loadAnuncios(); return;
+      }
+    } catch (e) {
+      btn.textContent = editingId ? 'Guardar cambios' : 'Publicar anuncio'; btn.disabled = false;
+      editingId = anuncioId;
+      showMsg('Anuncio guardado pero el video no se pudo subir. Revisa tu conexión.', true);
+      loadAnuncios(); return;
+    }
   }
 
   btn.textContent = editingId ? 'Guardar cambios' : 'Publicar anuncio'; btn.disabled = false;
