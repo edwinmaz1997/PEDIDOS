@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css?v=202610222210">
-<link rel="stylesheet" href="/assets/css/cliente.css?v=202610230102">
+<link rel="stylesheet" href="/assets/css/cliente.css?v=202611132030">
 <style>
 .order-layout { display:grid; grid-template-columns:1fr 360px; gap:24px; max-width:1100px; margin:0 auto; padding:32px 24px; }
 @media(max-width:768px){ .order-layout{grid-template-columns:1fr;} }
@@ -58,6 +58,13 @@
       <div class="px-alert-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
       <div class="px-alert-t">
         <strong>Plataforma en mantenimiento</strong>
+        <span>Los deliverys están pausados por ahora. Puedes pedir para <b>recoger en el negocio</b>.</span>
+      </div>
+    </div>
+    <div id="afterHoursModeBanner" class="px-alert px-alert-hours" style="display:none" role="status">
+      <div class="px-alert-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div>
+      <div class="px-alert-t">
+        <strong>Estamos fuera de horario</strong>
         <span>Los deliverys están pausados por ahora. Puedes pedir para <b>recoger en el negocio</b>.</span>
       </div>
     </div>
@@ -342,8 +349,17 @@ async function init() {
     var maintData = await maintRes.json();
     window._maintenanceMode = !!(maintData.data && maintData.data.maintenance_mode);
   } catch(e) {}
+  window._afterHoursMode = false;
+  try {
+    var ahRes = await fetch('/api/after-hours-mode');
+    var ahData = await ahRes.json();
+    window._afterHoursMode = !!(ahData.data && ahData.data.after_hours_mode);
+  } catch(e) {}
 
-  var deliveryBlocked = window._rainMode || window._maintenanceMode;
+  var deliveryBlocked = window._rainMode || window._maintenanceMode || window._afterHoursMode;
+  if (window._afterHoursMode) {
+    document.getElementById('afterHoursModeBanner').style.display = 'flex';
+  }
   if (window._maintenanceMode) {
     document.getElementById('maintenanceModeBanner').style.display = 'flex';
   }
@@ -364,7 +380,7 @@ async function init() {
     business = data.data;
     renderBizInfo();
     // Delivery activo por defecto
-    document.getElementById('deliveryAddressWrap').style.display = (window._rainMode || window._maintenanceMode) ? 'none' : 'block';
+    document.getElementById('deliveryAddressWrap').style.display = (window._rainMode || window._maintenanceMode || window._afterHoursMode) ? 'none' : 'block';
     loadSavedAddress();
     renderProducts();
 
@@ -1579,6 +1595,10 @@ async function submitOrder() {
   }
   if (deliveryType === 'delivery' && window._rainMode) {
     alert('🌧️ Deliverys suspendidos por el clima.\n\nCuidamos la integridad de nuestros repartidores. Por favor intenta más tarde o elige la opción de recoger en el negocio.');
+    return;
+  }
+  if (deliveryType === 'delivery' && window._afterHoursMode) {
+    alert('🌙 Estamos fuera de horario.\n\nLos deliverys están pausados por ahora. Por favor elige la opción de recoger en el negocio.');
     return;
   }
   if (deliveryType === 'delivery' && window._maintenanceMode) {

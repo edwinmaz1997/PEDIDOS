@@ -101,6 +101,13 @@ try {
             Response::success(['rain_mode' => $row ? (bool)(int)$row['value'] : false]);
             break;
 
+        // ── FUERA DE HORARIO (público) ────────────────────────
+        case 'after-hours-mode':
+            $db = Database::connect();
+            $row = $db->query("SELECT value FROM app_settings WHERE `key`='after_hours_mode' LIMIT 1")->fetch();
+            Response::success(['after_hours_mode' => $row ? (bool)(int)$row['value'] : false]);
+            break;
+
         // ── MAINTENANCE MODE (público) ────────────────────────
         case 'maintenance-mode':
             $db = Database::connect();
@@ -498,6 +505,23 @@ try {
                 $db = Database::connect();
                 $db->prepare("INSERT INTO app_settings (`key`,`value`) VALUES ('rain_mode',?) ON DUPLICATE KEY UPDATE `value`=?")->execute([$enabled, $enabled]);
                 Response::success(['rain_mode' => (bool)$enabled]);
+                break;
+            }
+            // GET /api/admin/after-hours-mode
+            if ($action === 'after-hours-mode' && $method === 'GET') {
+                AuthMiddleware::requireRole('admin');
+                $db = Database::connect();
+                $row = $db->query("SELECT value FROM app_settings WHERE `key`='after_hours_mode' LIMIT 1")->fetch();
+                Response::success(['after_hours_mode' => $row ? (bool)(int)$row['value'] : false]);
+                break;
+            }
+            // POST /api/admin/after-hours-mode
+            if ($action === 'after-hours-mode' && $method === 'POST') {
+                AuthMiddleware::requireRole('admin');
+                $enabled = isset($body['enabled']) ? (int)(bool)$body['enabled'] : 0;
+                $db = Database::connect();
+                $db->prepare("INSERT INTO app_settings (`key`,`value`) VALUES ('after_hours_mode',?) ON DUPLICATE KEY UPDATE `value`=?")->execute([$enabled, $enabled]);
+                Response::success(['after_hours_mode' => (bool)$enabled]);
                 break;
             }
             // GET /api/admin/maintenance-mode

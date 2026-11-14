@@ -277,6 +277,8 @@ class OrderController {
         try {
             $mm = $this->db->query("SELECT value FROM app_settings WHERE `key`='maintenance_mode' LIMIT 1")->fetch();
             if ($mm && (int)$mm['value'] === 1) Response::error('La plataforma está en mantenimiento. Los deliverys están pausados por ahora.', 403);
+            $ah = $this->db->query("SELECT value FROM app_settings WHERE `key`='after_hours_mode' LIMIT 1")->fetch();
+            if ($ah && (int)$ah['value'] === 1) Response::error('Estamos fuera de horario. Los deliverys están pausados por ahora.', 403);
         } catch (\Throwable $e) {}
 
         // Get business

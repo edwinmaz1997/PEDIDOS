@@ -579,7 +579,7 @@ body.px .cart-total #cartTotal { font-size: 1.35rem; letter-spacing: -.02em; }
 .px-submit:disabled { background: #e2e8f0; color: #94a3b8; box-shadow: none; cursor: not-allowed; }
 
 /* Banners de modo */
-body.px #maintenanceModeBanner, body.px #rainModeBanner { border-radius: 16px !important; }
+body.px #maintenanceModeBanner, body.px #rainModeBanner, body.px #afterHoursModeBanner { border-radius: 16px !important; }
 
 /* Pantalla de éxito */
 body.px .success-screen { max-width: 520px; margin: 24px auto; background: #fff; border-radius: 24px; border: 1px solid #edf0f5; box-shadow: 0 10px 30px -18px rgba(15,23,42,.4); padding: 36px 22px 26px; }
@@ -616,4 +616,5 @@ body.px .success-screen h2 { font-size: 1.4rem; font-weight: 800; letter-spacing
 .px-alert-t b { font-weight: 800; }
 .px-alert-rain { background: linear-gradient(135deg, #1e40af, #3b82f6); box-shadow: 0 14px 28px -16px rgba(30,64,175,.8); }
 .px-alert-maint { background: linear-gradient(135deg, #c2410c, #f97316); box-shadow: 0 14px 28px -16px rgba(194,65,12,.8); }
+.px-alert-hours { background: linear-gradient(135deg, #4c1d95, #7c3aed); box-shadow: 0 14px 28px -16px rgba(76,29,149,.8); }
 

@@ -75,7 +75,7 @@
 .stat-value { font-size: 1.25rem !important; font-weight: 800 !important; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Modo lluvia / mantenimiento: tarjetas compactas */
-.md-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+.md-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
 @media (max-width: 560px) { .md-grid { grid-template-columns: 1fr; gap: 8px; } }
 .md-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: #fff; border: 1px solid #edf0f5; box-shadow: 0 6px 16px -14px rgba(15,23,42,.4); min-width: 0; transition: background .2s, border-color .2s; }
 .md-ic { width: 34px; height: 34px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
@@ -95,3 +95,8 @@
 .md-maint.on { background: #fff7ed; border-color: #fed7aa; }
 .md-maint.on .md-sw { background: #f97316; }
 .md-maint.on .md-t span { color: #c2410c; }
+.md-hours .md-ic { background: #f5f3ff; color: #7c3aed; }
+.md-hours.on { background: #f5f3ff; border-color: #ddd6fe; }
+.md-hours.on .md-sw { background: #7c3aed; }
+.md-hours.on .md-t span { color: #6d28d9; }
+@media (min-width: 561px) and (max-width: 900px) { .md-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
