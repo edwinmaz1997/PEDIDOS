@@ -355,6 +355,22 @@ async function viewOrder(id) {
   html += '<div style="font-weight:700;font-size:.85rem;margin-bottom:8px">👤 Cliente</div>';
   html += '<div style="font-size:.88rem">' + esc(o.client_name||'') + '</div>';
   if (o.client_phone) html += '<div style="font-size:.82rem;color:var(--muted)"><a href="tel:'+o.client_phone+'">📞 '+o.client_phone+'</a></div>';
+  if (o.client_month_deliveries) {
+    var md = o.client_month_deliveries;
+    var mName = new Date(md.month + '-15').toLocaleDateString('es-GT', { month:'long', year:'numeric' });
+    var goal = 15, done = md.delivered;
+    var pct = Math.min(100, Math.round(done / goal * 100));
+    html += '<div style="margin-top:10px;padding:10px 12px;background:#f0f7ff;border:1px solid #cfe3ff;border-radius:10px">' +
+      '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">' +
+        '<span style="font-size:.74rem;color:#1e3a8a;font-weight:600;text-transform:capitalize">Deliverys en ' + esc(mName) + '</span>' +
+        '<span style="font-size:1.15rem;font-weight:800;color:#1e3a8a">' + done + '</span>' +
+      '</div>' +
+      '<div style="height:6px;background:#dbeafe;border-radius:6px;margin:6px 0 4px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#2563eb;border-radius:6px"></div></div>' +
+      '<div style="font-size:.72rem;color:#475569">' + done + ' entregados' + (md.total > done ? ' · ' + md.total + ' pedidos delivery en total' : '') +
+        (md.reward_used ? ' · <b style="color:#16a34a">Delivery gratis ya usado</b>' : done >= goal ? ' · <b style="color:#16a34a">Tiene delivery gratis</b>' : ' · faltan ' + (goal - done) + ' para delivery gratis') +
+      '</div>' +
+    '</div>';
+  }
   if (o.delivery_address) {
     var addr = o.delivery_address;
     var isUrl = addr.startsWith('http') || /^-?\d+\.\d+,-?\d+\.\d+$/.test(addr);

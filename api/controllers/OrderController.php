@@ -83,6 +83,34 @@ class OrderController {
         $order['status_log'] = $this->getStatusLog($id);
 
         $order['client_total'] = (float)$order['subtotal'] + (float)$order['delivery_fee'];
+
+        // Admin: deliverys del cliente en el mes del pedido
+        if ($user['role'] === 'admin' && !empty($order['client_id'])) {
+            try {
+                $ts    = strtotime($order['created_at'] ?? 'now') ?: time();
+                $month = date('Y-m', $ts);
+                $from  = date('Y-m-01 00:00:00', $ts);
+                $to    = date('Y-m-01 00:00:00', strtotime('+1 month', strtotime($from)));
+                $st = $this->db->prepare("SELECT
+                        SUM(status = 'entregado') AS entregados,
+                        SUM(status NOT IN ('cancelado','rechazado')) AS total
+                    FROM orders
+                    WHERE client_id = ? AND delivery_type = 'delivery' AND created_at >= ? AND created_at < ?");
+                $st->execute([$order['client_id'], $from, $to]);
+                $c = $st->fetch() ?: [];
+                $rw = $this->db->prepare("SELECT delivery_count, reward_used FROM delivery_rewards WHERE client_id=? AND month=?");
+                $rw->execute([$order['client_id'], $month]);
+                $r = $rw->fetch() ?: [];
+                $order['client_month_deliveries'] = [
+                    'month'        => $month,
+                    'delivered'    => (int)($c['entregados'] ?? 0),
+                    'total'        => (int)($c['total'] ?? 0),
+                    'reward_count' => isset($r['delivery_count']) ? (int)$r['delivery_count'] : null,
+                    'reward_used'  => !empty($r['reward_used']),
+                ];
+            } catch (\Throwable $e) {}
+        }
+
         if ($user['role'] === 'negocio') {
             $order['total']      = $order['client_total'];
             $order['net_income'] = (float)$order['subtotal'] - (float)$order['service_fee'];
